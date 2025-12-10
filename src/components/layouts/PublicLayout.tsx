@@ -121,7 +121,7 @@ export function PublicLayout() {
                 </div>
                 <span className="text-xl font-bold">Nordicascent</span>
               </Link>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-sm text-background/80">
                 Empowering teams to rise higher with modern workforce management solutions.
               </p>
             </div>
@@ -129,7 +129,7 @@ export function PublicLayout() {
             {/* Product */}
             <div>
               <h4 className="font-semibold mb-4">Product</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <ul className="space-y-2 text-sm text-background/70">
                 <li><Link to="/services" className="hover:text-background transition-colors">Features</Link></li>
                 <li><Link to="/services" className="hover:text-background transition-colors">Pricing</Link></li>
                 <li><Link to="/services" className="hover:text-background transition-colors">Integrations</Link></li>
@@ -140,7 +140,7 @@ export function PublicLayout() {
             {/* Company */}
             <div>
               <h4 className="font-semibold mb-4">Company</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <ul className="space-y-2 text-sm text-background/70">
                 <li><Link to="/about" className="hover:text-background transition-colors">About Us</Link></li>
                 <li><Link to="/careers" className="hover:text-background transition-colors">Careers</Link></li>
                 <li><Link to="/contact" className="hover:text-background transition-colors">Contact</Link></li>
@@ -151,7 +151,7 @@ export function PublicLayout() {
             {/* Legal */}
             <div>
               <h4 className="font-semibold mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <ul className="space-y-2 text-sm text-background/70">
                 <li><a href="#" className="hover:text-background transition-colors">Privacy Policy</a></li>
                 <li><a href="#" className="hover:text-background transition-colors">Terms of Service</a></li>
                 <li><a href="#" className="hover:text-background transition-colors">Cookie Policy</a></li>
@@ -161,17 +161,17 @@ export function PublicLayout() {
           </div>
 
           <div className="mt-12 pt-8 border-t border-muted-foreground/20 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-background/70">
               © 2024 Nordicascent. All rights reserved.
             </p>
             <div className="flex gap-6">
-              <a href="#" className="text-muted-foreground hover:text-background transition-colors">
+              <a href="#" className="text-background/70 hover:text-background transition-colors">
                 LinkedIn
               </a>
-              <a href="#" className="text-muted-foreground hover:text-background transition-colors">
+              <a href="#" className="text-background/70 hover:text-background transition-colors">
                 Twitter
               </a>
-              <a href="#" className="text-muted-foreground hover:text-background transition-colors">
+              <a href="#" className="text-background/70 hover:text-background transition-colors">
                 GitHub
               </a>
             </div>

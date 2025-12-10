@@ -71,13 +71,13 @@ export default function Home() {
               </h1>
               
               <p className="text-xl text-muted-foreground max-w-lg">
-                Training, performance, reporting, and employee management — all in one elegant Nordic-inspired platform.
+                Training, internships, relocation, performance, and workforce development — all in one structured Nordic talent pipeline platform.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" asChild className="nordic-gradient nordic-glow text-lg h-12 px-8">
                   <Link to="/contact">
-                    Book a Demo
+                    Book a Consultation
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
@@ -173,6 +173,66 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Journey Section */}
+      <section className="py-20">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">The Nordicascent Journey: M1–M7 Talent Pipeline</h2>
+            <p className="text-lg text-muted-foreground">
+              A proven seven-stage journey that prepares global talent for successful careers in the Nordics.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { title: "M1 — Company Alignment", desc: "Define workforce needs, roles, competencies." },
+              { title: "M2 — Candidate Selection & Matching", desc: "Screening, interviews, profiling, shortlist." },
+              { title: "M3 — Preparation Phase", desc: "Light training, communication practice, mentor support." },
+              { title: "M4 — Relocation Preparation", desc: "Culture, language, documentation, housing." },
+              { title: "M5 — Digital Internship", desc: "Project-based internship with Nordic companies." },
+              { title: "M6 — Physical Relocation & Onboarding", desc: "Move to Norway, settle in, start work." },
+              { title: "M7 — Long-Term Follow-Up", desc: "Check-ins, mentoring, integration, retention." },
+            ].map((stage, i) => (
+              <Card key={stage.title} className="h-full animate-fade-in-up" style={{ animationDelay: `${i * 0.05}s` }}>
+                <CardContent className="p-6 space-y-3">
+                  <div className="inline-flex items-center justify-center h-10 w-10 rounded-lg bg-primary/10 text-primary font-semibold">{stage.title.slice(0, 2)}</div>
+                  <h3 className="text-lg font-semibold">{stage.title}</h3>
+                  <p className="text-muted-foreground text-sm">{stage.desc}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div className="flex justify-center mt-10">
+            <Button size="lg" asChild className="nordic-gradient nordic-glow">
+              <Link to="/services">Explore the Complete M1–M7 Journey →</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Who We Help */}
+      <section className="py-20 bg-secondary/30">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">Who We Help</h2>
+            <p className="text-lg text-muted-foreground">Structured support for every stakeholder in the talent journey.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[ 
+              { title: "Students & Candidates", desc: "Learn, train, intern, relocate." },
+              { title: "Nordic Companies", desc: "Hire trained, relocation-ready talent." },
+              { title: "Mentors & Admins", desc: "Review progress, guide development." },
+            ].map((item, i) => (
+              <Card key={item.title} className="text-center p-8 animate-fade-in-up" style={{ animationDelay: `${i * 0.1}s` }}>
+                <CardContent className="p-0 space-y-3">
+                  <h3 className="text-xl font-semibold">{item.title}</h3>
+                  <p className="text-muted-foreground">{item.desc}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* How It Works */}
       <section className="py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -252,12 +312,12 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
                 <Button size="lg" variant="secondary" asChild className="text-lg h-12 px-8 bg-background text-foreground hover:bg-background/90">
                   <Link to="/contact">
-                    Start Free Trial
+                    Book a Consultation
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
                 <Button size="lg" variant="outline" asChild className="text-lg h-12 px-8 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
-                  <Link to="/contact">Talk to Sales</Link>
+                  <Link to="/contact">Contact Sales</Link>
                 </Button>
               </div>
             </div>
