@@ -1,57 +1,52 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Users,
-  GraduationCap,
-  BarChart3,
-  Shield,
-  ArrowRight,
-  CheckCircle,
-  Zap,
-  Globe,
-  Award,
-} from "lucide-react";
-
-const features = [
-  {
-    icon: Users,
-    title: "Employee Management",
-    description: "Centralized employee directory with profiles, documents, and performance tracking.",
-  },
-  {
-    icon: GraduationCap,
-    title: "Training & Learning",
-    description: "Comprehensive training modules with progress tracking and certifications.",
-  },
-  {
-    icon: BarChart3,
-    title: "Reporting & Insights",
-    description: "Real-time analytics and customizable reports for data-driven decisions.",
-  },
-  {
-    icon: Shield,
-    title: "Admin & Compliance",
-    description: "Role-based access control, audit logs, and regulatory compliance tools.",
-  },
-];
-
-const steps = [
-  { number: "01", title: "Quick Setup", description: "Get your workspace configured in minutes with our guided onboarding." },
-  { number: "02", title: "Import Your Team", description: "Easily import employee data or add team members individually." },
-  { number: "03", title: "Start Growing", description: "Launch trainings, track performance, and watch your team ascend." },
-];
-
-const stats = [
-  { value: "500+", label: "Companies Trust Us" },
-  { value: "50K+", label: "Active Users" },
-  { value: "99.9%", label: "Uptime SLA" },
-  { value: "4.9/5", label: "Customer Rating" },
-];
-
+import { Users, GraduationCap, BarChart3, Shield, ArrowRight, CheckCircle, Zap, Globe, Award } from "lucide-react";
+const features = [{
+  icon: Users,
+  title: "Employee Management",
+  description: "Centralized employee directory with profiles, documents, and performance tracking."
+}, {
+  icon: GraduationCap,
+  title: "Training & Learning",
+  description: "Comprehensive training modules with progress tracking and certifications."
+}, {
+  icon: BarChart3,
+  title: "Reporting & Insights",
+  description: "Real-time analytics and customizable reports for data-driven decisions."
+}, {
+  icon: Shield,
+  title: "Admin & Compliance",
+  description: "Role-based access control, audit logs, and regulatory compliance tools."
+}];
+const steps = [{
+  number: "01",
+  title: "Quick Setup",
+  description: "Get your workspace configured in minutes with our guided onboarding."
+}, {
+  number: "02",
+  title: "Import Your Team",
+  description: "Easily import employee data or add team members individually."
+}, {
+  number: "03",
+  title: "Start Growing",
+  description: "Launch trainings, track performance, and watch your team ascend."
+}];
+const stats = [{
+  value: "500+",
+  label: "Companies Trust Us"
+}, {
+  value: "50K+",
+  label: "Active Users"
+}, {
+  value: "99.9%",
+  label: "Uptime SLA"
+}, {
+  value: "4.9/5",
+  label: "Customer Rating"
+}];
 export default function Home() {
-  return (
-    <div className="flex flex-col">
+  return <div className="flex flex-col">
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-accent/30 via-background to-background" />
@@ -88,14 +83,9 @@ export default function Home() {
               
               <div className="flex items-center gap-4 pt-4">
                 <div className="flex -space-x-2">
-                  {["EL", "IS", "LJ", "AN"].map((initials, i) => (
-                    <div
-                      key={i}
-                      className="w-10 h-10 rounded-full bg-primary/10 border-2 border-background flex items-center justify-center text-xs font-medium"
-                    >
+                  {["EL", "IS", "LJ", "AN"].map((initials, i) => <div key={i} className="w-10 h-10 rounded-full bg-primary/10 border-2 border-background flex items-center justify-center text-xs font-medium">
                       {initials}
-                    </div>
-                  ))}
+                    </div>)}
                 </div>
                 <p className="text-sm text-muted-foreground">
                   <span className="font-semibold text-foreground">500+</span> companies growing with Nordicascent
@@ -103,12 +93,14 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="relative animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
+            <div className="relative animate-fade-in-up" style={{
+            animationDelay: "0.2s"
+          }}>
               <div className="relative bg-card rounded-2xl border border-border nordic-shadow-lg overflow-hidden">
                 <div className="p-6 space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground">Company Score</p>
+                      <p className="text-sm text-muted-foreground">Success Rate</p>
                       <p className="text-3xl font-bold">87%</p>
                     </div>
                     <div className="h-16 w-16 rounded-full nordic-gradient flex items-center justify-center">
@@ -119,16 +111,19 @@ export default function Home() {
                     <div className="h-full w-[87%] nordic-gradient rounded-full" />
                   </div>
                   <div className="grid grid-cols-3 gap-4 pt-4">
-                    {[
-                      { label: "Employees", value: "156" },
-                      { label: "Trainings", value: "24" },
-                      { label: "Reports", value: "12" },
-                    ].map((stat) => (
-                      <div key={stat.label} className="text-center p-3 bg-secondary/50 rounded-lg">
+                    {[{
+                    label: "Employees",
+                    value: "156"
+                  }, {
+                    label: "Trainings",
+                    value: "24"
+                  }, {
+                    label: "Reports",
+                    value: "12"
+                  }].map(stat => <div key={stat.label} className="text-center p-3 bg-secondary/50 rounded-lg">
                         <p className="text-lg font-bold">{stat.value}</p>
                         <p className="text-xs text-muted-foreground">{stat.label}</p>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
                 </div>
               </div>
@@ -154,12 +149,9 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, i) => (
-              <Card
-                key={feature.title}
-                className="group hover:border-primary/50 transition-all duration-300 animate-fade-in-up"
-                style={{ animationDelay: `${i * 0.1}s` }}
-              >
+            {features.map((feature, i) => <Card key={feature.title} className="group hover:border-primary/50 transition-all duration-300 animate-fade-in-up" style={{
+            animationDelay: `${i * 0.1}s`
+          }}>
                 <CardContent className="p-6 space-y-4">
                   <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                     <feature.icon className="h-6 w-6" />
@@ -167,8 +159,7 @@ export default function Home() {
                   <h3 className="text-lg font-semibold">{feature.title}</h3>
                   <p className="text-muted-foreground">{feature.description}</p>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
       </section>
@@ -183,23 +174,36 @@ export default function Home() {
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              { title: "M1 — Company Alignment", desc: "Define workforce needs, roles, competencies." },
-              { title: "M2 — Candidate Selection & Matching", desc: "Screening, interviews, profiling, shortlist." },
-              { title: "M3 — Preparation Phase", desc: "Light training, communication practice, mentor support." },
-              { title: "M4 — Relocation Preparation", desc: "Culture, language, documentation, housing." },
-              { title: "M5 — Digital Internship", desc: "Project-based internship with Nordic companies." },
-              { title: "M6 — Physical Relocation & Onboarding", desc: "Move to Norway, settle in, start work." },
-              { title: "M7 — Long-Term Follow-Up", desc: "Check-ins, mentoring, integration, retention." },
-            ].map((stage, i) => (
-              <Card key={stage.title} className="h-full animate-fade-in-up" style={{ animationDelay: `${i * 0.05}s` }}>
+            {[{
+            title: "M1 — Company Alignment",
+            desc: "Define workforce needs, roles, competencies."
+          }, {
+            title: "M2 — Candidate Selection & Matching",
+            desc: "Screening, interviews, profiling, shortlist."
+          }, {
+            title: "M3 — Preparation Phase",
+            desc: "Light training, communication practice, mentor support."
+          }, {
+            title: "M4 — Relocation Preparation",
+            desc: "Culture, language, documentation, housing."
+          }, {
+            title: "M5 — Digital Internship",
+            desc: "Project-based internship with Nordic companies."
+          }, {
+            title: "M6 — Physical Relocation & Onboarding",
+            desc: "Move to Norway, settle in, start work."
+          }, {
+            title: "M7 — Long-Term Follow-Up",
+            desc: "Check-ins, mentoring, integration, retention."
+          }].map((stage, i) => <Card key={stage.title} className="h-full animate-fade-in-up" style={{
+            animationDelay: `${i * 0.05}s`
+          }}>
                 <CardContent className="p-6 space-y-3">
                   <div className="inline-flex items-center justify-center h-10 w-10 rounded-lg bg-primary/10 text-primary font-semibold">{stage.title.slice(0, 2)}</div>
                   <h3 className="text-lg font-semibold">{stage.title}</h3>
                   <p className="text-muted-foreground text-sm">{stage.desc}</p>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
           <div className="flex justify-center mt-10">
             <Button size="lg" asChild className="nordic-gradient nordic-glow">
@@ -217,18 +221,23 @@ export default function Home() {
             <p className="text-lg text-muted-foreground">Structured support for every stakeholder in the talent journey.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {[ 
-              { title: "Students & Candidates", desc: "Learn, train, intern, relocate." },
-              { title: "Nordic Companies", desc: "Hire trained, relocation-ready talent." },
-              { title: "Mentors & Admins", desc: "Review progress, guide development." },
-            ].map((item, i) => (
-              <Card key={item.title} className="text-center p-8 animate-fade-in-up" style={{ animationDelay: `${i * 0.1}s` }}>
+            {[{
+            title: "Students & Candidates",
+            desc: "Learn, train, intern, relocate."
+          }, {
+            title: "Nordic Companies",
+            desc: "Hire trained, relocation-ready talent."
+          }, {
+            title: "Mentors & Admins",
+            desc: "Review progress, guide development."
+          }].map((item, i) => <Card key={item.title} className="text-center p-8 animate-fade-in-up" style={{
+            animationDelay: `${i * 0.1}s`
+          }}>
                 <CardContent className="p-0 space-y-3">
                   <h3 className="text-xl font-semibold">{item.title}</h3>
                   <p className="text-muted-foreground">{item.desc}</p>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
       </section>
@@ -244,13 +253,13 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {steps.map((step, i) => (
-              <div key={step.number} className="relative animate-fade-in-up" style={{ animationDelay: `${i * 0.15}s` }}>
+            {steps.map((step, i) => <div key={step.number} className="relative animate-fade-in-up" style={{
+            animationDelay: `${i * 0.15}s`
+          }}>
                 <div className="text-6xl font-bold text-primary/10 mb-4">{step.number}</div>
                 <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
                 <p className="text-muted-foreground">{step.description}</p>
-              </div>
-            ))}
+              </div>)}
           </div>
         </div>
       </section>
@@ -259,12 +268,12 @@ export default function Home() {
       <section className="py-20 nordic-gradient">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, i) => (
-              <div key={stat.label} className="text-center text-primary-foreground animate-fade-in" style={{ animationDelay: `${i * 0.1}s` }}>
+            {stats.map((stat, i) => <div key={stat.label} className="text-center text-primary-foreground animate-fade-in" style={{
+            animationDelay: `${i * 0.1}s`
+          }}>
                 <p className="text-4xl lg:text-5xl font-bold mb-2">{stat.value}</p>
                 <p className="text-primary-foreground/80">{stat.label}</p>
-              </div>
-            ))}
+              </div>)}
           </div>
         </div>
       </section>
@@ -281,12 +290,10 @@ export default function Home() {
                 From Stockholm to Helsinki, Copenhagen to Oslo — organizations of all sizes rely on Nordicascent to manage their most valuable asset: their people.
               </p>
               <div className="grid grid-cols-2 gap-4">
-                {["Enterprise Security", "GDPR Compliant", "Multi-language Support", "24/7 Support"].map((item) => (
-                  <div key={item} className="flex items-center gap-2">
+                {["Enterprise Security", "GDPR Compliant", "Multi-language Support", "24/7 Support"].map(item => <div key={item} className="flex items-center gap-2">
                     <CheckCircle className="h-5 w-5 text-success" />
                     <span className="text-sm font-medium">{item}</span>
-                  </div>
-                ))}
+                  </div>)}
               </div>
             </div>
             <div className="relative">
@@ -324,6 +331,5 @@ export default function Home() {
           </div>
         </div>
       </section>
-    </div>
-  );
+    </div>;
 }
