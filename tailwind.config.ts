@@ -57,6 +57,9 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        "candidate-accent": "hsl(var(--candidate-accent))",
+        "employer-accent": "hsl(var(--employer-accent))",
+        "admin-accent": "hsl(var(--admin-accent))",
       },
       borderRadius: {
         lg: "var(--radius)",

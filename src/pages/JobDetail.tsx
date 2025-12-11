@@ -17,7 +17,7 @@ export default function JobDetail() {
   const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const job = jobs.find((j) => j.id === Number(id));
+  const job = jobs.find((j) => j.id === id);
   if (!job) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
@@ -89,18 +89,18 @@ export default function JobDetail() {
             <div className="lg:col-span-2 space-y-8">
               <Card><CardHeader><CardTitle>About the Role</CardTitle></CardHeader><CardContent><p className="text-muted-foreground">{job.description}</p></CardContent></Card>
               <Card>
-                <CardHeader><CardTitle>Responsibilities</CardTitle></CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    {job.responsibilities.map((item, i) => (<li key={i} className="flex items-start gap-3"><CheckCircle className="h-5 w-5 text-success flex-shrink-0 mt-0.5" /><span>{item}</span></li>))}
-                  </ul>
-                </CardContent>
-              </Card>
-              <Card>
                 <CardHeader><CardTitle>Requirements</CardTitle></CardHeader>
                 <CardContent>
                   <ul className="space-y-3">
                     {job.requirements.map((item, i) => (<li key={i} className="flex items-start gap-3"><CheckCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" /><span>{item}</span></li>))}
+                  </ul>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader><CardTitle>Benefits</CardTitle></CardHeader>
+                <CardContent>
+                  <ul className="space-y-3">
+                    {job.benefits.map((item, i) => (<li key={i} className="flex items-start gap-3"><CheckCircle className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" /><span>{item}</span></li>))}
                   </ul>
                 </CardContent>
               </Card>
