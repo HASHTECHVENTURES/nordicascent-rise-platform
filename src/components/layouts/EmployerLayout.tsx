@@ -84,7 +84,7 @@ const EmployerLayout = () => {
                   key={item.name}
                   to={item.href}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg",
                     isActive
                       ? "bg-chart-2 text-white"
                       : "text-muted-foreground hover:bg-accent hover:text-foreground"
