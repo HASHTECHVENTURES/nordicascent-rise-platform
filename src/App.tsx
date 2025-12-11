@@ -31,6 +31,14 @@ import CandidateMessages from "./pages/candidate/Messages";
 
 // Employer Pages
 import EmployerDashboard from "./pages/employer/Dashboard";
+import EmployerCompanyProfile from "./pages/employer/CompanyProfile";
+import EmployerJobPostings from "./pages/employer/JobPostings";
+import EmployerCandidates from "./pages/employer/Candidates";
+import EmployerPipeline from "./pages/employer/Pipeline";
+import EmployerInterviews from "./pages/employer/Interviews";
+import EmployerOffers from "./pages/employer/Offers";
+import EmployerMessages from "./pages/employer/Messages";
+import EmployerAnalytics from "./pages/employer/Analytics";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -81,14 +89,14 @@ const App = () => (
           {/* Employer Portal Routes */}
           <Route element={<EmployerLayout />}>
             <Route path="/employer/dashboard" element={<EmployerDashboard />} />
-            <Route path="/employer/company" element={<div className="p-6"><h1 className="text-2xl font-bold">Company Profile</h1></div>} />
-            <Route path="/employer/jobs" element={<div className="p-6"><h1 className="text-2xl font-bold">Job Postings</h1></div>} />
-            <Route path="/employer/candidates" element={<div className="p-6"><h1 className="text-2xl font-bold">Candidates</h1></div>} />
-            <Route path="/employer/pipeline" element={<div className="p-6"><h1 className="text-2xl font-bold">Pipeline</h1></div>} />
-            <Route path="/employer/interviews" element={<div className="p-6"><h1 className="text-2xl font-bold">Interviews</h1></div>} />
-            <Route path="/employer/offers" element={<div className="p-6"><h1 className="text-2xl font-bold">Offers</h1></div>} />
-            <Route path="/employer/messages" element={<div className="p-6"><h1 className="text-2xl font-bold">Messages</h1></div>} />
-            <Route path="/employer/analytics" element={<div className="p-6"><h1 className="text-2xl font-bold">Analytics</h1></div>} />
+            <Route path="/employer/company" element={<EmployerCompanyProfile />} />
+            <Route path="/employer/jobs" element={<EmployerJobPostings />} />
+            <Route path="/employer/candidates" element={<EmployerCandidates />} />
+            <Route path="/employer/pipeline" element={<EmployerPipeline />} />
+            <Route path="/employer/interviews" element={<EmployerInterviews />} />
+            <Route path="/employer/offers" element={<EmployerOffers />} />
+            <Route path="/employer/messages" element={<EmployerMessages />} />
+            <Route path="/employer/analytics" element={<EmployerAnalytics />} />
           </Route>
 
           {/* Admin Portal Routes */}
