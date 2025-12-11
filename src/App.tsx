@@ -19,7 +19,25 @@ import JobDetail from "./pages/JobDetail";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 
+// Candidate Pages
+import CandidateDashboard from "./pages/candidate/Dashboard";
+import CandidateProfile from "./pages/candidate/Profile";
+import CandidateJobs from "./pages/candidate/Jobs";
+import CandidateApplications from "./pages/candidate/Applications";
+import CandidateInterviews from "./pages/candidate/Interviews";
+import CandidateOffers from "./pages/candidate/Offers";
+import CandidateRelocation from "./pages/candidate/Relocation";
+import CandidateMessages from "./pages/candidate/Messages";
+
+// Employer Pages
+import EmployerDashboard from "./pages/employer/Dashboard";
+
 // Admin Pages
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminUsers from "./pages/admin/Users";
+import AdminEmployers from "./pages/admin/Employers";
+import AdminCandidates from "./pages/admin/Candidates";
+import AdminJobs from "./pages/admin/Jobs";
 import AdminAnalytics from "./pages/admin/Analytics";
 import AdminSecurity from "./pages/admin/Security";
 import AdminSettings from "./pages/admin/Settings";
@@ -50,36 +68,36 @@ const App = () => (
 
           {/* Candidate Portal Routes */}
           <Route element={<CandidateLayout />}>
-            <Route path="/candidate/dashboard" element={<div className="text-2xl font-bold">Candidate Dashboard - Coming Soon</div>} />
-            <Route path="/candidate/profile" element={<div className="text-2xl font-bold">Profile - Coming Soon</div>} />
-            <Route path="/candidate/jobs" element={<div className="text-2xl font-bold">Jobs - Coming Soon</div>} />
-            <Route path="/candidate/applications" element={<div className="text-2xl font-bold">Applications - Coming Soon</div>} />
-            <Route path="/candidate/interviews" element={<div className="text-2xl font-bold">Interviews - Coming Soon</div>} />
-            <Route path="/candidate/offers" element={<div className="text-2xl font-bold">Offers - Coming Soon</div>} />
-            <Route path="/candidate/relocation" element={<div className="text-2xl font-bold">Relocation - Coming Soon</div>} />
-            <Route path="/candidate/messages" element={<div className="text-2xl font-bold">Messages - Coming Soon</div>} />
+            <Route path="/candidate/dashboard" element={<CandidateDashboard />} />
+            <Route path="/candidate/profile" element={<CandidateProfile />} />
+            <Route path="/candidate/jobs" element={<CandidateJobs />} />
+            <Route path="/candidate/applications" element={<CandidateApplications />} />
+            <Route path="/candidate/interviews" element={<CandidateInterviews />} />
+            <Route path="/candidate/offers" element={<CandidateOffers />} />
+            <Route path="/candidate/relocation" element={<CandidateRelocation />} />
+            <Route path="/candidate/messages" element={<CandidateMessages />} />
           </Route>
 
           {/* Employer Portal Routes */}
           <Route element={<EmployerLayout />}>
-            <Route path="/employer/dashboard" element={<div className="text-2xl font-bold">Employer Dashboard - Coming Soon</div>} />
-            <Route path="/employer/company" element={<div className="text-2xl font-bold">Company Profile - Coming Soon</div>} />
-            <Route path="/employer/jobs" element={<div className="text-2xl font-bold">Job Postings - Coming Soon</div>} />
-            <Route path="/employer/candidates" element={<div className="text-2xl font-bold">Candidates - Coming Soon</div>} />
-            <Route path="/employer/pipeline" element={<div className="text-2xl font-bold">Pipeline - Coming Soon</div>} />
-            <Route path="/employer/interviews" element={<div className="text-2xl font-bold">Interviews - Coming Soon</div>} />
-            <Route path="/employer/offers" element={<div className="text-2xl font-bold">Offers - Coming Soon</div>} />
-            <Route path="/employer/messages" element={<div className="text-2xl font-bold">Messages - Coming Soon</div>} />
-            <Route path="/employer/analytics" element={<div className="text-2xl font-bold">Analytics - Coming Soon</div>} />
+            <Route path="/employer/dashboard" element={<EmployerDashboard />} />
+            <Route path="/employer/company" element={<div className="p-6"><h1 className="text-2xl font-bold">Company Profile</h1></div>} />
+            <Route path="/employer/jobs" element={<div className="p-6"><h1 className="text-2xl font-bold">Job Postings</h1></div>} />
+            <Route path="/employer/candidates" element={<div className="p-6"><h1 className="text-2xl font-bold">Candidates</h1></div>} />
+            <Route path="/employer/pipeline" element={<div className="p-6"><h1 className="text-2xl font-bold">Pipeline</h1></div>} />
+            <Route path="/employer/interviews" element={<div className="p-6"><h1 className="text-2xl font-bold">Interviews</h1></div>} />
+            <Route path="/employer/offers" element={<div className="p-6"><h1 className="text-2xl font-bold">Offers</h1></div>} />
+            <Route path="/employer/messages" element={<div className="p-6"><h1 className="text-2xl font-bold">Messages</h1></div>} />
+            <Route path="/employer/analytics" element={<div className="p-6"><h1 className="text-2xl font-bold">Analytics</h1></div>} />
           </Route>
 
           {/* Admin Portal Routes */}
           <Route element={<AdminLayout />}>
-            <Route path="/admin/dashboard" element={<div className="text-2xl font-bold">Admin Dashboard - Coming Soon</div>} />
-            <Route path="/admin/users" element={<div className="text-2xl font-bold">Users - Coming Soon</div>} />
-            <Route path="/admin/employers" element={<div className="text-2xl font-bold">Employers - Coming Soon</div>} />
-            <Route path="/admin/candidates" element={<div className="text-2xl font-bold">Candidates - Coming Soon</div>} />
-            <Route path="/admin/jobs" element={<div className="text-2xl font-bold">Jobs - Coming Soon</div>} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/employers" element={<AdminEmployers />} />
+            <Route path="/admin/candidates" element={<AdminCandidates />} />
+            <Route path="/admin/jobs" element={<AdminJobs />} />
             <Route path="/admin/analytics" element={<AdminAnalytics />} />
             <Route path="/admin/security" element={<AdminSecurity />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
