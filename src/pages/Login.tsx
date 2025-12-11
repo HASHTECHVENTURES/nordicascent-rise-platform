@@ -93,7 +93,7 @@ export default function Login() {
           </p>
         </div>
         <div className="flex items-center gap-4 text-primary-foreground/60 text-sm">
-          <span>© 2024 Nordicascent</span>
+          <span>© 2025 Nordicascent</span>
           <span>•</span>
           <a href="#" className="hover:text-primary-foreground">Privacy</a>
           <span>•</span>

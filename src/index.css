@@ -48,6 +48,11 @@ All colors MUST be HSL.
     --sidebar-ring: 214 70% 45%;
 
     --gradient-end: 14 86% 57%;
+
+    /* Role-specific accent colors */
+    --candidate-accent: 214 70% 45%;
+    --employer-accent: 262 60% 50%;
+    --admin-accent: 220 14% 28%;
   }
 
   .dark {
@@ -88,6 +93,11 @@ All colors MUST be HSL.
     --sidebar-ring: 195 82% 60%;
 
     --gradient-end: 14 86% 57%;
+
+    /* Role-specific accent colors - dark mode */
+    --candidate-accent: 214 80% 55%;
+    --employer-accent: 262 70% 60%;
+    --admin-accent: 220 20% 50%;
   }
 }
 
