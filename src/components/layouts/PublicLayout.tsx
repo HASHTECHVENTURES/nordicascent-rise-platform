@@ -25,49 +25,48 @@ export function PublicLayout() {
   const location = useLocation();
   return <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-background border-b border-border">
+      <header className="sticky top-0 z-50 bg-primary text-primary-foreground border-b border-primary-foreground/15">
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3">
-              <img src={logoImage} alt="Nordic Ascent" className="h-10 w-auto" />
-              
+              <img src={logoImage} alt="Nordic Ascent" className="h-11 w-auto logo-boost" />
             </Link>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-8">
-              {navigation.map(item => <Link key={item.name} to={item.href} className={cn("text-sm font-medium hover:text-primary", location.pathname === item.href ? "text-primary" : "text-muted-foreground")}>
+              {navigation.map(item => <Link key={item.name} to={item.href} className={cn("text-sm font-medium transition-colors hover:text-primary-foreground", location.pathname === item.href ? "text-primary-foreground" : "text-primary-foreground/70")}>
                   {item.name}
                 </Link>)}
             </div>
 
             {/* CTA Buttons */}
             <div className="hidden md:flex items-center gap-4">
-              <Button variant="ghost" asChild>
+              <Button variant="ghost" asChild className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10">
                 <Link to="/login">Login</Link>
               </Button>
-              <Button asChild className="btn-professional">
+              <Button asChild className="bg-warning text-warning-foreground hover:opacity-90">
                 <Link to="/contact">Book Demo</Link>
               </Button>
             </div>
 
             {/* Mobile menu button */}
-            <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <button className="md:hidden p-2 text-primary-foreground" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
 
           {/* Mobile Navigation */}
-          {mobileMenuOpen && <div className="md:hidden py-4 border-t border-border">
+          {mobileMenuOpen && <div className="md:hidden py-4 border-t border-primary-foreground/15">
               <div className="flex flex-col gap-4">
-                {navigation.map(item => <Link key={item.name} to={item.href} onClick={() => setMobileMenuOpen(false)} className={cn("text-sm font-medium hover:text-primary px-2 py-2", location.pathname === item.href ? "text-primary" : "text-muted-foreground")}>
+                {navigation.map(item => <Link key={item.name} to={item.href} onClick={() => setMobileMenuOpen(false)} className={cn("text-sm font-medium transition-colors hover:text-primary-foreground px-2 py-2", location.pathname === item.href ? "text-primary-foreground" : "text-primary-foreground/70")}>
                     {item.name}
                   </Link>)}
-                <div className="flex flex-col gap-2 pt-4 border-t border-border">
-                  <Button variant="ghost" asChild className="justify-start">
+                <div className="flex flex-col gap-2 pt-4 border-t border-primary-foreground/15">
+                  <Button variant="ghost" asChild className="justify-start text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10">
                     <Link to="/login">Login</Link>
                   </Button>
-                  <Button asChild className="btn-professional">
+                  <Button asChild className="bg-warning text-warning-foreground hover:opacity-90 justify-start">
                     <Link to="/contact">Book Demo</Link>
                   </Button>
                 </div>
@@ -88,8 +87,7 @@ export function PublicLayout() {
             {/* Brand */}
             <div className="space-y-4">
               <Link to="/" className="flex items-center gap-3">
-                <img src={logoImage} alt="Nordic Ascent" className="h-10 w-auto brightness-0 invert" />
-                <span className="text-xl font-medium">Nordic Ascent</span>
+                <img src={logoImage} alt="Nordic Ascent" className="h-11 w-auto logo-boost" />
               </Link>
               <p className="text-sm text-primary-foreground/80">
                 Connecting exceptional engineering talent from India with leading Nordic companies through our structured mobility pipeline.

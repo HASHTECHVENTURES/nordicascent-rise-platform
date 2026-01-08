@@ -183,4 +183,9 @@
   .stage-blocked {
     @apply bg-destructive/10 text-destructive;
   }
+
+  /* Boost contrast for the cream/gold logo */
+  .logo-boost {
+    filter: brightness(1.25) contrast(1.25) saturate(1.05);
+  }
 }
