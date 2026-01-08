@@ -2,102 +2,135 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* Nordic Ascent Design System
+   Brand Colors:
+   - Nordic Deep Blue (Primary): #1C3A5F
+   - Fjord Light Blue (Secondary): #5FA7D1
+   - Neutral Sand: #E7E4DF
+   - Rise Orange (Accent): #F29E32
 */
 
 @layer base {
   :root {
-    --background: 32 43% 98%;
-    --foreground: 226 25% 14%;
+    /* Nordic Ascent Brand Colors */
+    --nordic-deep-blue: 215 54% 24%;
+    --fjord-light-blue: 200 58% 58%;
+    --neutral-sand: 36 22% 89%;
+    --rise-orange: 34 87% 57%;
+    
+    --background: 36 22% 96%;
+    --foreground: 215 54% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 226 25% 16%;
+    --card-foreground: 215 54% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 226 25% 14%;
+    --popover-foreground: 215 54% 15%;
 
-    --primary: 214 70% 45%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 215 54% 24%;
+    --primary-foreground: 36 22% 96%;
 
-    --secondary: 27 85% 92%;
-    --secondary-foreground: 226 25% 22%;
+    --secondary: 200 58% 58%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 16% 90%;
-    --muted-foreground: 225 12% 35%;
+    --muted: 36 15% 85%;
+    --muted-foreground: 215 20% 45%;
 
-    --accent: 174 63% 36%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 36 22% 92%;
+    --accent-foreground: 215 54% 20%;
 
-    --destructive: 2 74% 55%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214 30% 85%;
-    --input: 214 30% 85%;
-    --ring: 214 70% 45%;
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
 
-    --radius: 0.5rem;
+    --warning: 34 87% 57%;
+    --warning-foreground: 215 54% 15%;
 
-    --sidebar-background: 32 45% 97%;
-    --sidebar-foreground: 226 25% 20%;
-    --sidebar-primary: 214 70% 45%;
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 27 85% 92%;
-    --sidebar-accent-foreground: 226 25% 22%;
-    --sidebar-border: 214 30% 85%;
-    --sidebar-ring: 214 70% 45%;
+    --border: 215 20% 85%;
+    --input: 215 20% 85%;
+    --ring: 215 54% 24%;
 
-    --gradient-end: 14 86% 57%;
+    --radius: 0.375rem;
 
-    /* Role-specific accent colors */
-    --candidate-accent: 214 70% 45%;
-    --employer-accent: 262 60% 50%;
-    --admin-accent: 220 14% 28%;
+    /* Sidebar */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 215 54% 15%;
+    --sidebar-primary: 215 54% 24%;
+    --sidebar-primary-foreground: 36 22% 96%;
+    --sidebar-accent: 36 22% 92%;
+    --sidebar-accent-foreground: 215 54% 20%;
+    --sidebar-border: 215 20% 85%;
+    --sidebar-ring: 215 54% 24%;
+
+    /* Chart colors - using brand palette */
+    --chart-1: 215 54% 24%;
+    --chart-2: 200 58% 58%;
+    --chart-3: 34 87% 57%;
+    --chart-4: 142 76% 36%;
+    --chart-5: 215 54% 35%;
+    
+    /* Status colors */
+    --chart-success: 142 76% 36%;
+    --chart-warning: 34 87% 57%;
+    --chart-error: 0 84% 60%;
+
+    /* Pipeline stage colors */
+    --stage-preparation: 200 58% 58%;
+    --stage-selection: 215 54% 35%;
+    --stage-trainee: 34 87% 57%;
+    --stage-internship: 215 54% 24%;
+    --stage-relocation: 200 58% 45%;
+    --stage-onboarding: 142 76% 36%;
+    --stage-followup: 215 54% 50%;
   }
 
   .dark {
-    --background: 224 26% 12%;
-    --foreground: 36 33% 96%;
+    --background: 215 54% 10%;
+    --foreground: 36 22% 95%;
 
-    --card: 224 26% 14%;
-    --card-foreground: 36 33% 96%;
+    --card: 215 50% 14%;
+    --card-foreground: 36 22% 95%;
 
-    --popover: 224 26% 14%;
-    --popover-foreground: 36 33% 96%;
+    --popover: 215 50% 14%;
+    --popover-foreground: 36 22% 95%;
 
-    --primary: 195 82% 60%;
-    --primary-foreground: 224 26% 12%;
+    --primary: 200 58% 58%;
+    --primary-foreground: 215 54% 10%;
 
-    --secondary: 27 53% 22%;
-    --secondary-foreground: 36 33% 96%;
+    --secondary: 215 54% 24%;
+    --secondary-foreground: 36 22% 95%;
 
-    --muted: 220 16% 20%;
-    --muted-foreground: 36 28% 80%;
+    --muted: 215 40% 20%;
+    --muted-foreground: 36 15% 65%;
 
-    --accent: 174 50% 30%;
-    --accent-foreground: 36 33% 96%;
+    --accent: 215 40% 18%;
+    --accent-foreground: 36 22% 95%;
 
-    --destructive: 2 64% 48%;
-    --destructive-foreground: 36 33% 96%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 220 14% 24%;
-    --input: 220 14% 24%;
-    --ring: 195 82% 60%;
-    --sidebar-background: 224 26% 10%;
-    --sidebar-foreground: 36 33% 92%;
-    --sidebar-primary: 195 82% 60%;
-    --sidebar-primary-foreground: 224 26% 10%;
-    --sidebar-accent: 220 18% 16%;
-    --sidebar-accent-foreground: 36 33% 92%;
-    --sidebar-border: 220 14% 24%;
-    --sidebar-ring: 195 82% 60%;
+    --border: 215 40% 22%;
+    --input: 215 40% 22%;
+    --ring: 200 58% 58%;
 
-    --gradient-end: 14 86% 57%;
+    /* Sidebar dark */
+    --sidebar-background: 215 50% 12%;
+    --sidebar-foreground: 36 22% 95%;
+    --sidebar-primary: 200 58% 58%;
+    --sidebar-primary-foreground: 215 54% 10%;
+    --sidebar-accent: 215 40% 18%;
+    --sidebar-accent-foreground: 36 22% 95%;
+    --sidebar-border: 215 40% 22%;
+    --sidebar-ring: 200 58% 58%;
 
-    /* Role-specific accent colors - dark mode */
-    --candidate-accent: 214 80% 55%;
-    --employer-accent: 262 70% 60%;
-    --admin-accent: 220 20% 50%;
+    /* Chart colors dark mode */
+    --chart-1: 200 58% 58%;
+    --chart-2: 215 54% 45%;
+    --chart-3: 34 87% 57%;
+    --chart-4: 142 70% 45%;
+    --chart-5: 200 58% 70%;
   }
 }
 
@@ -105,42 +138,49 @@ All colors MUST be HSL.
   * {
     @apply border-border;
   }
-
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 500;
   }
 }
 
 @layer utilities {
-  .nordic-gradient {
-    background-image: linear-gradient(120deg, hsl(var(--primary)), hsl(var(--gradient-end)));
-    color: hsl(var(--primary-foreground));
+  /* Professional button style - rectangular, solid */
+  .btn-professional {
+    @apply bg-primary text-primary-foreground px-6 py-2.5 font-medium;
+    border-radius: 4px;
   }
-
-  .nordic-gradient-text {
-    background-image: linear-gradient(120deg, hsl(var(--primary)), hsl(var(--gradient-end)));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+  
+  .btn-professional:hover {
+    @apply opacity-90;
   }
-
-  .nordic-shadow {
-    box-shadow: 0 10px 30px -12px hsl(var(--foreground) / 0.18);
+  
+  /* Subtle shadow for cards */
+  .card-shadow {
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
   }
-
-  .nordic-shadow-lg {
-    box-shadow:
-      0 18px 38px -16px hsl(var(--foreground) / 0.16),
-      0 10px 18px -12px hsl(var(--foreground) / 0.12);
+  
+  /* Pipeline stage indicator */
+  .stage-indicator {
+    @apply inline-flex items-center gap-2 px-3 py-1 text-sm font-medium rounded;
   }
-
-  .nordic-glow {
-    box-shadow: 0 10px 35px hsl(var(--primary) / 0.35);
+  
+  .stage-active {
+    @apply bg-primary text-primary-foreground;
   }
-
-  .glass {
-    background-color: hsl(var(--background) / 0.75);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+  
+  .stage-completed {
+    @apply bg-success text-success-foreground;
+  }
+  
+  .stage-pending {
+    @apply bg-muted text-muted-foreground;
+  }
+  
+  .stage-blocked {
+    @apply bg-destructive/10 text-destructive;
   }
 }

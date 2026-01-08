@@ -4,20 +4,18 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   User,
+  ClipboardCheck,
+  UserCheck,
+  GraduationCap,
   Briefcase,
-  FileText,
-  Calendar,
-  Gift,
   MapPin,
   MessageSquare,
   ChevronLeft,
   ChevronRight,
   Bell,
   LogOut,
-  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,15 +25,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import logoImage from "@/assets/nordic-ascent-logo.png";
 
+// Navigation aligned with 7-stage pipeline
 const navigation = [
-  { name: "Dashboard", href: "/candidate/dashboard", icon: LayoutDashboard },
-  { name: "Profile & CV", href: "/candidate/profile", icon: User },
-  { name: "Job Search", href: "/candidate/jobs", icon: Briefcase },
-  { name: "Applications", href: "/candidate/applications", icon: FileText },
-  { name: "Interviews", href: "/candidate/interviews", icon: Calendar },
-  { name: "Offers", href: "/candidate/offers", icon: Gift },
+  { name: "My Journey", href: "/candidate/dashboard", icon: LayoutDashboard },
+  { name: "Preparation", href: "/candidate/preparation", icon: ClipboardCheck },
+  { name: "Selection", href: "/candidate/selection", icon: UserCheck },
+  { name: "Trainee", href: "/candidate/trainee", icon: GraduationCap },
+  { name: "Internship", href: "/candidate/internship", icon: Briefcase },
   { name: "Relocation", href: "/candidate/relocation", icon: MapPin },
+  { name: "Profile", href: "/candidate/profile", icon: User },
   { name: "Messages", href: "/candidate/messages", icon: MessageSquare },
 ];
 
@@ -48,7 +48,7 @@ const CandidateLayout = () => {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen bg-card border-r transition-all duration-300",
+          "fixed left-0 top-0 z-40 h-screen bg-card border-r",
           collapsed ? "w-16" : "w-64"
         )}
       >
@@ -57,21 +57,44 @@ const CandidateLayout = () => {
           <div className="flex h-16 items-center justify-between px-4 border-b">
             {!collapsed && (
               <Link to="/candidate/dashboard" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-lg">N</span>
-                </div>
-                <span className="font-semibold text-lg">Nordicascent</span>
+                <img 
+                  src={logoImage} 
+                  alt="Nordic Ascent" 
+                  className="h-8 w-auto"
+                />
+                <span className="font-medium text-lg text-foreground">Nordic Ascent</span>
+              </Link>
+            )}
+            {collapsed && (
+              <Link to="/candidate/dashboard" className="mx-auto">
+                <img 
+                  src={logoImage} 
+                  alt="Nordic Ascent" 
+                  className="h-8 w-auto"
+                />
               </Link>
             )}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setCollapsed(!collapsed)}
-              className={cn(collapsed && "mx-auto")}
+              className={cn(collapsed && "hidden")}
             >
-              {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+              <ChevronLeft className="h-4 w-4" />
             </Button>
           </div>
+
+          {/* Collapse toggle when collapsed */}
+          {collapsed && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setCollapsed(false)}
+              className="mx-auto mt-2"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          )}
 
           {/* Navigation */}
           <nav className="flex-1 p-4 space-y-1">
@@ -82,7 +105,7 @@ const CandidateLayout = () => {
                   key={item.name}
                   to={item.href}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
+                    "flex items-center gap-3 px-3 py-2.5 rounded",
                     isActive
                       ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -98,13 +121,13 @@ const CandidateLayout = () => {
           {/* User section */}
           {!collapsed && (
             <div className="p-4 border-t">
-              <div className="flex items-center gap-3 p-2 rounded-lg bg-accent/50">
+              <div className="flex items-center gap-3 p-2 rounded bg-accent/50">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="https://i.pravatar.cc/150?img=1" />
-                  <AvatarFallback>EA</AvatarFallback>
+                  <AvatarFallback>RA</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">Erik Andersson</p>
+                  <p className="text-sm font-medium truncate">Rahul Sharma</p>
                   <p className="text-xs text-muted-foreground">Candidate</p>
                 </div>
               </div>
@@ -114,24 +137,18 @@ const CandidateLayout = () => {
       </aside>
 
       {/* Main content */}
-      <div className={cn("transition-all duration-300", collapsed ? "ml-16" : "ml-64")}>
+      <div className={cn(collapsed ? "ml-16" : "ml-64")}>
         {/* Header */}
-        <header className="sticky top-0 z-30 h-16 bg-background/95 backdrop-blur border-b">
+        <header className="sticky top-0 z-30 h-16 bg-background border-b">
           <div className="flex h-full items-center justify-between px-6">
             <div className="flex items-center gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search jobs, companies..."
-                  className="w-80 pl-9 bg-muted/50"
-                />
-              </div>
+              <h1 className="text-lg font-medium text-foreground">Candidate Journey</h1>
             </div>
 
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 h-4 w-4 bg-primary text-primary-foreground text-xs rounded-full flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 h-4 w-4 bg-warning text-warning-foreground text-xs rounded-full flex items-center justify-center">
                   3
                 </span>
               </Button>
@@ -141,7 +158,7 @@ const CandidateLayout = () => {
                   <Button variant="ghost" className="flex items-center gap-2">
                     <Avatar className="h-8 w-8">
                       <AvatarImage src="https://i.pravatar.cc/150?img=1" />
-                      <AvatarFallback>EA</AvatarFallback>
+                      <AvatarFallback>RA</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
