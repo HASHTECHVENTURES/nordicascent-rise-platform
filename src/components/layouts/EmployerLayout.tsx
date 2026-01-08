@@ -6,19 +6,14 @@ import {
   Building2,
   Briefcase,
   Users,
-  GitBranch,
-  Calendar,
-  Gift,
   MessageSquare,
   BarChart3,
   ChevronLeft,
   ChevronRight,
   Bell,
   LogOut,
-  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,15 +23,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import logoImage from "@/assets/nordic-ascent-logo.png";
 
+// Company journey navigation - focused on pipeline overview
 const navigation = [
-  { name: "Dashboard", href: "/employer/dashboard", icon: LayoutDashboard },
-  { name: "Company Profile", href: "/employer/company", icon: Building2 },
-  { name: "Job Postings", href: "/employer/jobs", icon: Briefcase },
+  { name: "Pipeline Overview", href: "/employer/dashboard", icon: LayoutDashboard },
   { name: "Candidates", href: "/employer/candidates", icon: Users },
-  { name: "Pipeline", href: "/employer/pipeline", icon: GitBranch },
-  { name: "Interviews", href: "/employer/interviews", icon: Calendar },
-  { name: "Offers", href: "/employer/offers", icon: Gift },
+  { name: "Roles", href: "/employer/jobs", icon: Briefcase },
+  { name: "Company Profile", href: "/employer/company", icon: Building2 },
   { name: "Messages", href: "/employer/messages", icon: MessageSquare },
   { name: "Analytics", href: "/employer/analytics", icon: BarChart3 },
 ];
@@ -50,7 +44,7 @@ const EmployerLayout = () => {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen bg-card border-r transition-all duration-300",
+          "fixed left-0 top-0 z-40 h-screen bg-card border-r",
           collapsed ? "w-16" : "w-64"
         )}
       >
@@ -59,21 +53,44 @@ const EmployerLayout = () => {
           <div className="flex h-16 items-center justify-between px-4 border-b">
             {!collapsed && (
               <Link to="/employer/dashboard" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-chart-2 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">N</span>
-                </div>
-                <span className="font-semibold text-lg">Nordicascent</span>
+                <img 
+                  src={logoImage} 
+                  alt="Nordic Ascent" 
+                  className="h-8 w-auto"
+                />
+                <span className="font-medium text-lg text-foreground">Nordic Ascent</span>
+              </Link>
+            )}
+            {collapsed && (
+              <Link to="/employer/dashboard" className="mx-auto">
+                <img 
+                  src={logoImage} 
+                  alt="Nordic Ascent" 
+                  className="h-8 w-auto"
+                />
               </Link>
             )}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setCollapsed(!collapsed)}
-              className={cn(collapsed && "mx-auto")}
+              className={cn(collapsed && "hidden")}
             >
-              {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+              <ChevronLeft className="h-4 w-4" />
             </Button>
           </div>
+
+          {/* Collapse toggle when collapsed */}
+          {collapsed && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setCollapsed(false)}
+              className="mx-auto mt-2"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          )}
 
           {/* Navigation */}
           <nav className="flex-1 p-4 space-y-1">
@@ -84,9 +101,9 @@ const EmployerLayout = () => {
                   key={item.name}
                   to={item.href}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg",
+                    "flex items-center gap-3 px-3 py-2.5 rounded",
                     isActive
-                      ? "bg-chart-2 text-white"
+                      ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:bg-accent hover:text-foreground"
                   )}
                 >
@@ -100,14 +117,14 @@ const EmployerLayout = () => {
           {/* Company section */}
           {!collapsed && (
             <div className="p-4 border-t">
-              <div className="flex items-center gap-3 p-2 rounded-lg bg-accent/50">
+              <div className="flex items-center gap-3 p-2 rounded bg-accent/50">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="https://logo.clearbit.com/spotify.com" />
                   <AvatarFallback>TC</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">TechCorp Nordic</p>
-                  <p className="text-xs text-muted-foreground">Employer</p>
+                  <p className="text-xs text-muted-foreground">Company</p>
                 </div>
               </div>
             </div>
@@ -116,24 +133,18 @@ const EmployerLayout = () => {
       </aside>
 
       {/* Main content */}
-      <div className={cn("transition-all duration-300", collapsed ? "ml-16" : "ml-64")}>
+      <div className={cn(collapsed ? "ml-16" : "ml-64")}>
         {/* Header */}
-        <header className="sticky top-0 z-30 h-16 bg-background/95 backdrop-blur border-b">
+        <header className="sticky top-0 z-30 h-16 bg-background border-b">
           <div className="flex h-full items-center justify-between px-6">
             <div className="flex items-center gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search candidates, jobs..."
-                  className="w-80 pl-9 bg-muted/50"
-                />
-              </div>
+              <h1 className="text-lg font-medium text-foreground">Company Journey</h1>
             </div>
 
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="icon" className="relative">
                 <Bell className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 h-4 w-4 bg-chart-2 text-white text-xs rounded-full flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 h-4 w-4 bg-warning text-warning-foreground text-xs rounded-full flex items-center justify-center">
                   5
                 </span>
               </Button>

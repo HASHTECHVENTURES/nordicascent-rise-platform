@@ -2,157 +2,281 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Briefcase, FileText, Calendar, Gift, MapPin, TrendingUp, Clock, Building2 } from "lucide-react";
+import { 
+  CheckCircle, 
+  Circle, 
+  AlertTriangle, 
+  ArrowRight,
+  ClipboardCheck,
+  UserCheck,
+  GraduationCap,
+  Briefcase,
+  MapPin,
+  Building2,
+  Users
+} from "lucide-react";
+import { Link } from "react-router-dom";
 
-const recommendedJobs = [
-  { id: 1, title: "Senior Frontend Developer", company: "TechNordic AB", location: "Stockholm, SE", type: "Full-time", match: 95 },
-  { id: 2, title: "React Developer", company: "Nordic Innovations", location: "Copenhagen, DK", type: "Full-time", match: 88 },
-  { id: 3, title: "UI Engineer", company: "DesignHub Finland", location: "Helsinki, FI", type: "Contract", match: 82 },
+// Pipeline stages definition
+const pipelineStages = [
+  { 
+    id: 1, 
+    name: "Preparation", 
+    status: "completed",
+    href: "/candidate/preparation",
+    icon: ClipboardCheck,
+    description: "Initial readiness assessment"
+  },
+  { 
+    id: 2, 
+    name: "Selection", 
+    status: "completed",
+    href: "/candidate/selection",
+    icon: UserCheck,
+    description: "Screening and matching"
+  },
+  { 
+    id: 3, 
+    name: "Trainee", 
+    status: "active",
+    href: "/candidate/trainee",
+    icon: GraduationCap,
+    description: "Digital validation phase"
+  },
+  { 
+    id: 4, 
+    name: "Internship", 
+    status: "pending",
+    href: "/candidate/internship",
+    icon: Briefcase,
+    description: "Formal digital engagement"
+  },
+  { 
+    id: 5, 
+    name: "Relocation", 
+    status: "pending",
+    href: "/candidate/relocation",
+    icon: MapPin,
+    description: "Visa, housing, documentation"
+  },
+  { 
+    id: 6, 
+    name: "Onboarding", 
+    status: "pending",
+    href: "/candidate/onboarding",
+    icon: Building2,
+    description: "Physical arrival and integration"
+  },
+  { 
+    id: 7, 
+    name: "Follow-up", 
+    status: "pending",
+    href: "/candidate/followup",
+    icon: Users,
+    description: "Long-term support"
+  },
 ];
 
-const applications = [
-  { id: 1, role: "Software Engineer", company: "TechNordic AB", status: "interview", date: "2024-03-10" },
-  { id: 2, role: "Frontend Developer", company: "Nordic Innovations", status: "screening", date: "2024-03-08" },
-  { id: 3, role: "Full Stack Developer", company: "DataFlow Norway", status: "applied", date: "2024-03-05" },
-];
+// Current stage details
+const currentStage = {
+  name: "Trainee",
+  readiness: 65,
+  nextAction: "Complete Technical Assessment Module 3",
+  risks: [
+    { id: 1, text: "Technical assessment deadline in 5 days", level: "warning" },
+  ],
+  tasks: [
+    { id: 1, text: "Technical Assessment Module 1", completed: true },
+    { id: 2, text: "Technical Assessment Module 2", completed: true },
+    { id: 3, text: "Technical Assessment Module 3", completed: false },
+    { id: 4, text: "Soft Skills Workshop", completed: false },
+  ]
+};
 
 const CandidateDashboard = () => {
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "completed":
+        return <CheckCircle className="h-5 w-5 text-success" />;
+      case "active":
+        return <Circle className="h-5 w-5 text-primary fill-primary" />;
+      case "blocked":
+        return <AlertTriangle className="h-5 w-5 text-destructive" />;
+      default:
+        return <Circle className="h-5 w-5 text-muted-foreground" />;
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "completed":
+        return <Badge className="bg-success text-success-foreground">Completed</Badge>;
+      case "active":
+        return <Badge className="bg-primary text-primary-foreground">Active</Badge>;
+      case "blocked":
+        return <Badge variant="destructive">Blocked</Badge>;
+      default:
+        return <Badge variant="secondary">Pending</Badge>;
+    }
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Welcome back, Emma!</h1>
-        <p className="text-muted-foreground">Here's what's happening with your job search</p>
+        <h1 className="text-2xl font-medium text-foreground">My Journey</h1>
+        <p className="text-muted-foreground">Track your progress through the Nordic Ascent pipeline</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-candidate-accent/10 to-transparent border-candidate-accent/20">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Active Applications</CardTitle>
-            <FileText className="h-4 w-4 text-candidate-accent" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">8</div>
-            <p className="text-xs text-muted-foreground">+2 this week</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Interviews Scheduled</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">3</div>
-            <p className="text-xs text-muted-foreground">Next: Tomorrow 2PM</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Profile Views</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">47</div>
-            <p className="text-xs text-chart-success">+12% this week</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Pending Offers</CardTitle>
-            <Gift className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">1</div>
-            <p className="text-xs text-chart-warning">Expires in 5 days</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Briefcase className="h-5 w-5" />
-              Recommended Jobs
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {recommendedJobs.map((job) => (
-              <div key={job.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
-                <div>
-                  <h3 className="font-medium">{job.title}</h3>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Building2 className="h-3 w-3" />
-                    <span>{job.company}</span>
-                    <span>•</span>
-                    <MapPin className="h-3 w-3" />
-                    <span>{job.location}</span>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <Badge variant="secondary" className="bg-candidate-accent/10 text-candidate-accent">
-                    {job.match}% match
-                  </Badge>
-                </div>
-              </div>
-            ))}
-            <Button variant="outline" className="w-full">View All Jobs</Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Recent Applications
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {applications.map((app) => (
-              <div key={app.id} className="flex items-center justify-between p-3 rounded-lg border bg-card">
-                <div>
-                  <h3 className="font-medium">{app.role}</h3>
-                  <p className="text-sm text-muted-foreground">{app.company}</p>
-                </div>
-                <div className="text-right">
-                  <Badge variant={
-                    app.status === 'interview' ? 'default' :
-                    app.status === 'screening' ? 'secondary' : 'outline'
-                  }>
-                    {app.status}
-                  </Badge>
-                  <p className="text-xs text-muted-foreground mt-1">{app.date}</p>
-                </div>
-              </div>
-            ))}
-            <Button variant="outline" className="w-full">View All Applications</Button>
-          </CardContent>
-        </Card>
-      </div>
-
+      {/* Pipeline Overview */}
       <Card>
         <CardHeader>
-          <CardTitle>Profile Completeness</CardTitle>
+          <CardTitle className="text-lg font-medium">Pipeline Progress</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Your profile is 75% complete</span>
-              <span className="text-sm font-medium">75%</span>
-            </div>
-            <Progress value={75} className="h-2" />
-            <div className="flex gap-2 flex-wrap">
-              <Badge variant="outline" className="gap-1">
-                <Clock className="h-3 w-3" />
-                Add work experience
-              </Badge>
-              <Badge variant="outline" className="gap-1">
-                <Clock className="h-3 w-3" />
-                Upload portfolio
-              </Badge>
-            </div>
+          <div className="flex items-center justify-between overflow-x-auto pb-4">
+            {pipelineStages.map((stage, index) => (
+              <div key={stage.id} className="flex items-center">
+                <Link 
+                  to={stage.href}
+                  className="flex flex-col items-center min-w-[100px] group"
+                >
+                  <div className={`
+                    w-12 h-12 rounded-full flex items-center justify-center border-2 mb-2
+                    ${stage.status === 'completed' ? 'bg-success border-success text-success-foreground' : ''}
+                    ${stage.status === 'active' ? 'bg-primary border-primary text-primary-foreground' : ''}
+                    ${stage.status === 'pending' ? 'bg-muted border-muted-foreground/30 text-muted-foreground' : ''}
+                    ${stage.status === 'blocked' ? 'bg-destructive/10 border-destructive text-destructive' : ''}
+                    group-hover:opacity-80
+                  `}>
+                    <stage.icon className="h-5 w-5" />
+                  </div>
+                  <span className={`text-sm font-medium text-center ${
+                    stage.status === 'active' ? 'text-primary' : 'text-muted-foreground'
+                  }`}>
+                    {stage.name}
+                  </span>
+                </Link>
+                {index < pipelineStages.length - 1 && (
+                  <div className={`w-8 h-0.5 mx-2 ${
+                    stage.status === 'completed' ? 'bg-success' : 'bg-muted'
+                  }`} />
+                )}
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
+
+      {/* Current Stage Details */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main stage info */}
+        <Card className="lg:col-span-2">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-lg font-medium">Current Stage: {currentStage.name}</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">Digital validation phase</p>
+            </div>
+            {getStatusBadge("active")}
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Readiness */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium">Stage Readiness</span>
+                <span className="text-sm text-muted-foreground">{currentStage.readiness}%</span>
+              </div>
+              <Progress value={currentStage.readiness} className="h-2" />
+            </div>
+
+            {/* Tasks */}
+            <div>
+              <h4 className="text-sm font-medium mb-3">Tasks</h4>
+              <div className="space-y-2">
+                {currentStage.tasks.map((task) => (
+                  <div 
+                    key={task.id} 
+                    className={`flex items-center gap-3 p-3 rounded border ${
+                      task.completed ? 'bg-success/5 border-success/20' : 'bg-card border-border'
+                    }`}
+                  >
+                    {task.completed ? (
+                      <CheckCircle className="h-4 w-4 text-success" />
+                    ) : (
+                      <Circle className="h-4 w-4 text-muted-foreground" />
+                    )}
+                    <span className={`text-sm ${task.completed ? 'text-muted-foreground line-through' : ''}`}>
+                      {task.text}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Next Action */}
+            <div className="pt-4 border-t">
+              <Button className="w-full btn-professional" asChild>
+                <Link to="/candidate/trainee">
+                  {currentStage.nextAction}
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Sidebar - Risks & Info */}
+        <div className="space-y-6">
+          {/* Risks */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg font-medium">Open Issues</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {currentStage.risks.length > 0 ? (
+                <div className="space-y-3">
+                  {currentStage.risks.map((risk) => (
+                    <div 
+                      key={risk.id} 
+                      className={`flex items-start gap-3 p-3 rounded ${
+                        risk.level === 'warning' ? 'bg-warning/10' : 'bg-destructive/10'
+                      }`}
+                    >
+                      <AlertTriangle className={`h-4 w-4 mt-0.5 ${
+                        risk.level === 'warning' ? 'text-warning' : 'text-destructive'
+                      }`} />
+                      <span className="text-sm">{risk.text}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No open issues</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Quick Stats */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg font-medium">Journey Stats</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between">
+                <span className="text-sm text-muted-foreground">Stages Completed</span>
+                <span className="text-sm font-medium">2 of 7</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-muted-foreground">Days in Pipeline</span>
+                <span className="text-sm font-medium">45</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-muted-foreground">Target Company</span>
+                <span className="text-sm font-medium">TechCorp Nordic</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 };

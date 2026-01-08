@@ -2,7 +2,12 @@ import type { Config } from "tailwindcss";
 
 export default {
   darkMode: ["class"],
-  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  content: [
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   prefix: "",
   theme: {
     container: {
@@ -13,6 +18,9 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -30,6 +38,14 @@ export default {
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
@@ -57,9 +73,33 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        "candidate-accent": "hsl(var(--candidate-accent))",
-        "employer-accent": "hsl(var(--employer-accent))",
-        "admin-accent": "hsl(var(--admin-accent))",
+        chart: {
+          "1": "hsl(var(--chart-1))",
+          "2": "hsl(var(--chart-2))",
+          "3": "hsl(var(--chart-3))",
+          "4": "hsl(var(--chart-4))",
+          "5": "hsl(var(--chart-5))",
+          success: "hsl(var(--chart-success))",
+          warning: "hsl(var(--chart-warning))",
+          error: "hsl(var(--chart-error))",
+        },
+        // Nordic Ascent brand colors
+        nordic: {
+          deep: "hsl(var(--nordic-deep-blue))",
+          fjord: "hsl(var(--fjord-light-blue))",
+          sand: "hsl(var(--neutral-sand))",
+          orange: "hsl(var(--rise-orange))",
+        },
+        // Pipeline stage colors
+        stage: {
+          preparation: "hsl(var(--stage-preparation))",
+          selection: "hsl(var(--stage-selection))",
+          trainee: "hsl(var(--stage-trainee))",
+          internship: "hsl(var(--stage-internship))",
+          relocation: "hsl(var(--stage-relocation))",
+          onboarding: "hsl(var(--stage-onboarding))",
+          followup: "hsl(var(--stage-followup))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -68,20 +108,12 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
       },
       animation: {
