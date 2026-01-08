@@ -60,7 +60,7 @@ const CandidateLayout = () => {
                 <img 
                   src={logoImage} 
                   alt="Nordic Ascent" 
-                  className="h-10 w-auto"
+                  className="h-11 w-auto logo-boost"
                 />
               </Link>
             )}
@@ -69,7 +69,7 @@ const CandidateLayout = () => {
                 <img 
                   src={logoImage} 
                   alt="Nordic Ascent" 
-                  className="h-8 w-auto"
+                  className="h-9 w-auto logo-boost"
                 />
               </Link>
             )}
