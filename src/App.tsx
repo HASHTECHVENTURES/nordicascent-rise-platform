@@ -22,10 +22,10 @@ import Login from "./pages/Login";
 // Candidate Pages
 import CandidateDashboard from "./pages/candidate/Dashboard";
 import CandidateProfile from "./pages/candidate/Profile";
-import CandidateJobs from "./pages/candidate/Jobs";
-import CandidateApplications from "./pages/candidate/Applications";
-import CandidateInterviews from "./pages/candidate/Interviews";
-import CandidateOffers from "./pages/candidate/Offers";
+import CandidatePreparation from "./pages/candidate/Preparation";
+import CandidateSelection from "./pages/candidate/Selection";
+import CandidateTrainee from "./pages/candidate/Trainee";
+import CandidateInternship from "./pages/candidate/Internship";
 import CandidateRelocation from "./pages/candidate/Relocation";
 import CandidateMessages from "./pages/candidate/Messages";
 
@@ -34,9 +34,6 @@ import EmployerDashboard from "./pages/employer/Dashboard";
 import EmployerCompanyProfile from "./pages/employer/CompanyProfile";
 import EmployerJobPostings from "./pages/employer/JobPostings";
 import EmployerCandidates from "./pages/employer/Candidates";
-import EmployerPipeline from "./pages/employer/Pipeline";
-import EmployerInterviews from "./pages/employer/Interviews";
-import EmployerOffers from "./pages/employer/Offers";
 import EmployerMessages from "./pages/employer/Messages";
 import EmployerAnalytics from "./pages/employer/Analytics";
 
@@ -74,27 +71,24 @@ const App = () => (
           {/* Auth Routes */}
           <Route path="/login" element={<Login />} />
 
-          {/* Candidate Portal Routes */}
+          {/* Candidate Portal Routes - Journey-based navigation */}
           <Route element={<CandidateLayout />}>
             <Route path="/candidate/dashboard" element={<CandidateDashboard />} />
-            <Route path="/candidate/profile" element={<CandidateProfile />} />
-            <Route path="/candidate/jobs" element={<CandidateJobs />} />
-            <Route path="/candidate/applications" element={<CandidateApplications />} />
-            <Route path="/candidate/interviews" element={<CandidateInterviews />} />
-            <Route path="/candidate/offers" element={<CandidateOffers />} />
+            <Route path="/candidate/preparation" element={<CandidatePreparation />} />
+            <Route path="/candidate/selection" element={<CandidateSelection />} />
+            <Route path="/candidate/trainee" element={<CandidateTrainee />} />
+            <Route path="/candidate/internship" element={<CandidateInternship />} />
             <Route path="/candidate/relocation" element={<CandidateRelocation />} />
+            <Route path="/candidate/profile" element={<CandidateProfile />} />
             <Route path="/candidate/messages" element={<CandidateMessages />} />
           </Route>
 
-          {/* Employer Portal Routes */}
+          {/* Employer Portal Routes - Company Journey */}
           <Route element={<EmployerLayout />}>
             <Route path="/employer/dashboard" element={<EmployerDashboard />} />
-            <Route path="/employer/company" element={<EmployerCompanyProfile />} />
-            <Route path="/employer/jobs" element={<EmployerJobPostings />} />
             <Route path="/employer/candidates" element={<EmployerCandidates />} />
-            <Route path="/employer/pipeline" element={<EmployerPipeline />} />
-            <Route path="/employer/interviews" element={<EmployerInterviews />} />
-            <Route path="/employer/offers" element={<EmployerOffers />} />
+            <Route path="/employer/jobs" element={<EmployerJobPostings />} />
+            <Route path="/employer/company" element={<EmployerCompanyProfile />} />
             <Route path="/employer/messages" element={<EmployerMessages />} />
             <Route path="/employer/analytics" element={<EmployerAnalytics />} />
           </Route>
