@@ -48,26 +48,26 @@ const AdminLayout = () => {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen bg-secondary text-secondary-foreground border-r transition-all duration-300",
+          "fixed left-0 top-0 z-40 h-screen bg-nordic-deep border-r border-nordic-deep transition-all duration-300",
           collapsed ? "w-16" : "w-64"
         )}
       >
         <div className="flex h-full flex-col">
           {/* Logo */}
-          <div className="flex h-16 items-center justify-between px-4 border-b border-border/20">
+          <div className="flex h-16 items-center justify-between px-4 border-b border-white/10">
             {!collapsed && (
               <Link to="/admin/dashboard" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-lg">N</span>
+                <div className="w-8 h-8 bg-nordic-orange rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">N</span>
                 </div>
-                <span className="font-semibold text-lg">Admin Panel</span>
+                <span className="font-semibold text-lg text-nordic-sand">Admin Panel</span>
               </Link>
             )}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setCollapsed(!collapsed)}
-              className={cn("text-secondary-foreground hover:bg-secondary-foreground/10", collapsed && "mx-auto")}
+              className={cn("text-nordic-sand hover:bg-white/10", collapsed && "mx-auto")}
             >
               {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
             </Button>
@@ -84,8 +84,8 @@ const AdminLayout = () => {
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
                     isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-secondary-foreground/70 hover:bg-secondary-foreground/10 hover:text-secondary-foreground"
+                      ? "bg-nordic-orange text-white"
+                      : "text-nordic-sand/70 hover:bg-white/10 hover:text-nordic-sand"
                   )}
                 >
                   <item.icon className="h-5 w-5 flex-shrink-0" />
@@ -97,15 +97,15 @@ const AdminLayout = () => {
 
           {/* Admin section */}
           {!collapsed && (
-            <div className="p-4 border-t border-border/20">
-              <div className="flex items-center gap-3 p-2 rounded-lg bg-secondary-foreground/10">
+            <div className="p-4 border-t border-white/10">
+              <div className="flex items-center gap-3 p-2 rounded-lg bg-white/10">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="https://i.pravatar.cc/150?img=68" />
-                  <AvatarFallback>SA</AvatarFallback>
+                  <AvatarFallback className="bg-nordic-orange text-white">SA</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">Super Admin</p>
-                  <p className="text-xs text-secondary-foreground/60">Administrator</p>
+                  <p className="text-sm font-medium truncate text-nordic-sand">Super Admin</p>
+                  <p className="text-xs text-nordic-sand/60">Administrator</p>
                 </div>
               </div>
             </div>
