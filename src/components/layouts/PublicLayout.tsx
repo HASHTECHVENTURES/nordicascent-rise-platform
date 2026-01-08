@@ -4,51 +4,41 @@ import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import logoImage from "@/assets/nordic-ascent-logo.png";
-
-const navigation = [
-  { name: "Home", href: "/" },
-  { name: "Services", href: "/services" },
-  { name: "About", href: "/about" },
-  { name: "Careers", href: "/careers" },
-  { name: "Contact", href: "/contact" },
-];
-
+const navigation = [{
+  name: "Home",
+  href: "/"
+}, {
+  name: "Services",
+  href: "/services"
+}, {
+  name: "About",
+  href: "/about"
+}, {
+  name: "Careers",
+  href: "/careers"
+}, {
+  name: "Contact",
+  href: "/contact"
+}];
 export function PublicLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
-
-  return (
-    <div className="min-h-screen flex flex-col">
+  return <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background border-b border-border">
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3">
-              <img 
-                src={logoImage} 
-                alt="Nordic Ascent" 
-                className="h-10 w-auto"
-              />
-              <span className="text-xl font-medium text-foreground">Nordic Ascent</span>
+              <img src={logoImage} alt="Nordic Ascent" className="h-10 w-auto" />
+              
             </Link>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-8">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={cn(
-                    "text-sm font-medium hover:text-primary",
-                    location.pathname === item.href
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                  )}
-                >
+              {navigation.map(item => <Link key={item.name} to={item.href} className={cn("text-sm font-medium hover:text-primary", location.pathname === item.href ? "text-primary" : "text-muted-foreground")}>
                   {item.name}
-                </Link>
-              ))}
+                </Link>)}
             </div>
 
             {/* CTA Buttons */}
@@ -62,37 +52,17 @@ export function PublicLayout() {
             </div>
 
             {/* Mobile menu button */}
-            <button
-              className="md:hidden p-2"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
+            <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
 
           {/* Mobile Navigation */}
-          {mobileMenuOpen && (
-            <div className="md:hidden py-4 border-t border-border">
+          {mobileMenuOpen && <div className="md:hidden py-4 border-t border-border">
               <div className="flex flex-col gap-4">
-                {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={cn(
-                      "text-sm font-medium hover:text-primary px-2 py-2",
-                      location.pathname === item.href
-                        ? "text-primary"
-                        : "text-muted-foreground"
-                    )}
-                  >
+                {navigation.map(item => <Link key={item.name} to={item.href} onClick={() => setMobileMenuOpen(false)} className={cn("text-sm font-medium hover:text-primary px-2 py-2", location.pathname === item.href ? "text-primary" : "text-muted-foreground")}>
                     {item.name}
-                  </Link>
-                ))}
+                  </Link>)}
                 <div className="flex flex-col gap-2 pt-4 border-t border-border">
                   <Button variant="ghost" asChild className="justify-start">
                     <Link to="/login">Login</Link>
@@ -102,8 +72,7 @@ export function PublicLayout() {
                   </Button>
                 </div>
               </div>
-            </div>
-          )}
+            </div>}
         </nav>
       </header>
 
@@ -119,11 +88,7 @@ export function PublicLayout() {
             {/* Brand */}
             <div className="space-y-4">
               <Link to="/" className="flex items-center gap-3">
-                <img 
-                  src={logoImage} 
-                  alt="Nordic Ascent" 
-                  className="h-10 w-auto brightness-0 invert"
-                />
+                <img src={logoImage} alt="Nordic Ascent" className="h-10 w-auto brightness-0 invert" />
                 <span className="text-xl font-medium">Nordic Ascent</span>
               </Link>
               <p className="text-sm text-primary-foreground/80">
@@ -174,6 +139,5 @@ export function PublicLayout() {
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 }
