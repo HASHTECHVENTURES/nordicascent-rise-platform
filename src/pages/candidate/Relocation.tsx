@@ -9,15 +9,15 @@ const visaSteps = [
   { id: 1, title: "Job Offer Confirmation", status: "completed", description: "Receive official job offer letter" },
   { id: 2, title: "Visa Application Submitted", status: "completed", description: "Submit work permit application" },
   { id: 3, title: "Document Verification", status: "current", description: "Immigration authority reviews documents" },
-  { id: 4, title: "Visa Interview", status: "pending", description: "Attend interview at embassy" },
-  { id: 5, title: "Visa Approval", status: "pending", description: "Receive work permit" },
+  { id: 4, title: "Visa Interview", status: "not_started", description: "Attend interview at embassy" },
+  { id: 5, title: "Visa Approval", status: "not_started", description: "Receive work permit" },
 ];
 
 const cityGuides = [
-  { id: 1, city: "Stockholm", country: "Sweden", image: "🇸🇪", costOfLiving: "High", avgRent: "€1,500/mo", highlights: ["Tech hub", "Work-life balance", "English-friendly"] },
-  { id: 2, city: "Copenhagen", country: "Denmark", image: "🇩🇰", costOfLiving: "High", avgRent: "€1,600/mo", highlights: ["Design culture", "Cycling city", "Green living"] },
-  { id: 3, city: "Helsinki", country: "Finland", image: "🇫🇮", costOfLiving: "Medium-High", avgRent: "€1,200/mo", highlights: ["Startup scene", "Nature access", "Education system"] },
-  { id: 4, city: "Oslo", country: "Norway", image: "🇳🇴", costOfLiving: "Very High", avgRent: "€1,800/mo", highlights: ["High salaries", "Outdoor lifestyle", "Public services"] },
+  { id: 1, city: "Stockholm", country: "Sweden", image: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=600&h=400&fit=crop&q=80", flag: "🇸🇪", costOfLiving: "High", avgRent: "€1,500/mo", highlights: ["Tech hub", "Work-life balance", "English-friendly"] },
+  { id: 2, city: "Copenhagen", country: "Denmark", image: "https://images.unsplash.com/photo-1513622470522-26c3c8a854bc?w=600&h=400&fit=crop&q=80", flag: "🇩🇰", costOfLiving: "High", avgRent: "€1,600/mo", highlights: ["Design culture", "Cycling city", "Green living"] },
+  { id: 3, city: "Helsinki", country: "Finland", image: "https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?w=600&h=400&fit=crop&q=80", flag: "🇫🇮", costOfLiving: "Medium-High", avgRent: "€1,200/mo", highlights: ["Startup scene", "Nature access", "Education system"] },
+  { id: 4, city: "Oslo", country: "Norway", image: "https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=600&h=400&fit=crop&q=80", flag: "🇳🇴", costOfLiving: "Very High", avgRent: "€1,800/mo", highlights: ["High salaries", "Outdoor lifestyle", "Public services"] },
 ];
 
 const resources = [
@@ -148,7 +148,7 @@ const CandidateRelocation = () => {
                 </Card>
               </div>
 
-              <div className="p-4 rounded-lg bg-muted/50">
+              <div className="p-4 rounded bg-muted/50">
                 <h3 className="font-medium mb-2">Popular Housing Platforms</h3>
                 <div className="flex flex-wrap gap-2">
                   <Button variant="outline" size="sm">Blocket.se</Button>
@@ -164,28 +164,35 @@ const CandidateRelocation = () => {
         <TabsContent value="cities" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {cityGuides.map((city) => (
-              <Card key={city.id} className="hover:border-candidate-accent/50 transition-colors">
+              <Card key={city.id} className="hover:border-candidate-accent/50 transition-colors overflow-hidden">
+                <div className="relative h-48 overflow-hidden">
+                  <img 
+                    src={city.image} 
+                    alt={`${city.city}, ${city.country}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-4 right-4 text-3xl">{city.flag}</div>
+                </div>
                 <CardContent className="pt-6">
-                  <div className="flex items-start gap-4">
-                    <div className="text-4xl">{city.image}</div>
-                    <div className="flex-1">
+                  <div className="space-y-3">
+                    <div>
                       <h3 className="font-semibold text-lg">{city.city}</h3>
                       <p className="text-sm text-muted-foreground">{city.country}</p>
-                      <div className="mt-3 space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Cost of Living</span>
-                          <span className="font-medium">{city.costOfLiving}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Avg. Rent (1BR)</span>
-                          <span className="font-medium">{city.avgRent}</span>
-                        </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Cost of Living</span>
+                        <Badge variant="outline">{city.costOfLiving}</Badge>
                       </div>
-                      <div className="flex flex-wrap gap-1 mt-3">
-                        {city.highlights.map((h) => (
-                          <Badge key={h} variant="outline" className="text-xs">{h}</Badge>
-                        ))}
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Avg. Rent (1BR)</span>
+                        <span className="font-medium">{city.avgRent}</span>
                       </div>
+                    </div>
+                    <div className="flex flex-wrap gap-1 pt-2">
+                      {city.highlights.map((h) => (
+                        <Badge key={h} variant="secondary" className="text-xs">{h}</Badge>
+                      ))}
                     </div>
                   </div>
                   <Button variant="outline" className="w-full mt-4 gap-2">
@@ -207,7 +214,7 @@ const CandidateRelocation = () => {
             <CardContent>
               <div className="space-y-3">
                 {resources.map((resource) => (
-                  <div key={resource.id} className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors">
+                  <div key={resource.id} className="flex items-center justify-between p-3 rounded border hover:bg-muted/50 transition-colors">
                     <div className="flex items-center gap-3">
                       <FileText className="h-5 w-5 text-muted-foreground" />
                       <div>

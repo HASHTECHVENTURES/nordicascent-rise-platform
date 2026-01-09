@@ -9,6 +9,8 @@ import {
   GraduationCap,
   Briefcase,
   MapPin,
+  Building2,
+  Users,
   MessageSquare,
   ChevronLeft,
   ChevronRight,
@@ -35,6 +37,8 @@ const navigation = [
   { name: "Trainee", href: "/candidate/trainee", icon: GraduationCap },
   { name: "Internship", href: "/candidate/internship", icon: Briefcase },
   { name: "Relocation", href: "/candidate/relocation", icon: MapPin },
+  { name: "Onboarding", href: "/candidate/onboarding", icon: Building2 },
+  { name: "Follow-up", href: "/candidate/followup", icon: Users },
   { name: "Profile", href: "/candidate/profile", icon: User },
   { name: "Messages", href: "/candidate/messages", icon: MessageSquare },
 ];
@@ -54,13 +58,13 @@ const CandidateLayout = () => {
       >
         <div className="flex h-full flex-col">
           {/* Logo */}
-          <div className="flex h-16 items-center justify-between px-4 border-b border-white/10">
+          <div className="flex h-32 items-center justify-between px-4 border-b border-white/10">
             {!collapsed && (
               <Link to="/candidate/dashboard" className="flex items-center gap-2">
                 <img 
                   src={logoImage} 
                   alt="Nordic Ascent" 
-                  className="h-11 w-auto logo-boost"
+                  className="h-32 w-auto logo-boost"
                 />
               </Link>
             )}
@@ -69,7 +73,7 @@ const CandidateLayout = () => {
                 <img 
                   src={logoImage} 
                   alt="Nordic Ascent" 
-                  className="h-9 w-auto logo-boost"
+                  className="h-20 w-auto logo-boost"
                 />
               </Link>
             )}

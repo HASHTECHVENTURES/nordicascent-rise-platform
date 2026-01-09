@@ -83,12 +83,33 @@ const CandidateTrainee = () => {
         </CardContent>
       </Card>
 
+      <Card className="border-primary/50 bg-primary/5">
+        <CardHeader>
+          <CardTitle className="text-lg font-medium">Stage Completion & Approval</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">
+            Upon completion of all Trainee modules, your technical baseline and work readiness will be assessed. 
+            <strong> Final selection for Internship (1:1 digital engagement) happens at the end of this stage.</strong>
+          </p>
+          <div className="space-y-2 text-sm">
+            <p><strong>Approval Criteria:</strong></p>
+            <ul className="list-disc list-inside space-y-1 ml-2">
+              <li>All technical assessment modules completed</li>
+              <li>Work readiness and communication skills validated</li>
+              <li>Company match confirmed</li>
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="flex justify-between">
         <Button variant="outline" asChild>
           <Link to="/candidate/selection">Back to Selection</Link>
         </Button>
-        <Button disabled>
-          Continue to Internship <ArrowRight className="ml-2 h-4 w-4" />
+        <Button disabled={readiness < 100}>
+          {readiness === 100 ? "Request Approval for Internship" : "Complete All Modules to Proceed"} 
+          <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </div>
     </div>

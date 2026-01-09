@@ -27,6 +27,8 @@ import CandidateSelection from "./pages/candidate/Selection";
 import CandidateTrainee from "./pages/candidate/Trainee";
 import CandidateInternship from "./pages/candidate/Internship";
 import CandidateRelocation from "./pages/candidate/Relocation";
+import CandidateOnboarding from "./pages/candidate/Onboarding";
+import CandidateFollowup from "./pages/candidate/Followup";
 import CandidateMessages from "./pages/candidate/Messages";
 
 // Employer Pages
@@ -79,6 +81,8 @@ const App = () => (
             <Route path="/candidate/trainee" element={<CandidateTrainee />} />
             <Route path="/candidate/internship" element={<CandidateInternship />} />
             <Route path="/candidate/relocation" element={<CandidateRelocation />} />
+            <Route path="/candidate/onboarding" element={<CandidateOnboarding />} />
+            <Route path="/candidate/followup" element={<CandidateFollowup />} />
             <Route path="/candidate/profile" element={<CandidateProfile />} />
             <Route path="/candidate/messages" element={<CandidateMessages />} />
           </Route>

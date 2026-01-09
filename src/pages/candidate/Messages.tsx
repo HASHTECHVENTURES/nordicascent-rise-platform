@@ -112,7 +112,7 @@ const CandidateMessages = () => {
                     msg.sender === 'me' 
                       ? 'bg-candidate-accent text-white' 
                       : 'bg-muted'
-                  } rounded-lg p-3`}>
+                  } rounded p-3`}>
                     <p className="text-sm">{msg.content}</p>
                     <p className={`text-xs mt-1 ${
                       msg.sender === 'me' ? 'text-white/70' : 'text-muted-foreground'

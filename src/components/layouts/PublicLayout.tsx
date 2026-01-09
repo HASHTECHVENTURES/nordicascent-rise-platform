@@ -30,7 +30,7 @@ export function PublicLayout() {
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3">
-              <img src={logoImage} alt="Nordic Ascent" className="h-11 w-auto logo-boost" />
+              <img src={logoImage} alt="Nordic Ascent" className="h-24 w-auto logo-boost" />
             </Link>
 
             {/* Desktop Navigation */}
@@ -87,7 +87,7 @@ export function PublicLayout() {
             {/* Brand */}
             <div className="space-y-4">
               <Link to="/" className="flex items-center gap-3">
-                <img src={logoImage} alt="Nordic Ascent" className="h-11 w-auto logo-boost" />
+                <img src={logoImage} alt="Nordic Ascent" className="h-24 w-auto logo-boost" />
               </Link>
               <p className="text-sm text-primary-foreground/80">
                 Connecting exceptional engineering talent from India with leading Nordic companies through our structured mobility pipeline.

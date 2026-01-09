@@ -35,7 +35,7 @@ const EmployerCompanyProfile = () => (
           <CardHeader><CardTitle>Basic Information</CardTitle></CardHeader>
           <CardContent className="space-y-6">
             <div className="flex items-center gap-6">
-              <div className="h-24 w-24 rounded-lg bg-employer-accent/10 flex items-center justify-center">
+              <div className="h-24 w-24 rounded bg-employer-accent/10 flex items-center justify-center">
                 <Building2 className="h-12 w-12 text-employer-accent" />
               </div>
               <Button variant="outline" className="gap-2"><Upload className="h-4 w-4" />Upload Logo</Button>
@@ -75,9 +75,9 @@ const EmployerCompanyProfile = () => (
           <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Office Locations</CardTitle><Button size="sm" className="gap-2 bg-employer-accent hover:bg-employer-accent/90"><Plus className="h-4 w-4" />Add Location</Button></CardHeader>
           <CardContent className="space-y-4">
             {locations.map((loc) => (
-              <div key={loc.id} className="p-4 rounded-lg border flex items-center justify-between">
+              <div key={loc.id} className="p-4 rounded border flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center"><MapPin className="h-5 w-5 text-muted-foreground" /></div>
+                  <div className="h-10 w-10 rounded bg-muted flex items-center justify-center"><MapPin className="h-5 w-5 text-muted-foreground" /></div>
                   <div>
                     <h3 className="font-medium">{loc.city}, {loc.country}</h3>
                     <p className="text-sm text-muted-foreground">{loc.address}</p>

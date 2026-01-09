@@ -43,25 +43,36 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="py-20 lg:py-28 bg-background">
+      <section className="py-20 lg:py-28 bg-background relative overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl sm:text-5xl font-medium leading-tight text-foreground mb-6">
-              Engineering Talent from India to the Nordics
-            </h1>
-            <p className="text-xl text-muted-foreground mb-8">
-              A structured mobility pipeline connecting exceptional engineers with leading Nordic companies. End-to-end support from selection to successful integration.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" asChild className="btn-professional text-base h-12 px-8">
-                <Link to="/contact">
-                  Partner With Us
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild className="text-base h-12 px-8">
-                <Link to="/about">Learn More</Link>
-              </Button>
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="max-w-2xl">
+              <h1 className="text-4xl sm:text-5xl font-medium leading-tight text-foreground mb-6">
+                Engineering Talent from India to the Nordics
+              </h1>
+              <p className="text-xl text-muted-foreground mb-8">
+                A structured mobility pipeline connecting exceptional engineers with leading Nordic companies. End-to-end support from selection to successful integration.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button size="lg" asChild className="btn-professional text-base h-12 px-8">
+                  <Link to="/contact">
+                    Partner With Us
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+                <Button size="lg" variant="outline" asChild className="text-base h-12 px-8">
+                  <Link to="/about">Learn More</Link>
+                </Button>
+              </div>
+            </div>
+            <div className="relative">
+              <div className="rounded overflow-hidden">
+                <img 
+                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=600&fit=crop&q=80" 
+                  alt="Diverse team of engineers collaborating" 
+                  className="w-full h-auto object-cover"
+                />
+              </div>
             </div>
           </div>
         </div>

@@ -50,13 +50,13 @@ const EmployerLayout = () => {
       >
         <div className="flex h-full flex-col">
           {/* Logo */}
-          <div className="flex h-16 items-center justify-between px-4 border-b border-white/10">
+          <div className="flex h-32 items-center justify-between px-4 border-b border-white/10">
             {!collapsed && (
               <Link to="/employer/dashboard" className="flex items-center gap-2">
                 <img 
                   src={logoImage} 
                   alt="Nordic Ascent" 
-                  className="h-11 w-auto logo-boost"
+                  className="h-32 w-auto logo-boost"
                 />
               </Link>
             )}
@@ -65,7 +65,7 @@ const EmployerLayout = () => {
                 <img 
                   src={logoImage} 
                   alt="Nordic Ascent" 
-                  className="h-9 w-auto logo-boost"
+                  className="h-20 w-auto logo-boost"
                 />
               </Link>
             )}

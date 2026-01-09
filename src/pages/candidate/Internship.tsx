@@ -20,7 +20,7 @@ const CandidateInternship = () => {
           <h1 className="text-2xl font-medium text-foreground">Internship</h1>
           <p className="text-muted-foreground">Formal digital engagement with company</p>
         </div>
-        <Badge variant="secondary">Pending</Badge>
+        <Badge variant="secondary">Not Started</Badge>
       </div>
 
       <Card>
@@ -77,6 +77,23 @@ const CandidateInternship = () => {
               <p className="font-medium">8 Weeks</p>
               <p className="text-sm text-muted-foreground">Digital engagement period</p>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-primary/50 bg-primary/5">
+        <CardHeader>
+          <CardTitle className="text-lg font-medium">Important: Digital 1:1 Engagement</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">
+            The Internship stage is a <strong>digital, one-on-one engagement</strong> with your matched Nordic company. 
+            This phase represents a higher level of commitment following successful completion of the Trainee validation phase.
+          </p>
+          <div className="space-y-2 text-sm">
+            <p><strong>Duration:</strong> 8 weeks of structured digital project work</p>
+            <p><strong>Compensation:</strong> Standard internship compensation as per Nordic standards</p>
+            <p><strong>Focus:</strong> Real project deliverables and preparation for potential relocation</p>
           </div>
         </CardContent>
       </Card>

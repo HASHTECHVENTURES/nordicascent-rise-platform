@@ -46,7 +46,7 @@ const pipelineStages = [
   { 
     id: 4, 
     name: "Internship", 
-    status: "pending",
+    status: "not_started",
     href: "/candidate/internship",
     icon: Briefcase,
     description: "Formal digital engagement"
@@ -54,7 +54,7 @@ const pipelineStages = [
   { 
     id: 5, 
     name: "Relocation", 
-    status: "pending",
+    status: "not_started",
     href: "/candidate/relocation",
     icon: MapPin,
     description: "Visa, housing, documentation"
@@ -62,7 +62,7 @@ const pipelineStages = [
   { 
     id: 6, 
     name: "Onboarding", 
-    status: "pending",
+    status: "not_started",
     href: "/candidate/onboarding",
     icon: Building2,
     description: "Physical arrival and integration"
@@ -70,7 +70,7 @@ const pipelineStages = [
   { 
     id: 7, 
     name: "Follow-up", 
-    status: "pending",
+    status: "not_started",
     href: "/candidate/followup",
     icon: Users,
     description: "Long-term support"
@@ -115,8 +115,10 @@ const CandidateDashboard = () => {
         return <Badge className="bg-primary text-primary-foreground">Active</Badge>;
       case "blocked":
         return <Badge variant="destructive">Blocked</Badge>;
+      case "not_started":
+        return <Badge variant="secondary">Not Started</Badge>;
       default:
-        return <Badge variant="secondary">Pending</Badge>;
+        return <Badge variant="secondary">Not Started</Badge>;
     }
   };
 
@@ -145,7 +147,7 @@ const CandidateDashboard = () => {
                     w-12 h-12 rounded-full flex items-center justify-center border-2 mb-2
                     ${stage.status === 'completed' ? 'bg-success border-success text-success-foreground' : ''}
                     ${stage.status === 'active' ? 'bg-primary border-primary text-primary-foreground' : ''}
-                    ${stage.status === 'pending' ? 'bg-muted border-muted-foreground/30 text-muted-foreground' : ''}
+                    ${stage.status === 'not_started' ? 'bg-muted border-muted-foreground/30 text-muted-foreground' : ''}
                     ${stage.status === 'blocked' ? 'bg-destructive/10 border-destructive text-destructive' : ''}
                     group-hover:opacity-80
                   `}>

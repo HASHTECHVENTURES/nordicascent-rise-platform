@@ -2,84 +2,327 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Filter, Star, MoreHorizontal, Eye, MessageSquare, UserPlus, MapPin, Briefcase, GraduationCap } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Search, 
+  Filter, 
+  Star, 
+  MoreHorizontal, 
+  Eye, 
+  MessageSquare, 
+  UserPlus, 
+  MapPin, 
+  Briefcase, 
+  GraduationCap,
+  ClipboardCheck,
+  UserCheck,
+  Building2,
+  Users,
+  AlertTriangle,
+  CheckCircle,
+  Circle
+} from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Link } from "react-router-dom";
 
-const candidates = [
-  { id: 1, name: "Emma Lindqvist", role: "Frontend Developer", location: "Stockholm, SE", experience: "5 years", match: 95, status: "new", skills: ["React", "TypeScript", "Node.js"], appliedTo: "Senior Frontend Developer", shortlisted: true },
-  { id: 2, name: "Lars Andersen", role: "Product Manager", location: "Copenhagen, DK", experience: "7 years", match: 88, status: "screening", skills: ["Agile", "Roadmapping", "Analytics"], appliedTo: "Product Manager", shortlisted: false },
-  { id: 3, name: "Sofia Virtanen", role: "UX Designer", location: "Helsinki, FI", experience: "4 years", match: 82, status: "interview", skills: ["Figma", "User Research", "Prototyping"], appliedTo: "UX Designer", shortlisted: true },
-  { id: 4, name: "Magnus Olsen", role: "Backend Engineer", location: "Oslo, NO", experience: "6 years", match: 78, status: "new", skills: ["Python", "Django", "PostgreSQL"], appliedTo: "Backend Engineer", shortlisted: false },
+// Pipeline stages aligned with the 7-stage model
+const pipelineStages = [
+  { id: "preparation", name: "Preparation", icon: ClipboardCheck, color: "text-secondary" },
+  { id: "selection", name: "Selection", icon: UserCheck, color: "text-primary" },
+  { id: "trainee", name: "Trainee", icon: GraduationCap, color: "text-warning" },
+  { id: "internship", name: "Internship", icon: Briefcase, color: "text-primary" },
+  { id: "relocation", name: "Relocation", icon: MapPin, color: "text-secondary" },
+  { id: "onboarding", name: "Onboarding", icon: Building2, color: "text-success" },
+  { id: "followup", name: "Follow-up", icon: Users, color: "text-muted-foreground" },
 ];
 
-const EmployerCandidates = () => (
-  <div className="space-y-6">
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Candidates</h1>
-        <p className="text-muted-foreground">Review and manage applicants</p>
-      </div>
-    </div>
+// Mock candidates grouped by pipeline stage
+const candidatesByStage = {
+  preparation: [
+    { id: 1, name: "Rahul Sharma", role: "Frontend Developer", location: "Mumbai, IN", experience: "3 years", match: 92, skills: ["React", "TypeScript"], readiness: 45, status: "active", needsAction: false, avatar: "https://i.pravatar.cc/150?img=1" },
+    { id: 2, name: "Priya Patel", role: "Backend Engineer", location: "Bangalore, IN", experience: "4 years", match: 88, skills: ["Node.js", "Python"], readiness: 30, status: "active", needsAction: true, avatar: "https://i.pravatar.cc/150?img=5" },
+    { id: 3, name: "Amit Kumar", role: "Full Stack Developer", location: "Delhi, IN", experience: "5 years", match: 85, skills: ["React", "Node.js"], readiness: 60, status: "active", needsAction: false, avatar: "https://i.pravatar.cc/150?img=12" },
+  ],
+  selection: [
+    { id: 4, name: "Sneha Reddy", role: "UX Designer", location: "Hyderabad, IN", experience: "3 years", match: 90, skills: ["Figma", "User Research"], readiness: 75, status: "active", needsAction: true, avatar: "https://i.pravatar.cc/150?img=9" },
+    { id: 5, name: "Vikram Singh", role: "DevOps Engineer", location: "Pune, IN", experience: "4 years", match: 87, skills: ["AWS", "Docker"], readiness: 80, status: "active", needsAction: false, avatar: "https://i.pravatar.cc/150?img=15" },
+  ],
+  trainee: [
+    { id: 6, name: "Anjali Mehta", role: "Data Engineer", location: "Bangalore, IN", experience: "4 years", match: 93, skills: ["Python", "Spark"], readiness: 90, status: "active", needsAction: true, avatar: "https://i.pravatar.cc/150?img=20" },
+    { id: 7, name: "Rohan Desai", role: "Mobile Developer", location: "Mumbai, IN", experience: "3 years", match: 89, skills: ["React Native", "iOS"], readiness: 65, status: "active", needsAction: false, avatar: "https://i.pravatar.cc/150?img=18" },
+  ],
+  internship: [
+    { id: 8, name: "Kavita Nair", role: "Product Manager", location: "Bangalore, IN", experience: "5 years", match: 95, skills: ["Agile", "Roadmapping"], readiness: 100, status: "active", needsAction: false, avatar: "https://i.pravatar.cc/150?img=25" },
+  ],
+  relocation: [],
+  onboarding: [],
+  followup: [
+    { id: 9, name: "Arjun Menon", role: "Senior Developer", location: "Stockholm, SE", experience: "6 years", match: 98, skills: ["React", "TypeScript"], readiness: 100, status: "completed", needsAction: false, avatar: "https://i.pravatar.cc/150?img=30" },
+  ],
+};
 
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <Card className="bg-gradient-to-br from-employer-accent/10 to-transparent border-employer-accent/20"><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total Candidates</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">248</div></CardContent></Card>
-      <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">New This Week</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-chart-success">42</div></CardContent></Card>
-      <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Shortlisted</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">18</div></CardContent></Card>
-      <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">In Interview</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">8</div></CardContent></Card>
-    </div>
+const getStatusBadge = (status: string) => {
+  switch (status) {
+    case "completed":
+      return <Badge className="bg-success text-success-foreground">Completed</Badge>;
+    case "active":
+      return <Badge className="bg-primary text-primary-foreground">Active</Badge>;
+    case "blocked":
+      return <Badge variant="destructive">Blocked</Badge>;
+    case "not_started":
+      return <Badge variant="secondary">Not Started</Badge>;
+    default:
+      return <Badge variant="secondary">Not Started</Badge>;
+  }
+};
 
-    <Card>
-      <CardHeader>
-        <div className="flex flex-col md:flex-row gap-4 justify-between">
-          <div className="relative flex-1 max-w-sm"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /><Input placeholder="Search candidates..." className="pl-9" /></div>
-          <div className="flex gap-2">
-            <Select defaultValue="all"><SelectTrigger className="w-[140px]"><SelectValue placeholder="Job" /></SelectTrigger><SelectContent><SelectItem value="all">All Jobs</SelectItem><SelectItem value="frontend">Senior Frontend Developer</SelectItem><SelectItem value="pm">Product Manager</SelectItem></SelectContent></Select>
-            <Select defaultValue="all"><SelectTrigger className="w-[140px]"><SelectValue placeholder="Status" /></SelectTrigger><SelectContent><SelectItem value="all">All Status</SelectItem><SelectItem value="new">New</SelectItem><SelectItem value="screening">Screening</SelectItem><SelectItem value="interview">Interview</SelectItem></SelectContent></Select>
-            <Button variant="outline" size="icon"><Filter className="h-4 w-4" /></Button>
-          </div>
+const EmployerCandidates = () => {
+  const totalCandidates = Object.values(candidatesByStage).flat().length;
+  const candidatesNeedingAction = Object.values(candidatesByStage).flat().filter(c => c.needsAction);
+  const bottlenecks = pipelineStages.filter(stage => {
+    const candidates = candidatesByStage[stage.id as keyof typeof candidatesByStage] || [];
+    return candidates.length > 5; // More than 5 candidates indicates a bottleneck
+  });
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-medium text-foreground">Candidates by Pipeline Stage</h1>
+          <p className="text-muted-foreground">Monitor candidates across the mobility pipeline</p>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {candidates.map((c) => (
-          <div key={c.id} className="flex items-center justify-between p-4 rounded-lg border hover:border-employer-accent/50 transition-colors">
-            <div className="flex items-center gap-4">
-              <Avatar className="h-12 w-12"><AvatarFallback className="bg-employer-accent/10 text-employer-accent">{c.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold">{c.name}</h3>
-                  {c.shortlisted && <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />}
-                  <Badge className="bg-employer-accent/10 text-employer-accent border-0">{c.match}% match</Badge>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <span className="flex items-center gap-1"><Briefcase className="h-3 w-3" />{c.role}</span>
-                  <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{c.location}</span>
-                  <span className="flex items-center gap-1"><GraduationCap className="h-3 w-3" />{c.experience}</span>
-                </div>
-                <div className="flex gap-1 mt-2">{c.skills.map(s => <Badge key={s} variant="outline" className="text-xs">{s}</Badge>)}</div>
-              </div>
+      </div>
+
+      {/* Pipeline Overview Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Candidates</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-medium">{totalCandidates}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Action Required</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-medium text-warning">{candidatesNeedingAction.length}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Bottlenecks</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-medium text-destructive">{bottlenecks.length}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Completed</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-medium text-success">
+              {Object.values(candidatesByStage).flat().filter(c => c.status === "completed").length}
             </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right hidden md:block">
-                <p className="text-sm font-medium">{c.appliedTo}</p>
-                <Badge variant={c.status === 'new' ? 'default' : c.status === 'screening' ? 'secondary' : 'outline'}>{c.status}</Badge>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Bottlenecks Alert */}
+      {bottlenecks.length > 0 && (
+        <Card className="border-warning/50 bg-warning/5">
+          <CardHeader>
+            <CardTitle className="text-lg font-medium flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-warning" />
+              Pipeline Bottlenecks Detected
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-3">
+              The following stages have high candidate volume and may require attention:
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {bottlenecks.map(stage => (
+                <Badge key={stage.id} variant="outline" className="text-warning border-warning">
+                  {stage.name} ({candidatesByStage[stage.id as keyof typeof candidatesByStage]?.length || 0} candidates)
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Action Required */}
+      {candidatesNeedingAction.length > 0 && (
+        <Card className="border-primary/50 bg-primary/5">
+          <CardHeader>
+            <CardTitle className="text-lg font-medium">Immediate Actions Required</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {candidatesNeedingAction.slice(0, 5).map((candidate) => (
+                <div key={candidate.id} className="flex items-center justify-between p-3 border border-border rounded">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={candidate.avatar} />
+                      <AvatarFallback>{candidate.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-sm font-medium">{candidate.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {pipelineStages.find(s => candidatesByStage[s.id as keyof typeof candidatesByStage]?.some(c => c.id === candidate.id))?.name} · 
+                        Review required · {candidate.readiness}% readiness
+                      </p>
+                    </div>
+                  </div>
+                  <Button size="sm" variant="outline">Review</Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Pipeline Stages Tabs */}
+      <Card>
+        <CardHeader>
+          <div className="flex flex-col md:flex-row gap-4 justify-between">
+            <CardTitle className="text-lg font-medium">Candidates by Stage</CardTitle>
+            <div className="flex gap-2">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="Search candidates..." className="pl-9" />
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem><Eye className="h-4 w-4 mr-2" />View Profile</DropdownMenuItem>
-                  <DropdownMenuItem><Star className="h-4 w-4 mr-2" />Shortlist</DropdownMenuItem>
-                  <DropdownMenuItem><MessageSquare className="h-4 w-4 mr-2" />Message</DropdownMenuItem>
-                  <DropdownMenuItem><UserPlus className="h-4 w-4 mr-2" />Move to Pipeline</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Button variant="outline" size="icon">
+                <Filter className="h-4 w-4" />
+              </Button>
             </div>
           </div>
-        ))}
-      </CardContent>
-    </Card>
-  </div>
-);
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="preparation" className="w-full">
+            <TabsList className="grid w-full grid-cols-7">
+              {pipelineStages.map((stage) => {
+                const candidates = candidatesByStage[stage.id as keyof typeof candidatesByStage] || [];
+                const count = candidates.length;
+                return (
+                  <TabsTrigger key={stage.id} value={stage.id} className="flex flex-col gap-1">
+                    <stage.icon className={`h-4 w-4 ${stage.color}`} />
+                    <span className="text-xs">{stage.name}</span>
+                    {count > 0 && (
+                      <Badge variant="secondary" className="text-xs">{count}</Badge>
+                    )}
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+
+            {pipelineStages.map((stage) => {
+              const candidates = candidatesByStage[stage.id as keyof typeof candidatesByStage] || [];
+              return (
+                <TabsContent key={stage.id} value={stage.id} className="mt-4">
+                  {candidates.length > 0 ? (
+                    <div className="space-y-3">
+                      {candidates.map((candidate) => (
+                        <div key={candidate.id} className="flex items-center justify-between p-4 border border-border rounded hover:border-primary/50 transition-colors">
+                          <div className="flex items-center gap-4">
+                            <Avatar className="h-12 w-12">
+                              <AvatarImage src={candidate.avatar} />
+                              <AvatarFallback>{candidate.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-medium">{candidate.name}</h3>
+                                {candidate.needsAction && (
+                                  <AlertTriangle className="h-4 w-4 text-warning" />
+                                )}
+                                <Badge className="bg-primary/10 text-primary border-0">{candidate.match}% match</Badge>
+                              </div>
+                              <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
+                                <span className="flex items-center gap-1">
+                                  <Briefcase className="h-3 w-3" />
+                                  {candidate.role}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <MapPin className="h-3 w-3" />
+                                  {candidate.location}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <GraduationCap className="h-3 w-3" />
+                                  {candidate.experience}
+                                </span>
+                              </div>
+                              <div className="flex gap-1 mt-2">
+                                {candidate.skills.map(skill => (
+                                  <Badge key={skill} variant="outline" className="text-xs">{skill}</Badge>
+                                ))}
+                              </div>
+                              <div className="mt-2">
+                                <div className="flex items-center justify-between text-xs mb-1">
+                                  <span className="text-muted-foreground">Stage Readiness</span>
+                                  <span className="font-medium">{candidate.readiness}%</span>
+                                </div>
+                                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                                  <div 
+                                    className="h-full bg-primary transition-all" 
+                                    style={{ width: `${candidate.readiness}%` }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="text-right hidden md:block">
+                              {getStatusBadge(candidate.status)}
+                            </div>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem>
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View Profile
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <Star className="h-4 w-4 mr-2" />
+                                  Shortlist
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <MessageSquare className="h-4 w-4 mr-2" />
+                                  Message
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <UserPlus className="h-4 w-4 mr-2" />
+                                  Move Stage
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <stage.icon className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                      <p className="text-sm">No candidates in {stage.name} stage</p>
+                    </div>
+                  )}
+                </TabsContent>
+              );
+            })}
+          </Tabs>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
 
 export default EmployerCandidates;

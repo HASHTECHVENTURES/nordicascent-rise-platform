@@ -68,7 +68,7 @@ const EmployerMessages = () => {
             <div className="space-y-4">
               {messages.map((msg) => (
                 <div key={msg.id} className={`flex ${msg.sender === 'me' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[70%] ${msg.sender === 'me' ? 'bg-employer-accent text-white' : 'bg-muted'} rounded-lg p-3`}>
+                  <div className={`max-w-[70%] ${msg.sender === 'me' ? 'bg-employer-accent text-white' : 'bg-muted'} rounded p-3`}>
                     <p className="text-sm">{msg.content}</p>
                     <p className={`text-xs mt-1 ${msg.sender === 'me' ? 'text-white/70' : 'text-muted-foreground'}`}>{msg.time}</p>
                   </div>

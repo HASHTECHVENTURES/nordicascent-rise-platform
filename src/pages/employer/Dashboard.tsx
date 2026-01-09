@@ -34,6 +34,8 @@ const candidatesNeedingAction = [
 
 const EmployerDashboard = () => {
   const totalCandidates = pipelineStages.reduce((sum, stage) => sum + stage.count, 0);
+  const bottlenecks = pipelineStages.filter(stage => stage.count > 4); // More than 4 candidates indicates bottleneck
+  const blockedStages = pipelineStages.filter(stage => stage.count === 0 && stage.id < 6); // Empty stages before completion
   
   return (
     <div className="space-y-8">
@@ -49,19 +51,85 @@ const EmployerDashboard = () => {
         <Card><CardContent className="pt-6"><div className="flex items-center gap-4"><div className="h-12 w-12 rounded bg-success/10 flex items-center justify-center"><CheckCircle className="h-6 w-6 text-success" /></div><div><p className="text-2xl font-medium">2</p><p className="text-sm text-muted-foreground">Recently Onboarded</p></div></div></CardContent></Card>
       </div>
 
+      {/* Bottlenecks Alert */}
+      {bottlenecks.length > 0 && (
+        <Card className="border-warning/50 bg-warning/5">
+          <CardHeader>
+            <CardTitle className="text-lg font-medium flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-warning" />
+              Pipeline Bottlenecks
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-3">
+              The following stages have high candidate volume and may require attention:
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {bottlenecks.map(stage => (
+                <Badge key={stage.id} variant="outline" className="text-warning border-warning">
+                  {stage.name} ({stage.count} candidates)
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Blockers Alert */}
+      {blockedStages.length > 0 && (
+        <Card className="border-destructive/50 bg-destructive/5">
+          <CardHeader>
+            <CardTitle className="text-lg font-medium flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Potential Blockers
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-3">
+              The following stages have no candidates, which may indicate a blocker:
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {blockedStages.map(stage => (
+                <Badge key={stage.id} variant="outline" className="text-destructive border-destructive">
+                  {stage.name}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader><CardTitle className="text-lg font-medium">Pipeline Stages</CardTitle></CardHeader>
         <CardContent>
           <div className="grid grid-cols-7 gap-4">
-            {pipelineStages.map((stage) => (
-              <div key={stage.id} className="text-center">
-                <div className={`p-4 rounded border mb-2 ${stage.count > 0 ? 'bg-card border-border' : 'bg-muted/50 border-muted'}`}>
-                  <stage.icon className={`h-6 w-6 mx-auto mb-2 ${stage.count > 0 ? 'text-primary' : 'text-muted-foreground'}`} />
-                  <p className="text-2xl font-medium">{stage.count}</p>
+            {pipelineStages.map((stage) => {
+              const isBottleneck = stage.count > 4;
+              const isBlocked = stage.count === 0 && stage.id < 6;
+              return (
+                <div key={stage.id} className="text-center">
+                  <div className={`p-4 rounded border mb-2 ${
+                    isBottleneck ? 'border-warning bg-warning/10' : 
+                    isBlocked ? 'border-destructive/50 bg-destructive/5' :
+                    stage.count > 0 ? 'bg-card border-border' : 'bg-muted/50 border-muted'
+                  }`}>
+                    <stage.icon className={`h-6 w-6 mx-auto mb-2 ${
+                      isBottleneck ? 'text-warning' :
+                      isBlocked ? 'text-destructive' :
+                      stage.count > 0 ? 'text-primary' : 'text-muted-foreground'
+                    }`} />
+                    <p className="text-2xl font-medium">{stage.count}</p>
+                    {isBottleneck && (
+                      <AlertTriangle className="h-4 w-4 mx-auto mt-1 text-warning" />
+                    )}
+                    {isBlocked && (
+                      <AlertTriangle className="h-4 w-4 mx-auto mt-1 text-destructive" />
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{stage.name}</p>
                 </div>
-                <p className="text-xs text-muted-foreground">{stage.name}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </CardContent>
       </Card>

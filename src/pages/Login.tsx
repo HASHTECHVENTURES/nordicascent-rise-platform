@@ -69,7 +69,7 @@ export default function Login() {
       <div className="hidden lg:flex lg:w-1/2 bg-primary p-12 flex-col justify-between">
         <div>
           <Link to="/" className="flex items-center gap-3 text-primary-foreground">
-            <img src={logoImage} alt="Nordic Ascent" className="h-10 w-auto brightness-0 invert" />
+              <img src={logoImage} alt="Nordic Ascent" className="h-24 w-auto brightness-0 invert" />
             <span className="text-xl font-medium">Nordic Ascent</span>
           </Link>
         </div>
@@ -100,7 +100,7 @@ export default function Login() {
           {/* Mobile Logo */}
           <div className="lg:hidden text-center">
             <Link to="/" className="inline-flex items-center gap-3">
-              <img src={logoImage} alt="Nordic Ascent" className="h-10 w-auto" />
+              <img src={logoImage} alt="Nordic Ascent" className="h-24 w-auto" />
               <span className="text-xl font-medium">Nordic Ascent</span>
             </Link>
           </div>

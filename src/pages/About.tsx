@@ -11,10 +11,10 @@ const values = [
 ];
 
 const team = [
-  { name: "Anders Björkman", role: "CEO & Co-Founder", bio: "Former VP of People at Spotify, 15+ years in HR tech.", initials: "AB" },
-  { name: "Katarina Holm", role: "CTO & Co-Founder", bio: "Ex-Google engineer, passionate about building scalable systems.", initials: "KH" },
-  { name: "Henrik Larsson", role: "Chief Product Officer", bio: "Product leader with background at Klarna and Wise.", initials: "HL" },
-  { name: "Sofia Andersson", role: "VP of Customer Success", bio: "10+ years helping enterprises transform their HR operations.", initials: "SA" },
+  { name: "Anders Björkman", role: "CEO & Co-Founder", bio: "Former VP of People at Spotify, 15+ years in HR tech.", initials: "AB", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&q=80" },
+  { name: "Katarina Holm", role: "CTO & Co-Founder", bio: "Ex-Google engineer, passionate about building scalable systems.", initials: "KH", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&q=80" },
+  { name: "Henrik Larsson", role: "Chief Product Officer", bio: "Product leader with background at Klarna and Wise.", initials: "HL", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&q=80" },
+  { name: "Sofia Andersson", role: "VP of Customer Success", bio: "10+ years helping enterprises transform their HR operations.", initials: "SA", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&q=80" },
 ];
 
 const milestones = [
@@ -41,10 +41,12 @@ export default function About() {
               </p>
             </div>
             <div className="relative animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
-              <div className="bg-card rounded-2xl border border-border p-12 nordic-shadow-lg">
-                <div className="h-32 w-32 mx-auto nordic-gradient rounded-2xl flex items-center justify-center">
-                  <Mountain className="h-16 w-16 text-primary-foreground" />
-                </div>
+              <div className="bg-card rounded-2xl border border-border overflow-hidden nordic-shadow-lg">
+                <img 
+                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=600&fit=crop&q=80" 
+                  alt="Diverse team collaborating in modern workspace"
+                  className="w-full h-auto object-cover"
+                />
               </div>
             </div>
           </div>
@@ -96,8 +98,12 @@ export default function About() {
             {team.map((member, i) => (
               <Card key={member.name} className="overflow-hidden animate-fade-in-up" style={{ animationDelay: `${i * 0.1}s` }}>
                 <CardContent className="p-6 text-center space-y-4">
-                  <div className="h-24 w-24 rounded-full nordic-gradient mx-auto flex items-center justify-center">
-                    <span className="text-2xl font-bold text-primary-foreground">{member.initials}</span>
+                  <div className="h-24 w-24 rounded-full mx-auto overflow-hidden border-2 border-primary/20">
+                    <img 
+                      src={member.image} 
+                      alt={member.name}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold">{member.name}</h3>

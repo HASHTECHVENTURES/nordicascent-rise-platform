@@ -41,7 +41,7 @@ const EmployerAnalytics = () => (
     </div>
 
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <Card className="bg-gradient-to-br from-employer-accent/10 to-transparent border-employer-accent/20">
+      <Card className="bg-primary/5 border-primary/20">
         <CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total Hires</CardTitle><Users className="h-4 w-4 text-employer-accent" /></CardHeader>
         <CardContent><div className="text-2xl font-bold">18</div><p className="text-xs text-chart-success flex items-center gap-1"><TrendingUp className="h-3 w-3" />+28% vs last period</p></CardContent>
       </Card>

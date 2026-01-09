@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import logoImage from "@/assets/nordic-ascent-logo.png";
 
 const navigation = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
@@ -54,24 +55,46 @@ const AdminLayout = () => {
       >
         <div className="flex h-full flex-col">
           {/* Logo */}
-          <div className="flex h-16 items-center justify-between px-4 border-b border-white/10">
+          <div className="flex h-32 items-center justify-between px-4 border-b border-white/10">
             {!collapsed && (
               <Link to="/admin/dashboard" className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-nordic-orange rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">N</span>
-                </div>
-                <span className="font-semibold text-lg text-nordic-sand">Admin Panel</span>
+                <img 
+                  src={logoImage} 
+                  alt="Nordic Ascent" 
+                  className="h-32 w-auto logo-boost"
+                />
+              </Link>
+            )}
+            {collapsed && (
+              <Link to="/admin/dashboard" className="mx-auto">
+                <img 
+                  src={logoImage} 
+                  alt="Nordic Ascent" 
+                  className="h-20 w-auto logo-boost"
+                />
               </Link>
             )}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setCollapsed(!collapsed)}
-              className={cn("text-nordic-sand hover:bg-white/10", collapsed && "mx-auto")}
+              className={cn("text-nordic-sand hover:bg-white/10", collapsed && "hidden")}
             >
-              {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+              <ChevronLeft className="h-4 w-4" />
             </Button>
           </div>
+
+          {/* Collapse toggle when collapsed */}
+          {collapsed && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setCollapsed(false)}
+              className="mx-auto mt-2 text-nordic-sand hover:bg-white/10"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          )}
 
           {/* Navigation */}
           <nav className="flex-1 p-4 space-y-1">

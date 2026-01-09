@@ -62,7 +62,7 @@ const CandidateProfile = () => {
             <CardContent className="space-y-6">
               <div className="flex items-center gap-6">
                 <Avatar className="h-24 w-24">
-                  <AvatarImage src="" />
+                  <AvatarImage src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&q=80" />
                   <AvatarFallback className="text-2xl bg-candidate-accent/10 text-candidate-accent">EL</AvatarFallback>
                 </Avatar>
                 <Button variant="outline">Change Photo</Button>
@@ -113,7 +113,7 @@ const CandidateProfile = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               {experiences.map((exp) => (
-                <div key={exp.id} className="p-4 rounded-lg border bg-card">
+                <div key={exp.id} className="p-4 rounded border bg-card">
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="font-semibold">{exp.title}</h3>
@@ -147,7 +147,7 @@ const CandidateProfile = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               {education.map((edu) => (
-                <div key={edu.id} className="p-4 rounded-lg border bg-card">
+                <div key={edu.id} className="p-4 rounded border bg-card">
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="font-semibold">{edu.degree}</h3>

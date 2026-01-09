@@ -29,7 +29,7 @@ const EmployerJobPostings = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-employer-accent/10 to-transparent border-employer-accent/20">
+        <Card className="bg-primary/5 border-primary/20">
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Active Jobs</CardTitle></CardHeader>
           <CardContent><div className="text-2xl font-bold">{getStatusJobs('active').length}</div></CardContent>
         </Card>
@@ -47,7 +47,7 @@ const EmployerJobPostings = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           {jobs.map((job) => (
-            <div key={job.id} className="flex items-center justify-between p-4 rounded-lg border hover:border-employer-accent/50 transition-colors">
+            <div key={job.id} className="flex items-center justify-between p-4 rounded border hover:border-employer-accent/50 transition-colors">
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <h3 className="font-semibold">{job.title}</h3>
