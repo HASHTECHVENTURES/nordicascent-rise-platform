@@ -4,7 +4,6 @@ import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import logoImage from "@/assets/nordic-ascent-logo.png";
-import bridgeIcon from "@/assets/nordic-bridge-icon.png";
 const navigation = [{
   name: "Platform",
   href: "/platform"
@@ -27,9 +26,8 @@ export function PublicLayout() {
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
-            <Link to="/" className="flex flex-col items-center gap-0">
-              <img src={bridgeIcon} alt="" className="h-8 w-auto brightness-0 invert" />
-              <img src={logoImage} alt="Nordic Ascent" className="h-12 w-auto logo-boost" />
+            <Link to="/" className="flex items-center gap-3">
+              <img src={logoImage} alt="Nordic Ascent" className="h-24 w-auto logo-boost" />
             </Link>
 
             {/* Desktop Navigation */}
@@ -85,9 +83,8 @@ export function PublicLayout() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             {/* Brand */}
             <div className="space-y-4">
-              <Link to="/" className="flex flex-col items-center gap-0">
-                <img src={bridgeIcon} alt="" className="h-8 w-auto brightness-0 invert" />
-                <img src={logoImage} alt="Nordic Ascent" className="h-12 w-auto logo-boost" />
+              <Link to="/" className="flex items-center gap-3">
+                <img src={logoImage} alt="Nordic Ascent" className="h-24 w-auto logo-boost" />
               </Link>
               <p className="text-sm text-primary-foreground/80">
                 Connecting exceptional engineering talent from India with leading Nordic companies through our structured mobility pipeline.
