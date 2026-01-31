@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Bell,
   LogOut,
+  Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +32,7 @@ const navigation = [
   { name: "Candidates", href: "/employer/candidates", icon: Users },
   { name: "Roles", href: "/employer/jobs", icon: Briefcase },
   { name: "Company Profile", href: "/employer/company", icon: Building2 },
+  { name: "Mentoring", href: "/employer/mentoring", icon: Heart },
   { name: "Messages", href: "/employer/messages", icon: MessageSquare },
   { name: "Analytics", href: "/employer/analytics", icon: BarChart3 },
 ];

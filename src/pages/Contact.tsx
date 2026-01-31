@@ -4,15 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Mail, Phone, MapPin, Clock, Send, Calendar } from "lucide-react";
+import { Send, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-const contactInfo = [
-  { icon: Mail, label: "Email", value: "hello@nordicascent.com" },
-  { icon: Phone, label: "Phone", value: "+46 8 123 456 78" },
-  { icon: MapPin, label: "Address", value: "Kungsgatan 1, Stockholm, Sweden" },
-  { icon: Clock, label: "Hours", value: "Mon-Fri 9:00-18:00 CET" },
-];
 
 export default function Contact() {
   const { toast } = useToast();
@@ -35,7 +28,7 @@ export default function Contact() {
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
               Let's Start a <span className="nordic-gradient-text">Conversation</span>
             </h1>
-            <p className="text-xl text-muted-foreground">Have questions? Want to see a demo? We're here to help you find the right solution for your team.</p>
+            <p className="text-xl text-muted-foreground">Have questions? Want to see a demo? We're here to help you find the right solution.</p>
           </div>
         </div>
       </section>
@@ -49,7 +42,7 @@ export default function Contact() {
                   <div className="h-10 w-10 rounded-lg nordic-gradient flex items-center justify-center"><Calendar className="h-5 w-5 text-primary-foreground" /></div>
                   <CardTitle>Book a Demo</CardTitle>
                 </div>
-                <p className="text-muted-foreground">See Nordicascent in action with a personalized demo.</p>
+                <p className="text-muted-foreground">See Nordic Ascent in action with a personalized demo.</p>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleDemoSubmit} className="space-y-4">
@@ -57,7 +50,7 @@ export default function Contact() {
                     <div className="space-y-2"><Label htmlFor="demo-firstName">First Name</Label><Input id="demo-firstName" required /></div>
                     <div className="space-y-2"><Label htmlFor="demo-lastName">Last Name</Label><Input id="demo-lastName" required /></div>
                   </div>
-                  <div className="space-y-2"><Label htmlFor="demo-email">Work Email</Label><Input id="demo-email" type="email" required /></div>
+                  <div className="space-y-2"><Label htmlFor="demo-email">Work Email</Label><Input id="demo-email" type="email" placeholder="you@company.com" required /></div>
                   <div className="space-y-2"><Label htmlFor="demo-company">Company Name</Label><Input id="demo-company" required /></div>
                   <div className="space-y-2">
                     <Label htmlFor="demo-size">Company Size</Label>
@@ -72,14 +65,13 @@ export default function Contact() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="demo-interest">Primary Interest</Label>
-                    <Select><SelectTrigger><SelectValue placeholder="What are you looking for?" /></SelectTrigger>
+                    <Label htmlFor="demo-interest">I am a...</Label>
+                    <Select><SelectTrigger><SelectValue placeholder="Select your role" /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="employee-management">Employee Management</SelectItem>
-                        <SelectItem value="training">Training & Learning</SelectItem>
-                        <SelectItem value="reporting">Reporting & Analytics</SelectItem>
-                        <SelectItem value="compliance">Compliance & Admin</SelectItem>
-                        <SelectItem value="full-platform">Full Platform</SelectItem>
+                        <SelectItem value="company">Company looking for talent</SelectItem>
+                        <SelectItem value="candidate">Candidate seeking opportunities</SelectItem>
+                        <SelectItem value="partner">Potential partner</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -102,15 +94,15 @@ export default function Contact() {
                     <div className="space-y-2"><Label htmlFor="contact-firstName">First Name</Label><Input id="contact-firstName" required /></div>
                     <div className="space-y-2"><Label htmlFor="contact-lastName">Last Name</Label><Input id="contact-lastName" required /></div>
                   </div>
-                  <div className="space-y-2"><Label htmlFor="contact-email">Email</Label><Input id="contact-email" type="email" required /></div>
+                  <div className="space-y-2"><Label htmlFor="contact-email">Email</Label><Input id="contact-email" type="email" placeholder="you@example.com" required /></div>
                   <div className="space-y-2">
                     <Label htmlFor="contact-subject">Subject</Label>
                     <Select><SelectTrigger><SelectValue placeholder="Select a topic" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="general">General Inquiry</SelectItem>
-                        <SelectItem value="support">Customer Support</SelectItem>
-                        <SelectItem value="sales">Sales Question</SelectItem>
-                        <SelectItem value="partnership">Partnership</SelectItem>
+                        <SelectItem value="company">Company Partnership</SelectItem>
+                        <SelectItem value="candidate">Candidate Application</SelectItem>
+                        <SelectItem value="partnership">Strategic Partnership</SelectItem>
                         <SelectItem value="press">Press & Media</SelectItem>
                       </SelectContent>
                     </Select>
@@ -120,28 +112,6 @@ export default function Contact() {
                 </form>
               </CardContent>
             </Card>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-20 bg-secondary/30">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">Get in Touch</h2>
-            <p className="text-lg text-muted-foreground">Reach out directly through any of these channels.</p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
-            {contactInfo.map((item, i) => (
-              <Card key={item.label} className="text-center animate-fade-in-up" style={{ animationDelay: `${i * 0.1}s` }}>
-                <CardContent className="pt-6 pb-6 space-y-3">
-                  <div className="h-12 w-12 rounded-full bg-accent mx-auto flex items-center justify-center">
-                    <item.icon className="h-6 w-6 text-accent-foreground" />
-                  </div>
-                  <p className="text-sm text-muted-foreground">{item.label}</p>
-                  <p className="font-medium">{item.value}</p>
-                </CardContent>
-              </Card>
-            ))}
           </div>
         </div>
       </section>

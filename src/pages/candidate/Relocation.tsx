@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { MapPin, FileText, Home, Plane, Building2, CheckCircle, Clock, ExternalLink, Info } from "lucide-react";
+import { MapPin, FileText, Home, Plane, Building2, CheckCircle, ExternalLink, Info, BookOpen, Globe, Video, Calendar } from "lucide-react";
 
 const visaSteps = [
   { id: 1, title: "Job Offer Confirmation", status: "completed", description: "Receive official job offer letter" },
@@ -11,6 +11,19 @@ const visaSteps = [
   { id: 3, title: "Document Verification", status: "current", description: "Immigration authority reviews documents" },
   { id: 4, title: "Visa Interview", status: "not_started", description: "Attend interview at embassy" },
   { id: 5, title: "Visa Approval", status: "not_started", description: "Receive work permit" },
+];
+
+const languageCourses = [
+  { id: 1, title: "Swedish Basics A1", status: "in_progress", progress: 65, type: "digital", nextSession: null },
+  { id: 2, title: "Business Swedish", status: "not_started", progress: 0, type: "digital", nextSession: null },
+  { id: 3, title: "Swedish Conversation Practice", status: "scheduled", progress: 0, type: "live", nextSession: "2026-02-05" },
+];
+
+const culturalModules = [
+  { id: 1, title: "Nordic Work Culture & Values", status: "completed", type: "digital", description: "Understanding flat hierarchies, consensus, and work-life balance" },
+  { id: 2, title: "Social Norms & Etiquette", status: "in_progress", type: "digital", description: "Everyday interactions, fika culture, and social expectations" },
+  { id: 3, title: "Living in Sweden", status: "scheduled", type: "live", description: "Practical session with relocation team", nextSession: "2026-02-08" },
+  { id: 4, title: "Integration Workshop", status: "not_started", type: "live", description: "Group session on building community and networks" },
 ];
 
 const cityGuides = [
@@ -32,6 +45,10 @@ const CandidateRelocation = () => {
   const completedSteps = visaSteps.filter(s => s.status === 'completed').length;
   const progress = (completedSteps / visaSteps.length) * 100;
 
+  const languageProgress = languageCourses.reduce((sum, c) => sum + c.progress, 0) / languageCourses.length;
+  const culturalCompleted = culturalModules.filter(m => m.status === 'completed').length;
+  const culturalProgress = (culturalCompleted / culturalModules.length) * 100;
+
   return (
     <div className="space-y-6">
       <div>
@@ -40,22 +57,30 @@ const CandidateRelocation = () => {
       </div>
 
       <Tabs defaultValue="visa" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="visa" className="gap-2">
             <FileText className="h-4 w-4" />
-            Visa & Work Permit
+            <span className="hidden sm:inline">Visa</span>
           </TabsTrigger>
           <TabsTrigger value="housing" className="gap-2">
             <Home className="h-4 w-4" />
-            Housing
+            <span className="hidden sm:inline">Housing</span>
+          </TabsTrigger>
+          <TabsTrigger value="language" className="gap-2">
+            <BookOpen className="h-4 w-4" />
+            <span className="hidden sm:inline">Language</span>
+          </TabsTrigger>
+          <TabsTrigger value="cultural" className="gap-2">
+            <Globe className="h-4 w-4" />
+            <span className="hidden sm:inline">Cultural</span>
           </TabsTrigger>
           <TabsTrigger value="cities" className="gap-2">
             <MapPin className="h-4 w-4" />
-            City Guides
+            <span className="hidden sm:inline">Cities</span>
           </TabsTrigger>
           <TabsTrigger value="resources" className="gap-2">
             <Info className="h-4 w-4" />
-            Resources
+            <span className="hidden sm:inline">Resources</span>
           </TabsTrigger>
         </TabsList>
 
@@ -82,8 +107,8 @@ const CandidateRelocation = () => {
                   <div key={step.id} className="flex gap-4">
                     <div className="flex flex-col items-center">
                       <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
-                        step.status === 'completed' ? 'bg-chart-success text-white' :
-                        step.status === 'current' ? 'bg-candidate-accent text-white' :
+                        step.status === 'completed' ? 'bg-success text-success-foreground' :
+                        step.status === 'current' ? 'bg-primary text-primary-foreground' :
                         'bg-muted text-muted-foreground'
                       }`}>
                         {step.status === 'completed' ? (
@@ -94,7 +119,7 @@ const CandidateRelocation = () => {
                       </div>
                       {index < visaSteps.length - 1 && (
                         <div className={`w-0.5 h-full min-h-8 ${
-                          step.status === 'completed' ? 'bg-chart-success' : 'bg-muted'
+                          step.status === 'completed' ? 'bg-success' : 'bg-muted'
                         }`} />
                       )}
                     </div>
@@ -125,13 +150,13 @@ const CandidateRelocation = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card className="border-candidate-accent/30">
+                <Card className="border-primary/30">
                   <CardContent className="pt-6">
                     <h3 className="font-semibold mb-2">Temporary Housing</h3>
                     <p className="text-sm text-muted-foreground mb-4">
                       Your employer provides 4 weeks of temporary housing while you search for permanent accommodation.
                     </p>
-                    <Badge variant="secondary" className="bg-chart-success/10 text-chart-success">Included in Offer</Badge>
+                    <Badge variant="secondary" className="bg-success/10 text-success">Included in Offer</Badge>
                   </CardContent>
                 </Card>
                 <Card>
@@ -161,10 +186,162 @@ const CandidateRelocation = () => {
           </Card>
         </TabsContent>
 
+        <TabsContent value="language" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5" />
+                Language Courses
+              </CardTitle>
+              <CardDescription>Learn the local language to enhance your integration</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Overall Language Progress</span>
+                  <span className="font-medium">{Math.round(languageProgress)}%</span>
+                </div>
+                <Progress value={languageProgress} className="h-2" />
+              </div>
+
+              <div className="space-y-4">
+                {languageCourses.map((course) => (
+                  <div key={course.id} className={`p-4 rounded border ${
+                    course.status === 'in_progress' ? 'border-primary/30 bg-primary/5' : 
+                    course.status === 'scheduled' ? 'border-warning/30 bg-warning/5' : 
+                    'border-border'
+                  }`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        {course.type === 'digital' ? (
+                          <div className="h-8 w-8 rounded bg-primary/10 flex items-center justify-center">
+                            <BookOpen className="h-4 w-4 text-primary" />
+                          </div>
+                        ) : (
+                          <div className="h-8 w-8 rounded bg-warning/10 flex items-center justify-center">
+                            <Video className="h-4 w-4 text-warning" />
+                          </div>
+                        )}
+                        <div>
+                          <h3 className="font-medium">{course.title}</h3>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">{course.type === 'digital' ? 'Digital Learning' : 'Live Session'}</Badge>
+                            {course.status === 'in_progress' && <Badge className="bg-primary text-primary-foreground text-xs">In Progress</Badge>}
+                            {course.status === 'scheduled' && <Badge variant="secondary" className="text-xs">Scheduled</Badge>}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        {course.status === 'in_progress' && (
+                          <>
+                            <p className="text-sm font-medium">{course.progress}%</p>
+                            <Button size="sm" className="mt-2">Continue</Button>
+                          </>
+                        )}
+                        {course.status === 'scheduled' && course.nextSession && (
+                          <>
+                            <p className="text-sm text-muted-foreground flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              {new Date(course.nextSession).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </p>
+                            <Button size="sm" variant="outline" className="mt-2">View Details</Button>
+                          </>
+                        )}
+                        {course.status === 'not_started' && (
+                          <Button size="sm" variant="outline">Enroll</Button>
+                        )}
+                      </div>
+                    </div>
+                    {course.status === 'in_progress' && (
+                      <Progress value={course.progress} className="h-1 mt-2" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="cultural" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5" />
+                Cultural Preparation
+              </CardTitle>
+              <CardDescription>Understanding the destination country's work culture and society</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Cultural Preparation Progress</span>
+                  <span className="font-medium">{Math.round(culturalProgress)}%</span>
+                </div>
+                <Progress value={culturalProgress} className="h-2" />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 rounded border bg-muted/30">
+                  <div className="flex items-center gap-2 mb-2">
+                    <BookOpen className="h-4 w-4 text-primary" />
+                    <span className="font-medium text-sm">Digital Learning</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Self-paced modules you can complete anytime</p>
+                </div>
+                <div className="p-4 rounded border bg-muted/30">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Video className="h-4 w-4 text-warning" />
+                    <span className="font-medium text-sm">Live Sessions</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Scheduled sessions with our relocation team</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {culturalModules.map((module) => (
+                  <div key={module.id} className={`p-4 rounded border ${
+                    module.status === 'completed' ? 'bg-success/5 border-success/20' :
+                    module.status === 'in_progress' ? 'border-primary/30' :
+                    module.status === 'scheduled' ? 'border-warning/30' :
+                    'border-border'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {module.status === 'completed' ? (
+                          <CheckCircle className="h-5 w-5 text-success" />
+                        ) : module.type === 'digital' ? (
+                          <BookOpen className="h-5 w-5 text-primary" />
+                        ) : (
+                          <Video className="h-5 w-5 text-warning" />
+                        )}
+                        <div>
+                          <h3 className={`font-medium ${module.status === 'completed' ? 'text-muted-foreground' : ''}`}>{module.title}</h3>
+                          <p className="text-sm text-muted-foreground">{module.description}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-xs">{module.type === 'digital' ? 'Digital' : 'Live'}</Badge>
+                        {module.status === 'completed' && <Badge className="bg-success text-success-foreground">Completed</Badge>}
+                        {module.status === 'in_progress' && <Button size="sm">Continue</Button>}
+                        {module.status === 'scheduled' && module.nextSession && (
+                          <Button size="sm" variant="outline">
+                            {new Date(module.nextSession).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </Button>
+                        )}
+                        {module.status === 'not_started' && <Button size="sm" variant="outline">Start</Button>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="cities" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {cityGuides.map((city) => (
-              <Card key={city.id} className="hover:border-candidate-accent/50 transition-colors overflow-hidden">
+              <Card key={city.id} className="hover:border-primary/50 transition-colors overflow-hidden">
                 <div className="relative h-48 overflow-hidden">
                   <img 
                     src={city.image} 

@@ -6,7 +6,7 @@ import {
   User,
   ClipboardCheck,
   UserCheck,
-  GraduationCap,
+  CheckCircle2,
   Briefcase,
   MapPin,
   Building2,
@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Bell,
+  Heart,
   LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,11 +35,12 @@ const navigation = [
   { name: "My Journey", href: "/candidate/dashboard", icon: LayoutDashboard },
   { name: "Preparation", href: "/candidate/preparation", icon: ClipboardCheck },
   { name: "Selection", href: "/candidate/selection", icon: UserCheck },
-  { name: "Trainee", href: "/candidate/trainee", icon: GraduationCap },
+  { name: "Readiness", href: "/candidate/readiness", icon: CheckCircle2 },
   { name: "Internship", href: "/candidate/internship", icon: Briefcase },
   { name: "Relocation", href: "/candidate/relocation", icon: MapPin },
   { name: "Onboarding", href: "/candidate/onboarding", icon: Building2 },
   { name: "Follow-up", href: "/candidate/followup", icon: Users },
+  { name: "Mentoring", href: "/candidate/mentoring", icon: Heart },
   { name: "Profile", href: "/candidate/profile", icon: User },
   { name: "Messages", href: "/candidate/messages", icon: MessageSquare },
 ];
