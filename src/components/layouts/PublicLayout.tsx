@@ -5,17 +5,14 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import logoImage from "@/assets/nordic-ascent-logo.png";
 const navigation = [{
-  name: "Home",
-  href: "/"
-}, {
-  name: "Services",
-  href: "/services"
+  name: "Platform",
+  href: "/platform"
 }, {
   name: "About",
   href: "/about"
 }, {
-  name: "Careers",
-  href: "/careers"
+  name: "Insight",
+  href: "/insight"
 }, {
   name: "Contact",
   href: "/contact"
@@ -43,7 +40,7 @@ export function PublicLayout() {
             {/* CTA Buttons */}
             <div className="hidden md:flex items-center gap-4">
               <Button variant="ghost" asChild className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10">
-                <Link to="/login">Login</Link>
+                <Link to="/login">Login / Sign in</Link>
               </Button>
               <Button asChild className="bg-warning text-warning-foreground hover:opacity-90">
                 <Link to="/contact">Book Demo</Link>
@@ -64,7 +61,7 @@ export function PublicLayout() {
                   </Link>)}
                 <div className="flex flex-col gap-2 pt-4 border-t border-primary-foreground/15">
                   <Button variant="ghost" asChild className="justify-start text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10">
-                    <Link to="/login">Login</Link>
+                    <Link to="/login">Login / Sign in</Link>
                   </Button>
                   <Button asChild className="bg-warning text-warning-foreground hover:opacity-90 justify-start">
                     <Link to="/contact">Book Demo</Link>
@@ -98,9 +95,9 @@ export function PublicLayout() {
             <div>
               <h4 className="font-medium mb-4">Platform</h4>
               <ul className="space-y-2 text-sm text-primary-foreground/70">
-                <li><Link to="/services" className="hover:text-primary-foreground">For Companies</Link></li>
-                <li><Link to="/services" className="hover:text-primary-foreground">For Candidates</Link></li>
-                <li><Link to="/services" className="hover:text-primary-foreground">The Pipeline</Link></li>
+                <li><Link to="/platform" className="hover:text-primary-foreground">For Companies</Link></li>
+                <li><Link to="/platform" className="hover:text-primary-foreground">For Candidates</Link></li>
+                <li><Link to="/platform" className="hover:text-primary-foreground">The Pipeline</Link></li>
               </ul>
             </div>
 
@@ -109,7 +106,7 @@ export function PublicLayout() {
               <h4 className="font-medium mb-4">Company</h4>
               <ul className="space-y-2 text-sm text-primary-foreground/70">
                 <li><Link to="/about" className="hover:text-primary-foreground">About Us</Link></li>
-                <li><Link to="/careers" className="hover:text-primary-foreground">Careers</Link></li>
+                <li><Link to="/insight" className="hover:text-primary-foreground">Insight</Link></li>
                 <li><Link to="/contact" className="hover:text-primary-foreground">Contact</Link></li>
               </ul>
             </div>

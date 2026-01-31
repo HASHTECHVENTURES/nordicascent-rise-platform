@@ -9,7 +9,7 @@ import {
   ArrowRight,
   ClipboardCheck,
   UserCheck,
-  GraduationCap,
+  CheckCircle2,
   Briefcase,
   MapPin,
   Building2,
@@ -37,15 +37,15 @@ const pipelineStages = [
   },
   { 
     id: 3, 
-    name: "Trainee", 
+    name: "Readiness", 
     status: "active",
-    href: "/candidate/trainee",
-    icon: GraduationCap,
-    description: "Digital validation phase"
+    href: "/candidate/readiness",
+    icon: CheckCircle2,
+    description: "Technical, social & cultural validation"
   },
   { 
     id: 4, 
-    name: "Internship", 
+    name: "Internship",
     status: "not_started",
     href: "/candidate/internship",
     icon: Briefcase,
@@ -79,7 +79,7 @@ const pipelineStages = [
 
 // Current stage details
 const currentStage = {
-  name: "Trainee",
+  name: "Readiness",
   readiness: 65,
   nextAction: "Complete Technical Assessment Module 3",
   risks: [
@@ -177,7 +177,7 @@ const CandidateDashboard = () => {
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle className="text-lg font-medium">Current Stage: {currentStage.name}</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">Digital validation phase</p>
+              <p className="text-sm text-muted-foreground mt-1">Technical, social & cultural validation</p>
             </div>
             {getStatusBadge("active")}
           </CardHeader>
@@ -218,7 +218,7 @@ const CandidateDashboard = () => {
             {/* Next Action */}
             <div className="pt-4 border-t">
               <Button className="w-full btn-professional" asChild>
-                <Link to="/candidate/trainee">
+                <Link to="/candidate/readiness">
                   {currentStage.nextAction}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>

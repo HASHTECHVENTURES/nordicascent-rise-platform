@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Mountain, Target, Heart, Lightbulb, Users, ArrowRight, Linkedin, Twitter } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Mountain, Target, Heart, Lightbulb, Users, ArrowRight, Linkedin, Twitter, MapPin, Briefcase, Clock } from "lucide-react";
 
 const values = [
   { icon: Target, title: "Excellence", description: "We strive for excellence in everything we do, from code to customer service." },
@@ -18,12 +19,18 @@ const team = [
 ];
 
 const milestones = [
-  { year: "2019", event: "Nordicascent founded in Stockholm" },
+  { year: "2019", event: "Nordic Ascent founded in Stockholm" },
   { year: "2020", event: "Launched first version of the platform" },
   { year: "2021", event: "Reached 100 enterprise customers" },
   { year: "2022", event: "Expanded to all Nordic countries" },
   { year: "2023", event: "Series B funding, 500+ customers" },
   { year: "2024", event: "AI-powered insights launched" },
+];
+
+const openPositions = [
+  { id: 1, title: "Senior Software Engineer", location: "Stockholm", type: "Full-time", department: "Engineering" },
+  { id: 2, title: "Product Designer", location: "Remote", type: "Full-time", department: "Design" },
+  { id: 3, title: "Customer Success Manager", location: "Copenhagen", type: "Full-time", department: "Customer Success" },
 ];
 
 export default function About() {
@@ -58,7 +65,7 @@ export default function About() {
           <div className="max-w-3xl mx-auto text-center space-y-6">
             <h2 className="text-3xl sm:text-4xl font-bold">Our Story</h2>
             <div className="text-lg text-muted-foreground space-y-4">
-              <p>Nordicascent was born from a simple observation: workforce management tools were either too complex for users or too simple for enterprise needs.</p>
+              <p>Nordic Ascent was born from a simple observation: workforce management tools were either too complex for users or too simple for enterprise needs.</p>
               <p>Founded in Stockholm in 2019 by a team of HR tech veterans and software engineers, we set out to create a platform that combines the elegance of Nordic design with the power needed by modern organizations.</p>
               <p>Today, we serve over 500 companies across the Nordics and Europe, helping them train, manage, and empower their teams to reach new heights.</p>
             </div>
@@ -92,7 +99,7 @@ export default function About() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">Leadership Team</h2>
-            <p className="text-lg text-muted-foreground">Meet the people driving Nordicascent's mission forward.</p>
+            <p className="text-lg text-muted-foreground">Meet the people driving Nordic Ascent's mission forward.</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {team.map((member, i) => (
@@ -117,6 +124,50 @@ export default function About() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Careers Section - Moved below team */}
+      <section className="py-20 bg-card border-y border-border">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">Join Our Team</h2>
+            <p className="text-lg text-muted-foreground">We're always looking for talented people who share our passion.</p>
+          </div>
+          <div className="max-w-3xl mx-auto space-y-4">
+            {openPositions.map((job) => (
+              <Card key={job.id} className="hover:border-primary/50 transition-colors">
+                <CardContent className="p-6">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="space-y-2">
+                      <h3 className="text-lg font-semibold">{job.title}</h3>
+                      <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Briefcase className="h-4 w-4" />
+                          {job.department}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <MapPin className="h-4 w-4" />
+                          {job.location}
+                        </span>
+                        <Badge variant="secondary">{job.type}</Badge>
+                      </div>
+                    </div>
+                    <Button variant="outline">
+                      View Details
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div className="text-center mt-8">
+            <p className="text-muted-foreground mb-4">Don't see the right role? We're always open to hearing from talented people.</p>
+            <Button variant="outline" asChild>
+              <Link to="/contact">Send Open Application</Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -151,13 +202,15 @@ export default function About() {
       <section className="py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto space-y-6">
-            <h2 className="text-3xl sm:text-4xl font-bold">Join Our Journey</h2>
-            <p className="text-lg text-muted-foreground">We're always looking for talented people who share our passion for building great products.</p>
+            <h2 className="text-3xl sm:text-4xl font-bold">Ready to Connect?</h2>
+            <p className="text-lg text-muted-foreground">Whether you're a company or a candidate, we'd love to hear from you.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" asChild className="nordic-gradient nordic-glow">
-                <Link to="/careers">View Open Positions<ArrowRight className="ml-2 h-5 w-5" /></Link>
+                <Link to="/contact">Get in Touch<ArrowRight className="ml-2 h-5 w-5" /></Link>
               </Button>
-              <Button size="lg" variant="outline" asChild><Link to="/contact">Get in Touch</Link></Button>
+              <Button size="lg" variant="outline" asChild>
+                <Link to="/insight">Read Our Insights</Link>
+              </Button>
             </div>
           </div>
         </div>
