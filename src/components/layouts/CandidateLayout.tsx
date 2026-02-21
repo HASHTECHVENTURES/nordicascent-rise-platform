@@ -14,6 +14,7 @@ import {
   MessageSquare,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Bell,
   Heart,
   LogOut,
@@ -32,9 +33,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import logoImage from "@/assets/nordic-ascent-logo.png";
 
-// Navigation aligned with 7-stage pipeline
-const navigation = [
-  { name: "My Journey", href: "/candidate/dashboard", icon: LayoutDashboard, tooltip: "Overview of your progress across all pipeline stages" },
+// Pipeline stages nested under "My Journey"
+const journeyStages = [
   { name: "Preparation", href: "/candidate/preparation", icon: ClipboardCheck, tooltip: "Complete your profile, assessments, and initial readiness checks" },
   { name: "Selection", href: "/candidate/selection", icon: UserCheck, tooltip: "Screening, interviews, and matching with Nordic companies" },
   { name: "Readiness", href: "/candidate/readiness", icon: CheckCircle2, tooltip: "Technical, social, and cultural validation before internship" },
@@ -42,6 +42,10 @@ const navigation = [
   { name: "Relocation", href: "/candidate/relocation", icon: MapPin, tooltip: "Visa processing, housing, and language preparation for Nordic arrival" },
   { name: "Onboarding", href: "/candidate/onboarding", icon: Building2, tooltip: "Physical arrival, workplace integration, and team introduction" },
   { name: "Follow-up", href: "/candidate/followup", icon: Users, tooltip: "Long-term career support and development (add-on service)" },
+];
+
+// Standalone nav items
+const standaloneNav = [
   { name: "Mentoring", href: "/candidate/mentoring", icon: Heart, tooltip: "Connect with your dedicated company mentor" },
   { name: "Profile", href: "/candidate/profile", icon: User, tooltip: "Manage your personal information and CV" },
   { name: "Messages", href: "/candidate/messages", icon: MessageSquare, tooltip: "Communication with employers and Nordic Ascent team" },
@@ -49,7 +53,43 @@ const navigation = [
 
 const CandidateLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const [journeyOpen, setJourneyOpen] = useState(true);
   const location = useLocation();
+
+  const isJourneyActive = location.pathname === "/candidate/dashboard" || journeyStages.some(s => location.pathname === s.href);
+
+  const renderNavItem = (item: { name: string; href: string; icon: React.ElementType; tooltip?: string }, indented = false) => {
+    const isActive = location.pathname === item.href;
+    return (
+      <div key={item.name} className="flex items-center gap-1">
+        <Link
+          to={item.href}
+          className={cn(
+            "flex items-center gap-3 py-2 rounded transition-colors flex-1",
+            indented ? "pl-9 pr-3" : "px-3",
+            isActive
+              ? "bg-nordic-orange text-white"
+              : "text-nordic-sand/80 hover:bg-white/10 hover:text-nordic-sand"
+          )}
+        >
+          <item.icon className={cn("flex-shrink-0", indented ? "h-4 w-4" : "h-5 w-5")} />
+          {!collapsed && <span className={cn("font-medium", indented ? "text-xs" : "text-sm")}>{item.name}</span>}
+        </Link>
+        {!collapsed && item.tooltip && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button className="p-1 text-nordic-sand/40 hover:text-nordic-sand/70 transition-colors">
+                <Info className="h-3.5 w-3.5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right" className="max-w-[220px]">
+              <p className="text-xs">{item.tooltip}</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -83,7 +123,6 @@ const CandidateLayout = () => {
             </Button>
           </div>
 
-          {/* Collapse toggle when collapsed */}
           {collapsed && (
             <Button
               variant="ghost"
@@ -96,38 +135,65 @@ const CandidateLayout = () => {
           )}
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-1">
-            {navigation.map((item) => {
-              const isActive = location.pathname === item.href;
-              return (
-                <div key={item.name} className="flex items-center gap-1">
-                  <Link
-                    to={item.href}
+          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+            {/* My Journey - Collapsible Group */}
+            <div>
+              {collapsed ? (
+                <Link
+                  to="/candidate/dashboard"
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded transition-colors",
+                    isJourneyActive
+                      ? "bg-nordic-orange text-white"
+                      : "text-nordic-sand/80 hover:bg-white/10 hover:text-nordic-sand"
+                  )}
+                >
+                  <LayoutDashboard className="h-5 w-5 flex-shrink-0" />
+                </Link>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setJourneyOpen(!journeyOpen)}
                     className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded transition-colors flex-1",
-                      isActive
-                        ? "bg-nordic-orange text-white"
+                      "flex items-center gap-3 px-3 py-2.5 rounded transition-colors w-full text-left",
+                      isJourneyActive
+                        ? "text-nordic-sand"
                         : "text-nordic-sand/80 hover:bg-white/10 hover:text-nordic-sand"
                     )}
                   >
-                    <item.icon className="h-5 w-5 flex-shrink-0" />
-                    {!collapsed && <span className="text-sm font-medium">{item.name}</span>}
-                  </Link>
-                  {!collapsed && item.tooltip && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button className="p-1 text-nordic-sand/40 hover:text-nordic-sand/70 transition-colors">
-                          <Info className="h-3.5 w-3.5" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="right" className="max-w-[220px]">
-                        <p className="text-xs">{item.tooltip}</p>
-                      </TooltipContent>
-                    </Tooltip>
+                    <LayoutDashboard className="h-5 w-5 flex-shrink-0" />
+                    <span className="text-sm font-medium flex-1">My Journey</span>
+                    <ChevronDown className={cn("h-4 w-4 transition-transform", !journeyOpen && "-rotate-90")} />
+                  </button>
+
+                  {journeyOpen && (
+                    <div className="mt-1 space-y-0.5">
+                      {/* Dashboard link */}
+                      <Link
+                        to="/candidate/dashboard"
+                        className={cn(
+                          "flex items-center gap-3 pl-9 pr-3 py-2 rounded transition-colors",
+                          location.pathname === "/candidate/dashboard"
+                            ? "bg-nordic-orange text-white"
+                            : "text-nordic-sand/60 hover:bg-white/10 hover:text-nordic-sand"
+                        )}
+                      >
+                        <span className="text-xs font-medium">Overview</span>
+                      </Link>
+
+                      {/* Pipeline stages */}
+                      {journeyStages.map((stage) => renderNavItem(stage, true))}
+                    </div>
                   )}
-                </div>
-              );
-            })}
+                </>
+              )}
+            </div>
+
+            {/* Separator */}
+            {!collapsed && <div className="border-t border-white/10 my-3" />}
+
+            {/* Standalone items */}
+            {standaloneNav.map((item) => renderNavItem(item))}
           </nav>
 
           {/* User section */}
@@ -150,7 +216,6 @@ const CandidateLayout = () => {
 
       {/* Main content */}
       <div className={cn(collapsed ? "ml-16" : "ml-64")}>
-        {/* Header */}
         <header className="sticky top-0 z-30 h-16 bg-background border-b">
           <div className="flex h-full items-center justify-between px-6">
             <div className="flex items-center gap-4">
@@ -196,7 +261,6 @@ const CandidateLayout = () => {
           </div>
         </header>
 
-        {/* Page content */}
         <main className="p-6">
           <Outlet />
         </main>
