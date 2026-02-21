@@ -23,7 +23,7 @@ const PipelineProgress = () => {
   const location = useLocation();
 
   return (
-    <div className="bg-card border-b px-6 py-4">
+    <div className="bg-card border-b px-6 py-4 relative z-20">
       <div className="flex items-center justify-between overflow-x-auto">
         {pipelineStages.map((stage, index) => {
           const isCurrentPage = location.pathname === stage.href;
