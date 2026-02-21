@@ -34,6 +34,7 @@ import CandidateMentoring from "./pages/candidate/Mentoring";
 
 // Employer Pages
 import EmployerDashboard from "./pages/employer/Dashboard";
+import EmployerTasks from "./pages/employer/Tasks";
 import EmployerCompanyProfile from "./pages/employer/CompanyProfile";
 import EmployerJobPostings from "./pages/employer/JobPostings";
 import EmployerCandidates from "./pages/employer/Candidates";
@@ -93,6 +94,7 @@ const App = () => (
           {/* Employer Portal Routes - Company Journey */}
           <Route element={<EmployerLayout />}>
             <Route path="/employer/dashboard" element={<EmployerDashboard />} />
+            <Route path="/employer/tasks" element={<EmployerTasks />} />
             <Route path="/employer/candidates" element={<EmployerCandidates />} />
             <Route path="/employer/jobs" element={<EmployerJobPostings />} />
             <Route path="/employer/company" element={<EmployerCompanyProfile />} />

@@ -13,6 +13,7 @@ import {
   Bell,
   LogOut,
   Heart,
+  ClipboardList,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,9 +27,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import logoImage from "@/assets/nordic-ascent-logo.png";
 
-// Company journey navigation - focused on pipeline overview
+// Company journey navigation
 const navigation = [
   { name: "Pipeline Overview", href: "/employer/dashboard", icon: LayoutDashboard },
+  { name: "Tasks", href: "/employer/tasks", icon: ClipboardList },
   { name: "Candidates", href: "/employer/candidates", icon: Users },
   { name: "Roles", href: "/employer/jobs", icon: Briefcase },
   { name: "Company Profile", href: "/employer/company", icon: Building2 },
@@ -55,20 +57,12 @@ const EmployerLayout = () => {
           <div className="flex h-32 items-center justify-between px-4 border-b border-white/10">
             {!collapsed && (
               <Link to="/employer/dashboard" className="flex items-center gap-2">
-                <img 
-                  src={logoImage} 
-                  alt="Nordic Ascent" 
-                  className="h-32 w-auto logo-boost"
-                />
+                <img src={logoImage} alt="Nordic Ascent" className="h-32 w-auto logo-boost" />
               </Link>
             )}
             {collapsed && (
               <Link to="/employer/dashboard" className="mx-auto">
-                <img 
-                  src={logoImage} 
-                  alt="Nordic Ascent" 
-                  className="h-20 w-auto logo-boost"
-                />
+                <img src={logoImage} alt="Nordic Ascent" className="h-20 w-auto logo-boost" />
               </Link>
             )}
             <Button
@@ -81,7 +75,6 @@ const EmployerLayout = () => {
             </Button>
           </div>
 
-          {/* Collapse toggle when collapsed */}
           {collapsed && (
             <Button
               variant="ghost"
@@ -93,7 +86,6 @@ const EmployerLayout = () => {
             </Button>
           )}
 
-          {/* Navigation */}
           <nav className="flex-1 p-4 space-y-1">
             {navigation.map((item) => {
               const isActive = location.pathname === item.href;
@@ -115,7 +107,6 @@ const EmployerLayout = () => {
             })}
           </nav>
 
-          {/* Company section */}
           {!collapsed && (
             <div className="p-4 border-t border-white/10">
               <div className="flex items-center gap-3 p-2 rounded bg-white/10">
@@ -133,9 +124,7 @@ const EmployerLayout = () => {
         </div>
       </aside>
 
-      {/* Main content */}
       <div className={cn(collapsed ? "ml-16" : "ml-64")}>
-        {/* Header */}
         <header className="sticky top-0 z-30 h-16 bg-background border-b">
           <div className="flex h-full items-center justify-between px-6">
             <div className="flex items-center gap-4">
@@ -181,7 +170,6 @@ const EmployerLayout = () => {
           </div>
         </header>
 
-        {/* Page content */}
         <main className="p-6">
           <Outlet />
         </main>

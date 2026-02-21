@@ -13,7 +13,9 @@ import {
   BookOpen,
   Target,
   ArrowRight,
-  Star
+  Star,
+  Languages,
+  Info
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -29,7 +31,7 @@ const achievements = [
   { id: 1, title: "Successfully completed first project", date: "2024-05-20", type: "project" },
   { id: 2, title: "Received positive team feedback", date: "2024-06-10", type: "feedback" },
   { id: 3, title: "Completed advanced training course", date: "2024-08-05", type: "learning" },
-  { id: 4, title: "Mentored new team member", date: "2024-09-12", type: "leadership" },
+  { id: 4, title: "Led sprint retrospective", date: "2024-09-12", type: "leadership" },
 ];
 
 const careerGoals = [
@@ -56,8 +58,59 @@ const CandidateFollowup = () => {
           <h1 className="text-3xl font-bold tracking-tight">Follow-up & Support</h1>
           <p className="text-muted-foreground">Long-term support and career development</p>
         </div>
-        <Badge className="bg-success text-success-foreground">Active</Badge>
+        <div className="flex items-center gap-2">
+          <Badge className="bg-warning/20 text-warning border border-warning/30">Add-on Service</Badge>
+          <Badge className="bg-success text-success-foreground">Active</Badge>
+        </div>
       </div>
+
+      {/* Add-on Service Banner */}
+      <Card className="border-warning/40 bg-warning/5">
+        <CardContent className="p-4 flex items-start gap-3">
+          <Info className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium">This is an add-on service</p>
+            <p className="text-sm text-muted-foreground">
+              Follow-up support is available as an optional, paid service after onboarding is complete. 
+              Note: mentoring from your company mentor concludes at the end of the Onboarding stage.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Language Course Section */}
+      <Card className="border-secondary/30">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg font-medium">
+            <Languages className="h-5 w-5 text-secondary" />
+            Norwegian Language Course — A2 Level
+          </CardTitle>
+          <CardDescription>Continue your language development after arriving in the Nordics</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm">Course Progress</span>
+              <span className="text-sm font-medium">30%</span>
+            </div>
+            <Progress value={30} className="h-2" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
+              <div className="p-3 rounded bg-muted/30 text-center">
+                <p className="font-medium text-sm">A1 Completed</p>
+                <p className="text-xs text-muted-foreground">Before arrival</p>
+              </div>
+              <div className="p-3 rounded bg-secondary/10 border border-secondary/20 text-center">
+                <p className="font-medium text-sm text-secondary">A2 In Progress</p>
+                <p className="text-xs text-muted-foreground">Current level</p>
+              </div>
+              <div className="p-3 rounded bg-muted/30 text-center">
+                <p className="font-medium text-sm text-muted-foreground">B1 Planned</p>
+                <p className="text-xs text-muted-foreground">Next milestone</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <div className="relative h-48 overflow-hidden rounded-t-lg">
@@ -94,8 +147,6 @@ const CandidateFollowup = () => {
                 }`}>
                   {milestone.status === "completed" ? (
                     <CheckCircle className="h-5 w-5" />
-                  ) : milestone.status === "current" ? (
-                    <Calendar className="h-5 w-5" />
                   ) : (
                     <Calendar className="h-5 w-5" />
                   )}
@@ -162,11 +213,7 @@ const CandidateFollowup = () => {
                   return (
                     <div key={achievement.id} className="rounded border border-border bg-card overflow-hidden transition-colors hover:border-primary/50">
                       <div className="h-32 overflow-hidden">
-                        <img 
-                          src={images[idx % images.length]} 
-                          alt={achievement.title}
-                          className="w-full h-full object-cover"
-                        />
+                        <img src={images[idx % images.length]} alt={achievement.title} className="w-full h-full object-cover" />
                       </div>
                       <div className="p-4">
                         <div className="flex items-start justify-between mb-2">

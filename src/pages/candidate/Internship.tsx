@@ -2,14 +2,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Circle, Lock, ArrowRight, Briefcase, Calendar, Users } from "lucide-react";
+import { Lock, ArrowRight, Briefcase, Calendar, Users } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Separator } from "@/components/ui/separator";
 
-const milestones = [
-  { id: 1, name: "Project assignment", description: "Receive your internship project", locked: true },
+const phase1Milestones = [
+  { id: 1, name: "Project assignment", description: "Receive your internship project from the company", locked: true },
   { id: 2, name: "Week 1-2: Onboarding", description: "Meet your team and understand the codebase", locked: true },
-  { id: 3, name: "Week 3-8: Project work", description: "Work on assigned deliverables", locked: true },
-  { id: 4, name: "Final review", description: "Present your work and receive feedback", locked: true },
+  { id: 3, name: "Week 3-8: Project work", description: "Work on assigned deliverables with mentor guidance", locked: true },
+  { id: 4, name: "Week 8-10: Final review", description: "Present your work and receive evaluation feedback", locked: true },
+];
+
+const phase2Milestones = [
+  { id: 5, name: "Professional onboarding", description: "Begin as a pre-employed team member", locked: true },
+  { id: 6, name: "Project contribution", description: "Contribute to real company projects and sprints", locked: true },
+  { id: 7, name: "Relocation preparation", description: "Begin visa and relocation logistics in parallel", locked: true },
+  { id: 8, name: "Handover & transition", description: "Prepare for physical onboarding in the Nordics", locked: true },
 ];
 
 const CandidateInternship = () => {
@@ -33,16 +41,21 @@ const CandidateInternship = () => {
             <span className="text-sm font-medium">0%</span>
           </div>
           <Progress value={0} className="h-2" />
-          <p className="text-sm text-muted-foreground mt-3">Complete the Trainee stage to unlock this phase.</p>
+          <p className="text-sm text-muted-foreground mt-3">Complete the Readiness stage to unlock this phase.</p>
         </CardContent>
       </Card>
 
+      {/* Phase 1: Official Internship */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-medium">Internship Milestones</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg font-medium">Phase 1: Official Internship</CardTitle>
+            <Badge variant="outline">8–10 weeks</Badge>
+          </div>
+          <p className="text-sm text-muted-foreground">Academic internship per school/university rules. Earns academic credit.</p>
         </CardHeader>
         <CardContent className="space-y-3">
-          {milestones.map((milestone) => (
+          {phase1Milestones.map((milestone) => (
             <div key={milestone.id} className="flex items-center justify-between p-4 rounded border border-muted bg-muted/30">
               <div className="flex items-center gap-3">
                 <Lock className="h-5 w-5 text-muted-foreground" />
@@ -56,6 +69,41 @@ const CandidateInternship = () => {
         </CardContent>
       </Card>
 
+      {/* Hire / No-Hire Decision Divider */}
+      <div className="relative py-4">
+        <Separator />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Badge className="bg-warning text-warning-foreground px-4 py-1.5 text-sm font-semibold">
+            ⚡ Hire / No-Hire Decision
+          </Badge>
+        </div>
+      </div>
+
+      {/* Phase 2: Professional Pre-Employment */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg font-medium">Phase 2: Professional Pre-Employment</CardTitle>
+            <Badge variant="outline">Ongoing</Badge>
+          </div>
+          <p className="text-sm text-muted-foreground">After a positive hire decision. No academic credit — early professional engagement with the company.</p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {phase2Milestones.map((milestone) => (
+            <div key={milestone.id} className="flex items-center justify-between p-4 rounded border border-muted bg-muted/30">
+              <div className="flex items-center gap-3">
+                <Lock className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <p className="font-medium text-muted-foreground">{milestone.name}</p>
+                  <p className="text-sm text-muted-foreground">{milestone.description}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* What to Expect */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg font-medium">What to Expect</CardTitle>
@@ -74,8 +122,8 @@ const CandidateInternship = () => {
             </div>
             <div className="p-4 rounded bg-muted/30 text-center">
               <Calendar className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-              <p className="font-medium">8 Weeks</p>
-              <p className="text-sm text-muted-foreground">Digital engagement period</p>
+              <p className="font-medium">Two Phases</p>
+              <p className="text-sm text-muted-foreground">Academic internship → Pre-employment</p>
             </div>
           </div>
         </CardContent>
@@ -88,19 +136,20 @@ const CandidateInternship = () => {
         <CardContent>
           <p className="text-sm text-muted-foreground mb-4">
             The Internship stage is a <strong>digital, one-on-one engagement</strong> with your matched Nordic company. 
-            This phase represents a higher level of commitment following successful completion of the Trainee validation phase.
+            It begins with an official academic internship and, upon a positive hire decision, transitions into a professional pre-employment phase.
           </p>
           <div className="space-y-2 text-sm">
-            <p><strong>Duration:</strong> 8 weeks of structured digital project work</p>
+            <p><strong>Phase 1:</strong> 8–10 weeks official internship (academic credit, school rules apply)</p>
+            <p><strong>Decision Point:</strong> Company makes hire / no-hire decision based on performance</p>
+            <p><strong>Phase 2:</strong> Professional pre-employment — real project work, no academic credit</p>
             <p><strong>Compensation:</strong> Standard internship compensation as per Nordic standards</p>
-            <p><strong>Focus:</strong> Real project deliverables and preparation for potential relocation</p>
           </div>
         </CardContent>
       </Card>
 
       <div className="flex justify-between">
         <Button variant="outline" asChild>
-          <Link to="/candidate/trainee">Back to Trainee</Link>
+          <Link to="/candidate/readiness">Back to Readiness</Link>
         </Button>
         <Button disabled>
           Continue to Relocation <ArrowRight className="ml-2 h-4 w-4" />

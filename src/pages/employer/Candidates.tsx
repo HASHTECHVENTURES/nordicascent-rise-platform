@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Search, 
@@ -21,11 +20,8 @@ import {
   Building2,
   Users,
   AlertTriangle,
-  CheckCircle,
-  Circle
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Link } from "react-router-dom";
 
 // Pipeline stages aligned with the 7-stage model
 const pipelineStages = [
@@ -50,7 +46,7 @@ const candidatesByStage = {
     { id: 5, name: "Vikram Singh", role: "DevOps Engineer", location: "Pune, IN", experience: "4 years", match: 87, skills: ["AWS", "Docker"], readiness: 80, status: "active", needsAction: false, avatar: "https://i.pravatar.cc/150?img=15" },
   ],
   trainee: [
-    { id: 6, name: "Anjali Mehta", role: "Data Engineer", location: "Bangalore, IN", experience: "4 years", match: 93, skills: ["Python", "Spark"], readiness: 90, status: "active", needsAction: true, avatar: "https://i.pravatar.cc/150?img=20" },
+    { id: 6, name: "Anjali Mehta", role: "Data Engineer", location: "Bangalore, IN", experience: "4 years", match: 93, skills: ["Python", "Spark"], readiness: 90, status: "active", needsAction: false, avatar: "https://i.pravatar.cc/150?img=20" },
     { id: 7, name: "Rohan Desai", role: "Mobile Developer", location: "Mumbai, IN", experience: "3 years", match: 89, skills: ["React Native", "iOS"], readiness: 65, status: "active", needsAction: false, avatar: "https://i.pravatar.cc/150?img=18" },
   ],
   internship: [
@@ -69,10 +65,6 @@ const getStatusBadge = (status: string) => {
       return <Badge className="bg-success text-success-foreground">Completed</Badge>;
     case "active":
       return <Badge className="bg-primary text-primary-foreground">Active</Badge>;
-    case "blocked":
-      return <Badge variant="destructive">Blocked</Badge>;
-    case "not_started":
-      return <Badge variant="secondary">Not Started</Badge>;
     default:
       return <Badge variant="secondary">Not Started</Badge>;
   }
@@ -80,11 +72,7 @@ const getStatusBadge = (status: string) => {
 
 const EmployerCandidates = () => {
   const totalCandidates = Object.values(candidatesByStage).flat().length;
-  const candidatesNeedingAction = Object.values(candidatesByStage).flat().filter(c => c.needsAction);
-  const bottlenecks = pipelineStages.filter(stage => {
-    const candidates = candidatesByStage[stage.id as keyof typeof candidatesByStage] || [];
-    return candidates.length > 5; // More than 5 candidates indicates a bottleneck
-  });
+  const completedCount = Object.values(candidatesByStage).flat().filter(c => c.status === "completed").length;
 
   return (
     <div className="space-y-6">
@@ -95,8 +83,8 @@ const EmployerCandidates = () => {
         </div>
       </div>
 
-      {/* Pipeline Overview Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* Stage Count KPIs */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Candidates</CardTitle>
@@ -105,88 +93,28 @@ const EmployerCandidates = () => {
             <div className="text-2xl font-medium">{totalCandidates}</div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Action Required</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-medium text-warning">{candidatesNeedingAction.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Bottlenecks</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-medium text-destructive">{bottlenecks.length}</div>
-          </CardContent>
-        </Card>
+        {pipelineStages.slice(0, 2).map(stage => {
+          const count = (candidatesByStage[stage.id as keyof typeof candidatesByStage] || []).length;
+          return (
+            <Card key={stage.id}>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">{stage.name}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-medium">{count}</div>
+              </CardContent>
+            </Card>
+          );
+        })}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Completed</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-medium text-success">
-              {Object.values(candidatesByStage).flat().filter(c => c.status === "completed").length}
-            </div>
+            <div className="text-2xl font-medium text-success">{completedCount}</div>
           </CardContent>
         </Card>
       </div>
-
-      {/* Bottlenecks Alert */}
-      {bottlenecks.length > 0 && (
-        <Card className="border-warning/50 bg-warning/5">
-          <CardHeader>
-            <CardTitle className="text-lg font-medium flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-warning" />
-              Pipeline Bottlenecks Detected
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-3">
-              The following stages have high candidate volume and may require attention:
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {bottlenecks.map(stage => (
-                <Badge key={stage.id} variant="outline" className="text-warning border-warning">
-                  {stage.name} ({candidatesByStage[stage.id as keyof typeof candidatesByStage]?.length || 0} candidates)
-                </Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Action Required */}
-      {candidatesNeedingAction.length > 0 && (
-        <Card className="border-primary/50 bg-primary/5">
-          <CardHeader>
-            <CardTitle className="text-lg font-medium">Immediate Actions Required</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {candidatesNeedingAction.slice(0, 5).map((candidate) => (
-                <div key={candidate.id} className="flex items-center justify-between p-3 border border-border rounded">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={candidate.avatar} />
-                      <AvatarFallback>{candidate.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-sm font-medium">{candidate.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {pipelineStages.find(s => candidatesByStage[s.id as keyof typeof candidatesByStage]?.some(c => c.id === candidate.id))?.name} · 
-                        Review required · {candidate.readiness}% readiness
-                      </p>
-                    </div>
-                  </div>
-                  <Button size="sm" variant="outline">Review</Button>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Pipeline Stages Tabs */}
       <Card>
