@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import logoImage from "@/assets/nordic-ascent-logo.png";
+import EmployerPipelineProgress from "@/components/employer/EmployerPipelineProgress";
 
 // Company journey navigation
 const navigation = [
@@ -170,6 +171,7 @@ const EmployerLayout = () => {
           </div>
         </header>
 
+        <EmployerPipelineProgress />
         <main className="p-6">
           <Outlet />
         </main>

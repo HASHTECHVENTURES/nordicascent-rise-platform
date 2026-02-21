@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import logoImage from "@/assets/nordic-ascent-logo.png";
+import AdminPipelineProgress from "@/components/admin/AdminPipelineProgress";
 
 const navigation = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
@@ -191,6 +192,7 @@ const AdminLayout = () => {
         </header>
 
         {/* Page content */}
+        <AdminPipelineProgress />
         <main className="p-6">
           <Outlet />
         </main>
