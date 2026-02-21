@@ -130,46 +130,6 @@ const CandidateDashboard = () => {
         <p className="text-muted-foreground">Track your progress through the Nordic Ascent pipeline</p>
       </div>
 
-      {/* Pipeline Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-medium">Pipeline Progress</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between overflow-x-auto pb-4">
-            {pipelineStages.map((stage, index) => (
-              <div key={stage.id} className="flex items-center">
-                <Link 
-                  to={stage.href}
-                  className="flex flex-col items-center min-w-[100px] group"
-                >
-                  <div className={`
-                    w-12 h-12 rounded-full flex items-center justify-center border-2 mb-2
-                    ${stage.status === 'completed' ? 'bg-success border-success text-success-foreground' : ''}
-                    ${stage.status === 'active' ? 'bg-primary border-primary text-primary-foreground' : ''}
-                    ${stage.status === 'not_started' ? 'bg-muted border-muted-foreground/30 text-muted-foreground' : ''}
-                    ${stage.status === 'blocked' ? 'bg-destructive/10 border-destructive text-destructive' : ''}
-                    group-hover:opacity-80
-                  `}>
-                    <stage.icon className="h-5 w-5" />
-                  </div>
-                  <span className={`text-sm font-medium text-center ${
-                    stage.status === 'active' ? 'text-primary' : 'text-muted-foreground'
-                  }`}>
-                    {stage.name}
-                  </span>
-                </Link>
-                {index < pipelineStages.length - 1 && (
-                  <div className={`w-8 h-0.5 mx-2 ${
-                    stage.status === 'completed' ? 'bg-success' : 'bg-muted'
-                  }`} />
-                )}
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Current Stage Details */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main stage info */}

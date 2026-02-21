@@ -32,6 +32,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import logoImage from "@/assets/nordic-ascent-logo.png";
+import PipelineProgress from "@/components/candidate/PipelineProgress";
 
 // Pipeline stages nested under "My Journey"
 const journeyStages = [
@@ -261,6 +262,7 @@ const CandidateLayout = () => {
           </div>
         </header>
 
+        <PipelineProgress />
         <main className="p-6">
           <Outlet />
         </main>
