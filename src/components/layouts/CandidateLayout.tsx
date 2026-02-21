@@ -17,6 +17,7 @@ import {
   Bell,
   Heart,
   LogOut,
+  Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,21 +29,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import logoImage from "@/assets/nordic-ascent-logo.png";
 
 // Navigation aligned with 7-stage pipeline
 const navigation = [
-  { name: "My Journey", href: "/candidate/dashboard", icon: LayoutDashboard },
-  { name: "Preparation", href: "/candidate/preparation", icon: ClipboardCheck },
-  { name: "Selection", href: "/candidate/selection", icon: UserCheck },
-  { name: "Readiness", href: "/candidate/readiness", icon: CheckCircle2 },
-  { name: "Internship", href: "/candidate/internship", icon: Briefcase },
-  { name: "Relocation", href: "/candidate/relocation", icon: MapPin },
-  { name: "Onboarding", href: "/candidate/onboarding", icon: Building2 },
-  { name: "Follow-up", href: "/candidate/followup", icon: Users },
-  { name: "Mentoring", href: "/candidate/mentoring", icon: Heart },
-  { name: "Profile", href: "/candidate/profile", icon: User },
-  { name: "Messages", href: "/candidate/messages", icon: MessageSquare },
+  { name: "My Journey", href: "/candidate/dashboard", icon: LayoutDashboard, tooltip: "Overview of your progress across all pipeline stages" },
+  { name: "Preparation", href: "/candidate/preparation", icon: ClipboardCheck, tooltip: "Complete your profile, assessments, and initial readiness checks" },
+  { name: "Selection", href: "/candidate/selection", icon: UserCheck, tooltip: "Screening, interviews, and matching with Nordic companies" },
+  { name: "Readiness", href: "/candidate/readiness", icon: CheckCircle2, tooltip: "Technical, social, and cultural validation before internship" },
+  { name: "Internship", href: "/candidate/internship", icon: Briefcase, tooltip: "Official internship and professional pre-employment with your matched company" },
+  { name: "Relocation", href: "/candidate/relocation", icon: MapPin, tooltip: "Visa processing, housing, and language preparation for Nordic arrival" },
+  { name: "Onboarding", href: "/candidate/onboarding", icon: Building2, tooltip: "Physical arrival, workplace integration, and team introduction" },
+  { name: "Follow-up", href: "/candidate/followup", icon: Users, tooltip: "Long-term career support and development (add-on service)" },
+  { name: "Mentoring", href: "/candidate/mentoring", icon: Heart, tooltip: "Connect with your dedicated company mentor" },
+  { name: "Profile", href: "/candidate/profile", icon: User, tooltip: "Manage your personal information and CV" },
+  { name: "Messages", href: "/candidate/messages", icon: MessageSquare, tooltip: "Communication with employers and Nordic Ascent team" },
 ];
 
 const CandidateLayout = () => {
@@ -63,20 +65,12 @@ const CandidateLayout = () => {
           <div className="flex h-32 items-center justify-between px-4 border-b border-white/10">
             {!collapsed && (
               <Link to="/candidate/dashboard" className="flex items-center gap-2">
-                <img 
-                  src={logoImage} 
-                  alt="Nordic Ascent" 
-                  className="h-32 w-auto logo-boost"
-                />
+                <img src={logoImage} alt="Nordic Ascent" className="h-32 w-auto logo-boost" />
               </Link>
             )}
             {collapsed && (
               <Link to="/candidate/dashboard" className="mx-auto">
-                <img 
-                  src={logoImage} 
-                  alt="Nordic Ascent" 
-                  className="h-20 w-auto logo-boost"
-                />
+                <img src={logoImage} alt="Nordic Ascent" className="h-20 w-auto logo-boost" />
               </Link>
             )}
             <Button
@@ -106,19 +100,32 @@ const CandidateLayout = () => {
             {navigation.map((item) => {
               const isActive = location.pathname === item.href;
               return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded transition-colors",
-                    isActive
-                      ? "bg-nordic-orange text-white"
-                      : "text-nordic-sand/80 hover:bg-white/10 hover:text-nordic-sand"
+                <div key={item.name} className="flex items-center gap-1">
+                  <Link
+                    to={item.href}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2.5 rounded transition-colors flex-1",
+                      isActive
+                        ? "bg-nordic-orange text-white"
+                        : "text-nordic-sand/80 hover:bg-white/10 hover:text-nordic-sand"
+                    )}
+                  >
+                    <item.icon className="h-5 w-5 flex-shrink-0" />
+                    {!collapsed && <span className="text-sm font-medium">{item.name}</span>}
+                  </Link>
+                  {!collapsed && item.tooltip && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button className="p-1 text-nordic-sand/40 hover:text-nordic-sand/70 transition-colors">
+                          <Info className="h-3.5 w-3.5" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="max-w-[220px]">
+                        <p className="text-xs">{item.tooltip}</p>
+                      </TooltipContent>
+                    </Tooltip>
                   )}
-                >
-                  <item.icon className="h-5 w-5 flex-shrink-0" />
-                  {!collapsed && <span className="text-sm font-medium">{item.name}</span>}
-                </Link>
+                </div>
               );
             })}
           </nav>
