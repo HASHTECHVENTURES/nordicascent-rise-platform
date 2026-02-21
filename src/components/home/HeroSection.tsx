@@ -42,7 +42,7 @@ export default function HeroSection() {
               size="lg"
               variant="outline"
               asChild
-              className="text-base h-13 px-10 border-white/30 text-white hover:bg-white/10 hover:text-white"
+              className="text-base h-13 px-10 border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
             >
               <Link to="/platform">Explore Our Platform</Link>
             </Button>
