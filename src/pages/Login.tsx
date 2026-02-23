@@ -69,7 +69,7 @@ export default function Login() {
       <div className="hidden lg:flex lg:w-1/2 bg-primary p-12 flex-col justify-between">
         <div>
           <Link to="/" className="flex items-center gap-3 text-primary-foreground">
-              <img src={logoImage} alt="Nordic Ascent" className="h-24 w-auto brightness-0 invert" />
+              <img src={logoImage} alt="Nordic Ascent" className="h-24 w-auto" style={{ filter: "brightness(0) saturate(100%) invert(19%) sepia(32%) saturate(1200%) hue-rotate(183deg) brightness(95%) contrast(92%)" }} />
             <span className="text-xl font-medium">Nordic Ascent</span>
           </Link>
         </div>
