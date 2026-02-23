@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import logoImage from "@/assets/nordic-ascent-logo.png";
+import logoBlue from "@/assets/nordic-ascent-logo-blue.png";
 import AdminPipelineProgress from "@/components/admin/AdminPipelineProgress";
 
 const navigation = [
@@ -56,15 +57,15 @@ const AdminLayout = () => {
       >
         <div className="flex h-full flex-col">
           {/* Logo */}
-          <div className="flex h-32 items-center justify-between px-4 border-b border-border bg-[#1C3A5F]">
+          <div className="flex h-32 items-center justify-between px-4 border-b border-border">
             {!collapsed && (
               <Link to="/admin/dashboard" className="flex items-center gap-2">
-                <img src={logoImage} alt="Nordic Ascent" className="h-32 w-auto" style={{ filter: "brightness(0) invert(1)" }} />
+                <img src={logoBlue} alt="Nordic Ascent" className="h-32 w-auto" />
               </Link>
             )}
             {collapsed && (
               <Link to="/admin/dashboard" className="mx-auto">
-                <img src={logoImage} alt="Nordic Ascent" className="h-20 w-auto" style={{ filter: "brightness(0) invert(1)" }} />
+                <img src={logoBlue} alt="Nordic Ascent" className="h-20 w-auto" />
               </Link>
             )}
             <Button
