@@ -22,24 +22,24 @@ export function PublicLayout() {
   const location = useLocation();
   return <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-primary text-primary-foreground border-b border-primary-foreground/15">
+      <header className="sticky top-0 z-50 bg-white border-b border-border">
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3">
-              <img src={logoImage} alt="Nordic Ascent" className="h-24 w-auto brightness-0 invert" />
+              <img src={logoImage} alt="Nordic Ascent" className="h-24 w-auto" />
             </Link>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-8">
-              {navigation.map(item => <Link key={item.name} to={item.href} className={cn("text-sm font-medium transition-colors hover:text-primary-foreground", location.pathname === item.href ? "text-primary-foreground" : "text-primary-foreground/70")}>
+              {navigation.map(item => <Link key={item.name} to={item.href} className={cn("text-sm font-medium transition-colors hover:text-primary", location.pathname === item.href ? "text-primary" : "text-muted-foreground")}>
                   {item.name}
                 </Link>)}
             </div>
 
             {/* CTA Buttons */}
             <div className="hidden md:flex items-center gap-4">
-              <Button variant="ghost" asChild className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10">
+              <Button variant="ghost" asChild className="text-muted-foreground hover:text-primary">
                 <Link to="/login">Login / Sign in</Link>
               </Button>
               <Button asChild className="bg-warning text-warning-foreground hover:opacity-90">
@@ -48,19 +48,19 @@ export function PublicLayout() {
             </div>
 
             {/* Mobile menu button */}
-            <button className="md:hidden p-2 text-primary-foreground" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <button className="md:hidden p-2 text-primary" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
 
           {/* Mobile Navigation */}
-          {mobileMenuOpen && <div className="md:hidden py-4 border-t border-primary-foreground/15">
+          {mobileMenuOpen && <div className="md:hidden py-4 border-t border-border">
               <div className="flex flex-col gap-4">
-                {navigation.map(item => <Link key={item.name} to={item.href} onClick={() => setMobileMenuOpen(false)} className={cn("text-sm font-medium transition-colors hover:text-primary-foreground px-2 py-2", location.pathname === item.href ? "text-primary-foreground" : "text-primary-foreground/70")}>
+                {navigation.map(item => <Link key={item.name} to={item.href} onClick={() => setMobileMenuOpen(false)} className={cn("text-sm font-medium transition-colors hover:text-primary px-2 py-2", location.pathname === item.href ? "text-primary" : "text-muted-foreground")}>
                     {item.name}
                   </Link>)}
-                <div className="flex flex-col gap-2 pt-4 border-t border-primary-foreground/15">
-                  <Button variant="ghost" asChild className="justify-start text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10">
+                <div className="flex flex-col gap-2 pt-4 border-t border-border">
+                  <Button variant="ghost" asChild className="justify-start text-muted-foreground hover:text-primary">
                     <Link to="/login">Login / Sign in</Link>
                   </Button>
                   <Button asChild className="bg-warning text-warning-foreground hover:opacity-90 justify-start">
