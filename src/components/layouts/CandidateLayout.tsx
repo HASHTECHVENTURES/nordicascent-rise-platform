@@ -106,12 +106,12 @@ const CandidateLayout = () => {
           <div className="flex h-32 items-center justify-between px-4 border-b border-white/10">
             {!collapsed && (
               <Link to="/candidate/dashboard" className="flex items-center gap-2">
-                <img src={logoImage} alt="Nordic Ascent" className="h-32 w-auto logo-boost" />
+                <img src={logoImage} alt="Nordic Ascent" className="h-32 w-auto brightness-0 invert" />
               </Link>
             )}
             {collapsed && (
               <Link to="/candidate/dashboard" className="mx-auto">
-                <img src={logoImage} alt="Nordic Ascent" className="h-20 w-auto logo-boost" />
+                <img src={logoImage} alt="Nordic Ascent" className="h-20 w-auto brightness-0 invert" />
               </Link>
             )}
             <Button
