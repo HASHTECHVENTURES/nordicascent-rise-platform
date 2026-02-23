@@ -55,15 +55,15 @@ const EmployerLayout = () => {
       >
         <div className="flex h-full flex-col">
           {/* Logo */}
-          <div className="flex h-32 items-center justify-between px-4 border-b border-border bg-[#1C3A5F]">
+          <div className="flex h-32 items-center justify-between px-4 border-b border-border">
             {!collapsed && (
               <Link to="/employer/dashboard" className="flex items-center gap-2">
-                <img src={logoImage} alt="Nordic Ascent" className="h-32 w-auto" style={{ filter: "brightness(0) invert(1)" }} />
+                <img src={logoImage} alt="Nordic Ascent" className="h-32 w-auto" style={{ filter: "brightness(0) saturate(100%) invert(19%) sepia(32%) saturate(1200%) hue-rotate(183deg) brightness(95%) contrast(92%)" }} />
               </Link>
             )}
             {collapsed && (
               <Link to="/employer/dashboard" className="mx-auto">
-                <img src={logoImage} alt="Nordic Ascent" className="h-20 w-auto" style={{ filter: "brightness(0) invert(1)" }} />
+                <img src={logoImage} alt="Nordic Ascent" className="h-20 w-auto" style={{ filter: "brightness(0) saturate(100%) invert(19%) sepia(32%) saturate(1200%) hue-rotate(183deg) brightness(95%) contrast(92%)" }} />
               </Link>
             )}
             <Button
