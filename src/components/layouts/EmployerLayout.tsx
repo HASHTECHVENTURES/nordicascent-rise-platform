@@ -171,7 +171,6 @@ const EmployerLayout = () => {
           </div>
         </header>
 
-        <EmployerPipelineProgress />
         <main className="p-6">
           <Outlet />
         </main>
