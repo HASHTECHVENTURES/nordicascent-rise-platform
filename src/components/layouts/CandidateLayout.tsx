@@ -3,11 +3,9 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
-  User,
   MessageSquare,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
   Bell,
   Heart,
   LogOut,
@@ -27,10 +25,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import logoImage from "@/assets/nordic-ascent-logo.png";
 import PipelineProgress from "@/components/candidate/PipelineProgress";
 
-// My Journey group (dashboard only, profile accessed via user avatar)
-const journeyItems = [
-  { name: "Overview", href: "/candidate/dashboard", icon: LayoutDashboard, tooltip: "Track your pipeline progress overview" },
-];
+// No sub-items needed; My Journey is a direct link
 
 // Standalone nav items
 const standaloneNav = [
@@ -40,10 +35,7 @@ const standaloneNav = [
 
 const CandidateLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
-  const [journeyOpen, setJourneyOpen] = useState(true);
   const location = useLocation();
-
-  const isJourneyActive = journeyItems.some(s => location.pathname === s.href);
 
   const renderNavItem = (item: { name: string; href: string; icon: React.ElementType; tooltip?: string }, indented = false) => {
     const isActive = location.pathname === item.href;
@@ -123,44 +115,19 @@ const CandidateLayout = () => {
 
           {/* Navigation */}
           <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-            {/* My Journey - Collapsible Group */}
-            <div>
-              {collapsed ? (
-                <Link
-                  to="/candidate/dashboard"
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded transition-colors",
-                    isJourneyActive
-                      ? "bg-nordic-orange text-white"
-                      : "text-nordic-sand/80 hover:bg-white/10 hover:text-nordic-sand"
-                  )}
-                >
-                  <LayoutDashboard className="h-5 w-5 flex-shrink-0" />
-                </Link>
-              ) : (
-                <>
-                  <button
-                    onClick={() => setJourneyOpen(!journeyOpen)}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded transition-colors w-full text-left",
-                      isJourneyActive
-                        ? "text-nordic-sand"
-                        : "text-nordic-sand/80 hover:bg-white/10 hover:text-nordic-sand"
-                    )}
-                  >
-                    <LayoutDashboard className="h-5 w-5 flex-shrink-0" />
-                    <span className="text-sm font-medium flex-1">My Journey</span>
-                    <ChevronDown className={cn("h-4 w-4 transition-transform", !journeyOpen && "-rotate-90")} />
-                  </button>
-
-                  {journeyOpen && (
-                    <div className="mt-1 space-y-0.5">
-                      {journeyItems.map((item) => renderNavItem(item, true))}
-                    </div>
-                  )}
-                </>
+            {/* My Journey - Direct Link */}
+            <Link
+              to="/candidate/dashboard"
+              className={cn(
+                "flex items-center gap-3 px-3 py-2.5 rounded transition-colors",
+                location.pathname === "/candidate/dashboard"
+                  ? "bg-nordic-orange text-white"
+                  : "text-nordic-sand/80 hover:bg-white/10 hover:text-nordic-sand"
               )}
-            </div>
+            >
+              <LayoutDashboard className="h-5 w-5 flex-shrink-0" />
+              {!collapsed && <span className="text-sm font-medium">My Journey</span>}
+            </Link>
 
             {/* Separator */}
             {!collapsed && <div className="border-t border-white/10 my-3" />}
