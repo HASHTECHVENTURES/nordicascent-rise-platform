@@ -1,25 +1,25 @@
 
 
-# Summary of All Planned Changes
+# Fix: Logo Background to Blue in Sidebar
 
-## 1. Pipeline Hover Tooltips
-When you hover over any stage in the candidate pipeline bar, a small tooltip appears showing what that stage is about (e.g., "Document collection, CV review, and initial assessments" for Preparation).
+## What's Changing
+The logo section at the top of the sidebar currently has a white background. It will be changed to use a Nordic Deep Blue (#1C3A5F) background, making the logo area stand out with the brand's primary color.
 
-## 2. Pipeline Click-to-Navigate
-Clicking a pipeline stage takes you directly to that page -- no popup or extra button needed. Just click and go.
+## Changes Needed
 
-## 3. Remove the Special "My Journey" Circle
-The "My Journey" stage currently has a unique triple-ring design. This will be simplified to match all other stages -- same circle style, just colored blue to show it's the current/active stage.
+### File: `src/components/layouts/CandidateLayout.tsx`
+- Change the logo container `div` background from white to `bg-[#1C3A5F]` (Nordic Deep Blue)
+- Update the CSS filter on the logo image to render it white (so it's visible on the dark background)
+- Apply the same change for both expanded and collapsed sidebar states
 
-## 4. Fix Broken "Continue to Trainee" Button
-On the Selection page, the button says "Continue to Trainee" and links to a page that doesn't exist. This will be fixed to say "Continue to Readiness" and link to the correct page.
+### File: `src/components/layouts/EmployerLayout.tsx`
+- Same blue background treatment for the employer sidebar logo area
 
-## Files Being Changed
-- **PipelineProgress.tsx** -- tooltip on hover, direct navigation on click, simplified circle styles
-- **Selection.tsx** -- fix the broken button link
+### File: `src/components/layouts/AdminLayout.tsx`
+- Same blue background treatment for the admin sidebar logo area
 
-## What Stays the Same
-- The blue logo with white sidebar across all portals (already done)
-- The pipeline color coding: green = completed, blue = current, gray = not started
-- The connector lines between stages
-
+## Technical Details
+- Logo container div gets: `bg-[#1C3A5F]` class added
+- Logo image filter changes to: `brightness(0) invert(1)` to make logo white on blue background
+- Border bottom styling may be adjusted for contrast
+- All three portal layouts updated for consistency
