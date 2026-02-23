@@ -9,7 +9,6 @@ import {
   Bell,
   Heart,
   LogOut,
-  Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +20,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import logoImage from "@/assets/nordic-ascent-logo.png";
 import PipelineProgress from "@/components/candidate/PipelineProgress";
 
@@ -40,33 +38,20 @@ const CandidateLayout = () => {
   const renderNavItem = (item: { name: string; href: string; icon: React.ElementType; tooltip?: string }, indented = false) => {
     const isActive = location.pathname === item.href;
     return (
-      <div key={item.name} className="flex items-center gap-1">
-        <Link
-          to={item.href}
-          className={cn(
-            "flex items-center gap-3 py-2 rounded transition-colors flex-1",
-            indented ? "pl-9 pr-3" : "px-3",
-            isActive
-              ? "bg-nordic-orange text-white"
-              : "text-nordic-sand/80 hover:bg-white/10 hover:text-nordic-sand"
-          )}
-        >
-          <item.icon className={cn("flex-shrink-0", indented ? "h-4 w-4" : "h-5 w-5")} />
-          {!collapsed && <span className={cn("font-medium", indented ? "text-xs" : "text-sm")}>{item.name}</span>}
-        </Link>
-        {!collapsed && item.tooltip && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button className="p-1 text-nordic-sand/40 hover:text-nordic-sand/70 transition-colors">
-                <Info className="h-3.5 w-3.5" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right" className="max-w-[220px]">
-              <p className="text-xs">{item.tooltip}</p>
-            </TooltipContent>
-          </Tooltip>
+      <Link
+        key={item.name}
+        to={item.href}
+        className={cn(
+          "flex items-center gap-3 py-2 rounded transition-colors",
+          indented ? "pl-9 pr-3" : "px-3",
+          isActive
+            ? "bg-nordic-orange text-white"
+            : "text-nordic-sand/80 hover:bg-white/10 hover:text-nordic-sand"
         )}
-      </div>
+      >
+        <item.icon className={cn("flex-shrink-0", indented ? "h-4 w-4" : "h-5 w-5")} />
+        {!collapsed && <span className={cn("font-medium", indented ? "text-xs" : "text-sm")}>{item.name}</span>}
+      </Link>
     );
   };
 
