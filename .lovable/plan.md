@@ -1,33 +1,31 @@
 
 
-# Logo Visibility Fix on Blue Backgrounds
+# Add "My Journey" Overview to Pipeline Progress Bar
 
-## Problem
-The logo currently uses the `logo-boost` CSS filter on dark blue backgrounds (header, footer, sidebars), making it hard to see. The Login page already solves this correctly using `brightness-0 invert` to render the logo white.
+## What Changes
+Add an "i" (info/overview) icon as the first item in the candidate pipeline progress bar, linking to `/candidate/dashboard`. This gives candidates a quick way to return to their journey overview directly from the pipeline.
 
-## Solution
-Replace `logo-boost` with `brightness-0 invert` on all logo instances that sit on blue/dark backgrounds, matching the Login page approach.
+## File to Update
 
-## Files to Update
+### `src/components/candidate/PipelineProgress.tsx`
+- Add an `Info` (or `LayoutDashboard`) icon as a new entry at the start of the pipeline stages array
+- This entry links to `/candidate/dashboard` with the label "My Journey" (or "Overview")
+- It will not have a status like the other stages -- it acts as a persistent anchor point
+- It will be visually distinct (e.g., uses `primary` styling or a neutral style) so it doesn't look like a pipeline "stage" but rather a navigation shortcut
+- A connector line will link it to the first real stage (Preparation)
 
-### 1. `src/components/layouts/PublicLayout.tsx`
-- **Header logo** (line 30): Change `logo-boost` to `brightness-0 invert`
-- **Footer logo** (line 87): Change `logo-boost` to `brightness-0 invert`
+## Visual Result
+The pipeline bar will look like:
 
-### 2. `src/components/layouts/CandidateLayout.tsx`
-- **Sidebar logo expanded** (line 109): Change `logo-boost` to `brightness-0 invert`
-- **Sidebar logo collapsed** (line 114): Change `logo-boost` to `brightness-0 invert`
+```text
+[i] --- [Preparation] --- [Selection] --- [Readiness] --- [Internship] --- [Relocation] --- [Onboarding] --- [Follow-up]
+```
 
-### 3. `src/components/layouts/EmployerLayout.tsx`
-- **Sidebar logo expanded** (line 61): Change `logo-boost` to `brightness-0 invert`
-- **Sidebar logo collapsed** (line 66): Change `logo-boost` to `brightness-0 invert`
-
-### 4. `src/components/layouts/AdminLayout.tsx`
-- **Sidebar logo expanded** (line 65): Change `logo-boost` to `brightness-0 invert`
-- **Sidebar logo collapsed** (line 74): Change `logo-boost` to `brightness-0 invert`
+Where `[i]` is an info/overview icon linking to `/candidate/dashboard`.
 
 ## Technical Details
-- `brightness-0` makes the image fully black, then `invert` flips it to white
-- This is the same approach already used on the Login page (line 72)
-- No new CSS or dependencies needed
+- Import `Info` (or `LayoutDashboard`) icon from `lucide-react`
+- Add a new entry at position 0 in the `pipelineStages` array with `status: "info"` and `href: "/candidate/dashboard"`
+- Style the "info" status with a distinct but subtle appearance (e.g., `bg-primary/20 border-primary text-primary`) so it stands apart from the stage progression colors
+- Active/current-page highlighting (`ring-2`) will apply when on `/candidate/dashboard`
 
