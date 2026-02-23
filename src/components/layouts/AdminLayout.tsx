@@ -62,7 +62,7 @@ const AdminLayout = () => {
                 <img 
                   src={logoImage} 
                   alt="Nordic Ascent" 
-                  className="h-32 w-auto logo-boost"
+                  className="h-32 w-auto brightness-0 invert"
                 />
               </Link>
             )}
@@ -71,7 +71,7 @@ const AdminLayout = () => {
                 <img 
                   src={logoImage} 
                   alt="Nordic Ascent" 
-                  className="h-20 w-auto logo-boost"
+                  className="h-20 w-auto brightness-0 invert"
                 />
               </Link>
             )}
