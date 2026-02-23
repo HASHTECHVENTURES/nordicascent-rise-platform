@@ -27,10 +27,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import logoImage from "@/assets/nordic-ascent-logo.png";
 import PipelineProgress from "@/components/candidate/PipelineProgress";
 
-// My Journey group (dashboard + profile)
+// My Journey group (dashboard only, profile accessed via user avatar)
 const journeyItems = [
   { name: "Overview", href: "/candidate/dashboard", icon: LayoutDashboard, tooltip: "Track your pipeline progress overview" },
-  { name: "Profile", href: "/candidate/profile", icon: User, tooltip: "Manage your personal information and CV" },
 ];
 
 // Standalone nav items
@@ -173,7 +172,15 @@ const CandidateLayout = () => {
           {/* User section */}
           {!collapsed && (
             <div className="p-4 border-t border-white/10">
-              <div className="flex items-center gap-3 p-2 rounded bg-white/10">
+              <Link
+                to="/candidate/profile"
+                className={cn(
+                  "flex items-center gap-3 p-2 rounded transition-colors",
+                  location.pathname === "/candidate/profile"
+                    ? "bg-nordic-orange text-white"
+                    : "bg-white/10 hover:bg-white/15"
+                )}
+              >
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="https://i.pravatar.cc/150?img=1" />
                   <AvatarFallback className="bg-nordic-orange text-white">RA</AvatarFallback>
@@ -182,7 +189,7 @@ const CandidateLayout = () => {
                   <p className="text-sm font-medium truncate text-nordic-sand">Rahul Sharma</p>
                   <p className="text-xs text-nordic-sand/60">Candidate</p>
                 </div>
-              </div>
+              </Link>
             </div>
           )}
         </div>
