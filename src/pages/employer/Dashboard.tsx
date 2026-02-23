@@ -8,9 +8,12 @@ import {
   UserCheck,
   CheckCircle2,
   MapPin,
-  Building2
+  Building2,
+  TrendingUp,
+  TrendingDown,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { AreaChart, Area, ResponsiveContainer, BarChart, Bar } from "recharts";
 
 const pipelineStages = [
   { id: 1, name: "Preparation", count: 3, icon: ClipboardCheck },
@@ -20,6 +23,20 @@ const pipelineStages = [
   { id: 5, name: "Relocation", count: 1, icon: MapPin },
   { id: 6, name: "Onboarding", count: 0, icon: Building2 },
   { id: 7, name: "Follow-up", count: 2, icon: Users },
+];
+
+// Mock sparkline data for KPIs
+const candidatesTrend = [
+  { v: 8 }, { v: 10 }, { v: 12 }, { v: 11 }, { v: 14 }, { v: 15 }, { v: 17 },
+];
+const rolesTrend = [
+  { v: 2 }, { v: 2 }, { v: 3 }, { v: 3 }, { v: 4 }, { v: 3 }, { v: 3 },
+];
+const actionsTrend = [
+  { v: 5 }, { v: 4 }, { v: 3 }, { v: 4 }, { v: 3 }, { v: 2 }, { v: 2 },
+];
+const onboardedTrend = [
+  { v: 0 }, { v: 0 }, { v: 1 }, { v: 1 }, { v: 1 }, { v: 2 }, { v: 2 },
 ];
 
 const EmployerDashboard = () => {
@@ -64,63 +81,129 @@ const EmployerDashboard = () => {
         </CardContent>
       </Card>
 
-      {/* KPI Cards - 2x2 Grid, bigger */}
+      {/* KPI Cards - 2x2 Grid with sparklines */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Link to="/employer/candidates">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-            <CardContent className="p-8">
-              <div className="flex items-center gap-5">
-                <div className="h-16 w-16 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Users className="h-8 w-8 text-primary" />
+          <Card className="hover:border-primary/50 transition-colors cursor-pointer overflow-hidden">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Users className="h-7 w-7 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-4xl font-bold">{totalCandidates}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">Total Candidates</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-4xl font-bold">{totalCandidates}</p>
-                  <p className="text-base text-muted-foreground mt-1">Total Candidates</p>
+                <div className="flex items-center gap-1 text-success text-xs font-medium">
+                  <TrendingUp className="h-3.5 w-3.5" />
+                  +12%
                 </div>
+              </div>
+              <div className="h-16 mt-4 -mx-2">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={candidatesTrend}>
+                    <defs>
+                      <linearGradient id="candidateGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                        <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <Area type="monotone" dataKey="v" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#candidateGrad)" dot={false} />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
         </Link>
+
         <Link to="/employer/jobs">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-            <CardContent className="p-8">
-              <div className="flex items-center gap-5">
-                <div className="h-16 w-16 rounded-xl bg-secondary/20 flex items-center justify-center">
-                  <Briefcase className="h-8 w-8 text-secondary" />
+          <Card className="hover:border-primary/50 transition-colors cursor-pointer overflow-hidden">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="h-14 w-14 rounded-xl bg-secondary/20 flex items-center justify-center">
+                    <Briefcase className="h-7 w-7 text-secondary" />
+                  </div>
+                  <div>
+                    <p className="text-4xl font-bold">3</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">Open Roles</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-4xl font-bold">3</p>
-                  <p className="text-base text-muted-foreground mt-1">Open Roles</p>
+                <div className="flex items-center gap-1 text-muted-foreground text-xs font-medium">
+                  — stable
                 </div>
+              </div>
+              <div className="h-16 mt-4 -mx-2">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={rolesTrend}>
+                    <Bar dataKey="v" fill="hsl(var(--secondary))" radius={[2, 2, 0, 0]} opacity={0.6} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
         </Link>
+
         <Link to="/employer/tasks">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-            <CardContent className="p-8">
-              <div className="flex items-center gap-5">
-                <div className="h-16 w-16 rounded-xl bg-warning/10 flex items-center justify-center">
-                  <Clock className="h-8 w-8 text-warning" />
+          <Card className="hover:border-primary/50 transition-colors cursor-pointer overflow-hidden">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="h-14 w-14 rounded-xl bg-warning/10 flex items-center justify-center">
+                    <Clock className="h-7 w-7 text-warning" />
+                  </div>
+                  <div>
+                    <p className="text-4xl font-bold">2</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">Awaiting Action</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 text-success text-xs font-medium">
+                  <TrendingDown className="h-3.5 w-3.5" />
+                  -60%
+                </div>
+              </div>
+              <div className="h-16 mt-4 -mx-2">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={actionsTrend}>
+                    <defs>
+                      <linearGradient id="actionsGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="hsl(var(--warning))" stopOpacity={0.3} />
+                        <stop offset="100%" stopColor="hsl(var(--warning))" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <Area type="monotone" dataKey="v" stroke="hsl(var(--warning))" strokeWidth={2} fill="url(#actionsGrad)" dot={false} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Card className="overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-4">
+                <div className="h-14 w-14 rounded-xl bg-success/10 flex items-center justify-center">
+                  <CheckCircle className="h-7 w-7 text-success" />
                 </div>
                 <div>
                   <p className="text-4xl font-bold">2</p>
-                  <p className="text-base text-muted-foreground mt-1">Awaiting Action</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">Recently Onboarded</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </Link>
-        <Card>
-          <CardContent className="p-8">
-            <div className="flex items-center gap-5">
-              <div className="h-16 w-16 rounded-xl bg-success/10 flex items-center justify-center">
-                <CheckCircle className="h-8 w-8 text-success" />
+              <div className="flex items-center gap-1 text-success text-xs font-medium">
+                <TrendingUp className="h-3.5 w-3.5" />
+                +100%
               </div>
-              <div>
-                <p className="text-4xl font-bold">2</p>
-                <p className="text-base text-muted-foreground mt-1">Recently Onboarded</p>
-              </div>
+            </div>
+            <div className="h-16 mt-4 -mx-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={onboardedTrend}>
+                  <Bar dataKey="v" fill="hsl(var(--success))" radius={[2, 2, 0, 0]} opacity={0.6} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
