@@ -1,43 +1,25 @@
 
-# Add Overlay/Tooltip on Pipeline Stage Click
 
-## What Changes
-When a user clicks on a pipeline stage in the progress bar, a small overlay popup will appear showing the stage's purpose/description. The overlay will also contain a button/link to navigate to that stage's page. This gives candidates context about each stage before navigating.
+# Summary of All Planned Changes
 
-## How It Works
-1. Clicking a pipeline stage icon shows a popover overlay below/above the icon
-2. The overlay displays: stage name, a short description of what that stage is for, and a "Go to [Stage]" link
-3. Clicking the link navigates to the stage page
-4. Clicking outside the overlay closes it
+## 1. Pipeline Hover Tooltips
+When you hover over any stage in the candidate pipeline bar, a small tooltip appears showing what that stage is about (e.g., "Document collection, CV review, and initial assessments" for Preparation).
 
-## Stage Descriptions
-Each stage will have a brief purpose description:
-- **My Journey** -- "Overview of your complete candidate journey and progress"
-- **Preparation** -- "Document collection, CV review, and initial assessments"
-- **Selection** -- "Interview process and employer matching"
-- **Readiness** -- "Skills assessment and pre-departure preparation"
-- **Internship** -- "On-the-job training and workplace integration"
-- **Relocation** -- "Language courses, cultural integration, and settling in"
-- **Onboarding** -- "Final workplace onboarding and long-term setup"
-- **Follow-up** -- "Ongoing support and career development check-ins"
+## 2. Pipeline Click-to-Navigate
+Clicking a pipeline stage takes you directly to that page -- no popup or extra button needed. Just click and go.
 
-## Technical Details
+## 3. Remove the Special "My Journey" Circle
+The "My Journey" stage currently has a unique triple-ring design. This will be simplified to match all other stages -- same circle style, just colored blue to show it's the current/active stage.
 
-### File: `src/components/candidate/PipelineProgress.tsx`
-- Add a `description` field to each entry in the `pipelineStages` array
-- Replace the `<Link>` wrapper with a clickable `<button>` that toggles a popover
-- Use Radix `Popover` component (already available via `@/components/ui/popover`) to show the overlay
-- Inside the popover content: show the stage name, description text, and a `<Link>` button to navigate to the page
-- Track which stage popover is open via local state (`activePopover`)
-- Clicking the same stage again or clicking outside closes the popover
+## 4. Fix Broken "Continue to Trainee" Button
+On the Selection page, the button says "Continue to Trainee" and links to a page that doesn't exist. This will be fixed to say "Continue to Readiness" and link to the correct page.
 
-### Imports to Add
-- `Popover`, `PopoverTrigger`, `PopoverContent` from `@/components/ui/popover`
-- `useNavigate` from `react-router-dom` (for the "Go to stage" button)
-- `useState` from React
+## Files Being Changed
+- **PipelineProgress.tsx** -- tooltip on hover, direct navigation on click, simplified circle styles
+- **Selection.tsx** -- fix the broken button link
 
-### UI of the Overlay
-- Small card-style popover (max-width ~250px)
-- Stage icon + name as header
-- 1-2 line description
-- "Open [Stage Name]" button that navigates to the page
+## What Stays the Same
+- The blue logo with white sidebar across all portals (already done)
+- The pipeline color coding: green = completed, blue = current, gray = not started
+- The connector lines between stages
+
