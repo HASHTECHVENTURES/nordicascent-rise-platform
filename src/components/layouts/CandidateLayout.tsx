@@ -4,13 +4,6 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   User,
-  ClipboardCheck,
-  UserCheck,
-  CheckCircle2,
-  Briefcase,
-  MapPin,
-  Building2,
-  Users,
   MessageSquare,
   ChevronLeft,
   ChevronRight,
@@ -34,21 +27,15 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import logoImage from "@/assets/nordic-ascent-logo.png";
 import PipelineProgress from "@/components/candidate/PipelineProgress";
 
-// Pipeline stages nested under "My Journey"
-const journeyStages = [
-  { name: "Preparation", href: "/candidate/preparation", icon: ClipboardCheck, tooltip: "Complete your profile, assessments, and initial readiness checks" },
-  { name: "Selection", href: "/candidate/selection", icon: UserCheck, tooltip: "Screening, interviews, and matching with Nordic companies" },
-  { name: "Readiness", href: "/candidate/readiness", icon: CheckCircle2, tooltip: "Technical, social, and cultural validation before internship" },
-  { name: "Internship", href: "/candidate/internship", icon: Briefcase, tooltip: "Official internship and professional pre-employment with your matched company" },
-  { name: "Relocation", href: "/candidate/relocation", icon: MapPin, tooltip: "Visa processing, housing, and language preparation for Nordic arrival" },
-  { name: "Onboarding", href: "/candidate/onboarding", icon: Building2, tooltip: "Physical arrival, workplace integration, and team introduction" },
-  { name: "Follow-up", href: "/candidate/followup", icon: Users, tooltip: "Long-term career support and development (add-on service)" },
+// My Journey group (dashboard + profile)
+const journeyItems = [
+  { name: "Overview", href: "/candidate/dashboard", icon: LayoutDashboard, tooltip: "Track your pipeline progress overview" },
+  { name: "Profile", href: "/candidate/profile", icon: User, tooltip: "Manage your personal information and CV" },
 ];
 
 // Standalone nav items
 const standaloneNav = [
   { name: "Mentoring", href: "/candidate/mentoring", icon: Heart, tooltip: "Connect with your dedicated company mentor" },
-  { name: "Profile", href: "/candidate/profile", icon: User, tooltip: "Manage your personal information and CV" },
   { name: "Messages", href: "/candidate/messages", icon: MessageSquare, tooltip: "Communication with employers and Nordic Ascent team" },
 ];
 
@@ -57,7 +44,7 @@ const CandidateLayout = () => {
   const [journeyOpen, setJourneyOpen] = useState(true);
   const location = useLocation();
 
-  const isJourneyActive = location.pathname === "/candidate/dashboard" || journeyStages.some(s => location.pathname === s.href);
+  const isJourneyActive = journeyItems.some(s => location.pathname === s.href);
 
   const renderNavItem = (item: { name: string; href: string; icon: React.ElementType; tooltip?: string }, indented = false) => {
     const isActive = location.pathname === item.href;
@@ -169,21 +156,7 @@ const CandidateLayout = () => {
 
                   {journeyOpen && (
                     <div className="mt-1 space-y-0.5">
-                      {/* Dashboard link */}
-                      <Link
-                        to="/candidate/dashboard"
-                        className={cn(
-                          "flex items-center gap-3 pl-9 pr-3 py-2 rounded transition-colors",
-                          location.pathname === "/candidate/dashboard"
-                            ? "bg-nordic-orange text-white"
-                            : "text-nordic-sand/60 hover:bg-white/10 hover:text-nordic-sand"
-                        )}
-                      >
-                        <span className="text-xs font-medium">Overview</span>
-                      </Link>
-
-                      {/* Pipeline stages */}
-                      {journeyStages.map((stage) => renderNavItem(stage, true))}
+                      {journeyItems.map((item) => renderNavItem(item, true))}
                     </div>
                   )}
                 </>

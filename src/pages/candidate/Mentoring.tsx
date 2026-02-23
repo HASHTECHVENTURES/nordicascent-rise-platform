@@ -42,7 +42,7 @@ const CandidateMentoring = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-medium text-foreground">Mentoring</h1>
-        <p className="text-muted-foreground">Your dedicated mentor guides you from Readiness through Follow-up</p>
+        <p className="text-muted-foreground">Your dedicated mentor guides you from Readiness through Onboarding</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -195,20 +195,16 @@ const CandidateMentoring = () => {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground mb-4">
-            Mentoring at Nordic Ascent is a continuous journey that begins during the Readiness phase and extends through your Internship and Follow-up periods. Your mentor is your dedicated point of contact, helping you navigate cultural adaptation, professional development, and career growth in the Nordics.
+            Mentoring at Nordic Ascent is a continuous journey that begins during the Readiness phase and extends through your Internship and Onboarding periods. Your mentor is your dedicated point of contact, helping you navigate cultural adaptation, professional development, and career growth in the Nordics.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-3 rounded bg-background">
               <p className="font-medium text-sm">Readiness Phase</p>
               <p className="text-xs text-muted-foreground">Cultural orientation & goal setting</p>
             </div>
             <div className="p-3 rounded bg-background">
-              <p className="font-medium text-sm">Internship Phase</p>
+              <p className="font-medium text-sm">Internship & Onboarding</p>
               <p className="text-xs text-muted-foreground">Regular check-ins & career guidance</p>
-            </div>
-            <div className="p-3 rounded bg-background">
-              <p className="font-medium text-sm">Follow-up Phase</p>
-              <p className="text-xs text-muted-foreground">Long-term support & networking</p>
             </div>
           </div>
         </CardContent>

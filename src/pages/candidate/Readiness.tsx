@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, Circle, ArrowRight, AlertTriangle, BookOpen, Code, Users, Heart, Globe, Lightbulb } from "lucide-react";
+import { CheckCircle, Circle, ArrowRight, Code, Users, Heart, Globe } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const technicalModules = [
@@ -47,72 +47,13 @@ const CandidateReadiness = () => {
         <Badge className="bg-primary text-primary-foreground">Active</Badge>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-medium">Overall Readiness</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm">Total Progress</span>
-            <span className="text-sm font-medium">{readiness}%</span>
-          </div>
-          <Progress value={readiness} className="h-2" />
-          
-          <div className="grid grid-cols-3 gap-4 pt-4">
-            <div className="text-center p-3 rounded bg-muted/50">
-              <Code className="h-5 w-5 mx-auto mb-2 text-primary" />
-              <p className="text-sm font-medium">{technicalProgress}%</p>
-              <p className="text-xs text-muted-foreground">Technical</p>
-            </div>
-            <div className="text-center p-3 rounded bg-muted/50">
-              <Users className="h-5 w-5 mx-auto mb-2 text-primary" />
-              <p className="text-sm font-medium">{socialProgress}%</p>
-              <p className="text-xs text-muted-foreground">Social</p>
-            </div>
-            <div className="text-center p-3 rounded bg-muted/50">
-              <Globe className="h-5 w-5 mx-auto mb-2 text-primary" />
-              <p className="text-sm font-medium">{culturalProgress}%</p>
-              <p className="text-xs text-muted-foreground">Cultural</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {risks.length > 0 && (
-        <Card className="border-warning/50">
-          <CardHeader>
-            <CardTitle className="text-lg font-medium flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-warning" />
-              Open Issues
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {risks.map((risk) => (
-              <div key={risk.id} className="flex items-center gap-3 p-3 rounded bg-warning/10">
-                <span className="text-sm">{risk.text}</span>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      <Card className="border-primary/30 bg-primary/5">
-        <CardHeader>
-          <CardTitle className="text-lg font-medium flex items-center gap-2">
-            <Heart className="h-5 w-5 text-primary" />
-            Mentoring Begins Here
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground mb-3">
-            Your mentoring journey starts during the Readiness phase and continues through Internship and Follow-up. 
-            Your assigned mentor will guide you through cultural adaptation and professional development.
-          </p>
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/candidate/mentoring">View Mentoring Details</Link>
-          </Button>
-        </CardContent>
-      </Card>
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-medium">Stage Readiness</span>
+          <span className="text-sm text-muted-foreground">{readiness}%</span>
+        </div>
+        <Progress value={readiness} className="h-2" />
+      </div>
 
       <Tabs defaultValue="technical" className="space-y-4">
         <TabsList className="grid w-full grid-cols-3">
@@ -202,6 +143,24 @@ const CandidateReadiness = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Card className="border-primary/30 bg-primary/5">
+        <CardHeader>
+          <CardTitle className="text-lg font-medium flex items-center gap-2">
+            <Heart className="h-5 w-5 text-primary" />
+            Mentoring Begins Here
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-3">
+            Your mentoring journey starts during the Readiness phase and continues through Onboarding. 
+            Your assigned mentor will guide you through cultural adaptation and professional development.
+          </p>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/candidate/mentoring">View Mentoring Details</Link>
+          </Button>
+        </CardContent>
+      </Card>
 
       <Card className="border-primary/50 bg-primary/5">
         <CardHeader>
