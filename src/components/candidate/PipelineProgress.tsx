@@ -1,6 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
 import {
-  Info,
   ClipboardCheck,
   UserCheck,
   CheckCircle2,
@@ -12,7 +11,6 @@ import {
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 const pipelineStages = [
-  { id: 0, name: "My Journey", status: "active", href: "/candidate/dashboard", icon: Info, description: "Overview of your complete candidate journey and progress" },
   { id: 1, name: "Preparation", status: "completed", href: "/candidate/preparation", icon: ClipboardCheck, description: "Document collection, CV review, and initial assessments" },
   { id: 2, name: "Selection", status: "completed", href: "/candidate/selection", icon: UserCheck, description: "Interview process and employer matching" },
   { id: 3, name: "Readiness", status: "active", href: "/candidate/readiness", icon: CheckCircle2, description: "Skills assessment and pre-departure preparation" },

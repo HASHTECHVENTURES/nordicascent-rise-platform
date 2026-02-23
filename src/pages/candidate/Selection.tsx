@@ -17,7 +17,7 @@ const CandidateSelection = () => {
   const readiness = Math.round((completedTasks / tasks.length) * 100);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-16">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-medium text-foreground">Selection</h1>
