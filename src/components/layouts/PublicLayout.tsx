@@ -27,8 +27,8 @@ export function PublicLayout() {
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3">
-              <img src={logoBlue} alt="Nordic Ascent" className="h-24 w-auto" />
+            <Link to="/" className="flex items-center gap-3 h-14 overflow-hidden">
+              <img src={logoBlue} alt="Nordic Ascent" className="h-full w-auto object-contain" />
             </Link>
 
             {/* Desktop Navigation */}
