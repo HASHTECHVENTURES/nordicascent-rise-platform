@@ -35,17 +35,26 @@ const PipelineProgress = () => {
                 to={stage.href}
                 className="flex flex-col items-center min-w-[80px] group"
               >
-                <div className={`
-                  w-10 h-10 rounded-full flex items-center justify-center border-2 mb-1
-                  ${stage.status === 'info' ? 'bg-primary/20 border-primary text-primary' : ''}
-                  ${stage.status === 'completed' ? 'bg-success border-success text-success-foreground' : ''}
-                  ${stage.status === 'active' ? 'bg-primary border-primary text-primary-foreground' : ''}
-                  ${stage.status === 'not_started' ? 'bg-muted border-muted-foreground/30 text-muted-foreground' : ''}
-                  ${isCurrentPage ? 'ring-2 ring-offset-2 ring-primary' : ''}
-                  group-hover:opacity-80 transition-opacity
-                `}>
-                  <stage.icon className="h-4 w-4" />
-                </div>
+                {stage.status === 'info' ? (
+                  <div className={`relative w-12 h-12 mb-1 flex items-center justify-center ${isCurrentPage ? 'ring-2 ring-offset-2 ring-primary rounded-full' : ''}`}>
+                    <div className="absolute inset-0 rounded-full border-[3px] border-primary/30" />
+                    <div className="absolute inset-1 rounded-full border-2 border-primary/50" />
+                    <div className="w-8 h-8 rounded-full bg-primary/15 border-2 border-primary text-primary flex items-center justify-center">
+                      <stage.icon className="h-4 w-4" />
+                    </div>
+                  </div>
+                ) : (
+                  <div className={`
+                    w-10 h-10 rounded-full flex items-center justify-center border-2 mb-1
+                    ${stage.status === 'completed' ? 'bg-success border-success text-success-foreground' : ''}
+                    ${stage.status === 'active' ? 'bg-primary border-primary text-primary-foreground' : ''}
+                    ${stage.status === 'not_started' ? 'bg-muted border-muted-foreground/30 text-muted-foreground' : ''}
+                    ${isCurrentPage ? 'ring-2 ring-offset-2 ring-primary' : ''}
+                    group-hover:opacity-80 transition-opacity
+                  `}>
+                    <stage.icon className="h-4 w-4" />
+                  </div>
+                )}
                 <span className={`text-xs font-medium text-center ${
                   isCurrentPage ? 'text-primary' : stage.status === 'active' ? 'text-primary' : 'text-muted-foreground'
                 }`}>
