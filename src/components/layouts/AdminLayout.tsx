@@ -192,7 +192,6 @@ const AdminLayout = () => {
         </header>
 
         {/* Page content */}
-        <AdminPipelineProgress />
         <main className="p-6">
           <Outlet />
         </main>
