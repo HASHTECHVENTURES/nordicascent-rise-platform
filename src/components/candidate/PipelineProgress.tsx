@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import {
+  Info,
   ClipboardCheck,
   UserCheck,
   CheckCircle2,
@@ -10,6 +11,7 @@ import {
 } from "lucide-react";
 
 const pipelineStages = [
+  { id: 0, name: "My Journey", status: "info", href: "/candidate/dashboard", icon: Info },
   { id: 1, name: "Preparation", status: "completed", href: "/candidate/preparation", icon: ClipboardCheck },
   { id: 2, name: "Selection", status: "completed", href: "/candidate/selection", icon: UserCheck },
   { id: 3, name: "Readiness", status: "active", href: "/candidate/readiness", icon: CheckCircle2 },
@@ -35,6 +37,7 @@ const PipelineProgress = () => {
               >
                 <div className={`
                   w-10 h-10 rounded-full flex items-center justify-center border-2 mb-1
+                  ${stage.status === 'info' ? 'bg-primary/20 border-primary text-primary' : ''}
                   ${stage.status === 'completed' ? 'bg-success border-success text-success-foreground' : ''}
                   ${stage.status === 'active' ? 'bg-primary border-primary text-primary-foreground' : ''}
                   ${stage.status === 'not_started' ? 'bg-muted border-muted-foreground/30 text-muted-foreground' : ''}
