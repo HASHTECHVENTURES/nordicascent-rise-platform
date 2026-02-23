@@ -4,6 +4,7 @@ import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import logoImage from "@/assets/nordic-ascent-logo.png";
+import logoBlue from "@/assets/nordic-ascent-logo-blue.png";
 const navigation = [{
   name: "Platform",
   href: "/platform"
@@ -26,8 +27,8 @@ export function PublicLayout() {
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3 bg-[#1C3A5F] px-3 -ml-3 h-16">
-              <img src={logoImage} alt="Nordic Ascent" className="h-24 w-auto" style={{ filter: "brightness(0) invert(1)" }} />
+            <Link to="/" className="flex items-center gap-3">
+              <img src={logoBlue} alt="Nordic Ascent" className="h-24 w-auto" />
             </Link>
 
             {/* Desktop Navigation */}
