@@ -48,7 +48,7 @@ const CandidateLayout = () => {
           indented ? "pl-9 pr-3" : "px-3",
           isActive
             ? "bg-nordic-orange text-white"
-            : "text-nordic-sand/80 hover:bg-white/10 hover:text-nordic-sand"
+            : "text-foreground/70 hover:bg-muted hover:text-foreground"
         )}
       >
         <item.icon className={cn("flex-shrink-0", indented ? "h-4 w-4" : "h-5 w-5")} />
@@ -62,13 +62,13 @@ const CandidateLayout = () => {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen bg-nordic-deep border-r border-nordic-deep",
+          "fixed left-0 top-0 z-40 h-screen bg-white border-r border-border",
           collapsed ? "w-16" : "w-64"
         )}
       >
         <div className="flex h-full flex-col">
           {/* Logo */}
-          <div className="flex h-32 items-center justify-between px-4 border-b border-white/10">
+          <div className="flex h-32 items-center justify-between px-4 border-b border-border">
             {!collapsed && (
               <Link to="/candidate/dashboard" className="flex items-center gap-2">
                 <img src={logoImage} alt="Nordic Ascent" className="h-32 w-auto" style={{ filter: "brightness(0) saturate(100%) invert(19%) sepia(32%) saturate(1200%) hue-rotate(183deg) brightness(95%) contrast(92%)" }} />
@@ -83,7 +83,7 @@ const CandidateLayout = () => {
               variant="ghost"
               size="icon"
               onClick={() => setCollapsed(!collapsed)}
-              className={cn("text-nordic-sand hover:bg-white/10", collapsed && "hidden")}
+              className={cn("text-muted-foreground hover:bg-muted", collapsed && "hidden")}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -94,7 +94,7 @@ const CandidateLayout = () => {
               variant="ghost"
               size="icon"
               onClick={() => setCollapsed(false)}
-              className="mx-auto mt-2 text-nordic-sand hover:bg-white/10"
+              className="mx-auto mt-2 text-muted-foreground hover:bg-muted"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -109,7 +109,7 @@ const CandidateLayout = () => {
                 "flex items-center gap-3 px-3 py-2.5 rounded transition-colors",
                 location.pathname === "/candidate/dashboard"
                   ? "bg-nordic-orange text-white"
-                  : "text-nordic-sand/80 hover:bg-white/10 hover:text-nordic-sand"
+                  : "text-foreground/70 hover:bg-muted hover:text-foreground"
               )}
             >
               <LayoutDashboard className="h-5 w-5 flex-shrink-0" />
@@ -117,7 +117,7 @@ const CandidateLayout = () => {
             </Link>
 
             {/* Separator */}
-            {!collapsed && <div className="border-t border-white/10 my-3" />}
+            {!collapsed && <div className="border-t border-border my-3" />}
 
             {/* Standalone items */}
             {standaloneNav.map((item) => renderNavItem(item))}
@@ -125,14 +125,14 @@ const CandidateLayout = () => {
 
           {/* User section */}
           {!collapsed && (
-            <div className="p-4 border-t border-white/10">
+            <div className="p-4 border-t border-border">
               <Link
                 to="/candidate/profile"
                 className={cn(
                   "flex items-center gap-3 p-2 rounded transition-colors",
                   location.pathname === "/candidate/profile"
                     ? "bg-nordic-orange text-white"
-                    : "bg-white/10 hover:bg-white/15"
+                    : "bg-muted hover:bg-muted/80"
                 )}
               >
                 <Avatar className="h-8 w-8">
@@ -140,8 +140,8 @@ const CandidateLayout = () => {
                   <AvatarFallback className="bg-nordic-orange text-white">RA</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate text-nordic-sand">Rahul Sharma</p>
-                  <p className="text-xs text-nordic-sand/60">Candidate</p>
+                  <p className="text-sm font-medium truncate text-foreground">Rahul Sharma</p>
+                  <p className="text-xs text-muted-foreground">Candidate</p>
                 </div>
               </Link>
             </div>
