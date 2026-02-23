@@ -9,7 +9,9 @@ import {
   Bell,
   Heart,
   LogOut,
+  AlertTriangle,
 } from "lucide-react";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -156,12 +158,35 @@ const CandidateLayout = () => {
             </div>
 
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 h-4 w-4 bg-warning text-warning-foreground text-xs rounded-full flex items-center justify-center">
-                  3
-                </span>
-              </Button>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative">
+                    <Bell className="h-5 w-5" />
+                    <span className="absolute -top-1 -right-1 h-4 w-4 bg-warning text-warning-foreground text-xs rounded-full flex items-center justify-center">
+                      3
+                    </span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-0" align="end">
+                  <div className="p-4 border-b">
+                    <h3 className="font-semibold text-base">Open Issues</h3>
+                  </div>
+                  <div className="p-3 space-y-2">
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-warning/10">
+                      <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0" />
+                      <span className="text-sm">Technical assessment deadline in 5 days</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-warning/10">
+                      <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0" />
+                      <span className="text-sm">Document upload pending for Preparation stage</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-warning/10">
+                      <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0" />
+                      <span className="text-sm">New message from your mentor</span>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
