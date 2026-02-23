@@ -67,7 +67,7 @@ const CandidateSelection = () => {
 
       <div className="flex justify-end">
         <Button asChild>
-          <Link to="/candidate/trainee">Continue to Trainee <ArrowRight className="ml-2 h-4 w-4" /></Link>
+          <Link to="/candidate/readiness">Continue to Readiness <ArrowRight className="ml-2 h-4 w-4" /></Link>
         </Button>
       </div>
     </div>
