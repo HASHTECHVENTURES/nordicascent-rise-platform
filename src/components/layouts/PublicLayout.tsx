@@ -27,7 +27,7 @@ export function PublicLayout() {
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3">
-              <img src={logoImage} alt="Nordic Ascent" className="h-24 w-auto" />
+              <img src={logoImage} alt="Nordic Ascent" className="h-24 w-auto" style={{ filter: "brightness(0) saturate(100%) invert(19%) sepia(32%) saturate(1200%) hue-rotate(183deg) brightness(95%) contrast(92%)" }} />
             </Link>
 
             {/* Desktop Navigation */}
