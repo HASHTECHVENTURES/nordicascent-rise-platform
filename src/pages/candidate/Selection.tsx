@@ -6,10 +6,10 @@ import { CheckCircle, Circle, ArrowRight, Calendar, Video, FileCheck } from "luc
 import { Link } from "react-router-dom";
 
 const tasks = [
-  { id: 1, text: "Initial screening call", completed: true },
-  { id: 2, text: "Technical interview", completed: true },
-  { id: 3, text: "Cultural fit assessment", completed: true },
-  { id: 4, text: "Reference verification", completed: true },
+  { id: 1, text: "Application Review", completed: true },
+  { id: 2, text: "Interview Process", completed: true },
+  { id: 3, text: "Company Matching", completed: true },
+  { id: 4, text: "Final Approval", completed: true },
 ];
 
 const CandidateSelection = () => {
@@ -41,7 +41,7 @@ const CandidateSelection = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-medium">Selection Steps</CardTitle>
+          <CardTitle className="text-lg font-medium">Selection (points on page)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {tasks.map((task) => (
@@ -60,7 +60,7 @@ const CandidateSelection = () => {
         <CardContent>
           <div className="p-4 rounded bg-primary/5 border border-primary/20">
             <p className="font-medium">Matched with TechCorp Nordic</p>
-            <p className="text-sm text-muted-foreground mt-1">Senior Software Engineer position</p>
+            <p className="text-sm text-muted-foreground mt-1">Senior Engineer position</p>
           </div>
         </CardContent>
       </Card>

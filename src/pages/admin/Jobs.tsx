@@ -7,7 +7,7 @@ import { Search, Filter, Download, Eye, CheckCircle, XCircle, MoreHorizontal, Bu
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const jobs = [
-  { id: 1, title: "Senior Software Engineer", company: "TechNordic AB", location: "Stockholm, SE", type: "Full-time", status: "active", applicants: 47, posted: "2024-03-01", moderation: "approved" },
+  { id: 1, title: "Senior Engineer", company: "TechNordic AB", location: "Stockholm, SE", type: "Full-time", status: "active", applicants: 47, posted: "2024-03-01", moderation: "approved" },
   { id: 2, title: "Product Manager", company: "Nordic Innovations", location: "Copenhagen, DK", type: "Full-time", status: "active", applicants: 32, posted: "2024-03-05", moderation: "approved" },
   { id: 3, title: "UX Designer", company: "DesignHub Finland", location: "Helsinki, FI", type: "Contract", status: "pending", applicants: 0, posted: "2024-03-12", moderation: "pending" },
   { id: 4, title: "Data Scientist", company: "DataFlow Norway", location: "Oslo, NO", type: "Full-time", status: "closed", applicants: 89, posted: "2024-02-15", moderation: "approved" },

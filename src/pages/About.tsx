@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Mountain, Target, Heart, Lightbulb, Users, ArrowRight, Linkedin, Twitter, MapPin, Briefcase, Clock } from "lucide-react";
 
 const values = [
-  { icon: Target, title: "Excellence", description: "We strive for excellence in everything we do, from code to customer service." },
+  { icon: Target, title: "Excellence", description: "We strive for excellence in everything we do, from delivery to customer service." },
   { icon: Heart, title: "Empathy", description: "We put people first, understanding and addressing real workforce challenges." },
   { icon: Lightbulb, title: "Innovation", description: "We continuously evolve our platform to stay ahead of workforce trends." },
   { icon: Users, title: "Collaboration", description: "We believe in the power of teamwork, both internally and with our clients." },
@@ -13,7 +13,7 @@ const values = [
 
 const team = [
   { name: "Anders Björkman", role: "CEO & Co-Founder", bio: "Former VP of People at Spotify, 15+ years in HR tech.", initials: "AB", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&q=80" },
-  { name: "Katarina Holm", role: "CTO & Co-Founder", bio: "Ex-Google engineer, passionate about building scalable systems.", initials: "KH", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&q=80" },
+  { name: "Katarina Holm", role: "CTO & Co-Founder", bio: "Engineering leader, passionate about building scalable products and inclusive teams.", initials: "KH", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&q=80" },
   { name: "Henrik Larsson", role: "Chief Product Officer", bio: "Product leader with background at Klarna and Wise.", initials: "HL", image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&q=80" },
   { name: "Sofia Andersson", role: "VP of Customer Success", bio: "10+ years helping enterprises transform their HR operations.", initials: "SA", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&q=80" },
 ];
@@ -28,7 +28,7 @@ const milestones = [
 ];
 
 const openPositions = [
-  { id: 1, title: "Senior Software Engineer", location: "Stockholm", type: "Full-time", department: "Engineering" },
+  { id: 1, title: "Senior Engineer", location: "Stockholm", type: "Full-time", department: "Engineering" },
   { id: 2, title: "Product Designer", location: "Remote", type: "Full-time", department: "Design" },
   { id: 3, title: "Customer Success Manager", location: "Copenhagen", type: "Full-time", department: "Customer Success" },
 ];
@@ -66,7 +66,7 @@ export default function About() {
             <h2 className="text-3xl sm:text-4xl font-bold">Our Story</h2>
             <div className="text-lg text-muted-foreground space-y-4">
               <p>Nordic Ascent was born from a simple observation: workforce management tools were either too complex for users or too simple for enterprise needs.</p>
-              <p>Founded in Stockholm in 2019 by a team of HR tech veterans and software engineers, we set out to create a platform that combines the elegance of Nordic design with the power needed by modern organizations.</p>
+              <p>Founded in Stockholm in 2019 by a team of HR and engineering veterans, we set out to create a platform that combines the elegance of Nordic design with the power needed by modern organizations. We welcome engineers from all disciplines—not only tech.</p>
               <p>Today, we serve over 500 companies across the Nordics and Europe, helping them train, manage, and empower their teams to reach new heights.</p>
             </div>
           </div>

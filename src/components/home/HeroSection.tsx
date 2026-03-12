@@ -8,7 +8,7 @@ export default function HeroSection() {
       {/* Full-bleed background image */}
       <img
         src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1600&h=900&fit=crop&q=80"
-        alt="Diverse team of engineers collaborating in a modern Nordic office"
+        alt="Diverse team of engineers from all disciplines collaborating in a modern Nordic office"
         className="absolute inset-0 w-full h-full object-cover"
       />
 
@@ -28,8 +28,7 @@ export default function HeroSection() {
             </span>
           </h1>
           <p className="text-lg lg:text-xl text-white/80 mb-10 max-w-lg leading-relaxed">
-            Connecting exceptional engineers from India with forward-thinking Nordic companies.
-            A journey of growth, culture, and lasting success.
+            Connecting exceptional engineering talent from India—all disciplines, from software to mechanical, civil, and beyond—with forward-thinking Nordic companies. A journey of growth, culture, and lasting success.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <Button size="lg" asChild className="btn-professional text-base h-13 px-10 shadow-lg">

@@ -74,13 +74,13 @@ const EmployerCompanyProfile = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2"><Label>Company Name</Label><Input defaultValue="TechNordic AB" /></div>
-                <div className="space-y-2"><Label>Industry</Label><Input defaultValue="Technology / Software" /></div>
+                <div className="space-y-2"><Label>Industry</Label><Input defaultValue="Engineering & Industry" /></div>
                 <div className="space-y-2"><Label>Company Size</Label><Input defaultValue="50-200 employees" /></div>
                 <div className="space-y-2"><Label>Founded</Label><Input defaultValue="2018" /></div>
                 <div className="space-y-2"><Label>Website</Label><Input defaultValue="https://technordic.com" /></div>
                 <div className="space-y-2"><Label>LinkedIn</Label><Input defaultValue="linkedin.com/company/technordic" /></div>
               </div>
-              <div className="space-y-2"><Label>About</Label><Textarea rows={4} defaultValue="TechNordic is a leading software company building innovative solutions for the Nordic market..." /></div>
+              <div className="space-y-2"><Label>About</Label><Textarea rows={4} defaultValue="We are a Nordic company hiring engineers across disciplines—from software and mechanical to civil and electrical—for projects across the region." /></div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -97,7 +97,7 @@ const EmployerCompanyProfile = () => {
             </Card>
             <Card>
               <CardHeader><CardTitle>Company Culture</CardTitle></CardHeader>
-              <CardContent><Textarea rows={6} defaultValue="At TechNordic, we believe in work-life balance, continuous learning, and building great products together. Our team is diverse, inclusive, and always pushing boundaries..." /></CardContent>
+              <CardContent><Textarea rows={6} defaultValue="We believe in work-life balance, continuous learning, and building great teams together. Our engineers—from all disciplines—are diverse, inclusive, and always pushing boundaries." /></CardContent>
             </Card>
           </div>
         </TabsContent>

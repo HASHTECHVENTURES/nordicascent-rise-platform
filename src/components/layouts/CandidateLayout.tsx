@@ -22,8 +22,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import logoImage from "@/assets/nordic-ascent-logo.png";
-import logoBlue from "@/assets/nordic-ascent-logo-blue.png";
 import PipelineProgress from "@/components/candidate/PipelineProgress";
 
 // No sub-items needed; My Journey is a direct link
@@ -68,17 +66,15 @@ const CandidateLayout = () => {
         )}
       >
         <div className="flex h-full flex-col">
-          {/* Logo */}
-          <div className="flex h-32 items-center justify-between px-4 border-b border-border">
+          {/* Nav header – no logo; compact for normal back/forth navigation */}
+          <div className="flex h-14 items-center justify-between px-4 border-b border-border">
             {!collapsed && (
-              <Link to="/candidate/dashboard" className="flex items-center gap-2">
-                <img src={logoBlue} alt="Nordic Ascent" className="h-32 w-auto" />
+              <Link to="/candidate/dashboard" className="text-sm font-semibold text-foreground">
+                Nordic Ascent
               </Link>
             )}
             {collapsed && (
-              <Link to="/candidate/dashboard" className="mx-auto">
-                <img src={logoBlue} alt="Nordic Ascent" className="h-20 w-auto" />
-              </Link>
+              <Link to="/candidate/dashboard" className="mx-auto text-lg font-bold text-primary">N</Link>
             )}
             <Button
               variant="ghost"
@@ -156,6 +152,7 @@ const CandidateLayout = () => {
           <div className="flex h-full items-center justify-between px-6">
             <div className="flex items-center gap-4">
               <h1 className="text-lg font-medium text-foreground">Candidate Journey</h1>
+              <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded">Entry Track</span>
             </div>
 
             <div className="flex items-center gap-4">

@@ -8,7 +8,7 @@ import { Search, Plus, MoreHorizontal, Eye, Pencil, Copy, Pause, Trash2, MapPin,
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const jobs = [
-  { id: 1, title: "Senior Frontend Developer", location: "Stockholm, SE", type: "Full-time", applicants: 47, status: "active", posted: "2024-03-01", views: 234 },
+  { id: 1, title: "Senior Engineer", location: "Stockholm, SE", type: "Full-time", applicants: 47, status: "active", posted: "2024-03-01", views: 234 },
   { id: 2, title: "Product Manager", location: "Copenhagen, DK", type: "Full-time", applicants: 32, status: "active", posted: "2024-03-05", views: 189 },
   { id: 3, title: "UX Designer", location: "Remote", type: "Contract", applicants: 18, status: "paused", posted: "2024-02-20", views: 156 },
   { id: 4, title: "Backend Engineer", location: "Stockholm, SE", type: "Full-time", applicants: 0, status: "draft", posted: "2024-03-12", views: 0 },

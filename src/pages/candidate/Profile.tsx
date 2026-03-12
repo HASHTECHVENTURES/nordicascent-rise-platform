@@ -95,7 +95,7 @@ const CandidateProfile = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="bio">Bio</Label>
-                <Textarea id="bio" rows={4} defaultValue="Passionate frontend developer with 5+ years of experience building modern web applications. Specialized in React and TypeScript." />
+                <Textarea id="bio" rows={4} defaultValue="Passionate engineer with 5+ years of experience. Ready to bring my skills to the Nordic market." />
               </div>
               <Button className="bg-candidate-accent hover:bg-candidate-accent/90">Save Changes</Button>
             </CardContent>

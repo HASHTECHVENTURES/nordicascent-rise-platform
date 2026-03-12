@@ -5,8 +5,8 @@ import { ArrowRight } from "lucide-react";
 const stages = [
   { name: "Preparation", brief: "Skill assessment & readiness" },
   { name: "Selection", brief: "Matching talent to roles" },
-  { name: "Training", brief: "Technical & cultural prep" },
-  { name: "Internship", brief: "Real-world experience" },
+  { name: "Training", brief: "Skills & cultural prep" },
+  { name: "Activation", brief: "Internship or Pre-Employment" },
   { name: "Relocation", brief: "Seamless move to Nordics" },
   { name: "Onboarding", brief: "Integration support" },
   { name: "Follow-up", brief: "Long-term success" },

@@ -6,9 +6,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Filter, Download, Eye, Ban, CheckCircle, MoreHorizontal, MapPin, Briefcase } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Link } from "react-router-dom";
 
 const candidates = [
-  { id: 1, name: "Emma Lindqvist", email: "emma@email.com", avatar: "", location: "Stockholm, SE", role: "Software Engineer", status: "active", applications: 5, verified: true, joined: "2024-01-15" },
+  { id: 1, name: "Emma Lindqvist", email: "emma@email.com", avatar: "", location: "Stockholm, SE", role: "Engineer", status: "active", applications: 5, verified: true, joined: "2024-01-15" },
   { id: 2, name: "Lars Andersen", email: "lars@email.com", avatar: "", location: "Copenhagen, DK", role: "Product Manager", status: "active", applications: 3, verified: true, joined: "2024-02-20" },
   { id: 3, name: "Sofia Virtanen", email: "sofia@email.com", avatar: "", location: "Helsinki, FI", role: "UX Designer", status: "pending", applications: 2, verified: false, joined: "2024-03-10" },
   { id: 4, name: "Magnus Olsen", email: "magnus@email.com", avatar: "", location: "Oslo, NO", role: "Data Scientist", status: "suspended", applications: 0, verified: true, joined: "2024-01-28" },
@@ -23,9 +24,17 @@ const AdminCandidates = () => {
           <h1 className="text-3xl font-bold tracking-tight">Candidate Management</h1>
           <p className="text-muted-foreground">Review and manage platform candidates</p>
         </div>
-        <Button variant="outline" className="gap-2">
+        <Button variant="outline" className="gap-2" onClick={() => {
+          const headers = ["Name", "Email", "Location", "Role", "Status", "Applications", "Joined"];
+          const rows = candidates.map(c => [c.name, c.email, c.location, c.role, c.status, c.applications, c.joined]);
+          const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
+          const blob = new Blob([csv], { type: "text/csv" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a"); a.href = url; a.download = "candidates-export.csv"; a.click();
+          URL.revokeObjectURL(url);
+        }}>
           <Download className="h-4 w-4" />
-          Export Data
+          Export candidates
         </Button>
       </div>
 
@@ -142,9 +151,11 @@ const AdminCandidates = () => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
-                        <Eye className="h-4 w-4 mr-2" />
-                        View Profile
+                      <DropdownMenuItem asChild>
+                        <Link to={`/admin/candidates/${candidate.id}`}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          View & fix
+                        </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem>
                         <CheckCircle className="h-4 w-4 mr-2" />

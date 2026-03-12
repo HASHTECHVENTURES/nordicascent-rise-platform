@@ -25,8 +25,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import logoImage from "@/assets/nordic-ascent-logo.png";
-import logoBlue from "@/assets/nordic-ascent-logo-blue.png";
 import EmployerPipelineProgress from "@/components/employer/EmployerPipelineProgress";
 
 // Company journey navigation
@@ -55,17 +53,15 @@ const EmployerLayout = () => {
         )}
       >
         <div className="flex h-full flex-col">
-          {/* Logo */}
-          <div className="flex h-32 items-center justify-between px-4 border-b border-border">
+          {/* Nav header – no logo; compact for normal back/forth navigation */}
+          <div className="flex h-14 items-center justify-between px-4 border-b border-border">
             {!collapsed && (
-              <Link to="/employer/dashboard" className="flex items-center gap-2">
-                <img src={logoBlue} alt="Nordic Ascent" className="h-32 w-auto" />
+              <Link to="/employer/dashboard" className="text-sm font-semibold text-foreground">
+                Nordic Ascent
               </Link>
             )}
             {collapsed && (
-              <Link to="/employer/dashboard" className="mx-auto">
-                <img src={logoBlue} alt="Nordic Ascent" className="h-20 w-auto" />
-              </Link>
+              <Link to="/employer/dashboard" className="mx-auto text-lg font-bold text-primary">N</Link>
             )}
             <Button
               variant="ghost"

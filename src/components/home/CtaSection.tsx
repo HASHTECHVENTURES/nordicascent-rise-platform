@@ -17,12 +17,12 @@ export default function CtaSection() {
             Ready to Build Bridges?
           </h2>
           <p className="text-primary-foreground/80 text-lg mb-4 leading-relaxed">
-            Whether you're a Nordic company looking for exceptional talent or an engineer 
+            Whether you're a Nordic company looking for exceptional talent or an engineer (any discipline) 
             ready for a new chapter, we're here to guide your journey.
           </p>
           <p className="text-primary-foreground/60 text-sm italic">
             "Nordic Ascent helped us find engineers who truly integrated into our team and culture." 
-            — CTO, Nordic Tech Company
+            — Engineering Director, Nordic Company
           </p>
         </div>
 

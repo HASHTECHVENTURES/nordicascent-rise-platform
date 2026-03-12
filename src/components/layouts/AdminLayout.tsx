@@ -3,18 +3,19 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
-  Users,
   Building2,
   UserCheck,
-  Briefcase,
   BarChart3,
-  Shield,
   Settings,
   ChevronLeft,
   ChevronRight,
   Bell,
   LogOut,
   Search,
+  AlertTriangle,
+  Mail,
+  Megaphone,
+  History,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,18 +28,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import logoImage from "@/assets/nordic-ascent-logo.png";
 import logoBlue from "@/assets/nordic-ascent-logo-blue.png";
-import AdminPipelineProgress from "@/components/admin/AdminPipelineProgress";
 
 const navigation = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-  { name: "Users", href: "/admin/users", icon: Users },
-  { name: "Employers", href: "/admin/employers", icon: Building2 },
   { name: "Candidates", href: "/admin/candidates", icon: UserCheck },
-  { name: "Jobs", href: "/admin/jobs", icon: Briefcase },
+  { name: "Companies", href: "/admin/employers", icon: Building2 },
+  { name: "Issues", href: "/admin/issues", icon: AlertTriangle },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
-  { name: "Security", href: "/admin/security", icon: Shield },
+  { name: "Support Inbox", href: "/admin/support", icon: Mail },
+  { name: "Announcements", href: "/admin/notifications", icon: Megaphone },
+  { name: "Activity Log", href: "/admin/activity", icon: History },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
@@ -121,8 +121,8 @@ const AdminLayout = () => {
                   <AvatarFallback className="bg-nordic-orange text-white">SA</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate text-foreground">Super Admin</p>
-                  <p className="text-xs text-muted-foreground">Administrator</p>
+                  <p className="text-sm font-medium truncate text-foreground">Admin</p>
+                  <p className="text-xs text-muted-foreground">Portal admin</p>
                 </div>
               </div>
             </div>
@@ -139,7 +139,7 @@ const AdminLayout = () => {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search users, jobs, employers..."
+                  placeholder="Search candidates, companies..."
                   className="w-80 pl-9 bg-muted/50"
                 />
               </div>
@@ -163,13 +163,10 @@ const AdminLayout = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuLabel>Super Admin</DropdownMenuLabel>
+                  <DropdownMenuLabel>Admin</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <Link to="/admin/settings">Settings</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/admin/security">Security</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>

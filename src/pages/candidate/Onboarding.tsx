@@ -2,7 +2,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Building2, 
   CheckCircle, 
@@ -25,18 +24,26 @@ const onboardingSteps = [
   { id: 5, title: "Documentation Complete", status: "not_started", description: "Finalize all paperwork", icon: FileText },
 ];
 
-const firstWeekSchedule = [
-  { day: "Day 1", activity: "Welcome meeting & office tour", time: "09:00-12:00" },
-  { day: "Day 2", activity: "Team introductions & project overview", time: "09:00-17:00" },
-  { day: "Day 3", activity: "System access & tool setup", time: "09:00-12:00" },
-  { day: "Day 4", activity: "First project assignment", time: "09:00-17:00" },
-  { day: "Day 5", activity: "Week review & feedback session", time: "14:00-16:00" },
+const practicalOnboarding = [
+  { id: 1, text: "Arrival confirmation and travel dates", completed: false },
+  { id: 2, text: "Airport pickup and transportation", completed: false },
+  { id: 3, text: "Housing setup and accommodation", completed: false },
+  { id: 4, text: "Documentation (visa, ID, tax registration)", completed: false },
+  { id: 5, text: "Bank account and financial setup", completed: false },
+];
+
+const workplaceOnboarding = [
+  { id: 1, text: "Office introduction and facilities", completed: false },
+  { id: 2, text: "Team introductions and role overview", completed: false },
+  { id: 3, text: "System access and tools setup", completed: false },
+  { id: 4, text: "Company handbook and policies", completed: false },
+  { id: 5, text: "First assignments and expectations", completed: false },
 ];
 
 const resources = [
   { id: 1, title: "Office Map & Facilities Guide", type: "PDF", category: "Office" },
   { id: 2, title: "Team Directory", type: "Document", category: "Team" },
-  { id: 3, title: "IT Setup Instructions", type: "Guide", category: "Technical" },
+  { id: 3, title: "Systems & tools setup", type: "Guide", category: "Workplace" },
   { id: 4, title: "Company Handbook", type: "PDF", category: "General" },
   { id: 5, title: "Emergency Contacts", type: "Document", category: "Safety" },
 ];
@@ -120,63 +127,56 @@ const CandidateOnboarding = () => {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="schedule" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="schedule">
-            <Calendar className="h-4 w-4 mr-2" />
-            First Week Schedule
-          </TabsTrigger>
-          <TabsTrigger value="resources">
-            <FileText className="h-4 w-4 mr-2" />
-            Resources
-          </TabsTrigger>
-          <TabsTrigger value="checklist">
-            <CheckCircle className="h-4 w-4 mr-2" />
-            Checklist
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="schedule" className="space-y-4">
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
-            <div className="relative h-32 overflow-hidden rounded-t-lg">
-              <img 
-                src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&h=300&fit=crop&q=80" 
-                alt="Team collaboration"
-                className="w-full h-full object-cover"
-              />
-            </div>
             <CardHeader>
-              <CardTitle>Your First Week</CardTitle>
-              <CardDescription>What to expect during your first week at the office</CardDescription>
+              <CardTitle>Practical onboarding</CardTitle>
+              <CardDescription>Logistics, documents, and settling in</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {firstWeekSchedule.map((item, index) => (
-                  <div key={index} className="flex items-center gap-4 p-4 rounded border border-border">
-                    <div className="flex-shrink-0 w-12 h-12 rounded bg-primary/10 flex items-center justify-center">
-                      <span className="text-sm font-semibold text-primary">{index + 1}</span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-medium">{item.day}</h4>
-                        <Badge variant="outline">{item.time}</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1">{item.activity}</p>
-                    </div>
+              <div className="space-y-3">
+                {practicalOnboarding.map((item) => (
+                  <div key={item.id} className={`flex items-center gap-3 p-3 rounded border ${item.completed ? 'bg-success/5 border-success/20' : 'border-border'}`}>
+                    {item.completed ? (
+                      <CheckCircle className="h-5 w-5 text-success" />
+                    ) : (
+                      <Circle className="h-5 w-5 text-muted-foreground" />
+                    )}
+                    <span className={item.completed ? "text-muted-foreground line-through" : ""}>{item.text}</span>
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        <TabsContent value="resources" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Onboarding Resources</CardTitle>
-              <CardDescription>Essential documents and guides for your integration</CardDescription>
+              <CardTitle>Workplace onboarding</CardTitle>
+              <CardDescription>Office, team, and role integration</CardDescription>
             </CardHeader>
             <CardContent>
+              <div className="space-y-3">
+                {workplaceOnboarding.map((item) => (
+                  <div key={item.id} className={`flex items-center gap-3 p-3 rounded border ${item.completed ? 'bg-success/5 border-success/20' : 'border-border'}`}>
+                    {item.completed ? (
+                      <CheckCircle className="h-5 w-5 text-success" />
+                    ) : (
+                      <Circle className="h-5 w-5 text-muted-foreground" />
+                    )}
+                    <span className={item.completed ? "text-muted-foreground line-through" : ""}>{item.text}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Onboarding Resources</CardTitle>
+            <CardDescription>Essential documents and guides for your integration</CardDescription>
+          </CardHeader>
+          <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {resources.map((resource) => (
                   <div key={resource.id} className="flex items-center justify-between p-4 rounded border border-border hover:border-primary/50 transition-colors">
@@ -193,40 +193,9 @@ const CandidateOnboarding = () => {
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="checklist" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Pre-Arrival Checklist</CardTitle>
-              <CardDescription>Make sure you're ready for your first day</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {[
-                  { id: 1, text: "Confirm travel dates and flight details", completed: false },
-                  { id: 2, text: "Arrange temporary accommodation if needed", completed: false },
-                  { id: 3, text: "Review company handbook and policies", completed: false },
-                  { id: 4, text: "Prepare required documents (passport, visa, etc.)", completed: false },
-                  { id: 5, text: "Set up local bank account (if applicable)", completed: false },
-                  { id: 6, text: "Download company apps and tools", completed: false },
-                ].map((item) => (
-                  <div key={item.id} className={`flex items-center gap-3 p-3 rounded border ${item.completed ? 'bg-success/5 border-success/20' : 'border-border'}`}>
-                    {item.completed ? (
-                      <CheckCircle className="h-5 w-5 text-success" />
-                    ) : (
-                      <Circle className="h-5 w-5 text-muted-foreground" />
-                    )}
-                    <span className={item.completed ? "text-success line-through" : ""}>{item.text}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          </CardContent>
+        </Card>
+      </div>
 
       <Card className="bg-primary/5 border-primary/20">
         <CardContent className="pt-6">

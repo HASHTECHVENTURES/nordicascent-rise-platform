@@ -5,15 +5,15 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { CheckCircle, ArrowRight, Heart, Building2, Users } from "lucide-react";
 
 const companyBenefits = [
-  "Access pre-vetted, pipeline-ready engineering talent",
+  "Access pre-vetted, pipeline-ready engineering talent from all disciplines",
   "Reduce time-to-hire with structured candidate preparation",
   "Cultural alignment training before Day 1",
   "Dedicated mentoring support throughout the process",
 ];
 
 const candidateBenefits = [
-  "Structured career pathway to Nordic tech companies",
-  "Interview and technical preparation included",
+  "Structured career pathway to Nordic companies",
+  "Interview and readiness preparation included",
   "Visa, relocation, and cultural onboarding support",
   "Ongoing mentoring and follow-up after placement",
 ];
@@ -22,10 +22,10 @@ const faqs = [
   { question: "How long does the entire process take?", answer: "The complete pipeline typically takes 6-12 months from initial application to successful onboarding, depending on the candidate's readiness and the employer's timeline." },
   { question: "What countries do you place candidates in?", answer: "We focus on the Nordic region: Sweden, Norway, Denmark, and Finland." },
   { question: "Is there a cost for candidates?", answer: "No, candidates do not pay for our services. Our model is employer-funded." },
-  { question: "What kind of mentoring support is provided?", answer: "Mentoring begins during Readiness and continues through Internship and Onboarding with a dedicated company mentor. After onboarding, follow-up is available as an add-on service." },
+  { question: "What kind of mentoring support is provided?", answer: "Mentoring begins during Readiness and continues through Activation and Onboarding with a dedicated company mentor. After onboarding, follow-up is available as an add-on service." },
   { question: "What happens if a candidate doesn't pass the internship phase?", answer: "If a hire decision is not made after the official internship, the candidate receives feedback and guidance on next steps. They may re-enter the pipeline for other opportunities." },
   { question: "Do candidates need to speak a Nordic language?", answer: "A1-level Norwegian is part of the preparation before arrival. A2-level language training is available as part of the follow-up add-on service after onboarding." },
-  { question: "What industries do you cover?", answer: "We primarily serve the technology sector, including software development, data engineering, DevOps, UX design, and product management roles across Nordic companies." },
+  { question: "What industries do you cover?", answer: "We work with all types of engineering talent—software, mechanical, civil, electrical, chemical, and more—across Nordic companies in technology, manufacturing, energy, and other sectors." },
   { question: "How is the internship structured?", answer: "The internship has two phases: an official academic internship (8-10 weeks) and, upon a positive hire decision, a professional pre-employment engagement where the candidate begins contributing to real projects." },
 ];
 
@@ -36,7 +36,7 @@ export default function Platform() {
       <section className="py-20 lg:py-28 bg-gradient-to-b from-accent/30 to-background">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center max-w-3xl">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">Our <span className="nordic-gradient-text">Platform</span></h1>
-          <p className="text-xl text-muted-foreground mb-8">A proven process that prepares engineers for successful careers in the Nordics — and gives companies access to exceptional, pipeline-ready talent.</p>
+          <p className="text-xl text-muted-foreground mb-8">A proven process that prepares engineers of all disciplines for successful careers in the Nordics — and gives companies access to exceptional, pipeline-ready talent.</p>
           <Button size="lg" asChild className="nordic-gradient nordic-glow"><Link to="/contact">Get Started<ArrowRight className="ml-2 h-5 w-5" /></Link></Button>
         </div>
       </section>

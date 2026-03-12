@@ -190,7 +190,7 @@ export default function Insight() {
           <div className="text-center max-w-2xl mx-auto space-y-6">
             <h2 className="text-3xl font-bold">Ready to Start Your Journey?</h2>
             <p className="text-muted-foreground">
-              Whether you're a company seeking talent or an engineer exploring opportunities, we're here to help you build bridges.
+              Whether you're a company seeking talent or an engineer (any discipline) exploring opportunities, we're here to help you build bridges.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" asChild className="nordic-gradient nordic-glow">

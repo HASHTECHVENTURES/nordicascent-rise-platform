@@ -82,7 +82,7 @@ export default function Login() {
           <p className="text-xl text-primary-foreground/80">
             {selectedRole 
               ? roleConfig[selectedRole].description 
-              : "Connecting exceptional engineers from India with Nordic companies."}
+              : "Connecting exceptional engineering talent from India—all disciplines—with Nordic companies."}
           </p>
         </div>
         <div className="flex items-center gap-4 text-primary-foreground/60 text-sm">

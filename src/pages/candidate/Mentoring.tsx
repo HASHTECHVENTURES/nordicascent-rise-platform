@@ -11,8 +11,8 @@ const mentor = {
   company: "TechCorp Nordic",
   avatar: "https://i.pravatar.cc/150?img=12",
   email: "erik.johansson@techcorp.se",
-  experience: "15+ years in Nordic tech industry",
-  specialties: ["Career Development", "Cultural Integration", "Technical Leadership"],
+  experience: "15+ years in Nordic industry",
+  specialties: ["Career Development", "Cultural Integration", "Leadership"],
 };
 
 const upcomingSessions = [
@@ -195,7 +195,7 @@ const CandidateMentoring = () => {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground mb-4">
-            Mentoring at Nordic Ascent is a continuous journey that begins during the Readiness phase and extends through your Internship and Onboarding periods. Your mentor is your dedicated point of contact, helping you navigate cultural adaptation, professional development, and career growth in the Nordics.
+            Mentoring at Nordic Ascent is a continuous journey that begins during the Readiness phase and extends through your Activation and Onboarding periods. Your mentor is your dedicated point of contact, helping you navigate cultural adaptation, professional development, and career growth in the Nordics.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-3 rounded bg-background">
@@ -203,7 +203,7 @@ const CandidateMentoring = () => {
               <p className="text-xs text-muted-foreground">Cultural orientation & goal setting</p>
             </div>
             <div className="p-3 rounded bg-background">
-              <p className="font-medium text-sm">Internship & Onboarding</p>
+              <p className="font-medium text-sm">Activation & Onboarding</p>
               <p className="text-xs text-muted-foreground">Regular check-ins & career guidance</p>
             </div>
           </div>

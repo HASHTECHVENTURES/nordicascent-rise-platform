@@ -3,20 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { MapPin, FileText, Home, Plane, Building2, CheckCircle, ExternalLink, Info, BookOpen, Globe, Video, Calendar } from "lucide-react";
+import { MapPin, FileText, Home, Plane, Building2, CheckCircle, ExternalLink, Info, BookOpen, Globe, Video, Calendar, Users } from "lucide-react";
 
 const visaSteps = [
   { id: 1, title: "Job Offer Confirmation", status: "completed", description: "Receive official job offer letter" },
   { id: 2, title: "Visa Application Submitted", status: "completed", description: "Submit work permit application" },
   { id: 3, title: "Document Verification", status: "current", description: "Immigration authority reviews documents" },
-  { id: 4, title: "Visa Interview", status: "not_started", description: "Attend interview at embassy" },
+  { id: 4, title: "Visa Interview", status: "not_started", description: "Attend interview at embassy/Visa center" },
   { id: 5, title: "Visa Approval", status: "not_started", description: "Receive work permit" },
 ];
 
 const languageCourses = [
-  { id: 1, title: "Swedish Basics A1", status: "in_progress", progress: 65, type: "digital", nextSession: null },
-  { id: 2, title: "Business Swedish", status: "not_started", progress: 0, type: "digital", nextSession: null },
-  { id: 3, title: "Swedish Conversation Practice", status: "scheduled", progress: 0, type: "live", nextSession: "2026-02-05" },
+  { id: 1, title: "Norwegian Basic A1", status: "in_progress", progress: 65, type: "digital", nextSession: null },
 ];
 
 const culturalModules = [
@@ -27,7 +25,7 @@ const culturalModules = [
 ];
 
 const cityGuides = [
-  { id: 1, city: "Stockholm", country: "Sweden", image: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=600&h=400&fit=crop&q=80", flag: "🇸🇪", costOfLiving: "High", avgRent: "€1,500/mo", highlights: ["Tech hub", "Work-life balance", "English-friendly"] },
+  { id: 1, city: "Stockholm", country: "Sweden", image: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=600&h=400&fit=crop&q=80", flag: "🇸🇪", costOfLiving: "High", avgRent: "€1,500/mo", highlights: ["Business hub", "Work-life balance", "English-friendly"] },
   { id: 2, city: "Copenhagen", country: "Denmark", image: "https://images.unsplash.com/photo-1513622470522-26c3c8a854bc?w=600&h=400&fit=crop&q=80", flag: "🇩🇰", costOfLiving: "High", avgRent: "€1,600/mo", highlights: ["Design culture", "Cycling city", "Green living"] },
   { id: 3, city: "Helsinki", country: "Finland", image: "https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?w=600&h=400&fit=crop&q=80", flag: "🇫🇮", costOfLiving: "Medium-High", avgRent: "€1,200/mo", highlights: ["Startup scene", "Nature access", "Education system"] },
   { id: 4, city: "Oslo", country: "Norway", image: "https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=600&h=400&fit=crop&q=80", flag: "🇳🇴", costOfLiving: "Very High", avgRent: "€1,800/mo", highlights: ["High salaries", "Outdoor lifestyle", "Public services"] },
@@ -57,7 +55,7 @@ const CandidateRelocation = () => {
       </div>
 
       <Tabs defaultValue="visa" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="visa" className="gap-2">
             <FileText className="h-4 w-4" />
             <span className="hidden sm:inline">Visa</span>
@@ -73,10 +71,6 @@ const CandidateRelocation = () => {
           <TabsTrigger value="cultural" className="gap-2">
             <Globe className="h-4 w-4" />
             <span className="hidden sm:inline">Cultural</span>
-          </TabsTrigger>
-          <TabsTrigger value="cities" className="gap-2">
-            <MapPin className="h-4 w-4" />
-            <span className="hidden sm:inline">Cities</span>
           </TabsTrigger>
           <TabsTrigger value="resources" className="gap-2">
             <Info className="h-4 w-4" />
@@ -150,15 +144,6 @@ const CandidateRelocation = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card className="border-primary/30">
-                  <CardContent className="pt-6">
-                    <h3 className="font-semibold mb-2">Temporary Housing</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Your employer provides 4 weeks of temporary housing while you search for permanent accommodation.
-                    </p>
-                    <Badge variant="secondary" className="bg-success/10 text-success">Included in Offer</Badge>
-                  </CardContent>
-                </Card>
                 <Card>
                   <CardContent className="pt-6">
                     <h3 className="font-semibold mb-2">Housing Search Support</h3>
@@ -338,7 +323,56 @@ const CandidateRelocation = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="cities" className="space-y-6">
+        <TabsContent value="resources" className="space-y-6">
+          {/* Family – contact our team */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Family
+              </CardTitle>
+              <CardDescription>Support for family-related relocation questions</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                For family-related matters (dependents, visas for family members, schooling, etc.), please contact our team. We are here to help.
+              </p>
+              <Button variant="outline" className="gap-2">
+                <ExternalLink className="h-4 w-4" />
+                Contact our team
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Financials – contact our team */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Financials
+              </CardTitle>
+              <CardDescription>Tax ID, bank account, and financial setup</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-2">Tax ID / Bank account and related steps.</p>
+              <p className="text-sm text-muted-foreground mb-4">For personalised support with tax registration and opening a bank account, contact our team.</p>
+              <Button variant="outline" className="gap-2">
+                <ExternalLink className="h-4 w-4" />
+                Contact our team
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Cities (moved from top-level tab) */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5" />
+                Cities
+              </CardTitle>
+              <CardDescription>Overview of Nordic cities</CardDescription>
+            </CardHeader>
+            <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {cityGuides.map((city) => (
               <Card key={city.id} className="hover:border-primary/50 transition-colors overflow-hidden">
@@ -380,9 +414,10 @@ const CandidateRelocation = () => {
               </Card>
             ))}
           </div>
-        </TabsContent>
+            </CardContent>
+          </Card>
 
-        <TabsContent value="resources" className="space-y-6">
+          {/* Relocation Resources bucket */}
           <Card>
             <CardHeader>
               <CardTitle>Relocation Resources</CardTitle>

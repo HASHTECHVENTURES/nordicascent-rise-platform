@@ -44,13 +44,16 @@ import EmployerMentoring from "./pages/employer/Mentoring";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard";
-import AdminUsers from "./pages/admin/Users";
 import AdminEmployers from "./pages/admin/Employers";
 import AdminCandidates from "./pages/admin/Candidates";
-import AdminJobs from "./pages/admin/Jobs";
 import AdminAnalytics from "./pages/admin/Analytics";
-import AdminSecurity from "./pages/admin/Security";
 import AdminSettings from "./pages/admin/Settings";
+import AdminIssues from "./pages/admin/Issues";
+import AdminSupport from "./pages/admin/Support";
+import AdminNotifications from "./pages/admin/Notifications";
+import AdminActivity from "./pages/admin/Activity";
+import AdminCandidateDetail from "./pages/admin/CandidateDetail";
+import AdminEmployerDetail from "./pages/admin/EmployerDetail";
 
 import NotFound from "./pages/NotFound";
 
@@ -106,12 +109,15 @@ const App = () => (
           {/* Admin Portal Routes */}
           <Route element={<AdminLayout />}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/admin/users" element={<AdminUsers />} />
             <Route path="/admin/employers" element={<AdminEmployers />} />
+            <Route path="/admin/employers/:id" element={<AdminEmployerDetail />} />
             <Route path="/admin/candidates" element={<AdminCandidates />} />
-            <Route path="/admin/jobs" element={<AdminJobs />} />
+            <Route path="/admin/candidates/:id" element={<AdminCandidateDetail />} />
+            <Route path="/admin/issues" element={<AdminIssues />} />
             <Route path="/admin/analytics" element={<AdminAnalytics />} />
-            <Route path="/admin/security" element={<AdminSecurity />} />
+            <Route path="/admin/support" element={<AdminSupport />} />
+            <Route path="/admin/notifications" element={<AdminNotifications />} />
+            <Route path="/admin/activity" element={<AdminActivity />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
           </Route>
 

@@ -6,11 +6,10 @@ import { CheckCircle, Circle, ArrowRight, FileText, Upload, User } from "lucide-
 import { Link } from "react-router-dom";
 
 const tasks = [
-  { id: 1, text: "Complete personal profile", completed: true },
-  { id: 2, text: "Upload resume/CV", completed: true },
-  { id: 3, text: "Complete skills assessment", completed: true },
-  { id: 4, text: "Upload portfolio or work samples", completed: false },
-  { id: 5, text: "Verify educational credentials", completed: false },
+  { id: 1, text: "Profile Setup", completed: true },
+  { id: 2, text: "Professional Background", completed: true },
+  { id: 3, text: "Skills Assessment", completed: true },
+  { id: 4, text: "Mobility Readiness", completed: false },
 ];
 
 const CandidatePreparation = () => {
@@ -42,7 +41,7 @@ const CandidatePreparation = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg font-medium">Checklist</CardTitle>
+          <CardTitle className="text-lg font-medium">Preparation (points on page)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {tasks.map((task) => (

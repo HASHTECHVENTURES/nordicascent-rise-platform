@@ -4,7 +4,7 @@ import { CheckCircle, Building2, Users, ArrowRight } from "lucide-react";
 
 const benefits = {
   companies: [
-    "Access pre-vetted engineering talent",
+    "Access pre-vetted engineering talent (all disciplines)",
     "Reduced hiring risk through structured pipeline",
     "Cultural integration support included",
     "Ongoing retention assistance",

@@ -15,7 +15,7 @@ const companyMentors = [
   },
   {
     name: "Anna Lindqvist",
-    role: "Tech Lead",
+    role: "Team Lead",
     avatar: "https://i.pravatar.cc/150?img=32",
     email: "anna.lindqvist@techcorp.se",
     assignedCandidates: 1,
@@ -218,7 +218,7 @@ const EmployerMentoring = () => {
         <CardContent>
           <p className="text-sm text-muted-foreground mb-4">
             Companies can assign multiple internal mentors to guide candidates through their journey. 
-            Mentoring spans from the Readiness phase through Internship and concludes at Onboarding, ensuring candidates receive 
+            Mentoring spans from the Readiness phase through Activation and concludes at Onboarding, ensuring candidates receive 
             consistent support during their transition to Nordic work life.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -227,7 +227,7 @@ const EmployerMentoring = () => {
               <p className="text-xs text-muted-foreground">Cultural orientation & expectations</p>
             </div>
             <div className="p-3 rounded bg-background">
-              <p className="font-medium text-sm">Internship</p>
+              <p className="font-medium text-sm">Activation</p>
               <p className="text-xs text-muted-foreground">Hands-on guidance & integration</p>
             </div>
             <div className="p-3 rounded bg-background">

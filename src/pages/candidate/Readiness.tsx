@@ -7,21 +7,21 @@ import { CheckCircle, Circle, ArrowRight, Code, Users, Heart, Globe } from "luci
 import { Link } from "react-router-dom";
 
 const technicalModules = [
-  { id: 1, name: "Technical Assessment Module 1", description: "Core programming fundamentals", completed: true },
-  { id: 2, name: "Technical Assessment Module 2", description: "System design principles", completed: true },
-  { id: 3, name: "Technical Assessment Module 3", description: "Advanced problem solving", completed: false },
+  { id: 1, name: "Technical Assessment Module 1", completed: true },
+  { id: 2, name: "Technical Assessment Module 2", completed: true },
+  { id: 3, name: "Technical Assessment Module 3", completed: false },
 ];
 
 const socialModules = [
-  { id: 1, name: "Communication Skills", description: "Professional communication and collaboration", completed: true },
-  { id: 2, name: "Team Dynamics", description: "Working effectively in diverse teams", completed: false },
-  { id: 3, name: "Conflict Resolution", description: "Handling workplace challenges", completed: false },
+  { id: 1, name: "Social Assessment Module 1", completed: true },
+  { id: 2, name: "Social Assessment Module 2", completed: false },
+  { id: 3, name: "Social Assessment Module 3", completed: false },
 ];
 
 const culturalModules = [
-  { id: 1, name: "Nordic Work Culture", description: "Understanding flat hierarchies and work-life balance", completed: true },
-  { id: 2, name: "Social Norms & Etiquette", description: "Everyday interactions and expectations", completed: false },
-  { id: 3, name: "Diversity & Inclusion", description: "Thriving in multicultural environments", completed: false },
+  { id: 1, name: "Cultural Assessment Module 1", completed: true },
+  { id: 2, name: "Cultural Assessment Module 2", completed: false },
+  { id: 3, name: "Cultural Assessment Module 3", completed: false },
 ];
 
 const risks = [
@@ -42,7 +42,7 @@ const CandidateReadiness = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-medium text-foreground">Readiness</h1>
-          <p className="text-muted-foreground">Technical, social, and cultural validation phase</p>
+          <p className="text-muted-foreground">Entry Track — Technical, social, and cultural validation phase</p>
         </div>
         <Badge className="bg-primary text-primary-foreground">Active</Badge>
       </div>
@@ -74,7 +74,7 @@ const CandidateReadiness = () => {
         <TabsContent value="technical">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg font-medium">Technical Skills Validation</CardTitle>
+              <CardTitle className="text-lg font-medium">Technical Readiness Assessment</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {technicalModules.map((module) => (
@@ -83,7 +83,6 @@ const CandidateReadiness = () => {
                     {module.completed ? <CheckCircle className="h-5 w-5 text-success" /> : <Circle className="h-5 w-5 text-muted-foreground" />}
                     <div>
                       <p className={`font-medium ${module.completed ? 'text-muted-foreground' : ''}`}>{module.name}</p>
-                      <p className="text-sm text-muted-foreground">{module.description}</p>
                     </div>
                   </div>
                   {!module.completed && (
@@ -107,7 +106,6 @@ const CandidateReadiness = () => {
                     {module.completed ? <CheckCircle className="h-5 w-5 text-success" /> : <Circle className="h-5 w-5 text-muted-foreground" />}
                     <div>
                       <p className={`font-medium ${module.completed ? 'text-muted-foreground' : ''}`}>{module.name}</p>
-                      <p className="text-sm text-muted-foreground">{module.description}</p>
                     </div>
                   </div>
                   {!module.completed && (
@@ -131,7 +129,6 @@ const CandidateReadiness = () => {
                     {module.completed ? <CheckCircle className="h-5 w-5 text-success" /> : <Circle className="h-5 w-5 text-muted-foreground" />}
                     <div>
                       <p className={`font-medium ${module.completed ? 'text-muted-foreground' : ''}`}>{module.name}</p>
-                      <p className="text-sm text-muted-foreground">{module.description}</p>
                     </div>
                   </div>
                   {!module.completed && (
@@ -169,7 +166,7 @@ const CandidateReadiness = () => {
         <CardContent>
           <p className="text-sm text-muted-foreground mb-4">
             Upon completion of all Readiness modules, your technical baseline, social skills, and cultural readiness will be assessed. 
-            <strong> Final selection for Internship (1:1 digital engagement) happens at the end of this stage.</strong>
+            <strong> Final selection for Activation (1:1 digital engagement) happens at the end of this stage.</strong>
           </p>
           <div className="space-y-2 text-sm">
             <p><strong>Approval Criteria:</strong></p>
@@ -188,7 +185,7 @@ const CandidateReadiness = () => {
           <Link to="/candidate/selection">Back to Selection</Link>
         </Button>
         <Button disabled={readiness < 100}>
-          {readiness === 100 ? "Request Approval for Internship" : "Complete All Modules to Proceed"} 
+          {readiness === 100 ? "Request Approval for Activation" : "Complete All Modules to Proceed"} 
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </div>

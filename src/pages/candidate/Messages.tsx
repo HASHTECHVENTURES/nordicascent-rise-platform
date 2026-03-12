@@ -15,7 +15,7 @@ const conversations = [
 ];
 
 const messages = [
-  { id: 1, sender: "recruiter", content: "Hi Emma! Thank you for applying to the Senior Frontend Developer position.", time: "10:30 AM" },
+  { id: 1, sender: "recruiter", content: "Hi Emma! Thank you for applying to the Senior Engineer position.", time: "10:30 AM" },
   { id: 2, sender: "recruiter", content: "We've reviewed your profile and are impressed with your experience. Would you be available for an interview this week?", time: "10:31 AM" },
   { id: 3, sender: "me", content: "Hi Johan! Thank you for reaching out. I'm very interested in the position.", time: "11:15 AM" },
   { id: 4, sender: "me", content: "I'm available on Thursday or Friday afternoon. Would either of those work?", time: "11:15 AM" },

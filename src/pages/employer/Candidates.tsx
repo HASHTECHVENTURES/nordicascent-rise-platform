@@ -28,7 +28,7 @@ const pipelineStages = [
   { id: "preparation", name: "Preparation", icon: ClipboardCheck, color: "text-secondary" },
   { id: "selection", name: "Selection", icon: UserCheck, color: "text-primary" },
   { id: "readiness", name: "Readiness", icon: CheckCircle2, color: "text-warning" },
-  { id: "internship", name: "Internship", icon: Briefcase, color: "text-primary" },
+  { id: "internship", name: "Activation", icon: Briefcase, color: "text-primary" },
   { id: "relocation", name: "Relocation", icon: MapPin, color: "text-secondary" },
   { id: "onboarding", name: "Onboarding", icon: Building2, color: "text-success" },
   { id: "followup", name: "Follow-up", icon: Users, color: "text-muted-foreground" },
@@ -36,7 +36,7 @@ const pipelineStages = [
 
 const candidatesByStage = {
   preparation: [
-    { id: 1, name: "Rahul Sharma", role: "Frontend Developer", location: "Mumbai, IN", experience: "3 years", match: 92, skills: ["React", "TypeScript"], readiness: 45, status: "active", needsAction: false, avatar: "https://i.pravatar.cc/150?img=1" },
+    { id: 1, name: "Rahul Sharma", role: "Engineer", location: "Mumbai, IN", experience: "3 years", match: 92, skills: ["Design", "Analysis"], readiness: 45, status: "active", needsAction: false, avatar: "https://i.pravatar.cc/150?img=1" },
     { id: 2, name: "Priya Patel", role: "Backend Engineer", location: "Bangalore, IN", experience: "4 years", match: 88, skills: ["Node.js", "Python"], readiness: 30, status: "active", needsAction: true, avatar: "https://i.pravatar.cc/150?img=5" },
     { id: 3, name: "Amit Kumar", role: "Full Stack Developer", location: "Delhi, IN", experience: "5 years", match: 85, skills: ["React", "Node.js"], readiness: 60, status: "active", needsAction: false, avatar: "https://i.pravatar.cc/150?img=12" },
   ],

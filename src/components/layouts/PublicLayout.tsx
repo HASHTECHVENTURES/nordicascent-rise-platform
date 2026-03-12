@@ -88,7 +88,7 @@ export function PublicLayout() {
                 <img src={logoImage} alt="Nordic Ascent" className="h-24 w-auto brightness-0 invert" />
               </Link>
               <p className="text-sm text-primary-foreground/80">
-                Connecting exceptional engineering talent from India with leading Nordic companies through our structured mobility pipeline.
+                Connecting exceptional engineering talent from India—all disciplines—with leading Nordic companies through our structured mobility pipeline.
               </p>
             </div>
 

@@ -14,7 +14,7 @@ const pipelineStages = [
   { id: 1, name: "Preparation", status: "completed", href: "/candidate/preparation", icon: ClipboardCheck, description: "Document collection, CV review, and initial assessments" },
   { id: 2, name: "Selection", status: "completed", href: "/candidate/selection", icon: UserCheck, description: "Interview process and employer matching" },
   { id: 3, name: "Readiness", status: "active", href: "/candidate/readiness", icon: CheckCircle2, description: "Skills assessment and pre-departure preparation" },
-  { id: 4, name: "Internship", status: "not_started", href: "/candidate/internship", icon: Briefcase, description: "On-the-job training and workplace integration" },
+  { id: 4, name: "Activation", status: "not_started", href: "/candidate/internship", icon: Briefcase, description: "Activation – Internship (6–10 weeks) or Pre-Employment" },
   { id: 5, name: "Relocation", status: "not_started", href: "/candidate/relocation", icon: MapPin, description: "Language courses, cultural integration, and settling in" },
   { id: 6, name: "Onboarding", status: "not_started", href: "/candidate/onboarding", icon: Building2, description: "Final workplace onboarding and long-term setup" },
   { id: 7, name: "Follow-up", status: "not_started", href: "/candidate/followup", icon: Users, description: "Ongoing support and career development check-ins" },

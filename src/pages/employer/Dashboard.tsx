@@ -19,7 +19,7 @@ const pipelineStages = [
   { id: 1, name: "Preparation", count: 3, icon: ClipboardCheck },
   { id: 2, name: "Selection", count: 5, icon: UserCheck },
   { id: 3, name: "Readiness", count: 4, icon: CheckCircle2 },
-  { id: 4, name: "Internship", count: 2, icon: Briefcase },
+  { id: 4, name: "Activation", count: 2, icon: Briefcase },
   { id: 5, name: "Relocation", count: 1, icon: MapPin },
   { id: 6, name: "Onboarding", count: 0, icon: Building2 },
   { id: 7, name: "Follow-up", count: 2, icon: Users },

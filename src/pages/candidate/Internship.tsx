@@ -25,8 +25,8 @@ const CandidateInternship = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-medium text-foreground">Internship</h1>
-          <p className="text-muted-foreground">Formal digital engagement with company</p>
+          <h1 className="text-2xl font-medium text-foreground">Activation</h1>
+          <p className="text-muted-foreground">Entry Track — Activation – Internship (6–10 weeks) or Pre-Employment</p>
         </div>
         <Badge variant="secondary">Not Started</Badge>
       </div>
@@ -45,12 +45,12 @@ const CandidateInternship = () => {
         </CardContent>
       </Card>
 
-      {/* Phase 1: Official Internship */}
+      {/* Activation – Internship */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-medium">Phase 1: Official Internship</CardTitle>
-            <Badge variant="outline">8–10 weeks</Badge>
+            <CardTitle className="text-lg font-medium">Activation – Internship</CardTitle>
+            <Badge variant="outline">6–10 weeks</Badge>
           </div>
           <p className="text-sm text-muted-foreground">Academic internship per school/university rules. Earns academic credit.</p>
         </CardHeader>
@@ -69,21 +69,30 @@ const CandidateInternship = () => {
         </CardContent>
       </Card>
 
+      {/* Optional company visit */}
+      <Card className="border-primary/20 bg-primary/5">
+        <CardContent className="pt-6">
+          <p className="text-sm text-muted-foreground">
+            You may be invited for a <strong>voluntary company visit</strong> after your internship, before the Go/No Go decision and final offer.
+          </p>
+        </CardContent>
+      </Card>
+
       {/* Hire / No-Hire Decision Divider */}
       <div className="relative py-4">
         <Separator />
         <div className="absolute inset-0 flex items-center justify-center">
           <Badge className="bg-warning text-warning-foreground px-4 py-1.5 text-sm font-semibold">
-            ⚡ Hire / No-Hire Decision
+            ⚡ Go/No Go &amp; Final Offer
           </Badge>
         </div>
       </div>
 
-      {/* Phase 2: Professional Pre-Employment */}
+      {/* Activation – Pre-Employment */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg font-medium">Phase 2: Professional Pre-Employment</CardTitle>
+            <CardTitle className="text-lg font-medium">Activation – Pre-Employment</CardTitle>
             <Badge variant="outline">Ongoing</Badge>
           </div>
           <p className="text-sm text-muted-foreground">After a positive hire decision. No academic credit — early professional engagement with the company.</p>
@@ -118,12 +127,12 @@ const CandidateInternship = () => {
             <div className="p-4 rounded bg-muted/30 text-center">
               <Users className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
               <p className="font-medium">Team Integration</p>
-              <p className="text-sm text-muted-foreground">Collaborate with Nordic engineers</p>
+              <p className="text-sm text-muted-foreground">Collaborate with your Nordic team</p>
             </div>
             <div className="p-4 rounded bg-muted/30 text-center">
               <Calendar className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-              <p className="font-medium">Two Phases</p>
-              <p className="text-sm text-muted-foreground">Academic internship → Pre-employment</p>
+              <p className="font-medium">Two paths</p>
+              <p className="text-sm text-muted-foreground">Internship (6–10 weeks) → Pre-employment</p>
             </div>
           </div>
         </CardContent>
@@ -135,13 +144,13 @@ const CandidateInternship = () => {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground mb-4">
-            The Internship stage is a <strong>digital, one-on-one engagement</strong> with your matched Nordic company. 
-            It begins with an official academic internship and, upon a positive hire decision, transitions into a professional pre-employment phase.
+            The Activation stage is a <strong>digital, one-on-one engagement</strong> with your matched Nordic company. 
+            It begins with an official academic internship (6–10 weeks) and, upon a positive Go/No Go decision, transitions into a professional pre-employment phase.
           </p>
           <div className="space-y-2 text-sm">
-            <p><strong>Phase 1:</strong> 8–10 weeks official internship (academic credit, school rules apply)</p>
-            <p><strong>Decision Point:</strong> Company makes hire / no-hire decision based on performance</p>
-            <p><strong>Phase 2:</strong> Professional pre-employment — real project work, no academic credit</p>
+            <p><strong>Activation – Internship:</strong> 6–10 weeks official internship (academic credit, school rules apply)</p>
+            <p><strong>Decision Point:</strong> Company makes Go/No Go decision based on performance</p>
+            <p><strong>Activation – Pre-Employment:</strong> Professional pre-employment — real project work, no academic credit</p>
             <p><strong>Compensation:</strong> Standard internship compensation as per Nordic standards</p>
           </div>
         </CardContent>

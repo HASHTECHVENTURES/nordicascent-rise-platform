@@ -10,7 +10,7 @@ const stageData = [
   { stage: "Preparation", count: 120, conversion: 85 },
   { stage: "Selection", count: 102, conversion: 72 },
   { stage: "Readiness", count: 73, conversion: 88 },
-  { stage: "Internship", count: 64, conversion: 78 },
+  { stage: "Activation", count: 64, conversion: 78 },
   { stage: "Relocation", count: 50, conversion: 92 },
   { stage: "Onboarding", count: 46, conversion: 96 },
   { stage: "Follow-up", count: 44, conversion: 100 },
@@ -28,8 +28,8 @@ const taskCompletionData = [
 const dropOffData = [
   { stage: "Preparation → Selection", dropOffs: 18, reason: "Incomplete profile" },
   { stage: "Selection → Readiness", dropOffs: 29, reason: "Failed screening" },
-  { stage: "Readiness → Internship", dropOffs: 9, reason: "Withdrew application" },
-  { stage: "Internship → Relocation", dropOffs: 14, reason: "No-hire decision" },
+  { stage: "Readiness → Activation", dropOffs: 9, reason: "Withdrew application" },
+  { stage: "Activation → Relocation", dropOffs: 14, reason: "Go/No Go decision" },
 ];
 
 // KPI 4: Mentor Sessions
@@ -70,8 +70,8 @@ const AdminAnalytics = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Analytics & Reports</h1>
-          <p className="text-muted-foreground">Platform performance metrics</p>
+          <h1 className="text-3xl font-bold">Analytics</h1>
+          <p className="text-muted-foreground">Portal performance — candidates and companies</p>
         </div>
         <div className="flex items-center gap-3">
           <Select defaultValue="30days">

@@ -45,11 +45,11 @@ const pipelineStages = [
   },
   { 
     id: 4, 
-    name: "Internship",
+    name: "Activation",
     status: "not_started",
     href: "/candidate/internship",
     icon: Briefcase,
-    description: "Formal digital engagement"
+    description: "Activation – Internship or Pre-Employment"
   },
   { 
     id: 5, 
@@ -128,6 +128,7 @@ const CandidateDashboard = () => {
       <div>
         <h1 className="text-2xl font-medium text-foreground">My Journey</h1>
         <p className="text-muted-foreground">Track your progress through the Nordic Ascent pipeline</p>
+        <p className="text-xs text-muted-foreground mt-1">Program: <strong>Entry Track</strong> — Academic-to-Professional, up to 12 months</p>
       </div>
 
       {/* Current Stage Details */}
