@@ -10,6 +10,7 @@ import {
   Heart,
   LogOut,
   AlertTriangle,
+  Home,
 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -150,9 +151,15 @@ const CandidateLayout = () => {
       <div className={cn(collapsed ? "ml-16" : "ml-64")}>
         <header className="sticky top-0 z-30 h-16 bg-background border-b">
           <div className="flex h-full items-center justify-between px-6">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-wrap">
               <h1 className="text-lg font-medium text-foreground">Candidate Journey</h1>
               <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded">Entry Track</span>
+              <Button variant="ghost" size="sm" className="text-muted-foreground h-8 gap-1.5" asChild>
+                <Link to="/">
+                  <Home className="h-4 w-4" />
+                  Public site
+                </Link>
+              </Button>
             </div>
 
             <div className="flex items-center gap-4">

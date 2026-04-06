@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -130,6 +130,20 @@ const CandidateDashboard = () => {
         <p className="text-muted-foreground">Track your progress through the Nordic Ascent pipeline</p>
         <p className="text-xs text-muted-foreground mt-1">Program: <strong>Entry Track</strong> — Academic-to-Professional, up to 12 months</p>
       </div>
+
+      <Card className="border-border bg-muted/20">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base font-medium">Entry track vs. Fast track</CardTitle>
+          <CardDescription className="text-sm font-normal">
+            Both use the same seven stages in My Journey. <strong className="text-foreground">Entry track</strong> is the full path including the academic internship before hire. <strong className="text-foreground">Fast track</strong> is a shorter upstream path when you and the employer meet agreed criteria — your recruiter confirms which applies.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/candidate/internship">How the road is built — read on Activation</Link>
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Current Stage Details */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

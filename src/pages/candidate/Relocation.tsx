@@ -19,24 +19,26 @@ const languageCourses = [
 
 const culturalModules = [
   { id: 1, title: "Nordic Work Culture & Values", status: "completed", type: "digital", description: "Understanding flat hierarchies, consensus, and work-life balance" },
-  { id: 2, title: "Social Norms & Etiquette", status: "in_progress", type: "digital", description: "Everyday interactions, fika culture, and social expectations" },
-  { id: 3, title: "Living in Sweden", status: "scheduled", type: "live", description: "Practical session with relocation team", nextSession: "2026-02-08" },
+  { id: 2, title: "Social Norms & Etiquette (Norway)", status: "in_progress", type: "digital", description: "Everyday interactions, Norwegian workplace culture, and social expectations" },
+  { id: 3, title: "Living in Norway", status: "scheduled", type: "live", description: "Practical session with relocation team — Norway focus", nextSession: "2026-02-08" },
   { id: 4, title: "Integration Workshop", status: "not_started", type: "live", description: "Group session on building community and networks" },
 ];
 
 const cityGuides = [
-  { id: 1, city: "Stockholm", country: "Sweden", image: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=600&h=400&fit=crop&q=80", flag: "🇸🇪", costOfLiving: "High", avgRent: "€1,500/mo", highlights: ["Business hub", "Work-life balance", "English-friendly"] },
-  { id: 2, city: "Copenhagen", country: "Denmark", image: "https://images.unsplash.com/photo-1513622470522-26c3c8a854bc?w=600&h=400&fit=crop&q=80", flag: "🇩🇰", costOfLiving: "High", avgRent: "€1,600/mo", highlights: ["Design culture", "Cycling city", "Green living"] },
-  { id: 3, city: "Helsinki", country: "Finland", image: "https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?w=600&h=400&fit=crop&q=80", flag: "🇫🇮", costOfLiving: "Medium-High", avgRent: "€1,200/mo", highlights: ["Startup scene", "Nature access", "Education system"] },
-  { id: 4, city: "Oslo", country: "Norway", image: "https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=600&h=400&fit=crop&q=80", flag: "🇳🇴", costOfLiving: "Very High", avgRent: "€1,800/mo", highlights: ["High salaries", "Outdoor lifestyle", "Public services"] },
+  { id: 1, city: "Oslo", country: "Norway", image: "https://images.unsplash.com/photo-1527004013197-933c4bb611b3?w=600&h=400&fit=crop&q=80", flag: "🇳🇴", costOfLiving: "Very High", avgRent: "€1,800/mo", highlights: ["Capital", "Outdoor lifestyle", "English-friendly"] },
+  { id: 2, city: "Kristiansand", country: "Norway", image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop&q=80", flag: "🇳🇴", costOfLiving: "High", avgRent: "€1,100/mo", highlights: ["Coastal city", "Family-friendly", "Growing tech"] },
+  { id: 3, city: "Stavanger", country: "Norway", image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=600&h=400&fit=crop&q=80", flag: "🇳🇴", costOfLiving: "High", avgRent: "€1,300/mo", highlights: ["Energy sector", "Fjords", "International community"] },
+  { id: 4, city: "Stockholm", country: "Sweden", image: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=600&h=400&fit=crop&q=80", flag: "🇸🇪", costOfLiving: "High", avgRent: "€1,500/mo", highlights: ["Business hub", "Work-life balance", "English-friendly"] },
+  { id: 5, city: "Helsinki", country: "Finland", image: "https://images.unsplash.com/photo-1551884170-09fb70a3a2ed?w=600&h=400&fit=crop&q=80", flag: "🇫🇮", costOfLiving: "Medium-High", avgRent: "€1,200/mo", highlights: ["Startup scene", "Nature access", "Education system"] },
+  { id: 6, city: "Copenhagen", country: "Denmark", image: "https://images.unsplash.com/photo-1513622470522-26c3c8a854bc?w=600&h=400&fit=crop&q=80", flag: "🇩🇰", costOfLiving: "High", avgRent: "€1,600/mo", highlights: ["Design culture", "Cycling city", "Green living"] },
 ];
 
 const resources = [
   { id: 1, title: "Nordic Work Permit Guide", type: "PDF", category: "Visa" },
-  { id: 2, title: "Finding Housing in Stockholm", type: "Article", category: "Housing" },
+  { id: 2, title: "Finding Housing in Oslo & Southern Norway", type: "Article", category: "Housing" },
   { id: 3, title: "Opening a Bank Account", type: "Guide", category: "Finance" },
   { id: 4, title: "Healthcare Registration", type: "Checklist", category: "Healthcare" },
-  { id: 5, title: "Tax Registration (Skatteverket)", type: "Guide", category: "Finance" },
+  { id: 5, title: "Tax Registration (Norway / Skatteetaten)", type: "Guide", category: "Finance" },
 ];
 
 const CandidateRelocation = () => {
@@ -161,10 +163,10 @@ const CandidateRelocation = () => {
               <div className="p-4 rounded bg-muted/50">
                 <h3 className="font-medium mb-2">Popular Housing Platforms</h3>
                 <div className="flex flex-wrap gap-2">
-                  <Button variant="outline" size="sm">Blocket.se</Button>
-                  <Button variant="outline" size="sm">Hemnet.se</Button>
-                  <Button variant="outline" size="sm">Boligportal.dk</Button>
                   <Button variant="outline" size="sm">Finn.no</Button>
+                  <Button variant="outline" size="sm">Hemnet.se</Button>
+                  <Button variant="outline" size="sm">Blocket.se</Button>
+                  <Button variant="outline" size="sm">Boligportal.dk</Button>
                 </div>
               </div>
             </CardContent>
@@ -254,7 +256,9 @@ const CandidateRelocation = () => {
                 <Globe className="h-5 w-5" />
                 Cultural Preparation
               </CardTitle>
-              <CardDescription>Understanding the destination country's work culture and society</CardDescription>
+              <CardDescription>
+                Primary focus: <strong>Norway</strong> (not Sweden). Module titles and depth will be adjusted once sub-supplier alignment is confirmed (meeting scheduled April).
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
@@ -370,7 +374,7 @@ const CandidateRelocation = () => {
                 <MapPin className="h-5 w-5" />
                 Cities
               </CardTitle>
-              <CardDescription>Overview of Nordic cities</CardDescription>
+              <CardDescription>Norwegian cities first (Oslo, Kristiansand, Stavanger), then Stockholm, Helsinki, and Copenhagen.</CardDescription>
             </CardHeader>
             <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

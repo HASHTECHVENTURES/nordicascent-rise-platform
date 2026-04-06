@@ -69,11 +69,11 @@ const CandidateInternship = () => {
         </CardContent>
       </Card>
 
-      {/* Optional company visit */}
+      {/* Optional in-person touchpoint (company visits you in India) */}
       <Card className="border-primary/20 bg-primary/5">
         <CardContent className="pt-6">
           <p className="text-sm text-muted-foreground">
-            You may be invited for a <strong>voluntary company visit</strong> after your internship, before the Go/No Go decision and final offer.
+            Before the Go/No Go decision and final offer, the company may arrange a <strong>voluntary in-person meeting in India</strong> (for example a visit by company representatives to meet you locally). This is not a requirement for you to travel to the Nordic company’s offices.
           </p>
         </CardContent>
       </Card>
@@ -139,6 +139,21 @@ const CandidateInternship = () => {
       </Card>
 
       <Card className="border-primary/50 bg-primary/5">
+        <CardHeader>
+          <CardTitle className="text-lg font-medium">Entry track vs. Fast track — how the road is built</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 text-sm text-muted-foreground">
+          <p>
+            Both tracks follow the same <strong className="text-foreground">seven-stage journey</strong> you see in My Journey (Preparation → Selection → Readiness → Activation → Relocation → Onboarding → Follow-up). The difference is <strong className="text-foreground">how many steps you take before Activation</strong> and whether you enter via the academic internship path or a shorter path agreed with your employer.
+          </p>
+          <div className="space-y-2 pl-0 border-l-2 border-primary/30 pl-4">
+            <p><strong className="text-foreground">Entry track:</strong> Standard route — full Preparation, Selection, and Readiness, then Activation starting with the 6–10 week academic internship (unless your school agreement says otherwise), Go/No Go, then Pre-Employment when hired.</p>
+            <p><strong className="text-foreground">Fast track:</strong> Accelerated route when you and the company already meet defined criteria — fewer or shorter upstream steps; you may enter Activation closer to pre-employment or with a tailored timeline. Your recruiter confirms which track and which stages apply to you; the pipeline highlights what is active for your profile.</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
         <CardHeader>
           <CardTitle className="text-lg font-medium">Important: Digital 1:1 Engagement</CardTitle>
         </CardHeader>

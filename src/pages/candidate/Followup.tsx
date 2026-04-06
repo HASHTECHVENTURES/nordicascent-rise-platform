@@ -56,7 +56,7 @@ const CandidateFollowup = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Follow-up & Support</h1>
-          <p className="text-muted-foreground">Long-term support and career development</p>
+          <p className="text-muted-foreground">Long-term support — we treat a 6-month check-in as standard from Nordic Ascent</p>
         </div>
         <div className="flex items-center gap-2">
           <Badge className="bg-warning/20 text-warning border border-warning/30">Add-on Service</Badge>
@@ -64,14 +64,26 @@ const CandidateFollowup = () => {
         </div>
       </div>
 
+      <Card className="border-primary/30 bg-primary/5">
+        <CardContent className="p-4 flex items-start gap-3">
+          <Calendar className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium">Standard follow-up from our side</p>
+            <p className="text-sm text-muted-foreground">
+              Nordic Ascent considers a <strong className="text-foreground">6-month follow-up</strong> as a standard touchpoint after you settle in — to hear how you are doing and align on next steps. Longer programmes and extra coaching can be added on top of this baseline.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Add-on Service Banner */}
       <Card className="border-warning/40 bg-warning/5">
         <CardContent className="p-4 flex items-start gap-3">
           <Info className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-medium">This is an add-on service</p>
+            <p className="text-sm font-medium">Extended add-on services</p>
             <p className="text-sm text-muted-foreground">
-              Follow-up support is available as an optional, paid service after onboarding is complete. 
+              Deeper follow-up packages (beyond the standard rhythm) are available as optional, paid services after onboarding where agreed.
               Note: mentoring from your company mentor concludes at the end of the Onboarding stage.
             </p>
           </div>

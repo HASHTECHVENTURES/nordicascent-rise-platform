@@ -1,131 +1,169 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { LayoutDashboard, UserCheck, Building2, AlertTriangle, ArrowRight } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { UserCheck, Building2, Mail, AlertTriangle, TrendingUp, TrendingDown } from "lucide-react";
 import { Link } from "react-router-dom";
+import { AreaChart, Area, ResponsiveContainer, BarChart, Bar } from "recharts";
 
-const needsAttention = [
-  { type: "candidate" as const, name: "Emma Lindqvist", issue: "Readiness incomplete 14 days", href: "/admin/candidates" },
-  { type: "company" as const, name: "StartupHub Finland", issue: "Pending verification", href: "/admin/employers" },
-  { type: "candidate" as const, name: "Lars Andersen", issue: "Document upload pending", href: "/admin/candidates" },
+const candidatesTrend = [
+  { v: 2100 }, { v: 2240 }, { v: 2380 }, { v: 2510 }, { v: 2650 }, { v: 2780 }, { v: 2847 },
+];
+const companiesTrend = [
+  { v: 280 }, { v: 300 }, { v: 315 }, { v: 325 }, { v: 332 }, { v: 338 }, { v: 342 },
+];
+const issuesTrend = [
+  { v: 12 }, { v: 10 }, { v: 9 }, { v: 8 }, { v: 7 }, { v: 6 }, { v: 7 },
+];
+const supportTrend = [
+  { v: 4 }, { v: 5 }, { v: 3 }, { v: 6 }, { v: 5 }, { v: 4 }, { v: 3 },
 ];
 
 const AdminDashboard = () => (
-  <div className="space-y-6">
+  <div className="space-y-8">
     <div>
-      <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
+      <h1 className="text-2xl font-medium text-foreground">Admin Dashboard</h1>
       <p className="text-muted-foreground">Portal overview — candidates and companies</p>
     </div>
 
-    {/* Quick counts */}
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <Card className="bg-gradient-to-br from-primary/10 to-transparent border-primary/20">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-            <UserCheck className="h-4 w-4" /> Total Candidates
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">2,847</div>
-          <p className="text-xs text-chart-success">+156 this month</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-            <Building2 className="h-4 w-4" /> Total Companies
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">342</div>
-          <p className="text-xs text-muted-foreground">298 verified</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Pending</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-chart-warning">266</div>
-          <p className="text-xs text-muted-foreground">Candidates + companies</p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Needs action</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-destructive">5</div>
-          <p className="text-xs text-muted-foreground">Stuck or overdue</p>
-        </CardContent>
-      </Card>
-    </div>
-
-    {/* Needs attention */}
-    <Card className="border-warning/30 bg-warning/5">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <AlertTriangle className="h-5 w-5 text-warning" />
-          Needs attention
-        </CardTitle>
-        <p className="text-sm text-muted-foreground">Fix these from the linked page</p>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          {needsAttention.map((item) => (
-            <div
-              key={`${item.type}-${item.name}`}
-              className="flex items-center justify-between p-3 rounded-lg border bg-card"
-            >
-              <div>
-                <p className="font-medium text-sm">{item.name}</p>
-                <p className="text-xs text-muted-foreground">{item.issue}</p>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <Link to="/admin/candidates">
+        <Card className="hover:border-primary/50 transition-colors cursor-pointer overflow-hidden h-full">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-4">
+                <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <UserCheck className="h-7 w-7 text-primary" />
+                </div>
+                <div>
+                  <p className="text-4xl font-bold">2,847</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">Total Candidates</p>
+                </div>
               </div>
-              <Button variant="outline" size="sm" asChild>
-                <Link to={item.href}>
-                  Fix <ArrowRight className="ml-1 h-3 w-3" />
-                </Link>
-              </Button>
+              <div className="flex items-center gap-1 text-success text-xs font-medium">
+                <TrendingUp className="h-3.5 w-3.5" />
+                +156 this month
+              </div>
             </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+            <div className="h-16 mt-4 -mx-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={candidatesTrend}>
+                  <defs>
+                    <linearGradient id="adminCandGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <Area
+                    type="monotone"
+                    dataKey="v"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={2}
+                    fill="url(#adminCandGrad)"
+                    dot={false}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </Link>
 
-    {/* Shortcuts */}
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Quick links</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-wrap gap-3">
-          <Button variant="outline" asChild className="gap-2">
-            <Link to="/admin/candidates">
-              <UserCheck className="h-4 w-4" />
-              Candidates
-            </Link>
-          </Button>
-          <Button variant="outline" asChild className="gap-2">
-            <Link to="/admin/employers">
-              <Building2 className="h-4 w-4" />
-              Companies
-            </Link>
-          </Button>
-          <Button variant="outline" asChild className="gap-2">
-            <Link to="/admin/issues">
-              <AlertTriangle className="h-4 w-4" />
-              Issues
-            </Link>
-          </Button>
-          <Button variant="outline" asChild className="gap-2">
-            <Link to="/admin/analytics">
-              <LayoutDashboard className="h-4 w-4" />
-              Analytics
-            </Link>
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+      <Link to="/admin/employers">
+        <Card className="hover:border-primary/50 transition-colors cursor-pointer overflow-hidden h-full">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-4">
+                <div className="h-14 w-14 rounded-xl bg-secondary/20 flex items-center justify-center">
+                  <Building2 className="h-7 w-7 text-secondary" />
+                </div>
+                <div>
+                  <p className="text-4xl font-bold">342</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">Total Companies</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1 text-muted-foreground text-xs font-medium">
+                298 verified
+              </div>
+            </div>
+            <div className="h-16 mt-4 -mx-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={companiesTrend}>
+                  <Bar dataKey="v" fill="hsl(var(--secondary))" radius={[2, 2, 0, 0]} opacity={0.6} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </Link>
+
+      <Link to="/admin/issues">
+        <Card className="hover:border-primary/50 transition-colors cursor-pointer overflow-hidden h-full">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-4">
+                <div className="h-14 w-14 rounded-xl bg-warning/10 flex items-center justify-center">
+                  <AlertTriangle className="h-7 w-7 text-warning" />
+                </div>
+                <div>
+                  <p className="text-4xl font-bold">7</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">Open Issues</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1 text-success text-xs font-medium">
+                <TrendingDown className="h-3.5 w-3.5" />
+                Trending down
+              </div>
+            </div>
+            <div className="h-16 mt-4 -mx-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={issuesTrend}>
+                  <defs>
+                    <linearGradient id="adminIssuesGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--warning))" stopOpacity={0.3} />
+                      <stop offset="100%" stopColor="hsl(var(--warning))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <Area
+                    type="monotone"
+                    dataKey="v"
+                    stroke="hsl(var(--warning))"
+                    strokeWidth={2}
+                    fill="url(#adminIssuesGrad)"
+                    dot={false}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </Link>
+
+      <Link to="/admin/support">
+        <Card className="hover:border-primary/50 transition-colors cursor-pointer overflow-hidden h-full">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-4">
+                <div className="h-14 w-14 rounded-xl bg-success/10 flex items-center justify-center">
+                  <Mail className="h-7 w-7 text-success" />
+                </div>
+                <div>
+                  <p className="text-4xl font-bold">3</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">Support Inbox</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1 text-muted-foreground text-xs font-medium">
+                Awaiting reply
+              </div>
+            </div>
+            <div className="h-16 mt-4 -mx-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={supportTrend}>
+                  <Bar dataKey="v" fill="hsl(var(--success))" radius={[2, 2, 0, 0]} opacity={0.6} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </Link>
+    </div>
   </div>
 );
 

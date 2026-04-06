@@ -28,17 +28,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import logoBlue from "@/assets/nordic-ascent-logo-blue.png";
 
 const navigation = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-  { name: "Candidates", href: "/admin/candidates", icon: UserCheck },
-  { name: "Companies", href: "/admin/employers", icon: Building2 },
   { name: "Issues", href: "/admin/issues", icon: AlertTriangle },
-  { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { name: "Support Inbox", href: "/admin/support", icon: Mail },
-  { name: "Announcements", href: "/admin/notifications", icon: Megaphone },
   { name: "Activity Log", href: "/admin/activity", icon: History },
+  { name: "Companies", href: "/admin/employers", icon: Building2 },
+  { name: "Candidates", href: "/admin/candidates", icon: UserCheck },
+  { name: "Announcements", href: "/admin/notifications", icon: Megaphone },
+  { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
@@ -56,16 +55,16 @@ const AdminLayout = () => {
         )}
       >
         <div className="flex h-full flex-col">
-          {/* Logo */}
-          <div className="flex h-32 items-center justify-between px-4 border-b border-border">
+          {/* Nav header – compact, no large logo */}
+          <div className="flex h-14 items-center justify-between px-4 border-b border-border">
             {!collapsed && (
-              <Link to="/admin/dashboard" className="flex items-center gap-2">
-                <img src={logoBlue} alt="Nordic Ascent" className="h-32 w-auto" />
+              <Link to="/admin/dashboard" className="text-sm font-semibold text-foreground">
+                Nordic Ascent
               </Link>
             )}
             {collapsed && (
-              <Link to="/admin/dashboard" className="mx-auto">
-                <img src={logoBlue} alt="Nordic Ascent" className="h-20 w-auto" />
+              <Link to="/admin/dashboard" className="mx-auto text-lg font-bold text-primary">
+                N
               </Link>
             )}
             <Button
@@ -78,7 +77,6 @@ const AdminLayout = () => {
             </Button>
           </div>
 
-          {/* Collapse toggle when collapsed */}
           {collapsed && (
             <Button
               variant="ghost"
@@ -91,7 +89,7 @@ const AdminLayout = () => {
           )}
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-1">
+          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
             {navigation.map((item) => {
               const isActive = location.pathname === item.href;
               return (
@@ -112,7 +110,6 @@ const AdminLayout = () => {
             })}
           </nav>
 
-          {/* Admin section */}
           {!collapsed && (
             <div className="p-4 border-t border-border">
               <div className="flex items-center gap-3 p-2 rounded-lg bg-muted">
@@ -132,7 +129,6 @@ const AdminLayout = () => {
 
       {/* Main content */}
       <div className={cn("transition-all duration-300", collapsed ? "ml-16" : "ml-64")}>
-        {/* Header */}
         <header className="sticky top-0 z-30 h-16 bg-background/95 backdrop-blur border-b">
           <div className="flex h-full items-center justify-between px-6">
             <div className="flex items-center gap-4">
@@ -181,7 +177,6 @@ const AdminLayout = () => {
           </div>
         </header>
 
-        {/* Page content */}
         <main className="p-6">
           <Outlet />
         </main>
