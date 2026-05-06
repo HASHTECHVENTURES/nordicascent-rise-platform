@@ -133,12 +133,23 @@ const CandidateDashboard = () => {
 
       <Card className="border-border bg-muted/20">
         <CardHeader className="pb-2">
-          <CardTitle className="text-base font-medium">Entry track vs. Fast track</CardTitle>
+          <CardTitle className="text-base font-medium">Entry Track vs. Fast Track — Step by step</CardTitle>
           <CardDescription className="text-sm font-normal">
-            Both use the same seven stages in My Journey. <strong className="text-foreground">Entry track</strong> is the full path including the academic internship before hire. <strong className="text-foreground">Fast track</strong> is a shorter upstream path when you and the employer meet agreed criteria — your recruiter confirms which applies.
+            Both tracks follow the same seven-stage journey you see in My Journey (Preparation → Selection → Readiness → Activation → Relocation → Onboarding → Follow-up).
           </CardDescription>
         </CardHeader>
-        <CardContent className="pt-0">
+        <CardContent className="pt-0 space-y-4 text-sm text-muted-foreground">
+          <div className="space-y-2">
+            <p className="font-medium text-foreground">Entry Track</p>
+            <p>Entry Track is a 12-month selection and preparation program for participants with 0–12 months of professional experience, from selected schools.</p>
+            <p><strong className="text-foreground">Process:</strong> Participants progress through Preparation, Selection, and Readiness, then enter Activation beginning with a 6–10-week academic internship (unless otherwise specified). After the internship, the final hiring decision is confirmed, followed by Relocation and Pre-employment stages, before Onboarding and move to the Company.</p>
+          </div>
+          <div className="space-y-2">
+            <p className="font-medium text-foreground">Fast Track</p>
+            <p>Fast Track is an accelerated preparation and activation program for participants with 1+ years of professional experience and education/alumni from selected schools.</p>
+            <p>The Fast Track timeline starts after Selection has been completed, and it covers the stages of Readiness, Activation and Relocation. This route is designed for participants who already meet defined criteria with the company, allowing fewer or shorter upstream steps.</p>
+          </div>
+          <p>Nordic Ascent will confirm the track and stages applicable to your profile, and the pipeline indicates which steps are currently active.</p>
           <Button variant="outline" size="sm" asChild>
             <Link to="/candidate/internship">How the road is built — read on Activation</Link>
           </Button>
