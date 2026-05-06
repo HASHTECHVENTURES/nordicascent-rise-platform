@@ -26,7 +26,7 @@ const CandidateInternship = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-medium text-foreground">Activation</h1>
-          <p className="text-muted-foreground">Entry Track — Activation – Internship (6–10 weeks) or Pre-Employment</p>
+          <p className="text-muted-foreground">Activation – Internship (6–10 weeks) or Pre-Employment</p>
         </div>
         <Badge variant="secondary">Not Started</Badge>
       </div>
@@ -134,21 +134,6 @@ const CandidateInternship = () => {
               <p className="font-medium">Two paths</p>
               <p className="text-sm text-muted-foreground">Internship (6–10 weeks) → Pre-employment</p>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="border-primary/50 bg-primary/5">
-        <CardHeader>
-          <CardTitle className="text-lg font-medium">Entry track vs. Fast track — how the road is built</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 text-sm text-muted-foreground">
-          <p>
-            Both tracks follow the same <strong className="text-foreground">seven-stage journey</strong> you see in My Journey (Preparation → Selection → Readiness → Activation → Relocation → Onboarding → Follow-up). The difference is <strong className="text-foreground">how many steps you take before Activation</strong> and whether you enter via the academic internship path or a shorter path agreed with your employer.
-          </p>
-          <div className="space-y-2 pl-0 border-l-2 border-primary/30 pl-4">
-            <p><strong className="text-foreground">Entry track:</strong> Standard route — full Preparation, Selection, and Readiness, then Activation starting with the 6–10 week academic internship (unless your school agreement says otherwise), Go/No Go, then Pre-Employment when hired.</p>
-            <p><strong className="text-foreground">Fast track:</strong> Accelerated route when you and the company already meet defined criteria — fewer or shorter upstream steps; you may enter Activation closer to pre-employment or with a tailored timeline. Your recruiter confirms which track and which stages apply to you; the pipeline highlights what is active for your profile.</p>
           </div>
         </CardContent>
       </Card>

@@ -177,9 +177,6 @@ const AdminIssues = () => {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-lg font-medium">Issues by area</CardTitle>
-          <p className="text-sm text-muted-foreground font-normal">
-            Prep → Screening → Readiness → Activation → Relocation → Onboard → Follow-up
-          </p>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between overflow-x-auto pb-2 gap-1">
