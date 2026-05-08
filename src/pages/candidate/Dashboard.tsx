@@ -2,10 +2,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { 
-  CheckCircle, 
-  Circle, 
-  AlertTriangle, 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  CheckCircle,
+  Circle,
+  AlertTriangle,
   ArrowRight,
   ClipboardCheck,
   UserCheck,
@@ -13,9 +14,11 @@ import {
   Briefcase,
   MapPin,
   Building2,
-  Users
+  Users,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTrack, TRACK_META, type Track } from "@/lib/track";
+import { cn } from "@/lib/utils";
 
 // Pipeline stages definition
 const pipelineStages = [
