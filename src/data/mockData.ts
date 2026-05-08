@@ -1,6 +1,20 @@
 // Recruitment Platform Mock Data
+import type { Track } from "@/lib/track";
 
-export const candidates = [
+export const candidates: Array<{
+  id: string;
+  name: string;
+  email: string;
+  avatar: string;
+  title: string;
+  location: string;
+  skills: string[];
+  experience: string;
+  education: string;
+  status: string;
+  appliedJobs: number;
+  track: Track;
+}> = [
   {
     id: "1",
     name: "Erik Lindqvist",
@@ -13,6 +27,7 @@ export const candidates = [
     education: "M.Sc. Computer Science, KTH",
     status: "active",
     appliedJobs: 3,
+    track: "fast",
   },
   {
     id: "2",
@@ -26,6 +41,7 @@ export const candidates = [
     education: "B.A. Design, Copenhagen University",
     status: "active",
     appliedJobs: 2,
+    track: "entry",
   },
   {
     id: "3",
@@ -39,6 +55,7 @@ export const candidates = [
     education: "Ph.D. Data Science, University of Oslo",
     status: "interviewing",
     appliedJobs: 4,
+    track: "fast",
   },
   {
     id: "4",
@@ -52,6 +69,7 @@ export const candidates = [
     education: "MBA, Aalto University",
     status: "active",
     appliedJobs: 1,
+    track: "entry",
   },
 ];
 

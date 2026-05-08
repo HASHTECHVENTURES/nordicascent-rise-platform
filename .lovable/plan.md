@@ -1,38 +1,82 @@
-## Final pre-production feedback changes
+## Make Entry Track / Fast Track a real feature
 
-Based on the uploaded feedback document, four small content changes across the candidate and admin portals.
+Treat the track as a per-candidate attribute that drives the pipeline, badges, and admin controls. UI prototype only — no backend; track lives in mock data + a lightweight client store so it can be changed at runtime.
 
-### 1. Activation page — remove track explanation
-**File:** `src/pages/candidate/Internship.tsx`
+### 1. Data model (mock)
 
-- Remove the entire "Entry track vs. Fast track — how the road is built" card (currently around lines 141–154).
-- Update the subtitle on line 29 from `"Entry Track — Activation – Internship (6–10 weeks) or Pre-Employment"` to `"Activation – Internship (6–10 weeks) or Pre-Employment"` (drop the "Entry Track —" prefix; track labels should not appear on Activation).
+In `src/data/mockData.ts`:
 
-### 2. My Journey page — replace track explanation with the new copy
-**File:** `src/pages/candidate/Dashboard.tsx`
+- Add `track: "entry" | "fast"` to each candidate.
+- Add a shared `TRACK_META` export with display label, short description, and which stages apply:
+  - `entry`: stages `["preparation","selection","readiness","activation","relocation","onboarding","followup"]`
+  - `fast`: stages `["readiness","activation","relocation","onboarding","followup"]` (Preparation + Selection are not part of Fast Track)
+- Seed roughly 70% Entry / 30% Fast across the candidate list.
 
-Replace the existing short "Entry track vs. Fast track" card (around lines 134–145) with the new, fuller explanation from the feedback doc:
+### 2. Current candidate's track (prototype state)
 
-- Intro: "Both tracks follow the same seven-stage journey you see in My Journey (Preparation → Selection → Readiness → Activation → Relocation → Onboarding → Follow-up)."
-- **Entry Track** section: 12-month selection and preparation program for participants with 0–12 months of professional experience, from selected schools. Process description: Preparation → Selection → Readiness, then Activation starting with a 6–10-week academic internship (unless otherwise specified). After internship, final hiring decision is confirmed, followed by Relocation and Pre-employment, before Onboarding and move to Company.
-- **Fast Track** section: Accelerated preparation and activation program for participants with 1+ years of professional experience and education/alumni from selected schools. Timeline starts after Selection has been completed, covering Readiness, Activation and Relocation. Designed for participants who already meet defined criteria with the company.
-- Closing line: "Nordic Ascent will confirm the track and stages applicable to your profile, and the pipeline indicates which steps are currently active."
+Create `src/lib/track-store.ts` — a tiny `useSyncExternalStore`-based store with:
+- `getTrack()` / `setTrack(t)` persisted in `localStorage` under `na.candidateTrack` (default `"entry"`).
+- A `useTrack()` hook returning `[track, setTrack]`.
 
-Also update the dashboard line 131 program tag to use **Entry Track** (already correct capitalization).
+Used by candidate pages and the admin "Set track" action (admin updates the same key for the demo candidate).
 
-### 3. Capitalize "Entry Track" and "Fast Track" everywhere
-Across the platform, normalize lowercase "Entry track" / "Fast track" to **Entry Track** / **Fast Track** (both words capitalized). Affected files include:
+### 3. Track-aware candidate pipeline
 
-- `src/pages/candidate/Dashboard.tsx`
-- `src/pages/candidate/Internship.tsx` (in any remaining copy)
-- `src/pages/candidate/Readiness.tsx`
-- `src/components/layouts/CandidateLayout.tsx`
-- Any other occurrences surfaced during the edit pass.
+`src/components/candidate/PipelineProgress.tsx`:
 
-### 4. Admin — remove pipeline arrow line
-**File:** `src/pages/admin/Issues.tsx` (line 181)
+- Read current track via `useTrack()`.
+- Keep all 7 stage definitions, but for `fast`: render Preparation + Selection in a muted/dimmed style with a "Not in Fast Track" tooltip and disable their links.
+- Active/completed stage logic stays the same; just the first two are skipped visually for Fast Track.
+- Add a small **track badge** at the left edge of the bar: `Entry Track` or `Fast Track` chip (Nordic Deep Blue outline).
 
-Remove the line: `Prep → Screening → Readiness → Activation → Relocation → Onboard → Follow-up`. Clean up the surrounding wrapper element if it becomes empty.
+### 4. Candidate dashboard (My Journey)
+
+`src/pages/candidate/Dashboard.tsx`:
+
+- Show the track badge prominently next to the page title.
+- Keep the "Entry Track vs. Fast Track — Step by step" explanation card (already added), but highlight the candidate's current track section.
+- If track is `fast`, hide/grey-out Preparation and Selection summary tiles.
+
+Also lock direct navigation to `/candidate/preparation` and `/candidate/selection` for Fast Track users — show a small "Not part of Fast Track" notice on those pages instead of the normal content.
+
+### 5. Admin controls
+
+`src/pages/admin/Candidates.tsx`:
+- Add a **Track** column (badge) to the candidate table.
+- Add a **Track** filter (All / Entry / Fast) next to existing filters.
+
+`src/pages/admin/CandidateDetail.tsx`:
+- Add a "Track" section with current value and a dropdown to switch between Entry Track / Fast Track. Switching updates mock data in memory (and, for the demo candidate id, the `track-store` so the candidate view reflects it live).
+- Show the same track-aware pipeline preview using `AdminPipelineProgress` with the candidate's track.
+
+`src/components/admin/AdminPipelineProgress.tsx`:
+- Accept a `track` prop and dim Preparation + Selection when `track === "fast"`, mirroring the candidate component.
+
+### 6. Employer view (light touch)
+
+`src/pages/employer/Candidates.tsx`:
+- Show the track as a badge next to each candidate name.
+- Add a Track filter chip row (All / Entry / Fast).
+No changes to employer pipeline logic.
+
+### 7. Analytics
+
+`src/pages/admin/Analytics.tsx`:
+- Add a small "Candidates by track" KPI tile (Entry count / Fast count) computed from mock data. No new charts.
+
+### 8. Copy & capitalization
+
+- Confirm "Entry Track" / "Fast Track" capitalization remains consistent everywhere.
+- Activation page still has no track-explanation text (already done).
 
 ### Out of scope
-No layout, color, component, or routing changes — copy edits only.
+
+- No backend, no auth-based assignment, no migrations.
+- No changes to stage content pages beyond the Fast-Track "not part of your track" notice on Preparation/Selection.
+- No analytics drill-downs beyond the single KPI tile.
+
+### Technical notes
+
+- Track type lives in `src/data/mockData.ts` and is re-exported as `Track` for reuse.
+- `track-store.ts` is a 30-line file; no new deps.
+- Pipeline components share a small helper `isStageInTrack(stageId, track)` to avoid duplicating the skip rules.

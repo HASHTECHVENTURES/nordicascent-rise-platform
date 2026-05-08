@@ -2,8 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Circle, ArrowRight, Calendar, Video, FileCheck } from "lucide-react";
+import { CheckCircle, Circle, ArrowRight, Info } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTrack, TRACK_META } from "@/lib/track";
 
 const tasks = [
   { id: 1, text: "Application Review", completed: true },
@@ -13,6 +14,32 @@ const tasks = [
 ];
 
 const CandidateSelection = () => {
+  const [track] = useTrack();
+  if (track === "fast") {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-medium text-foreground">Selection</h1>
+          <p className="text-muted-foreground">Not part of {TRACK_META.fast.label}</p>
+        </div>
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="pt-6 flex items-start gap-3">
+            <Info className="h-5 w-5 text-primary mt-0.5" />
+            <div className="text-sm">
+              <p className="font-medium text-foreground">Selection is not part of Fast Track</p>
+              <p className="text-muted-foreground mt-1">
+                Fast Track participants enter the journey at Readiness, after Selection has already been completed.
+              </p>
+              <Button variant="outline" size="sm" className="mt-3" asChild>
+                <Link to="/candidate/readiness">Go to Readiness <ArrowRight className="ml-2 h-4 w-4" /></Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const completedTasks = tasks.filter(t => t.completed).length;
   const readiness = Math.round((completedTasks / tasks.length) * 100);
 

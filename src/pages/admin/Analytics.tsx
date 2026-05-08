@@ -148,7 +148,30 @@ const AdminAnalytics = () => {
         </Card>
       </div>
 
-      {/* KPI 1: Candidates per Stage + Conversion */}
+      {/* Candidates by track */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg font-medium">Candidates by track</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-4 rounded border border-border flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Entry Track</p>
+                <p className="text-xs text-muted-foreground">12-month program · 0–12 months experience</p>
+              </div>
+              <p className="text-2xl font-bold text-primary">84</p>
+            </div>
+            <div className="p-4 rounded border border-border flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium">Fast Track</p>
+                <p className="text-xs text-muted-foreground">Accelerated · 1+ years experience</p>
+              </div>
+              <p className="text-2xl font-bold text-primary">36</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle className="text-lg font-medium">Candidates per Stage & Conversion Rates</CardTitle>

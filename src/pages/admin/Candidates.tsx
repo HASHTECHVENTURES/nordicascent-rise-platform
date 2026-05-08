@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,16 +8,41 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Filter, Download, Eye, Ban, CheckCircle, MoreHorizontal, MapPin, Briefcase } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link } from "react-router-dom";
+import { TRACK_META, type Track } from "@/lib/track";
 
-const candidates = [
-  { id: 1, name: "Emma Lindqvist", email: "emma@email.com", avatar: "", location: "Stockholm, SE", role: "Engineer", status: "active", applications: 5, verified: true, joined: "2024-01-15" },
-  { id: 2, name: "Lars Andersen", email: "lars@email.com", avatar: "", location: "Copenhagen, DK", role: "Product Manager", status: "active", applications: 3, verified: true, joined: "2024-02-20" },
-  { id: 3, name: "Sofia Virtanen", email: "sofia@email.com", avatar: "", location: "Helsinki, FI", role: "UX Designer", status: "pending", applications: 2, verified: false, joined: "2024-03-10" },
-  { id: 4, name: "Magnus Olsen", email: "magnus@email.com", avatar: "", location: "Oslo, NO", role: "Data Scientist", status: "suspended", applications: 0, verified: true, joined: "2024-01-28" },
-  { id: 5, name: "Ingrid Svensson", email: "ingrid@email.com", avatar: "", location: "Gothenburg, SE", role: "Frontend Developer", status: "active", applications: 7, verified: true, joined: "2024-02-05" },
+export type AdminCandidate = {
+  id: number; name: string; email: string; avatar: string; location: string; role: string;
+  status: string; applications: number; verified: boolean; joined: string; track: Track;
+};
+
+export const adminCandidates: AdminCandidate[] = [
+  { id: 1, name: "Emma Lindqvist", email: "emma@email.com", avatar: "", location: "Stockholm, SE", role: "Engineer", status: "active", applications: 5, verified: true, joined: "2024-01-15", track: "entry" },
+  { id: 2, name: "Lars Andersen", email: "lars@email.com", avatar: "", location: "Copenhagen, DK", role: "Product Manager", status: "active", applications: 3, verified: true, joined: "2024-02-20", track: "fast" },
+  { id: 3, name: "Sofia Virtanen", email: "sofia@email.com", avatar: "", location: "Helsinki, FI", role: "UX Designer", status: "pending", applications: 2, verified: false, joined: "2024-03-10", track: "entry" },
+  { id: 4, name: "Magnus Olsen", email: "magnus@email.com", avatar: "", location: "Oslo, NO", role: "Data Scientist", status: "suspended", applications: 0, verified: true, joined: "2024-01-28", track: "fast" },
+  { id: 5, name: "Ingrid Svensson", email: "ingrid@email.com", avatar: "", location: "Gothenburg, SE", role: "Frontend Developer", status: "active", applications: 7, verified: true, joined: "2024-02-05", track: "entry" },
 ];
 
+const TrackBadge = ({ track }: { track: Track }) => (
+  <Badge variant="outline" className="border-primary/40 text-primary">
+    {TRACK_META[track].label}
+  </Badge>
+);
+
 const AdminCandidates = () => {
+  const [trackFilter, setTrackFilter] = useState<"all" | Track>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  const filtered = useMemo(
+    () =>
+      adminCandidates.filter(
+        (c) =>
+          (trackFilter === "all" || c.track === trackFilter) &&
+          (statusFilter === "all" || c.status === statusFilter),
+      ),
+    [trackFilter, statusFilter],
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -25,8 +51,8 @@ const AdminCandidates = () => {
           <p className="text-muted-foreground">Review and manage platform candidates</p>
         </div>
         <Button variant="outline" className="gap-2" onClick={() => {
-          const headers = ["Name", "Email", "Location", "Role", "Status", "Applications", "Joined"];
-          const rows = candidates.map(c => [c.name, c.email, c.location, c.role, c.status, c.applications, c.joined]);
+          const headers = ["Name", "Email", "Location", "Role", "Status", "Track", "Applications", "Joined"];
+          const rows = filtered.map(c => [c.name, c.email, c.location, c.role, c.status, TRACK_META[c.track].label, c.applications, c.joined]);
           const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
           const blob = new Blob([csv], { type: "text/csv" });
           const url = URL.createObjectURL(blob);
@@ -50,20 +76,20 @@ const AdminCandidates = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Active</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Entry Track</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-chart-success">2,456</div>
-            <p className="text-xs text-muted-foreground">86% of total</p>
+            <div className="text-2xl font-bold">{adminCandidates.filter(c => c.track === "entry").length}</div>
+            <p className="text-xs text-muted-foreground">in current sample</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Pending Verification</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Fast Track</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-chart-warning">234</div>
-            <p className="text-xs text-muted-foreground">Awaiting review</p>
+            <div className="text-2xl font-bold">{adminCandidates.filter(c => c.track === "fast").length}</div>
+            <p className="text-xs text-muted-foreground">in current sample</p>
           </CardContent>
         </Card>
         <Card>
@@ -85,7 +111,17 @@ const AdminCandidates = () => {
               <Input placeholder="Search candidates..." className="pl-9" />
             </div>
             <div className="flex gap-2">
-              <Select defaultValue="all">
+              <Select value={trackFilter} onValueChange={(v) => setTrackFilter(v as "all" | Track)}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Track" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All tracks</SelectItem>
+                  <SelectItem value="entry">Entry Track</SelectItem>
+                  <SelectItem value="fast">Fast Track</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-[140px]">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
@@ -104,7 +140,7 @@ const AdminCandidates = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {candidates.map((candidate) => (
+            {filtered.map((candidate) => (
               <div key={candidate.id} className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
                 <div className="flex items-center gap-4">
                   <Avatar className="h-12 w-12">
@@ -114,11 +150,12 @@ const AdminCandidates = () => {
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold">{candidate.name}</h3>
                       {candidate.verified && (
                         <CheckCircle className="h-4 w-4 text-chart-success" />
                       )}
+                      <TrackBadge track={candidate.track} />
                     </div>
                     <p className="text-sm text-muted-foreground">{candidate.email}</p>
                     <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
