@@ -35,27 +35,27 @@ const pipelineStages = [
   { id: "followup", name: "Follow-up", icon: Users, color: "text-muted-foreground" },
 ];
 
-const candidatesByStage = {
+const candidatesByStage: Record<string, Array<{ id: number; name: string; role: string; location: string; experience: string; match: number; skills: string[]; readiness: number; status: string; needsAction: boolean; avatar: string; track: Track }>> = {
   preparation: [
-    { id: 1, name: "Rahul Sharma", role: "Engineer", location: "Mumbai, IN", experience: "3 years", match: 92, skills: ["Design", "Analysis"], readiness: 45, status: "active", needsAction: false, avatar: "https://i.pravatar.cc/150?img=1" },
-    { id: 2, name: "Priya Patel", role: "Backend Engineer", location: "Bangalore, IN", experience: "4 years", match: 88, skills: ["Node.js", "Python"], readiness: 30, status: "active", needsAction: true, avatar: "https://i.pravatar.cc/150?img=5" },
-    { id: 3, name: "Amit Kumar", role: "Full Stack Developer", location: "Delhi, IN", experience: "5 years", match: 85, skills: ["React", "Node.js"], readiness: 60, status: "active", needsAction: false, avatar: "https://i.pravatar.cc/150?img=12" },
+    { id: 1, name: "Rahul Sharma", role: "Engineer", location: "Mumbai, IN", experience: "3 years", match: 92, skills: ["Design", "Analysis"], readiness: 45, status: "active", needsAction: false, avatar: "https://i.pravatar.cc/150?img=1", track: "entry" },
+    { id: 2, name: "Priya Patel", role: "Backend Engineer", location: "Bangalore, IN", experience: "4 years", match: 88, skills: ["Node.js", "Python"], readiness: 30, status: "active", needsAction: true, avatar: "https://i.pravatar.cc/150?img=5", track: "entry" },
+    { id: 3, name: "Amit Kumar", role: "Full Stack Developer", location: "Delhi, IN", experience: "5 years", match: 85, skills: ["React", "Node.js"], readiness: 60, status: "active", needsAction: false, avatar: "https://i.pravatar.cc/150?img=12", track: "entry" },
   ],
   selection: [
-    { id: 4, name: "Sneha Reddy", role: "UX Designer", location: "Hyderabad, IN", experience: "3 years", match: 90, skills: ["Figma", "User Research"], readiness: 75, status: "active", needsAction: true, avatar: "https://i.pravatar.cc/150?img=9" },
-    { id: 5, name: "Vikram Singh", role: "DevOps Engineer", location: "Pune, IN", experience: "4 years", match: 87, skills: ["AWS", "Docker"], readiness: 80, status: "active", needsAction: false, avatar: "https://i.pravatar.cc/150?img=15" },
+    { id: 4, name: "Sneha Reddy", role: "UX Designer", location: "Hyderabad, IN", experience: "3 years", match: 90, skills: ["Figma", "User Research"], readiness: 75, status: "active", needsAction: true, avatar: "https://i.pravatar.cc/150?img=9", track: "entry" },
+    { id: 5, name: "Vikram Singh", role: "DevOps Engineer", location: "Pune, IN", experience: "4 years", match: 87, skills: ["AWS", "Docker"], readiness: 80, status: "active", needsAction: false, avatar: "https://i.pravatar.cc/150?img=15", track: "entry" },
   ],
   readiness: [
-    { id: 6, name: "Anjali Mehta", role: "Data Engineer", location: "Bangalore, IN", experience: "4 years", match: 93, skills: ["Python", "Spark"], readiness: 90, status: "active", needsAction: false, avatar: "https://i.pravatar.cc/150?img=20" },
-    { id: 7, name: "Rohan Desai", role: "Mobile Developer", location: "Mumbai, IN", experience: "3 years", match: 89, skills: ["React Native", "iOS"], readiness: 65, status: "active", needsAction: false, avatar: "https://i.pravatar.cc/150?img=18" },
+    { id: 6, name: "Anjali Mehta", role: "Data Engineer", location: "Bangalore, IN", experience: "4 years", match: 93, skills: ["Python", "Spark"], readiness: 90, status: "active", needsAction: false, avatar: "https://i.pravatar.cc/150?img=20", track: "fast" },
+    { id: 7, name: "Rohan Desai", role: "Mobile Developer", location: "Mumbai, IN", experience: "3 years", match: 89, skills: ["React Native", "iOS"], readiness: 65, status: "active", needsAction: false, avatar: "https://i.pravatar.cc/150?img=18", track: "entry" },
   ],
   internship: [
-    { id: 8, name: "Kavita Nair", role: "Product Manager", location: "Bangalore, IN", experience: "5 years", match: 95, skills: ["Agile", "Roadmapping"], readiness: 100, status: "active", needsAction: false, avatar: "https://i.pravatar.cc/150?img=25" },
+    { id: 8, name: "Kavita Nair", role: "Product Manager", location: "Bangalore, IN", experience: "5 years", match: 95, skills: ["Agile", "Roadmapping"], readiness: 100, status: "active", needsAction: false, avatar: "https://i.pravatar.cc/150?img=25", track: "fast" },
   ],
   relocation: [],
   onboarding: [],
   followup: [
-    { id: 9, name: "Arjun Menon", role: "Senior Developer", location: "Stockholm, SE", experience: "6 years", match: 98, skills: ["React", "TypeScript"], readiness: 100, status: "completed", needsAction: false, avatar: "https://i.pravatar.cc/150?img=30" },
+    { id: 9, name: "Arjun Menon", role: "Senior Developer", location: "Stockholm, SE", experience: "6 years", match: 98, skills: ["React", "TypeScript"], readiness: 100, status: "completed", needsAction: false, avatar: "https://i.pravatar.cc/150?img=30", track: "fast" },
   ],
 };
 
