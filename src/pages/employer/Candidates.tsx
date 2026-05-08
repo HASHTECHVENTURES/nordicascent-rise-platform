@@ -22,7 +22,8 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { TRACK_META, type Track } from "@/lib/track";
 
 const pipelineStages = [
   { id: "preparation", name: "Preparation", icon: ClipboardCheck, color: "text-secondary" },
