@@ -97,6 +97,9 @@ const currentStage = {
 };
 
 const CandidateDashboard = () => {
+  const [track, setTrack] = useTrack();
+  const meta = TRACK_META[track];
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "completed":
@@ -128,10 +131,29 @@ const CandidateDashboard = () => {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-medium text-foreground">My Journey</h1>
-        <p className="text-muted-foreground">Track your progress through the Nordic Ascent pipeline</p>
-        <p className="text-xs text-muted-foreground mt-1">Program: <strong>Entry Track</strong> — Academic-to-Professional, up to 12 months</p>
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-2xl font-medium text-foreground">My Journey</h1>
+            <Badge variant="outline" className="border-primary/40 text-primary font-medium">
+              {meta.label}
+            </Badge>
+          </div>
+          <p className="text-muted-foreground">Track your progress through the Nordic Ascent pipeline</p>
+          <p className="text-xs text-muted-foreground mt-1">Program: <strong>{meta.label}</strong> — {meta.short}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">Demo: switch track</span>
+          <Select value={track} onValueChange={(v) => setTrack(v as Track)}>
+            <SelectTrigger className="w-[150px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="entry">Entry Track</SelectItem>
+              <SelectItem value="fast">Fast Track</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <Card className="border-border bg-muted/20">
@@ -142,13 +164,19 @@ const CandidateDashboard = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-0 space-y-4 text-sm text-muted-foreground">
-          <div className="space-y-2">
-            <p className="font-medium text-foreground">Entry Track</p>
+          <div className={cn("space-y-2 p-3 rounded-md border", track === "entry" ? "border-primary/40 bg-primary/5" : "border-transparent")}>
+            <div className="flex items-center gap-2">
+              <p className="font-medium text-foreground">Entry Track</p>
+              {track === "entry" && <Badge className="bg-primary text-primary-foreground">Your track</Badge>}
+            </div>
             <p>Entry Track is a 12-month selection and preparation program for participants with 0–12 months of professional experience, from selected schools.</p>
             <p><strong className="text-foreground">Process:</strong> Participants progress through Preparation, Selection, and Readiness, then enter Activation beginning with a 6–10-week academic internship (unless otherwise specified). After the internship, the final hiring decision is confirmed, followed by Relocation and Pre-employment stages, before Onboarding and move to the Company.</p>
           </div>
-          <div className="space-y-2">
-            <p className="font-medium text-foreground">Fast Track</p>
+          <div className={cn("space-y-2 p-3 rounded-md border", track === "fast" ? "border-primary/40 bg-primary/5" : "border-transparent")}>
+            <div className="flex items-center gap-2">
+              <p className="font-medium text-foreground">Fast Track</p>
+              {track === "fast" && <Badge className="bg-primary text-primary-foreground">Your track</Badge>}
+            </div>
             <p>Fast Track is an accelerated preparation and activation program for participants with 1+ years of professional experience and education/alumni from selected schools.</p>
             <p>The Fast Track timeline starts after Selection has been completed, and it covers the stages of Readiness, Activation and Relocation. This route is designed for participants who already meet defined criteria with the company, allowing fewer or shorter upstream steps.</p>
           </div>
