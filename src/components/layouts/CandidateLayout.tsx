@@ -8,37 +8,49 @@ import {
   ChevronRight,
   Bell,
   Heart,
-  LogOut,
-  AlertTriangle,
   Home,
+  AlertTriangle,
+  User,
+  Briefcase,
+  ClipboardList,
 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import PipelineProgress from "@/components/candidate/PipelineProgress";
+import JobHuntProgress from "@/components/candidate/JobHuntProgress";
+import { PortalUserMenu, PortalUserSidebar } from "@/components/PortalUserMenu";
+import { TRACK_META, useTrack } from "@/lib/track";
+import { useNotifications, useMarkAllNotificationsRead, useMyApplications } from "@/hooks/useData";
+import { hasUnlockedPipeline } from "@/lib/applicationJourney";
+import { useSyncEligibleTasks } from "@/hooks/useSyncEligibleTasks";
+import { useCandidateOnboardingRedirect } from "@/hooks/useCandidateOnboarding";
 
 // No sub-items needed; My Journey is a direct link
 
 // Standalone nav items
 const standaloneNav = [
+  { name: "My Profile", href: "/candidate/profile", icon: User, tooltip: "Complete your profile, upload CV, and add skills" },
+  { name: "Jobs", href: "/candidate/jobs", icon: Briefcase, tooltip: "Browse open roles — apply to multiple jobs" },
+  { name: "My Applications", href: "/candidate/applications", icon: ClipboardList, tooltip: "Track status of every role you applied to" },
   { name: "Mentoring", href: "/candidate/mentoring", icon: Heart, tooltip: "Connect with your dedicated company mentor" },
   { name: "Messages", href: "/candidate/messages", icon: MessageSquare, tooltip: "Communication with employers and Nordic Ascent team" },
+  { name: "Support", href: "/candidate/support", icon: AlertTriangle, tooltip: "Open a support ticket with Nordic Ascent" },
 ];
 
 const CandidateLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const [track] = useTrack();
+  const { data: notifications } = useNotifications();
+  const { data: applications } = useMyApplications();
+  const journeyUnlocked = hasUnlockedPipeline(applications ?? []);
+  const markAllRead = useMarkAllNotificationsRead();
+  const unreadIssues = notifications?.filter((n) => !n.read_at).length ?? 0;
+  useSyncEligibleTasks();
+  useCandidateOnboardingRedirect();
 
   const renderNavItem = (item: { name: string; href: string; icon: React.ElementType; tooltip?: string }, indented = false) => {
-    const isActive = location.pathname === item.href;
+    const isActive = location.pathname === item.href || location.pathname.startsWith(`${item.href}/`);
     return (
       <Link
         key={item.name}
@@ -111,7 +123,11 @@ const CandidateLayout = () => {
               )}
             >
               <LayoutDashboard className="h-5 w-5 flex-shrink-0" />
-              {!collapsed && <span className="text-sm font-medium">My Journey</span>}
+              {!collapsed && (
+                <span className="text-sm font-medium">
+                  {journeyUnlocked ? "My Journey" : "Home"}
+                </span>
+              )}
             </Link>
 
             {/* Separator */}
@@ -124,24 +140,7 @@ const CandidateLayout = () => {
           {/* User section */}
           {!collapsed && (
             <div className="p-4 border-t border-border">
-              <Link
-                to="/candidate/profile"
-                className={cn(
-                  "flex items-center gap-3 p-2 rounded transition-colors",
-                  location.pathname === "/candidate/profile"
-                    ? "bg-nordic-orange text-white"
-                    : "bg-muted hover:bg-muted/80"
-                )}
-              >
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="https://i.pravatar.cc/150?img=1" />
-                  <AvatarFallback className="bg-nordic-orange text-white">RA</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate text-foreground">Rahul Sharma</p>
-                  <p className="text-xs text-muted-foreground">Candidate</p>
-                </div>
-              </Link>
+              <PortalUserSidebar profilePath="/candidate/profile" roleLabel="Candidate" />
             </div>
           )}
         </div>
@@ -153,7 +152,7 @@ const CandidateLayout = () => {
           <div className="flex h-full items-center justify-between px-6">
             <div className="flex items-center gap-4 flex-wrap">
               <h1 className="text-lg font-medium text-foreground">Candidate Journey</h1>
-              <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded">Entry Track</span>
+              <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded">{TRACK_META[track].label}</span>
               <Button variant="ghost" size="sm" className="text-muted-foreground h-8 gap-1.5" asChild>
                 <Link to="/">
                   <Home className="h-4 w-4" />
@@ -167,64 +166,44 @@ const CandidateLayout = () => {
                 <PopoverTrigger asChild>
                   <Button variant="ghost" size="icon" className="relative">
                     <Bell className="h-5 w-5" />
-                    <span className="absolute -top-1 -right-1 h-4 w-4 bg-warning text-warning-foreground text-xs rounded-full flex items-center justify-center">
-                      3
-                    </span>
+                    {unreadIssues > 0 && (
+                      <span className="absolute -top-1 -right-1 h-4 w-4 bg-warning text-warning-foreground text-xs rounded-full flex items-center justify-center">
+                        {unreadIssues}
+                      </span>
+                    )}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-80 p-0" align="end">
-                  <div className="p-4 border-b">
-                    <h3 className="font-semibold text-base">Open Issues</h3>
+                  <div className="p-4 border-b flex items-center justify-between">
+                    <h3 className="font-semibold text-base">Notifications</h3>
+                    {unreadIssues > 0 && (
+                      <Button variant="ghost" size="sm" onClick={() => markAllRead.mutate()}>Mark all read</Button>
+                    )}
                   </div>
                   <div className="p-3 space-y-2">
-                    <div className="flex items-center gap-3 p-3 rounded-lg bg-warning/10">
-                      <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0" />
-                      <span className="text-sm">Technical assessment deadline in 5 days</span>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 rounded-lg bg-warning/10">
-                      <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0" />
-                      <span className="text-sm">Document upload pending for Preparation stage</span>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 rounded-lg bg-warning/10">
-                      <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0" />
-                      <span className="text-sm">New message from your mentor</span>
-                    </div>
+                    {(notifications ?? []).slice(0, 3).map((n) => (
+                      <div key={n.id} className="flex items-center gap-3 p-3 rounded-lg bg-warning/10">
+                        <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0" />
+                        <span className="text-sm">{n.title}</span>
+                      </div>
+                    ))}
+                    {(!notifications || notifications.length === 0) && (
+                      <p className="text-sm text-muted-foreground p-3">No notifications</p>
+                    )}
                   </div>
                 </PopoverContent>
               </Popover>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src="https://i.pravatar.cc/150?img=1" />
-                      <AvatarFallback>RA</AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/candidate/profile">Profile</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/candidate/messages">Messages</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/login" className="text-destructive">
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Logout
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <PortalUserMenu profilePath="/candidate/profile" messagesPath="/candidate/messages" />
             </div>
           </div>
         </header>
 
-        <PipelineProgress />
+        {journeyUnlocked ? (
+          <PipelineProgress />
+        ) : (
+          <JobHuntProgress />
+        )}
         <main className="p-6">
           <Outlet />
         </main>

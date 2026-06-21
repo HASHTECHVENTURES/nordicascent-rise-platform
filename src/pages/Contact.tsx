@@ -4,20 +4,66 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Send, Calendar } from "lucide-react";
+import { Send, Calendar, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useSubmitContact } from "@/hooks/useData";
+import { useState } from "react";
 
 export default function Contact() {
   const { toast } = useToast();
+  const submitContact = useSubmitContact();
+  const [contactForm, setContactForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+  const [demoForm, setDemoForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    company: "",
+    size: "",
+    interest: "",
+    message: "",
+  });
 
-  const handleContactSubmit = (e: React.FormEvent) => {
+  const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({ title: "Message Sent!", description: "We'll get back to you within 24 hours." });
+    try {
+      await submitContact.mutateAsync({
+        name: `${contactForm.firstName} ${contactForm.lastName}`.trim(),
+        email: contactForm.email,
+        company: contactForm.subject,
+        message: contactForm.message,
+      });
+      toast({ title: "Message Sent!", description: "We'll get back to you within 24 hours." });
+      setContactForm({ firstName: "", lastName: "", email: "", subject: "", message: "" });
+    } catch (err) {
+      toast({ title: "Failed to send", description: err instanceof Error ? err.message : "Try again", variant: "destructive" });
+    }
   };
 
-  const handleDemoSubmit = (e: React.FormEvent) => {
+  const handleDemoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({ title: "Demo Requested!", description: "Our team will reach out to schedule your demo." });
+    const details = [
+      demoForm.size && `Company size: ${demoForm.size}`,
+      demoForm.interest && `Role: ${demoForm.interest}`,
+      demoForm.message,
+    ].filter(Boolean).join("\n");
+    try {
+      await submitContact.mutateAsync({
+        name: `${demoForm.firstName} ${demoForm.lastName}`.trim(),
+        email: demoForm.email,
+        company: demoForm.company,
+        message: `[Demo request]\n${details}`,
+      });
+      toast({ title: "Demo Requested!", description: "Our team will reach out to schedule your demo." });
+      setDemoForm({ firstName: "", lastName: "", email: "", company: "", size: "", interest: "", message: "" });
+    } catch (err) {
+      toast({ title: "Failed to send", description: err instanceof Error ? err.message : "Try again", variant: "destructive" });
+    }
   };
 
   return (
@@ -47,14 +93,49 @@ export default function Contact() {
               <CardContent>
                 <form onSubmit={handleDemoSubmit} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2"><Label htmlFor="demo-firstName">First Name</Label><Input id="demo-firstName" required /></div>
-                    <div className="space-y-2"><Label htmlFor="demo-lastName">Last Name</Label><Input id="demo-lastName" required /></div>
+                    <div className="space-y-2">
+                      <Label htmlFor="demo-firstName">First Name</Label>
+                      <Input
+                        id="demo-firstName"
+                        required
+                        value={demoForm.firstName}
+                        onChange={(e) => setDemoForm((f) => ({ ...f, firstName: e.target.value }))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="demo-lastName">Last Name</Label>
+                      <Input
+                        id="demo-lastName"
+                        required
+                        value={demoForm.lastName}
+                        onChange={(e) => setDemoForm((f) => ({ ...f, lastName: e.target.value }))}
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2"><Label htmlFor="demo-email">Work Email</Label><Input id="demo-email" type="email" placeholder="you@company.com" required /></div>
-                  <div className="space-y-2"><Label htmlFor="demo-company">Company Name</Label><Input id="demo-company" required /></div>
+                  <div className="space-y-2">
+                    <Label htmlFor="demo-email">Work Email</Label>
+                    <Input
+                      id="demo-email"
+                      type="email"
+                      placeholder="you@company.com"
+                      required
+                      value={demoForm.email}
+                      onChange={(e) => setDemoForm((f) => ({ ...f, email: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="demo-company">Company Name</Label>
+                    <Input
+                      id="demo-company"
+                      required
+                      value={demoForm.company}
+                      onChange={(e) => setDemoForm((f) => ({ ...f, company: e.target.value }))}
+                    />
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="demo-size">Company Size</Label>
-                    <Select><SelectTrigger><SelectValue placeholder="Select company size" /></SelectTrigger>
+                    <Select value={demoForm.size} onValueChange={(v) => setDemoForm((f) => ({ ...f, size: v }))}>
+                      <SelectTrigger><SelectValue placeholder="Select company size" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="1-50">1-50 employees</SelectItem>
                         <SelectItem value="51-200">51-200 employees</SelectItem>
@@ -66,7 +147,8 @@ export default function Contact() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="demo-interest">I am a...</Label>
-                    <Select><SelectTrigger><SelectValue placeholder="Select your role" /></SelectTrigger>
+                    <Select value={demoForm.interest} onValueChange={(v) => setDemoForm((f) => ({ ...f, interest: v }))}>
+                      <SelectTrigger><SelectValue placeholder="Select your role" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="company">Company looking for talent</SelectItem>
                         <SelectItem value="candidate">Candidate seeking opportunities</SelectItem>
@@ -75,7 +157,18 @@ export default function Contact() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button type="submit" className="w-full nordic-gradient nordic-glow">Request Demo</Button>
+                  <div className="space-y-2">
+                    <Label htmlFor="demo-message">Notes (optional)</Label>
+                    <Textarea
+                      id="demo-message"
+                      rows={3}
+                      value={demoForm.message}
+                      onChange={(e) => setDemoForm((f) => ({ ...f, message: e.target.value }))}
+                    />
+                  </div>
+                  <Button type="submit" className="w-full nordic-gradient nordic-glow" disabled={submitContact.isPending}>
+                    {submitContact.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Request Demo"}
+                  </Button>
                 </form>
               </CardContent>
             </Card>
@@ -91,13 +184,40 @@ export default function Contact() {
               <CardContent>
                 <form onSubmit={handleContactSubmit} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2"><Label htmlFor="contact-firstName">First Name</Label><Input id="contact-firstName" required /></div>
-                    <div className="space-y-2"><Label htmlFor="contact-lastName">Last Name</Label><Input id="contact-lastName" required /></div>
+                    <div className="space-y-2">
+                      <Label htmlFor="contact-firstName">First Name</Label>
+                      <Input
+                        id="contact-firstName"
+                        required
+                        value={contactForm.firstName}
+                        onChange={(e) => setContactForm((f) => ({ ...f, firstName: e.target.value }))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="contact-lastName">Last Name</Label>
+                      <Input
+                        id="contact-lastName"
+                        required
+                        value={contactForm.lastName}
+                        onChange={(e) => setContactForm((f) => ({ ...f, lastName: e.target.value }))}
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2"><Label htmlFor="contact-email">Email</Label><Input id="contact-email" type="email" placeholder="you@example.com" required /></div>
+                  <div className="space-y-2">
+                    <Label htmlFor="contact-email">Email</Label>
+                    <Input
+                      id="contact-email"
+                      type="email"
+                      placeholder="you@example.com"
+                      required
+                      value={contactForm.email}
+                      onChange={(e) => setContactForm((f) => ({ ...f, email: e.target.value }))}
+                    />
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="contact-subject">Subject</Label>
-                    <Select><SelectTrigger><SelectValue placeholder="Select a topic" /></SelectTrigger>
+                    <Select value={contactForm.subject} onValueChange={(v) => setContactForm((f) => ({ ...f, subject: v }))}>
+                      <SelectTrigger><SelectValue placeholder="Select a topic" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="general">General Inquiry</SelectItem>
                         <SelectItem value="company">Company Partnership</SelectItem>
@@ -107,8 +227,20 @@ export default function Contact() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2"><Label htmlFor="contact-message">Message</Label><Textarea id="contact-message" placeholder="How can we help you?" rows={5} required /></div>
-                  <Button type="submit" variant="outline" className="w-full">Send Message</Button>
+                  <div className="space-y-2">
+                    <Label htmlFor="contact-message">Message</Label>
+                    <Textarea
+                      id="contact-message"
+                      placeholder="How can we help you?"
+                      rows={5}
+                      required
+                      value={contactForm.message}
+                      onChange={(e) => setContactForm((f) => ({ ...f, message: e.target.value }))}
+                    />
+                  </div>
+                  <Button type="submit" variant="outline" className="w-full" disabled={submitContact.isPending}>
+                    {submitContact.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send Message"}
+                  </Button>
                 </form>
               </CardContent>
             </Card>

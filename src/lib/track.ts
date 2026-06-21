@@ -1,6 +1,7 @@
-// Shared Entry Track / Fast Track helpers and persistent client store.
-// Prototype only — no backend.
+// Shared Entry Track / Fast Track helpers.
+// Reads track from Supabase auth context when available; falls back to localStorage for guests.
 import { useSyncExternalStore } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export type Track = "entry" | "fast";
 
@@ -8,17 +9,24 @@ export const TRACK_META: Record<Track, { label: string; short: string; stages: s
   entry: {
     label: "Entry Track",
     short: "12-month program · 0–12 months experience",
-    stages: ["preparation", "selection", "readiness", "activation", "relocation", "onboarding", "followup"],
+    stages: ["preparation", "selection", "readiness", "internship", "activation", "relocation", "onboarding", "followup"],
   },
   fast: {
     label: "Fast Track",
     short: "Accelerated · 1+ years experience",
-    stages: ["readiness", "activation", "relocation", "onboarding", "followup"],
+    stages: ["readiness", "internship", "activation", "relocation", "onboarding", "followup"],
   },
 };
 
 export const isStageInTrack = (stageId: string, track: Track) =>
   TRACK_META[track].stages.includes(stageId);
+
+export const getNextStageInTrack = (stageId: string, track: Track): string | null => {
+  const stages = TRACK_META[track].stages;
+  const idx = stages.indexOf(stageId);
+  if (idx < 0 || idx >= stages.length - 1) return null;
+  return stages[idx + 1];
+};
 
 const STORAGE_KEY = "na.candidateTrack";
 
@@ -52,6 +60,8 @@ export const setTrack = (t: Track) => {
 export const getTrack = getSnapshot;
 
 export const useTrack = (): [Track, (t: Track) => void] => {
-  const track = useSyncExternalStore(subscribe, getSnapshot, () => "entry" as Track);
+  const { candidate } = useAuth();
+  const localTrack = useSyncExternalStore(subscribe, getSnapshot, () => "entry" as Track);
+  const track = (candidate?.track as Track) ?? localTrack;
   return [track, setTrack];
 };

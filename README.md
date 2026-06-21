@@ -1,73 +1,70 @@
-# Welcome to your Lovable project
+# Nordic Ascent Rise Platform — Backend Setup
 
-## Project info
+Full-stack talent mobility platform with **Supabase** backend and three role-based portals.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Stack
 
-## How can I edit this code?
+- **Frontend:** Vite + React + TypeScript + shadcn/ui
+- **Backend:** Supabase (PostgreSQL, Auth, RLS, Storage, Realtime)
+- **Data layer:** TanStack React Query + `@supabase/supabase-js`
 
-There are several ways of editing your application.
+## Quick start
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+cp .env.example .env   # add your Supabase URL + anon key
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+App runs at `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Portals
 
-**Use GitHub Codespaces**
+| Role | Path | Sign up as |
+|------|------|------------|
+| Candidate | `/candidate/*` | Candidate on login page |
+| Employer | `/employer/*` | Company on login page |
+| Admin | `/admin/*` | Admin (disabled by default; see env) |
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+All portal routes are **protected** — unauthenticated users redirect to `/login`.
 
-## What technologies are used for this project?
+## Environment variables
 
-This project is built with:
+```
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_ALLOW_ADMIN_SIGNUP=false   # set true only for local dev
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Supabase
 
-## How can I deploy this project?
+Migrations `001`–`011` are applied on the connected project. Local SQL copies are in `supabase/migrations/` (001–008 were applied remotely first; 009–011 are mirrored locally).
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+### Database tables
 
-## Can I connect a custom domain to my Lovable project?
+- `profiles`, `candidates`, `companies`, `employers`
+- `pipeline_stages`, `candidate_stage_progress`, `stage_tasks`, `candidate_task_progress`
+- `jobs`, `applications`, `employer_tasks`
+- `conversations`, `messages`, `mentoring_sessions`
+- `issues`, `support_tickets`, `support_ticket_messages`, `notifications`, `activity_log`
+- `contact_submissions`, `insight_articles`, `announcements`, `platform_settings`
 
-Yes, you can!
+### Storage buckets
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+- `avatars` — public profile images
+- `documents` — private CVs and uploads
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+### Auth & security
+
+- `handle_new_user` trigger creates profile + role-specific rows
+- Server-side blocks: admin signup (unless `allowAdminSignup` in settings), registration toggles, maintenance mode
+- `profiles.account_status` — suspend users from admin panel
+- RLS on all tables; public RPCs: `get_public_stats`, `get_public_config`
+
+## Scripts
+
+```bash
+npm run dev      # development server
+npm run build    # production build
+npm run preview  # preview production build
+```

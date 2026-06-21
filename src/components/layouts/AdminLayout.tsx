@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { useState, useMemo } from "react";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -16,6 +16,9 @@ import {
   Mail,
   Megaphone,
   History,
+  ListChecks,
+  Briefcase,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,15 +30,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { PortalUserMenu, PortalUserSidebar } from "@/components/PortalUserMenu";
+import { useAdminCandidates, useAdminEmployers, useNotifications } from "@/hooks/useData";
 
 const navigation = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { name: "Issues", href: "/admin/issues", icon: AlertTriangle },
   { name: "Support Inbox", href: "/admin/support", icon: Mail },
+  { name: "Contact Inbox", href: "/admin/contacts", icon: Mail },
   { name: "Activity Log", href: "/admin/activity", icon: History },
   { name: "Companies", href: "/admin/employers", icon: Building2 },
   { name: "Candidates", href: "/admin/candidates", icon: UserCheck },
+  { name: "Program Tasks", href: "/admin/stage-tasks", icon: ListChecks },
+  { name: "Job Moderation", href: "/admin/jobs", icon: Briefcase },
+  { name: "Users", href: "/admin/users", icon: Users },
+  { name: "Insights CMS", href: "/admin/insights", icon: Megaphone },
   { name: "Announcements", href: "/admin/notifications", icon: Megaphone },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { name: "Settings", href: "/admin/settings", icon: Settings },
@@ -43,7 +52,31 @@ const navigation = [
 
 const AdminLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const [search, setSearch] = useState("");
+  const [showResults, setShowResults] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { data: candidates } = useAdminCandidates();
+  const { data: employers } = useAdminEmployers();
+  const { data: notifications } = useNotifications();
+  const unreadCount = notifications?.filter((n) => !n.read_at).length ?? 0;
+
+  const searchResults = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    if (!q) return [];
+    const cand = (candidates ?? [])
+      .filter((c) => {
+        const p = c.profiles as { full_name: string | null; email: string | null } | null;
+        return p?.full_name?.toLowerCase().includes(q) || p?.email?.toLowerCase().includes(q);
+      })
+      .slice(0, 5)
+      .map((c) => ({ type: "candidate" as const, id: c.id, label: (c.profiles as { full_name: string | null })?.full_name ?? "Candidate" }));
+    const emp = (employers ?? [])
+      .filter((e) => e.name.toLowerCase().includes(q))
+      .slice(0, 5)
+      .map((e) => ({ type: "company" as const, id: e.id, label: e.name }));
+    return [...cand, ...emp];
+  }, [search, candidates, employers]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -112,16 +145,7 @@ const AdminLayout = () => {
 
           {!collapsed && (
             <div className="p-4 border-t border-border">
-              <div className="flex items-center gap-3 p-2 rounded-lg bg-muted">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="https://i.pravatar.cc/150?img=68" />
-                  <AvatarFallback className="bg-nordic-orange text-white">SA</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate text-foreground">Admin</p>
-                  <p className="text-xs text-muted-foreground">Portal admin</p>
-                </div>
-              </div>
+              <PortalUserSidebar profilePath="/admin/settings" roleLabel="Portal admin" />
             </div>
           )}
         </div>
@@ -137,42 +161,46 @@ const AdminLayout = () => {
                 <Input
                   placeholder="Search candidates, companies..."
                   className="w-80 pl-9 bg-muted/50"
+                  value={search}
+                  onChange={(e) => { setSearch(e.target.value); setShowResults(true); }}
+                  onFocus={() => setShowResults(true)}
+                  onBlur={() => setTimeout(() => setShowResults(false), 150)}
                 />
+                {showResults && searchResults.length > 0 && (
+                  <div className="absolute top-full mt-1 w-80 bg-popover border rounded-md shadow-lg z-50 py-1">
+                    {searchResults.map((r) => (
+                      <button
+                        key={`${r.type}-${r.id}`}
+                        type="button"
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-muted"
+                        onMouseDown={() => {
+                          navigate(r.type === "candidate" ? `/admin/candidates/${r.id}` : `/admin/employers/${r.id}`);
+                          setSearch("");
+                          setShowResults(false);
+                        }}
+                      >
+                        <span className="text-muted-foreground text-xs uppercase">{r.type}</span>
+                        <p>{r.label}</p>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 h-4 w-4 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">
-                  2
-                </span>
+              <Button variant="ghost" size="icon" className="relative" asChild>
+                <Link to="/admin/messages">
+                  <Bell className="h-5 w-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-4 w-4 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">
+                      {unreadCount}
+                    </span>
+                  )}
+                </Link>
               </Button>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src="https://i.pravatar.cc/150?img=68" />
-                      <AvatarFallback>SA</AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuLabel>Admin</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/admin/settings">Settings</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/login" className="text-destructive">
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Logout
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <PortalUserMenu profilePath="/admin/settings" messagesPath="/admin/messages" />
             </div>
           </div>
         </header>

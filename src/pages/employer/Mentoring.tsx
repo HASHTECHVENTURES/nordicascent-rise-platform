@@ -1,240 +1,118 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
-import { Users, Calendar, CheckCircle, Heart, UserPlus } from "lucide-react";
-
-const companyMentors = [
-  {
-    name: "Erik Johansson",
-    role: "Senior Engineering Manager",
-    avatar: "https://i.pravatar.cc/150?img=12",
-    email: "erik.johansson@techcorp.se",
-    assignedCandidates: 2,
-  },
-  {
-    name: "Anna Lindqvist",
-    role: "Team Lead",
-    avatar: "https://i.pravatar.cc/150?img=32",
-    email: "anna.lindqvist@techcorp.se",
-    assignedCandidates: 1,
-  },
-];
-
-const mentees = [
-  { id: 1, name: "Rahul Sharma", avatar: "https://i.pravatar.cc/150?img=1", stage: "Readiness", progress: 65, nextSession: "2026-02-03", status: "active", mentor: "Erik Johansson" },
-  { id: 2, name: "Priya Patel", avatar: "https://i.pravatar.cc/150?img=5", stage: "Internship", progress: 45, nextSession: "2026-02-05", status: "active", mentor: "Erik Johansson" },
-  { id: 3, name: "Amit Kumar", avatar: "https://i.pravatar.cc/150?img=3", stage: "Onboarding", progress: 80, nextSession: null, status: "completed", mentor: "Anna Lindqvist" },
-];
-
-const upcomingSessions = [
-  { id: 1, candidate: "Rahul Sharma", title: "Weekly Check-in", date: "2026-02-03", time: "14:00 CET" },
-  { id: 2, candidate: "Priya Patel", title: "Career Planning", date: "2026-02-05", time: "10:00 CET" },
-];
+import { Calendar, Loader2, Plus } from "lucide-react";
+import { useEmployerApplications, useCreateMentoringSession, useMentoringSessions } from "@/hooks/useData";
+import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const EmployerMentoring = () => {
-  const activeMentees = mentees.filter(m => m.status === 'active').length;
-  const completedMentees = mentees.filter(m => m.status === 'completed').length;
+  const { data: sessions, isLoading } = useMentoringSessions();
+  const { data: applications } = useEmployerApplications();
+  const createSession = useCreateMentoringSession();
+  const { toast } = useToast();
+  const [candidateId, setCandidateId] = useState("");
+  const [title, setTitle] = useState("");
+  const [scheduledAt, setScheduledAt] = useState("");
+  const [meetingUrl, setMeetingUrl] = useState("");
+
+  const candidates = (applications ?? []).map((a) => {
+    const c = a.candidates as { id: string; profiles: { full_name: string | null } | null };
+    return { id: c.id, name: c.profiles?.full_name ?? "Candidate" };
+  });
+  const uniqueCandidates = [...new Map(candidates.map((c) => [c.id, c])).values()];
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!candidateId || !title || !scheduledAt) return;
+    try {
+      await createSession.mutateAsync({
+        candidate_id: candidateId,
+        title,
+        scheduled_at: new Date(scheduledAt).toISOString(),
+        meeting_url: meetingUrl || undefined,
+      });
+      toast({ title: "Session scheduled" });
+      setTitle("");
+      setScheduledAt("");
+      setMeetingUrl("");
+    } catch (err) {
+      toast({ title: "Failed", description: err instanceof Error ? err.message : "Try again", variant: "destructive" });
+    }
+  };
+
+  const list = sessions ?? [];
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-medium text-foreground">Mentoring</h1>
-          <p className="text-muted-foreground">Manage your company's mentoring program for candidates</p>
-        </div>
-        <Button className="gap-2">
-          <UserPlus className="h-4 w-4" />
-          Add Mentor
-        </Button>
+      <div>
+        <h1 className="text-2xl font-medium">Mentoring</h1>
+        <p className="text-muted-foreground">Schedule and manage mentoring sessions</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded bg-primary/10 flex items-center justify-center">
-                <Users className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-2xl font-medium">{mentees.length}</p>
-                <p className="text-sm text-muted-foreground">Total Mentees</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded bg-success/10 flex items-center justify-center">
-                <Heart className="h-6 w-6 text-success" />
-              </div>
-              <div>
-                <p className="text-2xl font-medium">{activeMentees}</p>
-                <p className="text-sm text-muted-foreground">Active Mentoring</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded bg-secondary/20 flex items-center justify-center">
-                <CheckCircle className="h-6 w-6 text-secondary" />
-              </div>
-              <div>
-                <p className="text-2xl font-medium">{completedMentees}</p>
-                <p className="text-sm text-muted-foreground">Completed</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded bg-warning/10 flex items-center justify-center">
-                <Calendar className="h-6 w-6 text-warning" />
-              </div>
-              <div>
-                <p className="text-2xl font-medium">{upcomingSessions.length}</p>
-                <p className="text-sm text-muted-foreground">Upcoming Sessions</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Company Mentors - Multiple */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-medium">Company Mentors</CardTitle>
-          <CardDescription>Mentors assigned to guide candidates through their journey</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {companyMentors.map((mentor) => (
-            <div key={mentor.email} className="flex items-center justify-between p-4 rounded border bg-muted/30">
-              <div className="flex items-center gap-4">
-                <Avatar className="h-14 w-14">
-                  <AvatarImage src={mentor.avatar} />
-                  <AvatarFallback>{mentor.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="font-semibold">{mentor.name}</h3>
-                  <p className="text-sm text-muted-foreground">{mentor.role}</p>
-                  <p className="text-sm text-primary">{mentor.email}</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-2xl font-medium">{mentor.assignedCandidates}</p>
-                <p className="text-sm text-muted-foreground">Assigned Candidates</p>
-              </div>
+        <CardHeader><CardTitle>Schedule session</CardTitle></CardHeader>
+        <CardContent>
+          <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Candidate</Label>
+              <Select value={candidateId} onValueChange={setCandidateId}>
+                <SelectTrigger><SelectValue placeholder="Select candidate" /></SelectTrigger>
+                <SelectContent>
+                  {uniqueCandidates.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          ))}
+            <div className="space-y-2">
+              <Label>Title</Label>
+              <Input value={title} onChange={(e) => setTitle(e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <Label>Date & time</Label>
+              <Input type="datetime-local" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <Label>Meeting URL</Label>
+              <Input value={meetingUrl} onChange={(e) => setMeetingUrl(e.target.value)} placeholder="https://..." />
+            </div>
+            <Button type="submit" className="md:col-span-2 gap-2" disabled={createSession.isPending}>
+              <Plus className="h-4 w-4" />Schedule
+            </Button>
+          </form>
         </CardContent>
       </Card>
 
-      {/* Mentees */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-medium">Candidate Mentees</CardTitle>
-          <CardDescription>Candidates currently in the mentoring program</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {mentees.map((mentee) => (
-            <div key={mentee.id} className="flex items-center justify-between p-4 rounded border">
-              <div className="flex items-center gap-4">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={mentee.avatar} />
-                  <AvatarFallback>{mentee.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="font-medium">{mentee.name}</p>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">{mentee.stage}</Badge>
-                    {mentee.status === 'completed' && (
-                      <Badge className="bg-success text-success-foreground">Completed</Badge>
-                    )}
-                    <span className="text-xs text-muted-foreground">Mentor: {mentee.mentor}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-6">
-                <div className="text-right">
-                  <p className="text-sm font-medium">{mentee.progress}%</p>
-                  <p className="text-xs text-muted-foreground">Progress</p>
-                </div>
-                <Progress value={mentee.progress} className="w-24 h-2" />
-                <div className="text-right min-w-[120px]">
-                  {mentee.nextSession ? (
-                    <>
-                      <p className="text-sm font-medium">
-                        {new Date(mentee.nextSession).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                      </p>
-                      <p className="text-xs text-muted-foreground">Next Session</p>
-                    </>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No sessions scheduled</p>
-                  )}
-                </div>
-                <Button size="sm" variant="outline">View Details</Button>
-              </div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-
-      {/* Upcoming Sessions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-medium flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Upcoming Mentoring Sessions
-          </CardTitle>
-        </CardHeader>
+        <CardHeader><CardTitle>Sessions</CardTitle></CardHeader>
         <CardContent className="space-y-3">
-          {upcomingSessions.map((session) => (
-            <div key={session.id} className="flex items-center justify-between p-4 rounded border">
+          {list.length === 0 && (
+            <p className="text-sm text-muted-foreground py-4">No mentoring sessions scheduled yet.</p>
+          )}
+          {list.map((s) => (
+            <div key={s.id} className="flex items-center justify-between p-4 border rounded-lg">
               <div>
-                <p className="font-medium">{session.title}</p>
-                <p className="text-sm text-muted-foreground">
-                  with {session.candidate} · {new Date(session.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at {session.time}
+                <p className="font-medium">{s.title}</p>
+                <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+                  <Calendar className="h-4 w-4" />{format(new Date(s.scheduled_at), "PPp")}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
-                <Button size="sm" variant="outline">Reschedule</Button>
-                <Button size="sm">View Details</Button>
-              </div>
+              <Badge>{s.status}</Badge>
             </div>
           ))}
-        </CardContent>
-      </Card>
-
-      {/* Mentoring Info */}
-      <Card className="border-primary/30 bg-primary/5">
-        <CardHeader>
-          <CardTitle className="text-lg font-medium">About the Mentoring Program</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground mb-4">
-            Companies can assign multiple internal mentors to guide candidates through their journey. 
-            Mentoring spans from the Readiness phase through Activation and concludes at Onboarding, ensuring candidates receive 
-            consistent support during their transition to Nordic work life.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-3 rounded bg-background">
-              <p className="font-medium text-sm">Readiness</p>
-              <p className="text-xs text-muted-foreground">Cultural orientation & expectations</p>
-            </div>
-            <div className="p-3 rounded bg-background">
-              <p className="font-medium text-sm">Activation</p>
-              <p className="text-xs text-muted-foreground">Hands-on guidance & integration</p>
-            </div>
-            <div className="p-3 rounded bg-background">
-              <p className="font-medium text-sm">Onboarding</p>
-              <p className="text-xs text-muted-foreground">Final stage of mentoring support</p>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </div>

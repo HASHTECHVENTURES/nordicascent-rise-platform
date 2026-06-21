@@ -1,25 +1,64 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, AlertTriangle, CheckCircle, Send, UserCheck } from "lucide-react";
-import { useState } from "react";
-import { adminCandidates } from "./Candidates";
-import { TRACK_META, type Track, setTrack as setGlobalTrack } from "@/lib/track";
+import { ArrowLeft, AlertTriangle, CheckCircle, Send, UserCheck, Loader2 } from "lucide-react";
+import { TRACK_META, type Track } from "@/lib/track";
+import { useCandidateById, useUpdateCandidateTrack, useUpdateCandidateStatus, useCreateIssue, useAdvanceCandidateStage, useCandidateStageProgress, useCandidateTaskProgress, useStageTasks, useAdminMarkTaskComplete } from "@/hooks/useData";
+import { useToast } from "@/hooks/use-toast";
 
 const AdminCandidateDetail = () => {
   const { id } = useParams();
-  const found = adminCandidates.find((c) => String(c.id) === id) ?? adminCandidates[0];
-  const [track, setTrack] = useState<Track>(found.track);
+  const navigate = useNavigate();
+  const { data: candidate, isLoading } = useCandidateById(id);
+  const updateTrack = useUpdateCandidateTrack();
+  const updateStatus = useUpdateCandidateStatus();
+  const createIssue = useCreateIssue();
+  const advanceStage = useAdvanceCandidateStage();
+  const { toast } = useToast();
+  const { data: stageProgress } = useCandidateStageProgress(id);
+  const { data: taskProgress } = useCandidateTaskProgress(id);
+  const markTaskComplete = useAdminMarkTaskComplete();
 
-  const onTrackChange = (v: string) => {
-    const t = v as Track;
-    setTrack(t);
-    found.track = t; // mutate mock so list reflects it
-    // Mirror the demo candidate (id 1) to the candidate-side store so the candidate view updates live.
-    if (String(found.id) === "1") setGlobalTrack(t);
+  const activeStage = stageProgress?.find((s) => s.status === "active");
+  const activeStageId = activeStage?.stage_id ?? "readiness";
+  const { data: stageTasks } = useStageTasks(activeStageId);
+  const completedTaskIds = new Set(taskProgress?.map((p) => p.task_id) ?? []);
+
+  const profile = candidate?.profiles as {
+    full_name: string | null;
+    email: string | null;
+    phone: string | null;
+  } | null;
+
+  const track = (candidate?.track ?? "entry") as Track;
+
+  const onTrackChange = async (v: string) => {
+    if (!candidate) return;
+    try {
+      await updateTrack.mutateAsync({ id: candidate.id, track: v as Track });
+      toast({ title: "Track updated", description: `Set to ${TRACK_META[v as Track].label}` });
+    } catch (err) {
+      toast({
+        title: "Failed to update track",
+        description: err instanceof Error ? err.message : "Try again",
+        variant: "destructive",
+      });
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!candidate) {
+    return <p className="text-muted-foreground">Candidate not found.</p>;
+  }
 
   return (
     <div className="space-y-6">
@@ -29,10 +68,10 @@ const AdminCandidateDetail = () => {
         </Button>
         <div className="flex-1">
           <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-2xl font-bold tracking-tight">{found.name}</h1>
+            <h1 className="text-2xl font-bold tracking-tight">{profile?.full_name ?? "Candidate"}</h1>
             <Badge variant="outline" className="border-primary/40 text-primary">{TRACK_META[track].label}</Badge>
           </div>
-          <p className="text-muted-foreground">{found.email} · {found.location}</p>
+          <p className="text-muted-foreground">{profile?.email} · {candidate.location ?? "—"}</p>
         </div>
       </div>
 
@@ -42,9 +81,10 @@ const AdminCandidateDetail = () => {
             <CardTitle className="text-base">Profile</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <p><span className="text-muted-foreground">Role</span> {found.role}</p>
-            <p><span className="text-muted-foreground">Status</span> <Badge>{found.status}</Badge></p>
-            <p><span className="text-muted-foreground">Joined</span> {found.joined}</p>
+            <p><span className="text-muted-foreground">Title</span> {candidate.title ?? "—"}</p>
+            <p><span className="text-muted-foreground">Status</span> <Badge>{candidate.status}</Badge></p>
+            <p><span className="text-muted-foreground">Joined</span> {candidate.created_at.split("T")[0]}</p>
+            <p><span className="text-muted-foreground">Readiness</span> {candidate.readiness_score}%</p>
           </CardContent>
         </Card>
 
@@ -54,7 +94,7 @@ const AdminCandidateDetail = () => {
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <p className="text-muted-foreground">{TRACK_META[track].short}</p>
-            <Select value={track} onValueChange={onTrackChange}>
+            <Select value={track} onValueChange={onTrackChange} disabled={updateTrack.isPending}>
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -76,18 +116,132 @@ const AdminCandidateDetail = () => {
           <p className="text-sm text-muted-foreground">Resolve issues from here</p>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-3">
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            disabled={updateStatus.isPending || candidate.status === "verified"}
+            onClick={async () => {
+              try {
+                await updateStatus.mutateAsync({ id: candidate.id, status: "verified" });
+                toast({ title: "Candidate marked verified" });
+              } catch (err) {
+                toast({
+                  title: "Failed",
+                  description: err instanceof Error ? err.message : "Try again",
+                  variant: "destructive",
+                });
+              }
+            }}
+          >
             <CheckCircle className="h-4 w-4" />
-            Mark Readiness complete
+            Mark verified
           </Button>
-          <Button variant="outline" size="sm" className="gap-2">
-            <Send className="h-4 w-4" />
-            Send reminder
-          </Button>
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            disabled={advanceStage.isPending}
+            onClick={async () => {
+              try {
+                await advanceStage.mutateAsync(candidate.id);
+                toast({ title: "Stage advanced" });
+              } catch (err) {
+                toast({ title: "Failed", description: err instanceof Error ? err.message : "Try again", variant: "destructive" });
+              }
+            }}
+          >
             <UserCheck className="h-4 w-4" />
-            Update status
+            Advance stage
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() =>
+              navigate("/admin/messages", {
+                state: { startWithProfileId: candidate.profile_id },
+              })
+            }
+          >
+            <Send className="h-4 w-4" />
+            Send message
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2 text-destructive"
+            disabled={createIssue.isPending}
+            onClick={async () => {
+              try {
+                await createIssue.mutateAsync({
+                  title: `Review needed: ${profile?.full_name ?? "Candidate"}`,
+                  description: `Flagged from candidate detail (${candidate.id})`,
+                  candidate_id: candidate.id,
+                  priority: "high",
+                });
+                toast({ title: "Issue flagged" });
+              } catch (err) {
+                toast({
+                  title: "Failed to flag",
+                  description: err instanceof Error ? err.message : "Try again",
+                  variant: "destructive",
+                });
+              }
+            }}
+          >
+            <AlertTriangle className="h-4 w-4" />
+            Flag issue
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Stage tasks</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Active stage: {(activeStage?.pipeline_stages as { name: string } | null)?.name ?? activeStageId}
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {(stageTasks ?? []).length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              No tasks for this stage.{" "}
+              <Link to="/admin/stage-tasks" className="text-primary underline">Create in Program Tasks</Link>
+            </p>
+          )}
+          {(stageTasks ?? []).map((task) => {
+            const done = completedTaskIds.has(task.id);
+            return (
+              <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg text-sm">
+                <div>
+                  <p className={`font-medium ${done ? "line-through text-muted-foreground" : ""}`}>{task.title}</p>
+                  <p className="text-xs text-muted-foreground">{task.description}</p>
+                </div>
+                {!done && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={markTaskComplete.isPending}
+                    onClick={async () => {
+                      try {
+                        await markTaskComplete.mutateAsync({ candidateId: candidate.id, taskId: task.id });
+                        toast({ title: "Marked complete" });
+                      } catch (err) {
+                        toast({
+                          title: "Failed",
+                          description: err instanceof Error ? err.message : "Try again",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                  >
+                    Mark done
+                  </Button>
+                )}
+              </div>
+            );
+          })}
         </CardContent>
       </Card>
     </div>

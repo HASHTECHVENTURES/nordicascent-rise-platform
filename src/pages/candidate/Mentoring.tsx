@@ -1,214 +1,98 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
-import { Calendar, MessageSquare, Video, Clock, CheckCircle, ArrowRight, Heart, Users } from "lucide-react";
-
-const mentor = {
-  name: "Erik Johansson",
-  role: "Senior Engineering Manager",
-  company: "TechCorp Nordic",
-  avatar: "https://i.pravatar.cc/150?img=12",
-  email: "erik.johansson@techcorp.se",
-  experience: "15+ years in Nordic industry",
-  specialties: ["Career Development", "Cultural Integration", "Leadership"],
-};
-
-const upcomingSessions = [
-  { id: 1, title: "Weekly Check-in", date: "2026-02-03", time: "14:00 CET", type: "video", status: "scheduled" },
-  { id: 2, title: "Career Planning Discussion", date: "2026-02-10", time: "15:00 CET", type: "video", status: "scheduled" },
-];
-
-const pastSessions = [
-  { id: 1, title: "Introduction & Goal Setting", date: "2026-01-20", notes: "Discussed career goals and expectations for the mentoring program." },
-  { id: 2, title: "Nordic Work Culture Overview", date: "2026-01-27", notes: "Covered key aspects of flat hierarchy and work-life balance in Nordic companies." },
-];
-
-const milestones = [
-  { id: 1, title: "Initial Meeting", completed: true },
-  { id: 2, title: "Goal Setting", completed: true },
-  { id: 3, title: "Cultural Orientation", completed: true },
-  { id: 4, title: "Mid-Program Review", completed: false },
-  { id: 5, title: "Career Planning", completed: false },
-  { id: 6, title: "Program Completion", completed: false },
-];
+import { Calendar, Video, Loader2, ExternalLink } from "lucide-react";
+import { useMentoringSessions } from "@/hooks/useData";
+import { format } from "date-fns";
 
 const CandidateMentoring = () => {
-  const completedMilestones = milestones.filter(m => m.completed).length;
-  const progress = Math.round((completedMilestones / milestones.length) * 100);
+  const { data: sessions, isLoading } = useMentoringSessions();
+  const list = sessions ?? [];
+  const upcoming = list.filter((s) => s.status === "scheduled" && new Date(s.scheduled_at) >= new Date());
+  const past = list.filter((s) => s.status === "completed" || new Date(s.scheduled_at) < new Date());
+  const next = upcoming[0];
+  const mentor = next?.mentor as { full_name: string | null; avatar_url: string | null } | null;
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-medium text-foreground">Mentoring</h1>
-        <p className="text-muted-foreground">Your dedicated mentor guides you from Readiness through Onboarding</p>
+        <p className="text-muted-foreground">Your mentoring sessions from Readiness through Onboarding</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Mentor Info */}
         <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="text-lg font-medium">Your Mentor</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-4">
-              <Avatar className="h-16 w-16">
-                <AvatarImage src={mentor.avatar} />
-                <AvatarFallback className="text-lg">EJ</AvatarFallback>
-              </Avatar>
-              <div>
-                <h3 className="font-semibold">{mentor.name}</h3>
-                <p className="text-sm text-muted-foreground">{mentor.role}</p>
-                <p className="text-sm text-primary">{mentor.company}</p>
+          <CardHeader><CardTitle className="text-lg">Your Mentor</CardTitle></CardHeader>
+          <CardContent>
+            {mentor ? (
+              <div className="flex items-center gap-4">
+                <Avatar className="h-16 w-16">
+                  <AvatarImage src={mentor.avatar_url ?? undefined} />
+                  <AvatarFallback>{(mentor.full_name ?? "?").slice(0, 2)}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="font-semibold">{mentor.full_name}</h3>
+                  <p className="text-sm text-muted-foreground">Assigned mentor</p>
+                </div>
               </div>
-            </div>
-            
-            <div className="pt-4 border-t space-y-3">
-              <p className="text-sm text-muted-foreground">{mentor.experience}</p>
-              <div className="flex flex-wrap gap-2">
-                {mentor.specialties.map((specialty) => (
-                  <Badge key={specialty} variant="secondary" className="text-xs">{specialty}</Badge>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex gap-2 pt-4">
-              <Button className="flex-1 gap-2" size="sm">
-                <MessageSquare className="h-4 w-4" />
-                Message
-              </Button>
-              <Button variant="outline" className="flex-1 gap-2" size="sm">
-                <Video className="h-4 w-4" />
-                Schedule Call
-              </Button>
-            </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No mentor assigned yet. Sessions will appear here once scheduled.</p>
+            )}
           </CardContent>
         </Card>
 
-        {/* Program Progress */}
         <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-lg font-medium">Mentoring Program Progress</CardTitle>
-            <CardDescription>Track your journey through the mentoring milestones</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <div className="flex justify-between mb-2">
-                <span className="text-sm">Overall Progress</span>
-                <span className="text-sm font-medium">{progress}%</span>
-              </div>
-              <Progress value={progress} className="h-2" />
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {milestones.map((milestone) => (
-                <div 
-                  key={milestone.id} 
-                  className={`flex items-center gap-2 p-3 rounded border ${
-                    milestone.completed ? 'bg-success/5 border-success/20' : 'border-border'
-                  }`}
-                >
-                  {milestone.completed ? (
-                    <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />
-                  ) : (
-                    <div className="h-4 w-4 rounded-full border-2 border-muted-foreground flex-shrink-0" />
-                  )}
-                  <span className={`text-sm ${milestone.completed ? 'text-muted-foreground' : ''}`}>
-                    {milestone.title}
-                  </span>
+          <CardHeader><CardTitle className="text-lg">Upcoming Sessions</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            {upcoming.length === 0 && <p className="text-sm text-muted-foreground">No upcoming sessions.</p>}
+            {upcoming.map((s) => (
+              <div key={s.id} className="flex items-center justify-between p-4 border rounded-lg gap-3">
+                <div>
+                  <p className="font-medium">{s.title}</p>
+                  <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+                    <Calendar className="h-4 w-4" />
+                    {format(new Date(s.scheduled_at), "PPp")}
+                  </p>
                 </div>
-              ))}
-            </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Badge><Video className="h-3 w-3 mr-1 inline" />{s.status}</Badge>
+                  {s.meeting_url && (
+                    <Button size="sm" asChild>
+                      <a href={s.meeting_url} target="_blank" rel="noopener noreferrer">
+                        Join
+                        <ExternalLink className="ml-1 h-3 w-3" />
+                      </a>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
           </CardContent>
         </Card>
       </div>
 
-      {/* Upcoming Sessions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-medium flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Upcoming Sessions
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {upcomingSessions.length > 0 ? (
-            upcomingSessions.map((session) => (
-              <div key={session.id} className="flex items-center justify-between p-4 rounded border">
-                <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded bg-primary/10 flex items-center justify-center">
-                    <Video className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-medium">{session.title}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(session.date).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })} at {session.time}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Badge variant="secondary">Scheduled</Badge>
-                  <Button size="sm">Join Call</Button>
-                </div>
+      {past.length > 0 && (
+        <Card>
+          <CardHeader><CardTitle className="text-lg">Past Sessions</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            {past.map((s) => (
+              <div key={s.id} className="p-4 border rounded-lg">
+                <p className="font-medium">{s.title}</p>
+                <p className="text-sm text-muted-foreground">{format(new Date(s.scheduled_at), "PP")}</p>
+                {s.notes && <p className="text-sm mt-2">{s.notes}</p>}
               </div>
-            ))
-          ) : (
-            <p className="text-sm text-muted-foreground text-center py-4">No upcoming sessions scheduled</p>
-          )}
-          <Button variant="outline" className="w-full">
-            Schedule New Session
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Past Sessions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-medium flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            Past Sessions
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {pastSessions.map((session) => (
-            <div key={session.id} className="p-4 rounded border bg-muted/30">
-              <div className="flex items-center justify-between mb-2">
-                <p className="font-medium">{session.title}</p>
-                <span className="text-sm text-muted-foreground">
-                  {new Date(session.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                </span>
-              </div>
-              <p className="text-sm text-muted-foreground">{session.notes}</p>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-
-      {/* Mentoring Info */}
-      <Card className="border-primary/30 bg-primary/5">
-        <CardHeader>
-          <CardTitle className="text-lg font-medium flex items-center gap-2">
-            <Heart className="h-5 w-5 text-primary" />
-            About Your Mentoring Journey
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground mb-4">
-            Mentoring at Nordic Ascent is a continuous journey that begins during the Readiness phase and extends through your Activation and Onboarding periods. Your mentor is your dedicated point of contact, helping you navigate cultural adaptation, professional development, and career growth in the Nordics.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-3 rounded bg-background">
-              <p className="font-medium text-sm">Readiness Phase</p>
-              <p className="text-xs text-muted-foreground">Cultural orientation & goal setting</p>
-            </div>
-            <div className="p-3 rounded bg-background">
-              <p className="font-medium text-sm">Activation & Onboarding</p>
-              <p className="text-xs text-muted-foreground">Regular check-ins & career guidance</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+            ))}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

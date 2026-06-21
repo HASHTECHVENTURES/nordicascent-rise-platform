@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -7,32 +7,28 @@ import {
   Briefcase,
   Users,
   MessageSquare,
-  BarChart3,
   ChevronLeft,
   ChevronRight,
   Bell,
-  LogOut,
   Heart,
   ClipboardList,
+  BarChart3,
+  AlertTriangle,
+  FileCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import EmployerPipelineProgress from "@/components/employer/EmployerPipelineProgress";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { PortalUserMenu, PortalUserSidebar } from "@/components/PortalUserMenu";
+import { useMyCompany, useNotifications, useMarkAllNotificationsRead } from "@/hooks/useData";
+import { useEmployerOnboardingRedirect } from "@/hooks/useEmployerOnboarding";
 
 // Company journey navigation
 const navigation = [
   { name: "Pipeline Overview", href: "/employer/dashboard", icon: LayoutDashboard },
   { name: "Tasks", href: "/employer/tasks", icon: ClipboardList },
   { name: "Candidates", href: "/employer/candidates", icon: Users },
-  { name: "Roles", href: "/employer/jobs", icon: Briefcase },
+  { name: "Internship", href: "/employer/internship", icon: FileCheck },
+  { name: "Job Postings", href: "/employer/jobs", icon: Briefcase },
   { name: "Company Profile", href: "/employer/company", icon: Building2 },
   { name: "Mentoring", href: "/employer/mentoring", icon: Heart },
   { name: "Messages", href: "/employer/messages", icon: MessageSquare },
@@ -42,6 +38,23 @@ const navigation = [
 const EmployerLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { data: employerData } = useMyCompany();
+  const { data: notifications } = useNotifications();
+  const markAllRead = useMarkAllNotificationsRead();
+  const companyName = (employerData?.companies as { name: string } | null)?.name ?? "Company";
+  const unreadCount = notifications?.filter((n) => !n.read_at).length ?? 0;
+  useEmployerOnboardingRedirect();
+
+  const openNotification = (n: {
+    metadata: { candidateId?: string } | null;
+  }) => {
+    if (n.metadata?.candidateId) {
+      navigate(`/employer/candidates/${n.metadata.candidateId}`);
+    } else {
+      navigate("/employer/candidates");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -107,16 +120,7 @@ const EmployerLayout = () => {
 
           {!collapsed && (
             <div className="p-4 border-t border-border">
-              <div className="flex items-center gap-3 p-2 rounded bg-muted">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="https://logo.clearbit.com/spotify.com" />
-                  <AvatarFallback className="bg-nordic-orange text-white">TC</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate text-foreground">TechCorp Nordic</p>
-                  <p className="text-xs text-muted-foreground">Company</p>
-                </div>
-              </div>
+              <PortalUserSidebar profilePath="/employer/company" roleLabel={companyName} />
             </div>
           )}
         </div>
@@ -130,40 +134,51 @@ const EmployerLayout = () => {
             </div>
 
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 h-4 w-4 bg-warning text-warning-foreground text-xs rounded-full flex items-center justify-center">
-                  5
-                </span>
-              </Button>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src="https://i.pravatar.cc/150?img=12" />
-                      <AvatarFallback>HR</AvatarFallback>
-                    </Avatar>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative">
+                    <Bell className="h-5 w-5" />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 h-4 w-4 bg-warning text-warning-foreground text-xs rounded-full flex items-center justify-center">
+                        {unreadCount}
+                      </span>
+                    )}
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuLabel>HR Manager</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/employer/company">Company Profile</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/employer/messages">Messages</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/login" className="text-destructive">
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Logout
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-0" align="end">
+                  <div className="p-4 border-b flex items-center justify-between">
+                    <h3 className="font-semibold text-base">Notifications</h3>
+                    {unreadCount > 0 && (
+                      <Button variant="ghost" size="sm" onClick={() => markAllRead.mutate()}>
+                        Mark all read
+                      </Button>
+                    )}
+                  </div>
+                  <div className="p-3 space-y-2 max-h-80 overflow-y-auto">
+                    {(notifications ?? []).slice(0, 8).map((n) => (
+                      <button
+                        key={n.id}
+                        type="button"
+                        onClick={() => openNotification(n)}
+                        className={`w-full text-left flex items-start gap-3 p-3 rounded-lg transition-colors hover:bg-muted ${
+                          n.read_at ? "opacity-70" : "bg-warning/10"
+                        }`}
+                      >
+                        <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-sm font-medium">{n.title}</p>
+                          {n.body && <p className="text-xs text-muted-foreground mt-0.5">{n.body}</p>}
+                        </div>
+                      </button>
+                    ))}
+                    {(!notifications || notifications.length === 0) && (
+                      <p className="text-sm text-muted-foreground p-3">No notifications yet</p>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
+
+              <PortalUserMenu profilePath="/employer/company" messagesPath="/employer/messages" />
             </div>
           </div>
         </header>

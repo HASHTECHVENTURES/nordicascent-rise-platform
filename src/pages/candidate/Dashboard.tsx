@@ -1,117 +1,56 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {
-  CheckCircle,
-  Circle,
-  AlertTriangle,
-  ArrowRight,
-  ClipboardCheck,
-  UserCheck,
-  CheckCircle2,
-  Briefcase,
-  MapPin,
-  Building2,
-  Users,
-} from "lucide-react";
+import { AlertTriangle, ArrowRight, Loader2, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useTrack, TRACK_META, type Track } from "@/lib/track";
+import { useTrack, TRACK_META, isStageInTrack } from "@/lib/track";
 import { cn } from "@/lib/utils";
-
-// Pipeline stages definition
-const pipelineStages = [
-  { 
-    id: 1, 
-    name: "Preparation", 
-    status: "completed",
-    href: "/candidate/preparation",
-    icon: ClipboardCheck,
-    description: "Initial readiness assessment"
-  },
-  { 
-    id: 2, 
-    name: "Selection", 
-    status: "completed",
-    href: "/candidate/selection",
-    icon: UserCheck,
-    description: "Screening and matching"
-  },
-  { 
-    id: 3, 
-    name: "Readiness", 
-    status: "active",
-    href: "/candidate/readiness",
-    icon: CheckCircle2,
-    description: "Technical, social & cultural validation"
-  },
-  { 
-    id: 4, 
-    name: "Activation",
-    status: "not_started",
-    href: "/candidate/internship",
-    icon: Briefcase,
-    description: "Activation – Internship or Pre-Employment"
-  },
-  { 
-    id: 5, 
-    name: "Relocation", 
-    status: "not_started",
-    href: "/candidate/relocation",
-    icon: MapPin,
-    description: "Visa, housing, documentation"
-  },
-  { 
-    id: 6, 
-    name: "Onboarding", 
-    status: "not_started",
-    href: "/candidate/onboarding",
-    icon: Building2,
-    description: "Physical arrival and integration"
-  },
-  { 
-    id: 7, 
-    name: "Follow-up", 
-    status: "not_started",
-    href: "/candidate/followup",
-    icon: Users,
-    description: "Long-term support"
-  },
-];
-
-// Current stage details
-const currentStage = {
-  name: "Readiness",
-  readiness: 65,
-  nextAction: "Complete Technical Assessment Module 3",
-  risks: [
-    { id: 1, text: "Technical assessment deadline in 5 days", level: "warning" },
-  ],
-  tasks: [
-    { id: 1, text: "Technical Assessment Module 1", completed: true },
-    { id: 2, text: "Technical Assessment Module 2", completed: true },
-    { id: 3, text: "Technical Assessment Module 3", completed: false },
-    { id: 4, text: "Soft Skills Workshop", completed: false },
-  ]
-};
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  useMyStageProgress,
+  useMyTaskProgress,
+  useStageTasks,
+  useNotifications,
+  useMyApplications,
+} from "@/hooks/useData";
+import { hasUnlockedPipeline, hasActiveApplication } from "@/lib/applicationJourney";
+import { PIPELINE_STAGES } from "@/lib/pipeline";
+import { computeStageReadiness } from "@/lib/profileCompleteness";
+import ProfileCompletionBanner from "@/components/candidate/ProfileCompletionBanner";
+import StageTaskRow from "@/components/candidate/StageTaskRow";
+import { STAGES_WITH_TASK_PAGES, stageTaskPath } from "@/lib/stageRoutes";
 
 const CandidateDashboard = () => {
-  const [track, setTrack] = useTrack();
+  const [track] = useTrack();
   const meta = TRACK_META[track];
+  const { candidate } = useAuth();
+  const { data: stageProgress, isLoading } = useMyStageProgress();
+  const { data: notifications } = useNotifications();
+  const { data: applications } = useMyApplications();
+  const journeyUnlocked = hasUnlockedPipeline(applications ?? []);
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "completed":
-        return <CheckCircle className="h-5 w-5 text-success" />;
-      case "active":
-        return <Circle className="h-5 w-5 text-primary fill-primary" />;
-      case "blocked":
-        return <AlertTriangle className="h-5 w-5 text-destructive" />;
-      default:
-        return <Circle className="h-5 w-5 text-muted-foreground" />;
-    }
-  };
+  const activeStage = stageProgress?.find((s) => s.status === "active");
+  const activeStageId = activeStage?.stage_id ?? "preparation";
+  const activeMeta = PIPELINE_STAGES.find((s) => s.id === activeStageId);
+  const { data: stageTasks } = useStageTasks(activeStageId);
+  const { data: taskProgress } = useMyTaskProgress();
+
+  const completedIds = new Set(taskProgress?.map((p) => p.task_id) ?? []);
+  const tasks = stageTasks ?? [];
+  const completedTasks = tasks.filter((t) => completedIds.has(t.id)).length;
+  const readiness = computeStageReadiness(completedTasks, tasks.length);
+  const preparationComplete =
+    activeStageId === "preparation" && tasks.length > 0 && readiness === 100;
+  const hasApplications = (applications?.length ?? 0) > 0;
+  const waitingOnEmployer = hasActiveApplication(applications ?? []);
+
+  const completedStages = stageProgress?.filter((s) => s.status === "completed").length ?? 0;
+  const daysInPipeline = candidate?.created_at
+    ? Math.floor((Date.now() - new Date(candidate.created_at).getTime()) / 86400000)
+    : 0;
+
+  const openIssues = (notifications ?? []).filter((n) => !n.read_at).slice(0, 3);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -119,152 +58,170 @@ const CandidateDashboard = () => {
         return <Badge className="bg-success text-success-foreground">Completed</Badge>;
       case "active":
         return <Badge className="bg-primary text-primary-foreground">Active</Badge>;
-      case "blocked":
-        return <Badge variant="destructive">Blocked</Badge>;
-      case "not_started":
-        return <Badge variant="secondary">Not Started</Badge>;
       default:
         return <Badge variant="secondary">Not Started</Badge>;
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-2xl font-medium text-foreground">My Journey</h1>
-            <Badge variant="outline" className="border-primary/40 text-primary font-medium">
-              {meta.label}
-            </Badge>
+            <Badge variant="outline" className="border-primary/40 text-primary font-medium">{meta.label}</Badge>
           </div>
           <p className="text-muted-foreground">Track your progress through the Nordic Ascent pipeline</p>
           <p className="text-xs text-muted-foreground mt-1">Program: <strong>{meta.label}</strong> — {meta.short}</p>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">Demo: switch track</span>
-          <Select value={track} onValueChange={(v) => setTrack(v as Track)}>
-            <SelectTrigger className="w-[150px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="entry">Entry Track</SelectItem>
-              <SelectItem value="fast">Fast Track</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
       </div>
+
+      <ProfileCompletionBanner />
+
+      {journeyUnlocked && (
+        <Card className="border-success/30 bg-success/5">
+          <CardContent className="pt-6 flex items-start gap-3">
+            <CheckCircle className="h-5 w-5 text-success shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-medium">You've been accepted — your journey continues</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Selection stage is now open. Complete tasks there and track updates in My Applications.
+              </p>
+              <div className="flex flex-wrap gap-2 mt-3">
+                <Button size="sm" asChild>
+                  <Link to="/candidate/selection">
+                    Go to Selection
+                    <ArrowRight className="ml-1 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button size="sm" variant="outline" asChild>
+                  <Link to="/candidate/applications">My Applications</Link>
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="border-border bg-muted/20">
         <CardHeader className="pb-2">
-          <CardTitle className="text-base font-medium">Entry Track vs. Fast Track — Step by step</CardTitle>
-          <CardDescription className="text-sm font-normal">
-            Both tracks follow the same seven-stage journey you see in My Journey (Preparation → Selection → Readiness → Activation → Relocation → Onboarding → Follow-up).
-          </CardDescription>
+          <CardTitle className="text-base font-medium">Entry Track vs. Fast Track</CardTitle>
         </CardHeader>
         <CardContent className="pt-0 space-y-4 text-sm text-muted-foreground">
           <div className={cn("space-y-2 p-3 rounded-md border", track === "entry" ? "border-primary/40 bg-primary/5" : "border-transparent")}>
-            <div className="flex items-center gap-2">
-              <p className="font-medium text-foreground">Entry Track</p>
-              {track === "entry" && <Badge className="bg-primary text-primary-foreground">Your track</Badge>}
+            <div className="font-medium text-foreground flex items-center gap-2">
+              Entry Track {track === "entry" && <Badge>Your track</Badge>}
             </div>
-            <p>Entry Track is a 12-month selection and preparation program for participants with 0–12 months of professional experience, from selected schools.</p>
-            <p><strong className="text-foreground">Process:</strong> Participants progress through Preparation, Selection, and Readiness, then enter Activation beginning with a 6–10-week academic internship (unless otherwise specified). After the internship, the final hiring decision is confirmed, followed by Relocation and Pre-employment stages, before Onboarding and move to the Company.</p>
+            <p>12-month program for participants with 0–12 months of professional experience.</p>
           </div>
           <div className={cn("space-y-2 p-3 rounded-md border", track === "fast" ? "border-primary/40 bg-primary/5" : "border-transparent")}>
-            <div className="flex items-center gap-2">
-              <p className="font-medium text-foreground">Fast Track</p>
-              {track === "fast" && <Badge className="bg-primary text-primary-foreground">Your track</Badge>}
+            <div className="font-medium text-foreground flex items-center gap-2">
+              Fast Track {track === "fast" && <Badge>Your track</Badge>}
             </div>
-            <p>Fast Track is an accelerated preparation and activation program for participants with 1+ years of professional experience and education/alumni from selected schools.</p>
-            <p>The Fast Track timeline starts after Selection has been completed, and it covers the stages of Readiness, Activation and Relocation. This route is designed for participants who already meet defined criteria with the company, allowing fewer or shorter upstream steps.</p>
+            <p>Accelerated program for participants with 1+ years of experience.</p>
           </div>
-          <p>Nordic Ascent will confirm the track and stages applicable to your profile, and the pipeline indicates which steps are currently active.</p>
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/candidate/internship">How the road is built — read on Activation</Link>
-          </Button>
         </CardContent>
       </Card>
 
-      {/* Current Stage Details */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main stage info */}
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-lg font-medium">Current Stage: {currentStage.name}</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">Technical, social & cultural validation</p>
+              <CardTitle className="text-lg font-medium">Current Stage: {activeMeta?.name ?? "—"}</CardTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                {(activeStage?.pipeline_stages as { description?: string } | null)?.description ?? activeMeta?.name}
+              </p>
             </div>
-            {getStatusBadge("active")}
+            {getStatusBadge(
+              preparationComplete && !journeyUnlocked ? "completed" : (activeStage?.status ?? "not_started")
+            )}
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Readiness */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium">Stage Readiness</span>
-                <span className="text-sm text-muted-foreground">{currentStage.readiness}%</span>
+                <span className="text-sm text-muted-foreground">{readiness}%</span>
               </div>
-              <Progress value={currentStage.readiness} className="h-2" />
+              <Progress value={readiness} className="h-2" />
             </div>
 
-            {/* Tasks */}
             <div>
               <h4 className="text-sm font-medium mb-3">Tasks</h4>
               <div className="space-y-2">
-                {currentStage.tasks.map((task) => (
-                  <div 
-                    key={task.id} 
-                    className={`flex items-center gap-3 p-3 rounded border ${
-                      task.completed ? 'bg-success/5 border-success/20' : 'bg-card border-border'
-                    }`}
-                  >
-                    {task.completed ? (
-                      <CheckCircle className="h-4 w-4 text-success" />
-                    ) : (
-                      <Circle className="h-4 w-4 text-muted-foreground" />
-                    )}
-                    <span className={`text-sm ${task.completed ? 'text-muted-foreground line-through' : ''}`}>
-                      {task.text}
-                    </span>
-                  </div>
+                {tasks.length === 0 && <p className="text-sm text-muted-foreground">No tasks for this stage.</p>}
+                {tasks.map((task) => (
+                  <StageTaskRow
+                    key={task.id}
+                    taskId={task.id}
+                    title={task.title}
+                    description={task.description}
+                    done={completedIds.has(task.id)}
+                    contentUrl={task.content_url}
+                    taskType={task.task_type as "task" | "course" | undefined}
+                    continueTo={
+                      STAGES_WITH_TASK_PAGES.includes(activeStageId as (typeof STAGES_WITH_TASK_PAGES)[number])
+                        ? stageTaskPath(activeStageId, task.id)
+                        : undefined
+                    }
+                  />
                 ))}
               </div>
             </div>
 
-            {/* Next Action */}
-            <div className="pt-4 border-t">
-              <Button className="w-full btn-professional" asChild>
-                <Link to="/candidate/readiness">
-                  {currentStage.nextAction}
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
+            {!journeyUnlocked && preparationComplete ? (
+              <div className="pt-4 border-t space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  {waitingOnEmployer
+                    ? "Preparation is done. Track employer updates in My Applications."
+                    : "Preparation is done. Apply to an open role to continue."}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {!waitingOnEmployer && (
+                    <Button className="btn-professional" asChild>
+                      <Link to="/candidate/jobs">
+                        {hasApplications ? "Browse more jobs" : "Apply to a job"}
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  )}
+                  {hasApplications && (
+                    <Button variant="outline" asChild>
+                      <Link to="/candidate/applications">My Applications</Link>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ) : activeMeta?.href ? (
+              <div className="pt-4 border-t">
+                <Button className="w-full btn-professional" asChild>
+                  <Link to={activeMeta.href}>
+                    Continue {activeMeta.name}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            ) : null}
           </CardContent>
         </Card>
 
-        {/* Sidebar - Risks & Info */}
         <div className="space-y-6">
-          {/* Risks */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg font-medium">Open Issues</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-lg font-medium">Open Issues</CardTitle></CardHeader>
             <CardContent>
-              {currentStage.risks.length > 0 ? (
+              {openIssues.length > 0 ? (
                 <div className="space-y-3">
-                  {currentStage.risks.map((risk) => (
-                    <div 
-                      key={risk.id} 
-                      className={`flex items-start gap-3 p-3 rounded ${
-                        risk.level === 'warning' ? 'bg-warning/10' : 'bg-destructive/10'
-                      }`}
-                    >
-                      <AlertTriangle className={`h-4 w-4 mt-0.5 ${
-                        risk.level === 'warning' ? 'text-warning' : 'text-destructive'
-                      }`} />
-                      <span className="text-sm">{risk.text}</span>
+                  {openIssues.map((n) => (
+                    <div key={n.id} className="flex items-start gap-3 p-3 rounded bg-warning/10">
+                      <AlertTriangle className="h-4 w-4 mt-0.5 text-warning" />
+                      <span className="text-sm">{n.title}</span>
                     </div>
                   ))}
                 </div>
@@ -274,24 +231,44 @@ const CandidateDashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Quick Stats */}
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg font-medium">Journey Stats</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-lg font-medium">Journey Stats</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground">Stages Completed</span>
-                <span className="text-sm font-medium">2 of 7</span>
+                <span className="text-sm font-medium">{completedStages} of 7</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground">Days in Pipeline</span>
-                <span className="text-sm font-medium">45</span>
+                <span className="text-sm font-medium">{daysInPipeline}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Target Company</span>
-                <span className="text-sm font-medium">TechCorp Nordic</span>
+                <span className="text-sm text-muted-foreground">Track</span>
+                <span className="text-sm font-medium">{meta.label}</span>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader><CardTitle className="text-sm font-medium">All Stages</CardTitle></CardHeader>
+            <CardContent className="space-y-2">
+              {PIPELINE_STAGES.map((stage) => {
+                const prog = stageProgress?.find((s) => s.stage_id === stage.id);
+                const inTrack = isStageInTrack(stage.id, track);
+                return (
+                  <Link
+                    key={stage.id}
+                    to={inTrack ? stage.href : "#"}
+                    className={cn(
+                      "flex items-center justify-between p-2 rounded text-sm",
+                      inTrack ? "hover:bg-muted" : "opacity-40 pointer-events-none"
+                    )}
+                  >
+                    <span>{stage.name}</span>
+                    {getStatusBadge(prog?.status ?? "not_started")}
+                  </Link>
+                );
+              })}
             </CardContent>
           </Card>
         </div>

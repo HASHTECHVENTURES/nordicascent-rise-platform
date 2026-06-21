@@ -1,189 +1,290 @@
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { markCompanyProfileSaved } from "@/hooks/useEmployerOnboarding";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Building2, MapPin, Globe, Users, Plus, Pencil, Trash2, Upload, Leaf } from "lucide-react";
-import { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Building2, Loader2, Upload } from "lucide-react";
+import { useMyCompany, useUpdateCompany } from "@/hooks/useData";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
+import {
+  companyToForm,
+  getMissingCompanyFields,
+  isCompanyProfileComplete,
+  type CompanyProfile,
+} from "@/lib/companyProfileCompleteness";
 
-const benefits = ["Health Insurance", "Remote Work Options", "Stock Options", "25 Days PTO", "Learning Budget", "Gym Membership"];
-const locations = [
-  { id: 1, city: "Stockholm", country: "Sweden", address: "Kungsgatan 12", type: "Headquarters" },
-  { id: 2, city: "Copenhagen", country: "Denmark", address: "Nørrebrogade 45", type: "Office" },
-];
-
-const sdgGoals = [
-  { id: 1, name: "No Poverty", color: "#E5243B" },
-  { id: 2, name: "Zero Hunger", color: "#DDA63A" },
-  { id: 3, name: "Good Health and Well-being", color: "#4C9F38" },
-  { id: 4, name: "Quality Education", color: "#C5192D" },
-  { id: 5, name: "Gender Equality", color: "#FF3A21" },
-  { id: 6, name: "Clean Water and Sanitation", color: "#26BDE2" },
-  { id: 7, name: "Affordable and Clean Energy", color: "#FCC30B" },
-  { id: 8, name: "Decent Work and Economic Growth", color: "#A21942" },
-  { id: 9, name: "Industry, Innovation and Infrastructure", color: "#FD6925" },
-  { id: 10, name: "Reduced Inequalities", color: "#DD1367" },
-  { id: 11, name: "Sustainable Cities and Communities", color: "#FD9D24" },
-  { id: 12, name: "Responsible Consumption and Production", color: "#BF8B2E" },
-  { id: 13, name: "Climate Action", color: "#3F7E44" },
-  { id: 14, name: "Life Below Water", color: "#0A97D9" },
-  { id: 15, name: "Life on Land", color: "#56C02B" },
-  { id: 16, name: "Peace, Justice and Strong Institutions", color: "#00689D" },
-  { id: 17, name: "Partnerships for the Goals", color: "#19486A" },
-];
+const emptyForm = {
+  name: "",
+  industry: "",
+  location: "",
+  size: "",
+  description: "",
+  website: "",
+  logo_url: "",
+};
 
 const EmployerCompanyProfile = () => {
-  const [selectedSdgs, setSelectedSdgs] = useState<number[]>([8, 10, 4]);
+  const navigate = useNavigate();
+  const { data: employerData, isLoading } = useMyCompany();
+  const updateCompany = useUpdateCompany();
+  const { toast } = useToast();
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const lastSyncedAt = useRef<string | null>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const company = employerData?.companies as CompanyProfile | null | undefined;
+  const [form, setForm] = useState(emptyForm);
 
-  const toggleSdg = (id: number) => {
-    setSelectedSdgs(prev =>
-      prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
+  useEffect(() => {
+    if (!company?.id) return;
+    const syncKey = `${company.id}:${company.updated_at ?? ""}`;
+    if (lastSyncedAt.current === syncKey) return;
+    lastSyncedAt.current = syncKey;
+    setForm(companyToForm(company));
+  }, [company]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
     );
+  }
+
+  if (!company?.id) {
+    return (
+      <div className="space-y-4 py-12 text-center">
+        <p className="text-muted-foreground">No company linked to your account.</p>
+        <p className="text-sm text-muted-foreground">Log out and sign up again as a company, or contact support.</p>
+      </div>
+    );
+  }
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingLogo(true);
+    try {
+      const ext = file.name.split(".").pop() ?? "png";
+      const path = `companies/${company.id}/logo.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (uploadError) throw uploadError;
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      setForm((f) => ({ ...f, logo_url: data.publicUrl }));
+      toast({ title: "Logo uploaded", description: "Click Save Changes to apply." });
+    } catch (err) {
+      toast({
+        title: "Upload failed",
+        description: err instanceof Error ? err.message : "Try again",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingLogo(false);
+      if (logoInputRef.current) logoInputRef.current.value = "";
+    }
   };
+
+  const handleSave = async () => {
+    if (!company.id) {
+      toast({ title: "No company found", variant: "destructive" });
+      return;
+    }
+
+    const saved: CompanyProfile = {
+      name: form.name.trim(),
+      industry: form.industry.trim(),
+      location: form.location.trim(),
+      size: form.size.trim(),
+      description: form.description.trim(),
+      website: form.website.trim(),
+      logo_url: form.logo_url || null,
+      status: company.status,
+    };
+
+    const wasPending = company.status === "pending";
+    const complete = isCompanyProfileComplete(saved);
+    const missing = getMissingCompanyFields(saved);
+
+    setSaving(true);
+    try {
+      const updated = await updateCompany.mutateAsync({
+        id: company.id,
+        name: saved.name,
+        industry: saved.industry || null,
+        location: saved.location || null,
+        size: saved.size || null,
+        description: saved.description || null,
+        website: saved.website || null,
+        logo_url: saved.logo_url,
+        status: wasPending && complete ? "active" : company.status,
+      });
+
+      const nextForm = companyToForm(updated as CompanyProfile);
+      setForm(nextForm);
+      lastSyncedAt.current = `${updated.id}:${updated.updated_at ?? ""}`;
+
+      markCompanyProfileSaved();
+
+      if (complete) {
+        toast({ title: "Company profile saved" });
+      } else {
+        toast({
+          title: "Saved",
+          description: `Still needed: ${missing.map((m) => m.label).join(", ")}`,
+        });
+      }
+
+      navigate("/employer/jobs?new=1", { replace: true });
+    } catch (err) {
+      toast({
+        title: "Save failed",
+        description: err instanceof Error ? err.message : "Try again",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const isSaving = saving || updateCompany.isPending;
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Company Profile</h1>
-          <p className="text-muted-foreground">Manage your company information</p>
-        </div>
-        <Button className="gap-2 bg-employer-accent hover:bg-employer-accent/90">Save Changes</Button>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Company Profile</h1>
+        <p className="text-sm text-muted-foreground">Candidates see this on your job listings</p>
       </div>
 
-      <Tabs defaultValue="info" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="info" className="gap-2"><Building2 className="h-4 w-4" />Company Info</TabsTrigger>
-          <TabsTrigger value="culture" className="gap-2"><Users className="h-4 w-4" />Culture & Benefits</TabsTrigger>
-          <TabsTrigger value="sustainability" className="gap-2"><Leaf className="h-4 w-4" />Sustainability</TabsTrigger>
-          <TabsTrigger value="locations" className="gap-2"><MapPin className="h-4 w-4" />Locations</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="info">
-          <Card>
-            <CardHeader><CardTitle>Basic Information</CardTitle></CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center gap-6">
-                <div className="h-24 w-24 rounded bg-employer-accent/10 flex items-center justify-center">
-                  <Building2 className="h-12 w-12 text-employer-accent" />
-                </div>
-                <Button variant="outline" className="gap-2"><Upload className="h-4 w-4" />Upload Logo</Button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2"><Label>Company Name</Label><Input defaultValue="TechNordic AB" /></div>
-                <div className="space-y-2"><Label>Industry</Label><Input defaultValue="Engineering & Industry" /></div>
-                <div className="space-y-2"><Label>Company Size</Label><Input defaultValue="50-200 employees" /></div>
-                <div className="space-y-2"><Label>Founded</Label><Input defaultValue="2018" /></div>
-                <div className="space-y-2"><Label>Website</Label><Input defaultValue="https://technordic.com" /></div>
-                <div className="space-y-2"><Label>LinkedIn</Label><Input defaultValue="linkedin.com/company/technordic" /></div>
-              </div>
-              <div className="space-y-2"><Label>About</Label><Textarea rows={4} defaultValue="We are a Nordic company hiring engineers across disciplines—from software and mechanical to civil and electrical—for projects across the region." /></div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="culture">
-          <div className="space-y-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Benefits</CardTitle><Button size="sm" className="gap-2 bg-employer-accent hover:bg-employer-accent/90"><Plus className="h-4 w-4" />Add Benefit</Button></CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {benefits.map((b) => (<Badge key={b} variant="secondary" className="text-sm py-1 px-3 gap-2">{b}<button className="hover:text-destructive">×</button></Badge>))}
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader><CardTitle>Company Culture</CardTitle></CardHeader>
-              <CardContent><Textarea rows={6} defaultValue="We believe in work-life balance, continuous learning, and building great teams together. Our engineers—from all disciplines—are diverse, inclusive, and always pushing boundaries." /></CardContent>
-            </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Building2 className="h-5 w-5" />
+            Company Info
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-center gap-4">
+            <Avatar className="h-16 w-16 rounded-lg">
+              {form.logo_url ? (
+                <AvatarImage src={form.logo_url} className="object-contain p-1" />
+              ) : null}
+              <AvatarFallback className="rounded-lg text-lg">
+                {(form.name || "CO").slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <input
+                ref={logoInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleLogoUpload}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={uploadingLogo}
+                onClick={() => logoInputRef.current?.click()}
+              >
+                {uploadingLogo ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Upload className="h-4 w-4 mr-2" />
+                )}
+                Upload logo
+              </Button>
+              <p className="text-xs text-muted-foreground mt-2">PNG or JPG</p>
+            </div>
           </div>
-        </TabsContent>
 
-        <TabsContent value="sustainability">
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Leaf className="h-5 w-5 text-success" />
-                  Sustainable Development Goals (SDGs)
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">Select the UN SDGs your company contributes to</p>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {sdgGoals.map((goal) => {
-                    const isSelected = selectedSdgs.includes(goal.id);
-                    return (
-                      <button
-                        key={goal.id}
-                        onClick={() => toggleSdg(goal.id)}
-                        className={`
-                          flex items-center gap-3 p-3 rounded-lg border-2 text-left transition-all
-                          ${isSelected 
-                            ? 'border-primary bg-primary/5' 
-                            : 'border-border hover:border-primary/30'}
-                        `}
-                      >
-                        <div
-                          className="h-8 w-8 rounded flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                          style={{ backgroundColor: goal.color }}
-                        >
-                          {goal.id}
-                        </div>
-                        <span className="text-sm font-medium leading-tight">{goal.name}</span>
-                        {isSelected && (
-                          <Checkbox checked className="ml-auto" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Sustainability Commitment</CardTitle>
-                <p className="text-sm text-muted-foreground">Describe how your company works on sustainability</p>
-              </CardHeader>
-              <CardContent>
-                <Textarea
-                  rows={6}
-                  placeholder="Describe your company's sustainability initiatives, environmental policies, social responsibility programs, and how you contribute to the selected SDGs..."
-                  defaultValue="At TechNordic, sustainability is at the core of our operations. We are committed to reducing our carbon footprint through remote-first work policies, energy-efficient data centers, and sustainable procurement practices. We actively promote diversity and inclusion, invest in quality education through our internship programs, and ensure decent work conditions across our supply chain."
-                />
-              </CardContent>
-            </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="company-name">Company name</Label>
+              <Input
+                id="company-name"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="company-industry">Industry</Label>
+              <Input
+                id="company-industry"
+                value={form.industry}
+                onChange={(e) => setForm({ ...form, industry: e.target.value })}
+                placeholder="e.g. Technology"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="company-location">Location</Label>
+              <Input
+                id="company-location"
+                value={form.location}
+                onChange={(e) => setForm({ ...form, location: e.target.value })}
+                placeholder="e.g. Stockholm, Sweden"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="company-size">Company size</Label>
+              <Input
+                id="company-size"
+                value={form.size}
+                onChange={(e) => setForm({ ...form, size: e.target.value })}
+                placeholder="e.g. 500-1000"
+              />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="company-website">Website</Label>
+              <Input
+                id="company-website"
+                value={form.website}
+                onChange={(e) => setForm({ ...form, website: e.target.value })}
+                placeholder="https://yourcompany.com"
+              />
+            </div>
           </div>
-        </TabsContent>
 
-        <TabsContent value="locations">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Office Locations</CardTitle><Button size="sm" className="gap-2 bg-employer-accent hover:bg-employer-accent/90"><Plus className="h-4 w-4" />Add Location</Button></CardHeader>
-            <CardContent className="space-y-4">
-              {locations.map((loc) => (
-                <div key={loc.id} className="p-4 rounded border flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded bg-muted flex items-center justify-center"><MapPin className="h-5 w-5 text-muted-foreground" /></div>
-                    <div>
-                      <h3 className="font-medium">{loc.city}, {loc.country}</h3>
-                      <p className="text-sm text-muted-foreground">{loc.address}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">{loc.type}</Badge>
-                    <Button variant="ghost" size="icon"><Pencil className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          <div className="space-y-2">
+            <Label htmlFor="company-description">Description</Label>
+            <Textarea
+              id="company-description"
+              rows={4}
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              placeholder="What your company does and why candidates should join..."
+            />
+          </div>
+
+          <p className="text-sm text-muted-foreground">
+            Status:{" "}
+            <strong>
+              {company.status === "pending"
+                ? "Pending — complete profile and save to go live"
+                : company.status}
+            </strong>
+          </p>
+
+          <div className="flex justify-end pt-2">
+            <Button
+              type="button"
+              size="lg"
+              className="min-w-[140px] bg-nordic-orange hover:bg-nordic-orange/90 text-white"
+              onClick={handleSave}
+              disabled={isSaving}
+            >
+              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Changes"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
