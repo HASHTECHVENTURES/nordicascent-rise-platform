@@ -30,6 +30,7 @@ import {
 } from "@/lib/candidateLocation";
 import { markProfileSaved } from "@/hooks/useCandidateOnboarding";
 import { syncEligibleTasks } from "@/lib/syncProfileTasks";
+import { deriveTrackFromExperience, setTrack, TRACK_META } from "@/lib/track";
 
 type ProfileForm = {
   full_name: string;
@@ -88,6 +89,9 @@ const CandidateProfile = () => {
 
   const isIndia = form.country === DEFAULT_COUNTRY;
   const isSaving = saving || updateCandidate.isPending;
+  const derivedTrack = deriveTrackFromExperience(form.experience);
+  const currentTrack = (candidate?.track ?? "entry") as "entry" | "fast";
+  const trackWillChange = derivedTrack !== null && derivedTrack !== currentTrack;
   const cvFileName = candidate?.cv_url?.split("/").pop()?.replace(/^\d+-/, "") ?? null;
   const initials = (profile?.full_name ?? "?").split(" ").map((n) => n[0]).join("").slice(0, 2);
 
@@ -139,7 +143,10 @@ const CandidateProfile = () => {
         education: form.education,
         bio: form.bio,
         skills: form.skills,
+        ...(derivedTrack ? { track: derivedTrack } : {}),
       });
+
+      if (derivedTrack) setTrack(derivedTrack);
 
       await refreshProfile();
 
@@ -372,8 +379,14 @@ const CandidateProfile = () => {
               <Input id="title" value={form.title} onChange={(e) => updateField("title", e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="experience">Experience (optional)</Label>
-              <Input id="experience" placeholder="e.g. Fresher, 1 year, 2 years" value={form.experience} onChange={(e) => updateField("experience", e.target.value)} />
+              <Label htmlFor="experience">Experience</Label>
+              <Input id="experience" placeholder="e.g. Fresher, 6 months, 1 year, 2 years" value={form.experience} onChange={(e) => updateField("experience", e.target.value)} />
+              {derivedTrack && (
+                <p className="text-xs text-muted-foreground">
+                  Program track: <strong>{TRACK_META[derivedTrack].label}</strong> — {TRACK_META[derivedTrack].short}
+                  {trackWillChange && " (updates when you save)"}
+                </p>
+              )}
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="education">Education</Label>

@@ -28,6 +28,32 @@ export const getNextStageInTrack = (stageId: string, track: Track): string | nul
   return stages[idx + 1];
 };
 
+/** Map free-text experience to Entry (0–12 mo) or Fast (1+ yr). Returns null if unclear. */
+export function deriveTrackFromExperience(experience: string): Track | null {
+  const text = experience.trim().toLowerCase();
+  if (!text) return null;
+
+  if (/\b(fresher|graduate|intern|no experience|none|zero)\b/.test(text)) {
+    return "entry";
+  }
+
+  const yearMatch = text.match(/(\d+(?:\.\d+)?)\s*\+?\s*(?:year|yr|years|yrs)\b/);
+  if (yearMatch) {
+    return parseFloat(yearMatch[1]) >= 1 ? "fast" : "entry";
+  }
+
+  if (/^1\s*\+/.test(text) || /\b1\s*\+\s*(?:year|yr)?\b/.test(text)) {
+    return "fast";
+  }
+
+  const monthMatch = text.match(/(\d+)\s*(?:month|months|mo)\b/);
+  if (monthMatch) {
+    return parseInt(monthMatch[1], 10) >= 12 ? "fast" : "entry";
+  }
+
+  return null;
+}
+
 const STORAGE_KEY = "na.candidateTrack";
 
 const isTrack = (v: unknown): v is Track => v === "entry" || v === "fast";
