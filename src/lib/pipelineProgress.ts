@@ -1,5 +1,68 @@
 import { supabase } from "@/lib/supabase";
 import { fetchStageTaskIdsForCandidate } from "@/lib/stageTasks";
+import { TRACK_META, type Track } from "@/lib/track";
+
+const FAST_TRACK_SKIP_STAGES = ["preparation", "selection"] as const;
+
+/** Align pipeline stage progress when a candidate's program track changes. */
+export async function syncPipelineForTrack(candidateId: string, track: Track) {
+  const now = new Date().toISOString();
+  const { data: progress } = await supabase
+    .from("candidate_stage_progress")
+    .select("id, stage_id, status")
+    .eq("candidate_id", candidateId);
+
+  const rows = progress ?? [];
+  const firstStage = TRACK_META[track].stages[0];
+
+  if (track === "fast") {
+    for (const stageId of FAST_TRACK_SKIP_STAGES) {
+      const row = rows.find((p) => p.stage_id === stageId);
+      if (row) {
+        if (row.status !== "completed") {
+          await supabase
+            .from("candidate_stage_progress")
+            .update({ status: "completed", completed_at: now })
+            .eq("id", row.id);
+        }
+      } else {
+        await supabase.from("candidate_stage_progress").insert({
+          candidate_id: candidateId,
+          stage_id: stageId,
+          status: "completed",
+          completed_at: now,
+        });
+      }
+    }
+
+    const readiness = rows.find((p) => p.stage_id === "readiness");
+    if (readiness) {
+      if (readiness.status === "not_started") {
+        await supabase
+          .from("candidate_stage_progress")
+          .update({ status: "active", started_at: now })
+          .eq("id", readiness.id);
+      }
+    } else {
+      await supabase.from("candidate_stage_progress").insert({
+        candidate_id: candidateId,
+        stage_id: "readiness",
+        status: "active",
+        started_at: now,
+      });
+    }
+    return;
+  }
+
+  if (!rows.length && firstStage) {
+    await supabase.from("candidate_stage_progress").insert({
+      candidate_id: candidateId,
+      stage_id: firstStage,
+      status: "active",
+      started_at: now,
+    });
+  }
+}
 
 export async function completePreparationIfReady(candidateId: string): Promise<boolean> {
   const { data: tasks } = await supabase.from("stage_tasks").select("id").eq("stage_id", "preparation");

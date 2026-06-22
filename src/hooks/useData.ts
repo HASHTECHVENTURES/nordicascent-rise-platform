@@ -10,7 +10,10 @@ import {
 } from "@/lib/applicationEffects";
 import { getOrCreateConversationWithProfile, resolveConversationParticipant } from "@/lib/conversations";
 import { sendInterviewInvite } from "@/lib/sendInterviewInvite";
-import { isCandidateVisibleJob, VISIBLE_COMPANY_STATUSES } from "@/lib/jobVisibility";
+import {
+  ensureCompanyActiveWhenPublishingJob,
+  isCandidateVisibleJob,
+} from "@/lib/jobVisibility";
 import {
   computeStageReadiness,
   isTaskManuallyCompletable,
@@ -293,7 +296,6 @@ export function useOpenJobs() {
         .from("jobs")
         .select("*, companies!inner(name, logo_url, location, status)")
         .eq("status", "open")
-        .in("companies.status", [...VISIBLE_COMPANY_STATUSES])
         .order("posted_at", { ascending: false });
       if (error) throw error;
       return (data ?? []).filter(isCandidateVisibleJob);
@@ -342,6 +344,10 @@ export function useCreateJob() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (job: Record<string, unknown>) => {
+      const companyId = job.company_id as string | undefined;
+      if (companyId && job.status === "open") {
+        await ensureCompanyActiveWhenPublishingJob(companyId);
+      }
       const { error } = await supabase.from("jobs").insert(job);
       if (error) throw error;
     },
@@ -357,6 +363,12 @@ export function useUpdateJob() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: { id: string } & Record<string, unknown>) => {
+      if (updates.status === "open") {
+        const { data: job } = await supabase.from("jobs").select("company_id").eq("id", id).single();
+        if (job?.company_id) {
+          await ensureCompanyActiveWhenPublishingJob(job.company_id);
+        }
+      }
       const { error } = await supabase.from("jobs").update(updates).eq("id", id);
       if (error) throw error;
     },

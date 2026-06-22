@@ -30,7 +30,8 @@ import {
 } from "@/lib/candidateLocation";
 import { markProfileSaved } from "@/hooks/useCandidateOnboarding";
 import { syncEligibleTasks } from "@/lib/syncProfileTasks";
-import { deriveTrackFromExperience, setTrack, TRACK_META } from "@/lib/track";
+import { deriveTrackFromExperience, EXPERIENCE_OPTIONS, normalizeExperienceValue, setTrack, TRACK_META } from "@/lib/track";
+import { syncPipelineForTrack } from "@/lib/pipelineProgress";
 
 type ProfileForm = {
   full_name: string;
@@ -61,7 +62,7 @@ function formFromAuth(
     state: candidate?.state ?? "",
     city: candidate?.city ?? candidate?.location ?? "",
     title: candidate?.title ?? "",
-    experience: candidate?.experience ?? "",
+    experience: normalizeExperienceValue(candidate?.experience),
     education: candidate?.education ?? "",
     bio: candidate?.bio ?? "",
     skills: candidate?.skills ?? [],
@@ -133,6 +134,8 @@ const CandidateProfile = () => {
         country: form.country.trim(),
       });
 
+      const trackFromExperience = deriveTrackFromExperience(form.experience.trim());
+
       await updateCandidate.mutateAsync({
         country: form.country.trim() || DEFAULT_COUNTRY,
         state: form.state.trim(),
@@ -143,10 +146,15 @@ const CandidateProfile = () => {
         education: form.education,
         bio: form.bio,
         skills: form.skills,
-        ...(derivedTrack ? { track: derivedTrack } : {}),
+        ...(trackFromExperience ? { track: trackFromExperience } : {}),
       });
 
-      if (derivedTrack) setTrack(derivedTrack);
+      if (trackFromExperience) {
+        setTrack(trackFromExperience);
+        if (trackFromExperience !== currentTrack) {
+          await syncPipelineForTrack(candidate.id, trackFromExperience);
+        }
+      }
 
       await refreshProfile();
 
@@ -184,7 +192,12 @@ const CandidateProfile = () => {
       qc.invalidateQueries({ queryKey: ["stage-progress"] });
 
       markProfileSaved();
-      toast({ title: "Profile saved" });
+      toast({
+        title: "Profile saved",
+        ...(trackFromExperience && trackFromExperience !== currentTrack
+          ? { description: `Program track updated to ${TRACK_META[trackFromExperience].label}.` }
+          : {}),
+      });
       navigate("/candidate/dashboard", { replace: true });
     } catch (err) {
       toast({
@@ -380,7 +393,21 @@ const CandidateProfile = () => {
             </div>
             <div className="space-y-2">
               <Label htmlFor="experience">Experience</Label>
-              <Input id="experience" placeholder="e.g. Fresher, 6 months, 1 year, 2 years" value={form.experience} onChange={(e) => updateField("experience", e.target.value)} />
+              <Select
+                value={form.experience || undefined}
+                onValueChange={(value) => updateField("experience", value)}
+              >
+                <SelectTrigger id="experience">
+                  <SelectValue placeholder="Select your experience" />
+                </SelectTrigger>
+                <SelectContent>
+                  {EXPERIENCE_OPTIONS.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               {derivedTrack && (
                 <p className="text-xs text-muted-foreground">
                   Program track: <strong>{TRACK_META[derivedTrack].label}</strong> — {TRACK_META[derivedTrack].short}

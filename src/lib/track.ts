@@ -28,10 +28,21 @@ export const getNextStageInTrack = (stageId: string, track: Track): string | nul
   return stages[idx + 1];
 };
 
+export const EXPERIENCE_OPTIONS: { value: string; label: string; track: Track }[] = [
+  { value: "Fresher", label: "Fresher (no experience)", track: "entry" },
+  { value: "6 months", label: "6 months", track: "entry" },
+  { value: "12 months", label: "12 months", track: "entry" },
+  { value: "1 year", label: "1 year", track: "fast" },
+  { value: "2+ years", label: "2+ years", track: "fast" },
+];
+
 /** Map free-text experience to Entry (0–12 mo) or Fast (1+ yr). Returns null if unclear. */
 export function deriveTrackFromExperience(experience: string): Track | null {
   const text = experience.trim().toLowerCase();
   if (!text) return null;
+
+  const preset = EXPERIENCE_OPTIONS.find((o) => o.value.toLowerCase() === text);
+  if (preset) return preset.track;
 
   if (/\b(fresher|graduate|intern|no experience|none|zero)\b/.test(text)) {
     return "entry";
@@ -51,7 +62,40 @@ export function deriveTrackFromExperience(experience: string): Track | null {
     return parseInt(monthMatch[1], 10) >= 12 ? "fast" : "entry";
   }
 
+  // Bare number like "1" or "2" — treat as years of experience
+  if (/^\d+(?:\.\d+)?$/.test(text)) {
+    return parseFloat(text) >= 1 ? "fast" : "entry";
+  }
+
   return null;
+}
+
+/** Normalize legacy free-text values to a select option when possible. */
+export function normalizeExperienceValue(experience: string | null | undefined): string {
+  const text = experience?.trim() ?? "";
+  if (!text) return "";
+
+  const preset = EXPERIENCE_OPTIONS.find((o) => o.value.toLowerCase() === text.toLowerCase());
+  if (preset) return preset.value;
+
+  const derived = deriveTrackFromExperience(text);
+  if (derived === "fast") {
+    const years = text.match(/(\d+(?:\.\d+)?)/);
+    if (years && parseFloat(years[1]) >= 2) return "2+ years";
+    return "1 year";
+  }
+  if (derived === "entry") {
+    if (/\b(fresher|graduate|intern|none|zero|0)\b/.test(text.toLowerCase())) return "Fresher";
+    const months = text.match(/(\d+)\s*(?:month|months|mo)\b/i);
+    if (months) {
+      const n = parseInt(months[1], 10);
+      if (n <= 6) return "6 months";
+      return "12 months";
+    }
+    return "12 months";
+  }
+
+  return text;
 }
 
 const STORAGE_KEY = "na.candidateTrack";

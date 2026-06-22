@@ -31,7 +31,10 @@ const CandidateDashboard = () => {
   const journeyUnlocked = hasUnlockedPipeline(applications ?? []);
 
   const activeStage = stageProgress?.find((s) => s.status === "active");
-  const activeStageId = activeStage?.stage_id ?? "preparation";
+  let activeStageId = activeStage?.stage_id ?? TRACK_META[track].stages[0];
+  if (!isStageInTrack(activeStageId, track)) {
+    activeStageId = TRACK_META[track].stages[0];
+  }
   const activeMeta = PIPELINE_STAGES.find((s) => s.id === activeStageId);
   const { data: stageTasks } = useStageTasks(activeStageId);
   const { data: taskProgress } = useMyTaskProgress();
