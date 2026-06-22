@@ -1,10 +1,10 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { UserCheck, Building2, Mail, AlertTriangle, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { usePlatformStats } from "@/hooks/useData";
+import { Card, CardContent } from "@/components/ui/card";
+import { GraduationCap, ClipboardCheck, Heart, Briefcase, Loader2 } from "lucide-react";
+import { useAdminJourneyStats } from "@/hooks/useData";
 
 const AdminDashboard = () => {
-  const { data: stats, isLoading } = usePlatformStats();
+  const { data: stats, isLoading } = useAdminJourneyStats();
 
   if (isLoading) {
     return (
@@ -14,77 +14,63 @@ const AdminDashboard = () => {
     );
   }
 
+  const cards = [
+    {
+      title: "Universities",
+      count: stats?.waitlistPending ?? 0,
+      label: "waitlist pending",
+      href: "/admin/universities",
+      icon: GraduationCap,
+    },
+    {
+      title: "Readiness",
+      count: stats?.readinessNeedsReview ?? 0,
+      label: "need review",
+      href: "/admin/readiness",
+      icon: ClipboardCheck,
+    },
+    {
+      title: "Mentoring",
+      count: stats?.mentoringPipeline ?? 0,
+      label: "ready · jobs locked",
+      href: "/admin/mentoring",
+      icon: Heart,
+    },
+    {
+      title: "Jobs",
+      count: stats?.jobsUnlocked ?? 0,
+      label: "candidates unlocked",
+      href: "/admin/jobs",
+      icon: Briefcase,
+    },
+  ];
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 max-w-4xl">
       <div>
-        <h1 className="text-2xl font-medium text-foreground">Admin Dashboard</h1>
-        <p className="text-muted-foreground">Portal overview — live counts from Supabase</p>
+        <h1 className="text-2xl font-medium">Dashboard</h1>
+        <p className="text-muted-foreground text-sm mt-1">
+          Universities → Readiness → Mentoring → Jobs
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Link to="/admin/candidates">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <UserCheck className="h-7 w-7 text-primary" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {cards.map((card) => (
+          <Link key={card.title} to={card.href}>
+            <Card className="hover:border-primary/40 transition-colors h-full">
+              <CardContent className="pt-6 flex items-center gap-4">
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <card.icon className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-4xl font-bold">{stats?.candidates ?? 0}</p>
-                  <p className="text-sm text-muted-foreground mt-0.5">Total Candidates</p>
+                  <p className="font-medium">{card.title}</p>
+                  <p className="text-2xl font-bold mt-0.5">{card.count}</p>
+                  <p className="text-xs text-muted-foreground">{card.label}</p>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link to="/admin/employers">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="h-14 w-14 rounded-xl bg-secondary/20 flex items-center justify-center">
-                  <Building2 className="h-7 w-7 text-secondary" />
-                </div>
-                <div>
-                  <p className="text-4xl font-bold">{stats?.companies ?? 0}</p>
-                  <p className="text-sm text-muted-foreground mt-0.5">Total Companies</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link to="/admin/issues">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="h-14 w-14 rounded-xl bg-warning/10 flex items-center justify-center">
-                  <AlertTriangle className="h-7 w-7 text-warning" />
-                </div>
-                <div>
-                  <p className="text-4xl font-bold">{stats?.openIssues ?? 0}</p>
-                  <p className="text-sm text-muted-foreground mt-0.5">Open Issues</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link to="/admin/support">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer h-full">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="h-14 w-14 rounded-xl bg-success/10 flex items-center justify-center">
-                  <Mail className="h-7 w-7 text-success" />
-                </div>
-                <div>
-                  <p className="text-4xl font-bold">{stats?.openSupportTickets ?? 0}</p>
-                  <p className="text-sm text-muted-foreground mt-0.5">Open Support Tickets</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
       </div>
     </div>
   );

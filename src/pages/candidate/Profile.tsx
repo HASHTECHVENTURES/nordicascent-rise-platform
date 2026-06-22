@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { TagsInput } from "@/components/ui/tags-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Select,
@@ -16,9 +15,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { User, Award, Upload, FileText, Loader2, Download, GraduationCap } from "lucide-react";
+import { User, Award, Upload, FileText, Loader2, Download } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useUpdateMyCandidate, useMyUniversity } from "@/hooks/useData";
+import { useUpdateMyCandidate } from "@/hooks/useData";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import {
@@ -33,10 +32,14 @@ import { markProfileSaved } from "@/hooks/useCandidateOnboarding";
 import { syncEligibleTasks } from "@/lib/syncProfileTasks";
 import { deriveTrackFromExperience, EXPERIENCE_OPTIONS, normalizeExperienceValue, setTrack, TRACK_META } from "@/lib/track";
 import { syncPipelineForTrack } from "@/lib/pipelineProgress";
-import UniversityPickerDialog from "@/components/candidate/UniversityPickerDialog";
+import { isOnUniversityWaitlist, isWaitlistProfileOnly } from "@/lib/candidateAccess";
+import { completePreparationAndActivateReadiness } from "@/lib/preparationProgress";
+import { Clock, GraduationCap } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 function needsUniversityStep(candidate: ReturnType<typeof useAuth>["candidate"]) {
-  return !candidate?.university_id && !candidate?.university_waitlist_name;
+  if (isOnUniversityWaitlist(candidate)) return false;
+  return !candidate?.university_id;
 }
 
 type ProfileForm = {
@@ -86,14 +89,7 @@ const CandidateProfile = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [universityPickerOpen, setUniversityPickerOpen] = useState(false);
-  const [universityStepRequired, setUniversityStepRequired] = useState(false);
   const [form, setForm] = useState<ProfileForm>(formFromAuth(profile, candidate));
-  const { data: myUniversity, refetch: refetchUniversity } = useMyUniversity(
-    candidate?.id,
-    candidate?.university_id,
-    candidate?.university_waitlist_name
-  );
 
   useEffect(() => {
     if (profile || candidate) {
@@ -212,11 +208,14 @@ const CandidateProfile = () => {
           : {}),
       });
 
-      if (needsUniversityStep(freshCandidate)) {
-        setUniversityStepRequired(true);
-        setUniversityPickerOpen(true);
+      if (isWaitlistProfileOnly(freshCandidate)) {
+        navigate("/candidate/profile", { replace: true });
+      } else if (needsUniversityStep(freshCandidate)) {
+        navigate("/candidate/university", { replace: true });
       } else {
-        navigate("/candidate/dashboard", { replace: true });
+        const track = (freshCandidate?.track ?? currentTrack) as typeof currentTrack;
+        await completePreparationAndActivateReadiness(candidate!.id, track);
+        navigate("/candidate/readiness", { replace: true });
       }
     } catch (err) {
       toast({
@@ -321,12 +320,38 @@ const CandidateProfile = () => {
     }
   };
 
+  const onWaitlist = isOnUniversityWaitlist(candidate);
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">My Profile</h1>
         <p className="text-muted-foreground">Manage your profile and CV</p>
       </div>
+
+      {onWaitlist && (
+        <Card className="border-amber-200 bg-amber-50/80 dark:border-amber-900 dark:bg-amber-950/30">
+          <CardContent className="flex flex-col gap-3 p-6 sm:flex-row sm:items-start">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/50">
+              <Clock className="h-5 w-5 text-amber-700 dark:text-amber-400" />
+            </div>
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-semibold">University under review</p>
+                <Badge variant="secondary" className="gap-1">
+                  <GraduationCap className="h-3 w-3" />
+                  Waitlist
+                </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                You requested <span className="font-medium text-foreground">{candidate?.university_waitlist_name}</span>.
+                Our team is reviewing it. Until it is approved, only your profile is available — jobs, applications, and
+                other portal sections will unlock once your university is added.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={handleCvUpload} />
 
@@ -449,44 +474,6 @@ const CandidateProfile = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <GraduationCap className="h-5 w-5" />
-            University
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {myUniversity ? (
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-lg border p-4">
-              <div>
-                <p className="font-medium">{myUniversity.name}</p>
-                {myUniversity.status === "waitlist" ? (
-                  <p className="text-sm text-muted-foreground mt-1">
-                    On our waitlist — an admin will review and add this university soon.
-                  </p>
-                ) : (
-                  <p className="text-sm text-muted-foreground mt-1">Selected from the directory</p>
-                )}
-              </div>
-              <Badge variant={myUniversity.status === "waitlist" ? "secondary" : "default"}>
-                {myUniversity.status === "waitlist" ? "Pending review" : "Confirmed"}
-              </Badge>
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Add the university or institute where you studied.
-            </p>
-          )}
-          <Button type="button" variant="outline" onClick={() => {
-            setUniversityStepRequired(false);
-            setUniversityPickerOpen(true);
-          }}>
-            {myUniversity ? "Change university" : "Add university"}
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
             <Award className="h-5 w-5" />
             Skills
           </CardTitle>
@@ -546,25 +533,6 @@ const CandidateProfile = () => {
           {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Changes"}
         </Button>
       </div>
-
-      {candidate?.id && (
-        <UniversityPickerDialog
-          open={universityPickerOpen}
-          candidateId={candidate.id}
-          required={universityStepRequired}
-          onOpenChange={setUniversityPickerOpen}
-          onComplete={async () => {
-            const wasRequired = universityStepRequired;
-            setUniversityPickerOpen(false);
-            setUniversityStepRequired(false);
-            await refreshProfile();
-            await refetchUniversity();
-            if (wasRequired) {
-              navigate("/candidate/dashboard", { replace: true });
-            }
-          }}
-        />
-      )}
     </div>
   );
 };

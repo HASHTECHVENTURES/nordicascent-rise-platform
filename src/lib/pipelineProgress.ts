@@ -2,7 +2,7 @@ import { supabase } from "@/lib/supabase";
 import { fetchStageTaskIdsForCandidate } from "@/lib/stageTasks";
 import { TRACK_META, type Track } from "@/lib/track";
 
-const FAST_TRACK_SKIP_STAGES = ["preparation", "selection"] as const;
+const FAST_TRACK_SKIP_STAGES = ["internship"] as const;
 
 /** Align pipeline stage progress when a candidate's program track changes. */
 export async function syncPipelineForTrack(candidateId: string, track: Track) {
@@ -35,21 +35,35 @@ export async function syncPipelineForTrack(candidateId: string, track: Track) {
       }
     }
 
-    const readiness = rows.find((p) => p.stage_id === "readiness");
-    if (readiness) {
-      if (readiness.status === "not_started") {
+    const trackStages = TRACK_META.fast.stages;
+    const { data: refreshed } = await supabase
+      .from("candidate_stage_progress")
+      .select("id, stage_id, status")
+      .eq("candidate_id", candidateId);
+
+    const refreshedRows = refreshed ?? [];
+    const hasActiveInTrack = refreshedRows.some(
+      (p) => trackStages.includes(p.stage_id) && p.status === "active"
+    );
+    if (hasActiveInTrack) return;
+
+    for (const stageId of trackStages) {
+      const row = refreshedRows.find((p) => p.stage_id === stageId);
+      if (row?.status === "completed") continue;
+      if (row) {
         await supabase
           .from("candidate_stage_progress")
           .update({ status: "active", started_at: now })
-          .eq("id", readiness.id);
+          .eq("id", row.id);
+      } else {
+        await supabase.from("candidate_stage_progress").insert({
+          candidate_id: candidateId,
+          stage_id: stageId,
+          status: "active",
+          started_at: now,
+        });
       }
-    } else {
-      await supabase.from("candidate_stage_progress").insert({
-        candidate_id: candidateId,
-        stage_id: "readiness",
-        status: "active",
-        started_at: now,
-      });
+      return;
     }
     return;
   }
@@ -162,6 +176,14 @@ async function ensureSelectionCompleteIfAccepted(candidateId: string) {
 }
 
 export async function advanceCandidateStage(candidateId: string, currentStageId?: string) {
+  const { data: candidate } = await supabase
+    .from("candidates")
+    .select("track")
+    .eq("id", candidateId)
+    .maybeSingle();
+  const track = (candidate?.track ?? "entry") as Track;
+  const allowedStages = new Set(TRACK_META[track].stages);
+
   const { data: stages } = await supabase
     .from("pipeline_stages")
     .select("id, sort_order")
@@ -189,7 +211,29 @@ export async function advanceCandidateStage(candidateId: string, currentStageId?
       .eq("id", currentRow.id);
   }
 
-  const next = stages[idx + 1];
+  let nextIdx = idx + 1;
+  while (nextIdx < stages.length && !allowedStages.has(stages[nextIdx].id)) {
+    const skipped = stages[nextIdx];
+    const skippedRow = progress?.find((p) => p.stage_id === skipped.id);
+    if (skippedRow) {
+      if (skippedRow.status !== "completed") {
+        await supabase
+          .from("candidate_stage_progress")
+          .update({ status: "completed", completed_at: now })
+          .eq("id", skippedRow.id);
+      }
+    } else {
+      await supabase.from("candidate_stage_progress").insert({
+        candidate_id: candidateId,
+        stage_id: skipped.id,
+        status: "completed",
+        completed_at: now,
+      });
+    }
+    nextIdx++;
+  }
+
+  const next = stages[nextIdx];
   if (next) {
     const nextRow = progress?.find((p) => p.stage_id === next.id);
     if (nextRow) {
@@ -197,6 +241,13 @@ export async function advanceCandidateStage(candidateId: string, currentStageId?
         .from("candidate_stage_progress")
         .update({ status: "active", started_at: now })
         .eq("id", nextRow.id);
+    } else {
+      await supabase.from("candidate_stage_progress").insert({
+        candidate_id: candidateId,
+        stage_id: next.id,
+        status: "active",
+        started_at: now,
+      });
     }
   }
 }

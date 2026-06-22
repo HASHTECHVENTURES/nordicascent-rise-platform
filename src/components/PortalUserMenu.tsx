@@ -25,9 +25,11 @@ function initials(name?: string | null) {
 export function PortalUserMenu({
   profilePath,
   messagesPath,
+  hideMessages = false,
 }: {
   profilePath: string;
   messagesPath: string;
+  hideMessages?: boolean;
 }) {
   const { profile, signOut } = useAuth();
   const navigate = useNavigate();
@@ -54,9 +56,11 @@ export function PortalUserMenu({
         <DropdownMenuItem asChild>
           <Link to={profilePath}>Profile</Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to={messagesPath}>Messages</Link>
-        </DropdownMenuItem>
+        {!hideMessages && (
+          <DropdownMenuItem asChild>
+            <Link to={messagesPath}>Messages</Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} className="text-destructive">
           <LogOut className="h-4 w-4 mr-2" />

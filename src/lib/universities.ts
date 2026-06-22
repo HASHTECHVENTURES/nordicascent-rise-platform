@@ -29,10 +29,10 @@ export const UNIVERSITY_SEED: University[] = [
 export function filterUniversities(
   list: University[],
   query: string,
-  institutionType: InstitutionType
+  institutionType?: InstitutionType
 ) {
   const q = query.trim().toLowerCase();
   return list
-    .filter((u) => u.institution_type === institutionType)
+    .filter((u) => !institutionType || u.institution_type === institutionType)
     .filter((u) => !q || u.name.toLowerCase().includes(q));
 }

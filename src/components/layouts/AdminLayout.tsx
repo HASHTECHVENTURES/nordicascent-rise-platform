@@ -10,7 +10,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Bell,
-  LogOut,
   Search,
   AlertTriangle,
   Mail,
@@ -20,36 +19,41 @@ import {
   Briefcase,
   Users,
   GraduationCap,
+  ClipboardCheck,
+  Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { PortalUserMenu, PortalUserSidebar } from "@/components/PortalUserMenu";
+import AdminJourneyProgress from "@/components/admin/AdminJourneyProgress";
 import { useAdminCandidates, useAdminEmployers, useNotifications } from "@/hooks/useData";
 
-const navigation = [
-  { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-  { name: "Issues", href: "/admin/issues", icon: AlertTriangle },
-  { name: "Support Inbox", href: "/admin/support", icon: Mail },
-  { name: "Contact Inbox", href: "/admin/contacts", icon: Mail },
-  { name: "Activity Log", href: "/admin/activity", icon: History },
-  { name: "Companies", href: "/admin/employers", icon: Building2 },
-  { name: "Candidates", href: "/admin/candidates", icon: UserCheck },
-  { name: "Program Tasks", href: "/admin/stage-tasks", icon: ListChecks },
+type NavItem = { name: string; href: string; icon: React.ElementType };
+
+const journeyNav: NavItem[] = [
   { name: "Universities", href: "/admin/universities", icon: GraduationCap },
-  { name: "Job Moderation", href: "/admin/jobs", icon: Briefcase },
+  { name: "Readiness", href: "/admin/readiness", icon: ClipboardCheck },
+  { name: "Mentoring", href: "/admin/mentoring", icon: Heart },
+  { name: "Candidates", href: "/admin/candidates", icon: UserCheck },
+];
+
+const platformNav: NavItem[] = [
+  { name: "Companies", href: "/admin/employers", icon: Building2 },
+  { name: "Jobs", href: "/admin/jobs", icon: Briefcase },
+  { name: "Program Tasks", href: "/admin/stage-tasks", icon: ListChecks },
   { name: "Users", href: "/admin/users", icon: Users },
-  { name: "Insights CMS", href: "/admin/insights", icon: Megaphone },
+  { name: "Insights", href: "/admin/insights", icon: Megaphone },
   { name: "Announcements", href: "/admin/notifications", icon: Megaphone },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { name: "Settings", href: "/admin/settings", icon: Settings },
+];
+
+const operationsNav: NavItem[] = [
+  { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+  { name: "Issues", href: "/admin/issues", icon: AlertTriangle },
+  { name: "Support", href: "/admin/support", icon: Mail },
+  { name: "Contacts", href: "/admin/contacts", icon: Mail },
+  { name: "Activity", href: "/admin/activity", icon: History },
 ];
 
 const AdminLayout = () => {
@@ -72,7 +76,11 @@ const AdminLayout = () => {
         return p?.full_name?.toLowerCase().includes(q) || p?.email?.toLowerCase().includes(q);
       })
       .slice(0, 5)
-      .map((c) => ({ type: "candidate" as const, id: c.id, label: (c.profiles as { full_name: string | null })?.full_name ?? "Candidate" }));
+      .map((c) => ({
+        type: "candidate" as const,
+        id: c.id,
+        label: (c.profiles as { full_name: string | null })?.full_name ?? "Candidate",
+      }));
     const emp = (employers ?? [])
       .filter((e) => e.name.toLowerCase().includes(q))
       .slice(0, 5)
@@ -80,9 +88,40 @@ const AdminLayout = () => {
     return [...cand, ...emp];
   }, [search, candidates, employers]);
 
+  const renderNavItem = (item: NavItem) => {
+    const isActive =
+      location.pathname === item.href ||
+      (item.href !== "/admin/dashboard" && location.pathname.startsWith(`${item.href}/`));
+    return (
+      <Link
+        key={item.name}
+        to={item.href}
+        className={cn(
+          "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
+          isActive
+            ? "bg-nordic-orange text-white"
+            : "text-foreground/70 hover:bg-muted hover:text-foreground"
+        )}
+      >
+        <item.icon className="h-5 w-5 flex-shrink-0" />
+        {!collapsed && <span className="text-sm font-medium">{item.name}</span>}
+      </Link>
+    );
+  };
+
+  const renderSection = (label: string, items: NavItem[]) => (
+    <div className="space-y-1">
+      {!collapsed && (
+        <p className="px-3 pt-3 pb-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          {label}
+        </p>
+      )}
+      {items.map(renderNavItem)}
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Sidebar */}
       <aside
         className={cn(
           "fixed left-0 top-0 z-40 h-screen bg-white border-r border-border transition-all duration-300",
@@ -90,7 +129,6 @@ const AdminLayout = () => {
         )}
       >
         <div className="flex h-full flex-col">
-          {/* Nav header – compact, no large logo */}
           <div className="flex h-14 items-center justify-between px-4 border-b border-border">
             {!collapsed && (
               <Link to="/admin/dashboard" className="text-sm font-semibold text-foreground">
@@ -123,26 +161,11 @@ const AdminLayout = () => {
             </Button>
           )}
 
-          {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-            {navigation.map((item) => {
-              const isActive = location.pathname === item.href;
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors",
-                    isActive
-                      ? "bg-nordic-orange text-white"
-                      : "text-foreground/70 hover:bg-muted hover:text-foreground"
-                  )}
-                >
-                  <item.icon className="h-5 w-5 flex-shrink-0" />
-                  {!collapsed && <span className="text-sm font-medium">{item.name}</span>}
-                </Link>
-              );
-            })}
+          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+            {renderSection("Overview", operationsNav.slice(0, 1))}
+            {renderSection("Candidate journey", journeyNav)}
+            {renderSection("Platform", platformNav)}
+            {renderSection("Operations", operationsNav.slice(1))}
           </nav>
 
           {!collapsed && (
@@ -153,41 +176,45 @@ const AdminLayout = () => {
         </div>
       </aside>
 
-      {/* Main content */}
       <div className={cn("transition-all duration-300", collapsed ? "ml-16" : "ml-64")}>
         <header className="sticky top-0 z-30 h-16 bg-background/95 backdrop-blur border-b">
           <div className="flex h-full items-center justify-between px-6">
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search candidates, companies..."
-                  className="w-80 pl-9 bg-muted/50"
-                  value={search}
-                  onChange={(e) => { setSearch(e.target.value); setShowResults(true); }}
-                  onFocus={() => setShowResults(true)}
-                  onBlur={() => setTimeout(() => setShowResults(false), 150)}
-                />
-                {showResults && searchResults.length > 0 && (
-                  <div className="absolute top-full mt-1 w-80 bg-popover border rounded-md shadow-lg z-50 py-1">
-                    {searchResults.map((r) => (
-                      <button
-                        key={`${r.type}-${r.id}`}
-                        type="button"
-                        className="w-full text-left px-3 py-2 text-sm hover:bg-muted"
-                        onMouseDown={() => {
-                          navigate(r.type === "candidate" ? `/admin/candidates/${r.id}` : `/admin/employers/${r.id}`);
-                          setSearch("");
-                          setShowResults(false);
-                        }}
-                      >
-                        <span className="text-muted-foreground text-xs uppercase">{r.type}</span>
-                        <p>{r.label}</p>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search candidates, companies..."
+                className="w-80 pl-9 bg-muted/50"
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setShowResults(true);
+                }}
+                onFocus={() => setShowResults(true)}
+                onBlur={() => setTimeout(() => setShowResults(false), 150)}
+              />
+              {showResults && searchResults.length > 0 && (
+                <div className="absolute top-full mt-1 w-80 bg-popover border rounded-md shadow-lg z-50 py-1">
+                  {searchResults.map((r) => (
+                    <button
+                      key={`${r.type}-${r.id}`}
+                      type="button"
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-muted"
+                      onMouseDown={() => {
+                        navigate(
+                          r.type === "candidate"
+                            ? `/admin/candidates/${r.id}`
+                            : `/admin/employers/${r.id}`
+                        );
+                        setSearch("");
+                        setShowResults(false);
+                      }}
+                    >
+                      <span className="text-muted-foreground text-xs uppercase">{r.type}</span>
+                      <p>{r.label}</p>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="flex items-center gap-4">
@@ -201,11 +228,12 @@ const AdminLayout = () => {
                   )}
                 </Link>
               </Button>
-
               <PortalUserMenu profilePath="/admin/settings" messagesPath="/admin/messages" />
             </div>
           </div>
         </header>
+
+        <AdminJourneyProgress />
 
         <main className="p-6">
           <Outlet />

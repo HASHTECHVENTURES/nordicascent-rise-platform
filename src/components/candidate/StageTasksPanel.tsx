@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ArrowRight, Info, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useTrack, TRACK_META, isStageInTrack, getNextStageInTrack } from "@/lib/track";
+import { useTrack, TRACK_META, isStageInTrack, getNextStageInTrack, getContinueStageForExcluded } from "@/lib/track";
 import {
   useStageTasks,
   useMyTaskProgress,
@@ -16,7 +16,7 @@ import {
 import { PIPELINE_STAGES } from "@/lib/pipeline";
 import { computeStageReadiness } from "@/lib/profileCompleteness";
 import { hasUnlockedPipeline, isPostPreparationStage, hasActiveApplication } from "@/lib/applicationJourney";
-import { STAGES_WITH_TASK_PAGES, stageTaskPath } from "@/lib/stageRoutes";
+import { STAGES_WITH_TASK_PAGES, stageListPath, stageTaskPath } from "@/lib/stageRoutes";
 import StageTaskRow from "@/components/candidate/StageTaskRow";
 import SelectionStageContent from "@/components/candidate/SelectionStageContent";
 
@@ -62,6 +62,8 @@ export default function StageTasksPanel({ stageId, title, description }: Props) 
   }, [stageId, stageTasksDone, stageStatus]);
 
   if (!isStageInTrack(stageId, track)) {
+    const continueStageId = getContinueStageForExcluded(stageId, track);
+    const continueMeta = PIPELINE_STAGES.find((s) => s.id === continueStageId);
     return (
       <div className="space-y-6">
         <div>
@@ -72,10 +74,16 @@ export default function StageTasksPanel({ stageId, title, description }: Props) 
           <CardContent className="pt-6 flex items-start gap-3">
             <Info className="h-5 w-5 text-primary mt-0.5" />
             <div className="text-sm">
-              <p className="font-medium text-foreground">{stageMeta?.name} is not part of Fast Track</p>
-              <p className="text-muted-foreground mt-1">Continue with stages in your track using the pipeline above.</p>
+              <p className="font-medium text-foreground">
+                {stageMeta?.name} is not required on {TRACK_META[track].label}
+              </p>
+              <p className="text-muted-foreground mt-1">
+                Continue with the stages in your track using the pipeline above.
+              </p>
               <Button variant="outline" size="sm" className="mt-3" asChild>
-                <Link to="/candidate/readiness">Go to Readiness <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                <Link to={stageListPath(continueStageId)}>
+                  Go to {continueMeta?.name ?? "your next stage"} <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
               </Button>
             </div>
           </CardContent>

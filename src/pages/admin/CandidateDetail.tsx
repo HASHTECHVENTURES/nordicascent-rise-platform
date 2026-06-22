@@ -5,13 +5,16 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, AlertTriangle, CheckCircle, Send, UserCheck, Loader2 } from "lucide-react";
 import { TRACK_META, type Track } from "@/lib/track";
-import { useCandidateById, useUpdateCandidateTrack, useUpdateCandidateStatus, useCreateIssue, useAdvanceCandidateStage, useCandidateStageProgress, useCandidateTaskProgress, useStageTasks, useAdminMarkTaskComplete } from "@/hooks/useData";
+import { useCandidateById, useUpdateCandidateTrack, useUpdateCandidateStatus, useCreateIssue, useAdvanceCandidateStage, useCandidateStageProgress, useCandidateTaskProgress, useStageTasks, useAdminMarkTaskComplete, useAdminCandidateJourneyBrief, useUnlockCandidateJobs } from "@/hooks/useData";
 import { useToast } from "@/hooks/use-toast";
+import { adminJourneyStageLabel } from "@/lib/adminJourney";
 
 const AdminCandidateDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: candidate, isLoading } = useCandidateById(id);
+  const { data: journeyMap } = useAdminCandidateJourneyBrief();
+  const unlockJobs = useUnlockCandidateJobs();
   const updateTrack = useUpdateCandidateTrack();
   const updateStatus = useUpdateCandidateStatus();
   const createIssue = useCreateIssue();
@@ -33,6 +36,7 @@ const AdminCandidateDetail = () => {
   } | null;
 
   const track = (candidate?.track ?? "entry") as Track;
+  const journeyStage = id ? journeyMap?.get(id) : undefined;
 
   const onTrackChange = async (v: string) => {
     if (!candidate) return;
@@ -104,7 +108,7 @@ const AdminCandidateDetail = () => {
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              Stages in track: {TRACK_META[track].stages.length} of 7
+              Stages in track: {TRACK_META[track].stages.length} of 8
             </p>
           </CardContent>
         </Card>
@@ -112,8 +116,49 @@ const AdminCandidateDetail = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Fix actions</CardTitle>
-          <p className="text-sm text-muted-foreground">Resolve issues from here</p>
+          <CardTitle className="text-base">Journey</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm">
+            Stage:{" "}
+            <Badge variant="outline">
+              {journeyStage ? adminJourneyStageLabel(journeyStage) : "—"}
+            </Badge>
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="outline" asChild>
+              <Link to="/admin/readiness">Readiness reviews</Link>
+            </Button>
+            <Button size="sm" variant="outline" asChild>
+              <Link to="/admin/mentoring">Mentoring</Link>
+            </Button>
+            {journeyStage === "mentoring" && !candidate.jobs_unlocked && (
+              <Button
+                size="sm"
+                disabled={unlockJobs.isPending}
+                onClick={async () => {
+                  try {
+                    await unlockJobs.mutateAsync({ candidateId: candidate.id, unlock: true });
+                    toast({ title: "Jobs unlocked" });
+                  } catch (err) {
+                    toast({
+                      title: "Failed",
+                      description: err instanceof Error ? err.message : "Try again",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+              >
+                Unlock jobs
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Actions</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-3">
           <Button
@@ -199,9 +244,6 @@ const AdminCandidateDetail = () => {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Stage tasks</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Active stage: {(activeStage?.pipeline_stages as { name: string } | null)?.name ?? activeStageId}
-          </p>
         </CardHeader>
         <CardContent className="space-y-2">
           {(stageTasks ?? []).length === 0 && (

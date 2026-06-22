@@ -4,7 +4,7 @@ export type Database = {
   public: {
     Tables: {
       profiles: { Row: { id: string; role: 'candidate' | 'employer' | 'admin'; full_name: string | null; email: string | null; avatar_url: string | null; phone: string | null; account_status: string; created_at: string; updated_at: string } };
-      candidates: { Row: { id: string; profile_id: string; full_name: string | null; avatar_url: string | null; title: string | null; location: string | null; country: string | null; state: string | null; city: string | null; skills: string[] | null; experience: string | null; education: string | null; university_id: string | null; university_waitlist_name: string | null; track: 'entry' | 'fast'; status: string; readiness_score: number; bio: string | null; cv_url: string | null; created_at: string; updated_at: string } };
+      candidates: { Row: { id: string; profile_id: string; full_name: string | null; avatar_url: string | null; title: string | null; location: string | null; country: string | null; state: string | null; city: string | null; skills: string[] | null; experience: string | null; education: string | null; university_id: string | null; university_waitlist_name: string | null; track: 'entry' | 'fast'; status: string; readiness_score: number; jobs_unlocked: boolean; bio: string | null; cv_url: string | null; created_at: string; updated_at: string } };
       companies: { Row: { id: string; name: string; logo_url: string | null; industry: string | null; location: string | null; size: string | null; description: string | null; website: string | null; status: string; created_at: string; updated_at: string } };
       employers: { Row: { id: string; profile_id: string; company_id: string; title: string | null; created_at: string } };
       jobs: { Row: { id: string; company_id: string; title: string; department: string | null; location: string | null; job_type: string | null; salary_range: string | null; description: string | null; requirements: string[] | null; benefits: string[] | null; status: 'draft' | 'open' | 'closed'; posted_at: string | null; deadline_at: string | null; created_at: string; updated_at: string } };
@@ -28,6 +28,11 @@ export type Database = {
       platform_settings: { Row: { id: string; settings: Json; updated_at: string } };
       universities: { Row: { id: string; name: string; institution_type: 'university' | 'institute'; country: string; is_accessible: boolean; created_at: string } };
       university_waitlist: { Row: { id: string; candidate_id: string; university_name: string; institution_type: 'university' | 'institute'; status: string; created_at: string } };
+      readiness_tests: { Row: { id: string; area: 'cultural_social' | 'technical'; level: number; title: string; subtitle: string | null; intro_body: string | null; timer_minutes: number; timer_hard: boolean; sort_order: number; active: boolean; created_at: string } };
+      readiness_questions: { Row: { id: string; test_id: string; scenario_label: string | null; prompt: string; answer_type: 'short' | 'long' | 'bullets' | 'video'; sort_order: number; created_at: string } };
+      readiness_attempts: { Row: { id: string; candidate_id: string; test_id: string; status: 'in_progress' | 'submitted' | 'expired'; started_at: string; submitted_at: string | null; expires_at: string | null; created_at: string } };
+      readiness_answers: { Row: { id: string; attempt_id: string; question_id: string; answer_text: string | null; video_path: string | null; updated_at: string } };
+      readiness_evaluations: { Row: { id: string; candidate_id: string; cultural_signal: 'strong' | 'acceptable' | 'weak' | null; technical_signal: 'strong' | 'acceptable' | 'weak' | null; red_flag: boolean; red_flag_note: string | null; evaluator_notes: string | null; evaluated_by: string | null; evaluated_at: string | null; approved_for_activation: boolean; created_at: string; updated_at: string } };
     };
     Enums: {
       user_role: 'candidate' | 'employer' | 'admin';

@@ -1,8 +1,9 @@
 /** URL segment ↔ pipeline stage id. */
 export const STAGE_PATH_BY_ID: Record<string, string> = {
   preparation: "preparation",
-  selection: "selection",
   readiness: "readiness",
+  mentoring: "mentoring",
+  selection: "selection",
   internship: "internship",
   activation: "activation",
   relocation: "relocation",

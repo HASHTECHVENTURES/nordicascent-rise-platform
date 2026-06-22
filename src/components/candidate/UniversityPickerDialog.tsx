@@ -19,7 +19,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Command,
   CommandEmpty,
@@ -31,16 +30,13 @@ import {
 import { Loader2, GraduationCap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useUniversities, useSaveCandidateUniversity } from "@/hooks/useData";
-import {
-  filterUniversities,
-  INSTITUTION_TYPE_LABELS,
-  type InstitutionType,
-} from "@/lib/universities";
+import { filterUniversities } from "@/lib/universities";
 
 type Props = {
   open: boolean;
   candidateId: string;
   onComplete: () => void;
+  onWaitlistComplete: () => void;
   onOpenChange?: (open: boolean) => void;
   required?: boolean;
 };
@@ -49,23 +45,20 @@ export default function UniversityPickerDialog({
   open,
   candidateId,
   onComplete,
+  onWaitlistComplete,
   onOpenChange,
   required = false,
 }: Props) {
   const { toast } = useToast();
   const { data: universities, isLoading } = useUniversities();
   const saveUniversity = useSaveCandidateUniversity();
-  const [institutionType, setInstitutionType] = useState<InstitutionType>("university");
   const [search, setSearch] = useState("");
   const [showWaitlistForm, setShowWaitlistForm] = useState(false);
   const [waitlistName, setWaitlistName] = useState("");
   const [confirmWaitlistOpen, setConfirmWaitlistOpen] = useState(false);
 
   const list = universities ?? [];
-  const filtered = useMemo(
-    () => filterUniversities(list, search, institutionType),
-    [list, search, institutionType]
-  );
+  const filtered = useMemo(() => filterUniversities(list, search), [list, search]);
 
   const resetState = () => {
     setSearch("");
@@ -102,15 +95,11 @@ export default function UniversityPickerDialog({
       await saveUniversity.mutateAsync({
         candidateId,
         waitlistName: name,
-        institutionType,
-      });
-      toast({
-        title: "Added to our waitlist",
-        description: "We've saved your university. An admin will review and add it to the list.",
+        institutionType: "university",
       });
       setConfirmWaitlistOpen(false);
       resetState();
-      onComplete();
+      onWaitlistComplete();
     } catch (err) {
       toast({
         title: "Could not save",
@@ -118,11 +107,6 @@ export default function UniversityPickerDialog({
         variant: "destructive",
       });
     }
-  };
-
-  const openWaitlistForSearch = () => {
-    setWaitlistName(search.trim());
-    setShowWaitlistForm(true);
   };
 
   const isSaving = saveUniversity.isPending;
@@ -139,109 +123,103 @@ export default function UniversityPickerDialog({
               Where did you study?
             </DialogTitle>
             <DialogDescription>
-              Search and select your university or institute. If it is not listed, submit the name for our waitlist.
+              Search and select your university. If it is not listed, submit the name for our waitlist.
             </DialogDescription>
           </DialogHeader>
 
-          <Tabs
-            value={institutionType}
-            onValueChange={(v) => {
-              setInstitutionType(v as InstitutionType);
-              setSearch("");
-              setShowWaitlistForm(false);
-            }}
-          >
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="university">{INSTITUTION_TYPE_LABELS.university}</TabsTrigger>
-              <TabsTrigger value="institute">{INSTITUTION_TYPE_LABELS.institute}</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value={institutionType} className="space-y-4 mt-4">
-              {!showWaitlistForm ? (
-                <>
-                  <Command shouldFilter={false} className="rounded-lg border">
-                    <CommandInput
-                      placeholder={`Search ${institutionType === "university" ? "universities" : "institutes"}...`}
-                      value={search}
-                      onValueChange={setSearch}
-                    />
-                    <CommandList className="max-h-[220px]">
-                      {isLoading ? (
-                        <div className="flex justify-center py-8">
-                          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                        </div>
-                      ) : (
-                        <>
-                          <CommandEmpty>
-                            {searchTrimmed
-                              ? `No match for "${searchTrimmed}". You can submit it to our waitlist.`
-                              : "Start typing to search."}
-                          </CommandEmpty>
-                          <CommandGroup>
-                            {filtered.map((uni) => (
-                              <CommandItem
-                                key={uni.id}
-                                value={uni.name}
-                                onSelect={() => handleSelect(uni.id)}
-                                disabled={isSaving}
-                              >
-                                <span>{uni.name}</span>
-                                <span className="ml-auto text-xs text-muted-foreground">{uni.country}</span>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </>
-                      )}
-                    </CommandList>
-                  </Command>
-
-                  {noMatches && (
-                    <Button
-                      type="button"
-                      className="w-full"
-                      variant="secondary"
-                      onClick={() => {
-                        setWaitlistName(searchTrimmed);
-                        setConfirmWaitlistOpen(true);
-                      }}
-                    >
-                      Submit "{searchTrimmed}" to waitlist
-                    </Button>
-                  )}
-
-                  <Button type="button" variant="outline" className="w-full" onClick={openWaitlistForSearch}>
-                    My {institutionType === "university" ? "university" : "institute"} isn't listed
-                  </Button>
-                </>
-              ) : (
-                <div className="space-y-3 rounded-lg border p-4">
-                  <Label htmlFor="waitlist-name">University / institute name</Label>
-                  <Input
-                    id="waitlist-name"
-                    value={waitlistName}
-                    onChange={(e) => setWaitlistName(e.target.value)}
-                    placeholder="Enter the full name"
+          <div className="space-y-4">
+            {!showWaitlistForm ? (
+              <>
+                <Command shouldFilter={false} className="rounded-lg border">
+                  <CommandInput
+                    placeholder="Search universities..."
+                    value={search}
+                    onValueChange={setSearch}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    We'll keep your university on our waitlist. An admin will review it and make it selectable.
-                  </p>
-                  <div className="flex gap-2">
-                    <Button type="button" variant="outline" onClick={() => setShowWaitlistForm(false)}>
-                      Back to search
-                    </Button>
-                    <Button
-                      type="button"
-                      className="flex-1"
-                      disabled={!waitlistName.trim() || isSaving}
-                      onClick={() => setConfirmWaitlistOpen(true)}
-                    >
-                      Continue
-                    </Button>
-                  </div>
+                  <CommandList className="max-h-[220px]">
+                    {isLoading ? (
+                      <div className="flex justify-center py-8">
+                        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : (
+                      <>
+                        <CommandEmpty>
+                          {searchTrimmed
+                            ? `No match for "${searchTrimmed}". You can submit it to our waitlist.`
+                            : "Start typing to search."}
+                        </CommandEmpty>
+                        <CommandGroup>
+                          {filtered.map((uni) => (
+                            <CommandItem
+                              key={uni.id}
+                              value={uni.name}
+                              onSelect={() => handleSelect(uni.id)}
+                              disabled={isSaving}
+                            >
+                              <span>{uni.name}</span>
+                              <span className="ml-auto text-xs text-muted-foreground">{uni.country}</span>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </>
+                    )}
+                  </CommandList>
+                </Command>
+
+                {noMatches && (
+                  <Button
+                    type="button"
+                    className="w-full"
+                    variant="secondary"
+                    onClick={() => {
+                      setWaitlistName(searchTrimmed);
+                      setConfirmWaitlistOpen(true);
+                    }}
+                  >
+                    Submit "{searchTrimmed}" to waitlist
+                  </Button>
+                )}
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    setWaitlistName(search.trim());
+                    setShowWaitlistForm(true);
+                  }}
+                >
+                  My university isn't listed
+                </Button>
+              </>
+            ) : (
+              <div className="space-y-3 rounded-lg border p-4">
+                <Label htmlFor="waitlist-name">University name</Label>
+                <Input
+                  id="waitlist-name"
+                  value={waitlistName}
+                  onChange={(e) => setWaitlistName(e.target.value)}
+                  placeholder="Enter the full name"
+                />
+                <p className="text-xs text-muted-foreground">
+                  We'll keep your university on our waitlist. An admin will review it and make it selectable.
+                </p>
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" onClick={() => setShowWaitlistForm(false)}>
+                    Back to search
+                  </Button>
+                  <Button
+                    type="button"
+                    className="flex-1"
+                    disabled={!waitlistName.trim() || isSaving}
+                    onClick={() => setConfirmWaitlistOpen(true)}
+                  >
+                    Continue
+                  </Button>
                 </div>
-              )}
-            </TabsContent>
-          </Tabs>
+              </div>
+            )}
+          </div>
 
           {!required && (
             <div className="flex justify-end">
@@ -258,8 +236,8 @@ export default function UniversityPickerDialog({
           <AlertDialogHeader>
             <AlertDialogTitle>Submit university to waitlist?</AlertDialogTitle>
             <AlertDialogDescription>
-              We'll save <strong>{waitlistName.trim()}</strong> for admin review. You'll see it on your profile as
-              pending until an admin adds it to the directory.
+              We'll save <strong>{waitlistName.trim()}</strong> for admin review. An admin will add it to the
+              directory when approved.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

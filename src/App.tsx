@@ -26,9 +26,11 @@ import ForgotPassword from "./pages/ForgotPassword";
 // Candidate Pages
 import CandidateDashboard from "./pages/candidate/Dashboard";
 import CandidateProfile from "./pages/candidate/Profile";
+import CandidateUniversity from "./pages/candidate/University";
 import CandidatePreparation from "./pages/candidate/Preparation";
 import CandidateSelection from "./pages/candidate/Selection";
 import CandidateReadiness from "./pages/candidate/Readiness";
+import CandidateReadinessTest from "./pages/candidate/ReadinessTest";
 import CandidateStageTaskDetail from "./pages/candidate/StageTaskDetail";
 import CandidateInternship from "./pages/candidate/Internship";
 import CandidateActivation from "./pages/candidate/Activation";
@@ -74,6 +76,8 @@ import AdminMessages from "./pages/admin/Messages";
 import AdminContacts from "./pages/admin/Contacts";
 import AdminInsights from "./pages/admin/Insights";
 import AdminStageTasks from "./pages/admin/StageTasks";
+import AdminReadiness from "./pages/admin/Readiness";
+import AdminMentoring from "./pages/admin/Mentoring";
 import AdminUniversities from "./pages/admin/Universities";
 
 import NotFound from "./pages/NotFound";
@@ -111,6 +115,7 @@ const App = () => (
                 <Route path="/candidate/preparation" element={<CandidatePreparation />} />
                 <Route path="/candidate/selection" element={<CandidateSelection />} />
                 <Route path="/candidate/readiness" element={<CandidateReadiness />} />
+                <Route path="/candidate/readiness/test/:testId" element={<CandidateReadinessTest />} />
                 <Route path="/candidate/:stagePath/tasks/:taskId" element={<CandidateStageTaskDetail />} />
                 <Route path="/candidate/internship" element={<CandidateInternship />} />
                 <Route path="/candidate/activation" element={<CandidateActivation />} />
@@ -118,6 +123,7 @@ const App = () => (
                 <Route path="/candidate/onboarding" element={<CandidateOnboarding />} />
                 <Route path="/candidate/followup" element={<CandidateFollowup />} />
                 <Route path="/candidate/profile" element={<CandidateProfile />} />
+                <Route path="/candidate/university" element={<CandidateUniversity />} />
                 <Route path="/candidate/jobs" element={<CandidateJobs />} />
                 <Route path="/candidate/jobs/:id" element={<CandidateJobDetail />} />
                 <Route path="/candidate/applications" element={<CandidateApplications />} />
@@ -166,6 +172,8 @@ const App = () => (
                 <Route path="/admin/contacts" element={<AdminContacts />} />
                 <Route path="/admin/insights" element={<AdminInsights />} />
                 <Route path="/admin/stage-tasks" element={<AdminStageTasks />} />
+                <Route path="/admin/readiness" element={<AdminReadiness />} />
+                <Route path="/admin/mentoring" element={<AdminMentoring />} />
                 <Route path="/admin/universities" element={<AdminUniversities />} />
                 <Route path="/admin/security" element={<AdminSecurity />} />
               </Route>

@@ -9,12 +9,12 @@ export const TRACK_META: Record<Track, { label: string; short: string; stages: s
   entry: {
     label: "Entry Track",
     short: "12-month program · 0–12 months experience",
-    stages: ["preparation", "selection", "readiness", "internship", "activation", "relocation", "onboarding", "followup"],
+    stages: ["preparation", "readiness", "mentoring", "selection", "internship", "activation", "relocation", "onboarding", "followup"],
   },
   fast: {
     label: "Fast Track",
-    short: "Accelerated · 1+ years experience",
-    stages: ["readiness", "internship", "activation", "relocation", "onboarding", "followup"],
+    short: "Accelerated · 1+ years experience · no internship",
+    stages: ["preparation", "readiness", "mentoring", "selection", "activation", "relocation", "onboarding", "followup"],
   },
 };
 
@@ -27,6 +27,30 @@ export const getNextStageInTrack = (stageId: string, track: Track): string | nul
   if (idx < 0 || idx >= stages.length - 1) return null;
   return stages[idx + 1];
 };
+
+const ALL_PIPELINE_STAGE_IDS = [
+  "preparation",
+  "readiness",
+  "mentoring",
+  "selection",
+  "internship",
+  "activation",
+  "relocation",
+  "onboarding",
+  "followup",
+] as const;
+
+/** Where to send a candidate when they open a stage that is not in their track. */
+export function getContinueStageForExcluded(stageId: string, track: Track): string {
+  const trackStages = TRACK_META[track].stages;
+  const idx = ALL_PIPELINE_STAGE_IDS.indexOf(stageId as (typeof ALL_PIPELINE_STAGE_IDS)[number]);
+  if (idx >= 0) {
+    for (let i = idx + 1; i < ALL_PIPELINE_STAGE_IDS.length; i++) {
+      if (trackStages.includes(ALL_PIPELINE_STAGE_IDS[i])) return ALL_PIPELINE_STAGE_IDS[i];
+    }
+  }
+  return trackStages[0];
+}
 
 export const EXPERIENCE_OPTIONS: { value: string; label: string; track: Track }[] = [
   { value: "Fresher", label: "Fresher (no experience)", track: "entry" },

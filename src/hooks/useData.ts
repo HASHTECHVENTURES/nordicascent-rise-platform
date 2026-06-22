@@ -1,8 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { activateJobsAfterMentoringUnlock } from "@/lib/preparationProgress";
+import type { Track } from "@/lib/track";
+import type { AdminCandidateJourneyStage } from "@/lib/adminJourney";
+import { inferCandidateJourneyStage } from "@/lib/adminJourney";
 import type { TrackType } from "@/types/database";
+import { completePreparationAndActivateReadiness } from "@/lib/preparationProgress";
 import { useAuth } from "@/contexts/AuthContext";
-import { advanceCandidateStage, completePreparationIfReady, completeStageIfTasksDone } from "@/lib/pipelineProgress";
+import { advanceCandidateStage, completePreparationIfReady, completeStageIfTasksDone, syncPipelineForTrack } from "@/lib/pipelineProgress";
 import {
   onApplicationStatusChange,
   onApplicationSubmitted,
@@ -225,6 +230,7 @@ export function useUpdateCandidateTrack() {
     mutationFn: async ({ id, track }: { id: string; track: TrackType }) => {
       const { error } = await supabase.from("candidates").update({ track }).eq("id", id);
       if (error) throw error;
+      await syncPipelineForTrack(id, track);
     },
     onSuccess: (_, { id }) => {
       qc.invalidateQueries({ queryKey: ["admin-candidates"] });
@@ -295,18 +301,22 @@ export function useUniversities() {
         .from("universities")
         .select("id, name, institution_type, country, is_accessible")
         .eq("is_accessible", true)
+        .eq("institution_type", "university")
         .order("name");
 
       if (error?.message?.includes("is_accessible")) {
         const fallback = await supabase
           .from("universities")
           .select("id, name, institution_type, country")
+          .eq("institution_type", "university")
           .order("name");
         data = fallback.data;
         error = fallback.error;
       }
 
-      if (error || !data?.length) return UNIVERSITY_SEED;
+      if (error || !data?.length) {
+        return UNIVERSITY_SEED.filter((u) => u.institution_type === "university");
+      }
       return data;
     },
   });
@@ -469,6 +479,16 @@ export function useApproveUniversityWaitlist() {
           university_waitlist_name: null,
         })
         .eq("university_waitlist_name", entry.university_name);
+
+      const { data: cand } = await supabase
+        .from("candidates")
+        .select("track")
+        .eq("id", entry.candidate_id)
+        .single();
+      await completePreparationAndActivateReadiness(
+        entry.candidate_id,
+        (cand?.track ?? "entry") as Track
+      );
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-university-waitlist"] });
@@ -526,6 +546,16 @@ export function useSaveCandidateUniversity() {
           })
           .eq("id", candidateId);
         if (error) throw error;
+
+        const { data: cand } = await supabase
+          .from("candidates")
+          .select("track")
+          .eq("id", candidateId)
+          .single();
+        await completePreparationAndActivateReadiness(
+          candidateId,
+          (cand?.track ?? "entry") as Track
+        );
         return;
       }
 
@@ -552,6 +582,7 @@ export function useSaveCandidateUniversity() {
       qc.invalidateQueries({ queryKey: ["candidate"] });
       qc.invalidateQueries({ queryKey: ["my-university"] });
       qc.invalidateQueries({ queryKey: ["admin-university-waitlist"] });
+      qc.invalidateQueries({ queryKey: ["stage-progress"] });
     },
   });
 }
@@ -1086,7 +1117,7 @@ export function useMentoringSessions() {
   const { profile, candidate } = useAuth();
   return useQuery({
     queryKey: ["mentoring", profile?.id, candidate?.id],
-    enabled: !!profile?.id,
+    enabled: !!profile?.id && profile.role !== "admin",
     queryFn: async () => {
       let query = supabase
         .from("mentoring_sessions")
@@ -1098,6 +1129,37 @@ export function useMentoringSessions() {
         query = query.eq("mentor_id", profile.id);
       }
       const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useAdminMentors() {
+  return useQuery({
+    queryKey: ["admin-mentors"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, full_name, email, avatar_url")
+        .eq("role", "admin")
+        .order("full_name");
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useAdminMentoringSessions() {
+  return useQuery({
+    queryKey: ["admin-mentoring-sessions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("mentoring_sessions")
+        .select(
+          "*, mentor:profiles!mentoring_sessions_mentor_id_fkey(id, full_name, avatar_url), candidate:candidates!mentoring_sessions_candidate_id_fkey(id, profiles(full_name, email))"
+        )
+        .order("scheduled_at", { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -2027,16 +2089,243 @@ export function useCreateMentoringSession() {
       duration_minutes?: number;
       meeting_url?: string;
       notes?: string;
+      mentor_id?: string;
     }) => {
+      const { mentor_id: mentorOverride, ...rest } = session;
       const { error } = await supabase.from("mentoring_sessions").insert({
-        ...session,
-        mentor_id: profile!.id,
+        ...rest,
+        mentor_id: mentorOverride ?? profile!.id,
         status: "scheduled",
         duration_minutes: session.duration_minutes ?? 60,
       });
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["mentoring"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["mentoring"] });
+      qc.invalidateQueries({ queryKey: ["admin-mentoring-sessions"] });
+    },
+  });
+}
+
+export function useUpdateMentoringSession() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      ...updates
+    }: {
+      id: string;
+      status?: string;
+      title?: string;
+      scheduled_at?: string;
+      meeting_url?: string | null;
+      notes?: string | null;
+      duration_minutes?: number;
+    }) => {
+      const { error } = await supabase.from("mentoring_sessions").update(updates).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["mentoring"] });
+      qc.invalidateQueries({ queryKey: ["admin-mentoring-sessions"] });
+    },
+  });
+}
+
+export type AdminMentoringCandidateRow = {
+  id: string;
+  fullName: string;
+  email: string;
+  testsTotal: number;
+  testsSubmitted: number;
+  jobsUnlocked: boolean;
+  sessionCount: number;
+  nextSessionAt: string | null;
+};
+
+export function useAdminMentoringPipeline() {
+  return useQuery({
+    queryKey: ["admin-mentoring-pipeline"],
+    queryFn: async () => {
+      const [
+        { data: candidates, error: cErr },
+        { data: tests, error: tErr },
+        { data: attempts, error: aErr },
+        { data: sessions, error: sErr },
+      ] = await Promise.all([
+        supabase
+          .from("candidates")
+          .select("id, jobs_unlocked, profiles(full_name, email)")
+          .order("created_at", { ascending: false }),
+        supabase.from("readiness_tests").select("id").eq("active", true),
+        supabase.from("readiness_attempts").select("candidate_id, status"),
+        supabase.from("mentoring_sessions").select("candidate_id, scheduled_at, status"),
+      ]);
+      if (cErr) throw cErr;
+      if (tErr) throw tErr;
+      if (aErr) throw aErr;
+      if (sErr) throw sErr;
+
+      const testsTotal = tests?.length ?? 0;
+      const rows: AdminMentoringCandidateRow[] = (candidates ?? [])
+        .map((c) => {
+          const p = c.profiles as { full_name: string | null; email: string | null } | null;
+          const candAttempts = (attempts ?? []).filter((a) => a.candidate_id === c.id);
+          const submitted = candAttempts.filter((a) => a.status === "submitted" || a.status === "expired");
+          const candSessions = (sessions ?? []).filter((s) => s.candidate_id === c.id);
+          const upcoming = candSessions
+            .filter((s) => s.status === "scheduled")
+            .map((s) => s.scheduled_at)
+            .sort();
+
+          return {
+            id: c.id,
+            fullName: p?.full_name ?? "Candidate",
+            email: p?.email ?? "—",
+            testsTotal,
+            testsSubmitted: submitted.length,
+            jobsUnlocked: Boolean(c.jobs_unlocked),
+            sessionCount: candSessions.length,
+            nextSessionAt: upcoming[0] ?? null,
+          };
+        })
+        .filter((r) => r.testsTotal > 0 && r.testsSubmitted >= r.testsTotal);
+
+      return rows.sort((a, b) => {
+        if (!a.jobsUnlocked && b.jobsUnlocked) return -1;
+        if (a.jobsUnlocked && !b.jobsUnlocked) return 1;
+        return a.fullName.localeCompare(b.fullName);
+      });
+    },
+  });
+}
+
+export function useUnlockCandidateJobs() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ candidateId, unlock }: { candidateId: string; unlock: boolean }) => {
+      const { error } = await supabase
+        .from("candidates")
+        .update({ jobs_unlocked: unlock, updated_at: new Date().toISOString() })
+        .eq("id", candidateId);
+      if (error) throw error;
+
+      if (unlock) {
+        const { data: cand } = await supabase
+          .from("candidates")
+          .select("track")
+          .eq("id", candidateId)
+          .single();
+        await activateJobsAfterMentoringUnlock(candidateId, (cand?.track ?? "entry") as Track);
+      }
+    },
+    onSuccess: (_, { candidateId }) => {
+      qc.invalidateQueries({ queryKey: ["admin-mentoring-pipeline"] });
+      qc.invalidateQueries({ queryKey: ["admin-journey-stats"] });
+      qc.invalidateQueries({ queryKey: ["admin-candidate-journey-brief"] });
+      qc.invalidateQueries({ queryKey: ["admin-candidates"] });
+      qc.invalidateQueries({ queryKey: ["candidate", candidateId] });
+      qc.invalidateQueries({ queryKey: ["stage-progress"] });
+    },
+  });
+}
+
+export type AdminJourneyStats = {
+  waitlistPending: number;
+  readinessNeedsReview: number;
+  mentoringPipeline: number;
+  jobsUnlocked: number;
+};
+
+export function useAdminJourneyStats() {
+  return useQuery({
+    queryKey: ["admin-journey-stats"],
+    queryFn: async () => {
+      const [
+        { count: waitlistPending, error: wErr },
+        { data: tests, error: tErr },
+        { data: attempts, error: aErr },
+        { data: candidates, error: cErr },
+        { data: evaluations, error: eErr },
+      ] = await Promise.all([
+        supabase
+          .from("university_waitlist")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "pending"),
+        supabase.from("readiness_tests").select("id").eq("active", true),
+        supabase.from("readiness_attempts").select("candidate_id, status"),
+        supabase.from("candidates").select("id, jobs_unlocked, university_id"),
+        supabase.from("readiness_evaluations").select("candidate_id, evaluated_at"),
+      ]);
+      if (wErr) throw wErr;
+      if (tErr) throw tErr;
+      if (aErr) throw aErr;
+      if (cErr) throw cErr;
+      if (eErr) throw eErr;
+
+      const testsTotal = tests?.length ?? 0;
+      const evalByCandidate = new Map((evaluations ?? []).map((e) => [e.candidate_id, e]));
+
+      let readinessNeedsReview = 0;
+      let mentoringPipeline = 0;
+      let jobsUnlocked = 0;
+
+      for (const c of candidates ?? []) {
+        if (c.jobs_unlocked) jobsUnlocked += 1;
+        const submitted = (attempts ?? []).filter(
+          (a) =>
+            a.candidate_id === c.id && (a.status === "submitted" || a.status === "expired")
+        ).length;
+        const readinessDone = testsTotal > 0 && submitted >= testsTotal;
+        if (readinessDone && !c.jobs_unlocked) mentoringPipeline += 1;
+        if (readinessDone && !evalByCandidate.get(c.id)?.evaluated_at) readinessNeedsReview += 1;
+      }
+
+      return {
+        waitlistPending: waitlistPending ?? 0,
+        readinessNeedsReview,
+        mentoringPipeline,
+        jobsUnlocked,
+      } satisfies AdminJourneyStats;
+    },
+  });
+}
+
+export function useAdminCandidateJourneyBrief() {
+  return useQuery({
+    queryKey: ["admin-candidate-journey-brief"],
+    queryFn: async () => {
+      const [{ data: candidates, error: cErr }, { data: tests, error: tErr }, { data: attempts, error: aErr }] =
+        await Promise.all([
+          supabase.from("candidates").select("id, university_id, jobs_unlocked"),
+          supabase.from("readiness_tests").select("id").eq("active", true),
+          supabase.from("readiness_attempts").select("candidate_id, status"),
+        ]);
+      if (cErr) throw cErr;
+      if (tErr) throw tErr;
+      if (aErr) throw aErr;
+
+      const testsTotal = tests?.length ?? 0;
+      const map = new Map<string, AdminCandidateJourneyStage>();
+
+      for (const c of candidates ?? []) {
+        const testsSubmitted = (attempts ?? []).filter(
+          (a) =>
+            a.candidate_id === c.id && (a.status === "submitted" || a.status === "expired")
+        ).length;
+        map.set(
+          c.id,
+          inferCandidateJourneyStage({
+            universityId: c.university_id,
+            jobsUnlocked: Boolean(c.jobs_unlocked),
+            testsSubmitted,
+            testsTotal,
+          })
+        );
+      }
+
+      return map;
+    },
   });
 }
 

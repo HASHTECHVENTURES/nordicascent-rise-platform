@@ -9,7 +9,8 @@ import { Search, Filter, Download, Eye, Ban, CheckCircle, MoreHorizontal, MapPin
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link } from "react-router-dom";
 import { TRACK_META, type Track } from "@/lib/track";
-import { useAdminCandidates } from "@/hooks/useData";
+import { useAdminCandidates, useAdminCandidateJourneyBrief } from "@/hooks/useData";
+import { adminJourneyStageLabel } from "@/lib/adminJourney";
 
 const TrackBadge = ({ track }: { track: Track }) => (
   <Badge variant="outline" className="border-primary/40 text-primary">
@@ -19,6 +20,7 @@ const TrackBadge = ({ track }: { track: Track }) => (
 
 const AdminCandidates = () => {
   const { data: candidates, isLoading } = useAdminCandidates();
+  const { data: journeyMap } = useAdminCandidateJourneyBrief();
   const [trackFilter, setTrackFilter] = useState<"all" | Track>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
@@ -55,10 +57,7 @@ const AdminCandidates = () => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Candidate Management</h1>
-          <p className="text-muted-foreground">Review and manage platform candidates</p>
-        </div>
+        <h1 className="text-2xl font-medium">Candidates</h1>
         <Button variant="outline" className="gap-2" onClick={() => {
           const headers = ["Name", "Email", "Location", "Title", "Status", "Track", "Joined"];
           const rows = filtered.map((c) => {
@@ -76,10 +75,10 @@ const AdminCandidates = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-candidate-accent/10 to-transparent border-candidate-accent/20">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Candidates</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{list.length}</div>
@@ -87,26 +86,32 @@ const AdminCandidates = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Entry Track</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Readiness</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{list.filter((c) => c.track === "entry").length}</div>
+            <div className="text-2xl font-bold">
+              {[...(journeyMap?.values() ?? [])].filter((s) => s === "readiness").length}
+            </div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Fast Track</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Mentoring</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{list.filter((c) => c.track === "fast").length}</div>
+            <div className="text-2xl font-bold">
+              {[...(journeyMap?.values() ?? [])].filter((s) => s === "mentoring").length}
+            </div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Suspended</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Jobs open</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-destructive">{list.filter((c) => c.status === "suspended").length}</div>
+            <div className="text-2xl font-bold">
+              {[...(journeyMap?.values() ?? [])].filter((s) => s === "jobs").length}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -154,6 +159,7 @@ const AdminCandidates = () => {
             {filtered.map((candidate) => {
               const profile = candidate.profiles as { full_name: string | null; email: string | null; avatar_url: string | null } | null;
               const name = profile?.full_name ?? "Unknown";
+              const stage = journeyMap?.get(candidate.id);
               return (
               <div key={candidate.id} className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
                 <div className="flex items-center gap-4">
@@ -167,6 +173,9 @@ const AdminCandidates = () => {
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold">{name}</h3>
                       <TrackBadge track={candidate.track as Track} />
+                      {stage && (
+                        <Badge variant="outline">{adminJourneyStageLabel(stage)}</Badge>
+                      )}
                     </div>
                     <p className="text-sm text-muted-foreground">{profile?.email}</p>
                     <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
