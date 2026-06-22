@@ -30,10 +30,13 @@ export const getNextStageInTrack = (stageId: string, track: Track): string | nul
 
 export const EXPERIENCE_OPTIONS: { value: string; label: string; track: Track }[] = [
   { value: "Fresher", label: "Fresher (no experience)", track: "entry" },
-  { value: "6 months", label: "6 months", track: "entry" },
   { value: "12 months", label: "12 months", track: "entry" },
   { value: "1 year", label: "1 year", track: "fast" },
-  { value: "2+ years", label: "2+ years", track: "fast" },
+  { value: "2 years", label: "2 years", track: "fast" },
+  { value: "3 years", label: "3 years", track: "fast" },
+  { value: "4 years", label: "4 years", track: "fast" },
+  { value: "5 years", label: "5 years", track: "fast" },
+  { value: "6+ years", label: "6+ years", track: "fast" },
 ];
 
 /** Map free-text experience to Entry (0–12 mo) or Fast (1+ yr). Returns null if unclear. */
@@ -50,7 +53,13 @@ export function deriveTrackFromExperience(experience: string): Track | null {
 
   const yearMatch = text.match(/(\d+(?:\.\d+)?)\s*\+?\s*(?:year|yr|years|yrs)\b/);
   if (yearMatch) {
-    return parseFloat(yearMatch[1]) >= 1 ? "fast" : "entry";
+    const years = parseFloat(yearMatch[1]);
+    if (text.includes("+") && years >= 6) return "fast";
+    return years >= 1 ? "fast" : "entry";
+  }
+
+  if (/\b6\s*\+?\s*(?:year|yr|years|yrs)?\b/.test(text) || text === "6+ years") {
+    return "fast";
   }
 
   if (/^1\s*\+/.test(text) || /\b1\s*\+\s*(?:year|yr)?\b/.test(text)) {
@@ -75,21 +84,32 @@ export function normalizeExperienceValue(experience: string | null | undefined):
   const text = experience?.trim() ?? "";
   if (!text) return "";
 
+  if (text.toLowerCase() === "2+ years") return "2 years";
+  if (text.toLowerCase() === "6 months") return "12 months";
+
   const preset = EXPERIENCE_OPTIONS.find((o) => o.value.toLowerCase() === text.toLowerCase());
   if (preset) return preset.value;
 
   const derived = deriveTrackFromExperience(text);
   if (derived === "fast") {
+    if (text.toLowerCase().includes("6+")) return "6+ years";
     const years = text.match(/(\d+(?:\.\d+)?)/);
-    if (years && parseFloat(years[1]) >= 2) return "2+ years";
+    if (years) {
+      const n = parseFloat(years[1]);
+      if (n >= 6) return "6+ years";
+      if (n >= 5) return "5 years";
+      if (n >= 4) return "4 years";
+      if (n >= 3) return "3 years";
+      if (n >= 2) return "2 years";
+      return "1 year";
+    }
+    if (text.toLowerCase().includes("2+")) return "2 years";
     return "1 year";
   }
   if (derived === "entry") {
     if (/\b(fresher|graduate|intern|none|zero|0)\b/.test(text.toLowerCase())) return "Fresher";
     const months = text.match(/(\d+)\s*(?:month|months|mo)\b/i);
     if (months) {
-      const n = parseInt(months[1], 10);
-      if (n <= 6) return "6 months";
       return "12 months";
     }
     return "12 months";

@@ -4,7 +4,7 @@ export type Database = {
   public: {
     Tables: {
       profiles: { Row: { id: string; role: 'candidate' | 'employer' | 'admin'; full_name: string | null; email: string | null; avatar_url: string | null; phone: string | null; account_status: string; created_at: string; updated_at: string } };
-      candidates: { Row: { id: string; profile_id: string; full_name: string | null; avatar_url: string | null; title: string | null; location: string | null; country: string | null; state: string | null; city: string | null; skills: string[] | null; experience: string | null; education: string | null; track: 'entry' | 'fast'; status: string; readiness_score: number; bio: string | null; cv_url: string | null; created_at: string; updated_at: string } };
+      candidates: { Row: { id: string; profile_id: string; full_name: string | null; avatar_url: string | null; title: string | null; location: string | null; country: string | null; state: string | null; city: string | null; skills: string[] | null; experience: string | null; education: string | null; university_id: string | null; university_waitlist_name: string | null; track: 'entry' | 'fast'; status: string; readiness_score: number; bio: string | null; cv_url: string | null; created_at: string; updated_at: string } };
       companies: { Row: { id: string; name: string; logo_url: string | null; industry: string | null; location: string | null; size: string | null; description: string | null; website: string | null; status: string; created_at: string; updated_at: string } };
       employers: { Row: { id: string; profile_id: string; company_id: string; title: string | null; created_at: string } };
       jobs: { Row: { id: string; company_id: string; title: string; department: string | null; location: string | null; job_type: string | null; salary_range: string | null; description: string | null; requirements: string[] | null; benefits: string[] | null; status: 'draft' | 'open' | 'closed'; posted_at: string | null; deadline_at: string | null; created_at: string; updated_at: string } };
@@ -26,6 +26,8 @@ export type Database = {
       announcements: { Row: { id: string; title: string; body: string; published: boolean; created_by: string | null; created_at: string } };
       employer_tasks: { Row: { id: string; employer_id: string; title: string; description: string | null; due_at: string | null; completed: boolean; priority: string; created_at: string } };
       platform_settings: { Row: { id: string; settings: Json; updated_at: string } };
+      universities: { Row: { id: string; name: string; institution_type: 'university' | 'institute'; country: string; is_accessible: boolean; created_at: string } };
+      university_waitlist: { Row: { id: string; candidate_id: string; university_name: string; institution_type: 'university' | 'institute'; status: string; created_at: string } };
     };
     Enums: {
       user_role: 'candidate' | 'employer' | 'admin';

@@ -20,6 +20,7 @@ import {
   isTaskRequirementMet,
 } from "@/lib/profileCompleteness";
 import { fetchStageTasksForCandidate, fetchStageTaskIdsForCandidate } from "@/lib/stageTasks";
+import { UNIVERSITY_SEED, type InstitutionType } from "@/lib/universities";
 
 // ─── Pipeline ───────────────────────────────────────────────────────────────
 
@@ -280,6 +281,277 @@ export function useMyCompany() {
         .single();
       if (e1) throw e1;
       return employer;
+    },
+  });
+}
+
+// ─── Universities ────────────────────────────────────────────────────────────
+
+export function useUniversities() {
+  return useQuery({
+    queryKey: ["universities"],
+    queryFn: async () => {
+      let { data, error } = await supabase
+        .from("universities")
+        .select("id, name, institution_type, country, is_accessible")
+        .eq("is_accessible", true)
+        .order("name");
+
+      if (error?.message?.includes("is_accessible")) {
+        const fallback = await supabase
+          .from("universities")
+          .select("id, name, institution_type, country")
+          .order("name");
+        data = fallback.data;
+        error = fallback.error;
+      }
+
+      if (error || !data?.length) return UNIVERSITY_SEED;
+      return data;
+    },
+  });
+}
+
+export function useMyUniversity(candidateId: string | undefined, universityId: string | null | undefined, waitlistName: string | null | undefined) {
+  return useQuery({
+    queryKey: ["my-university", candidateId, universityId, waitlistName],
+    enabled: !!candidateId,
+    queryFn: async () => {
+      if (universityId) {
+        const { data, error } = await supabase
+          .from("universities")
+          .select("id, name, is_accessible")
+          .eq("id", universityId)
+          .maybeSingle();
+        if (error) throw error;
+        if (data) return { name: data.name, status: "selected" as const, isAccessible: data.is_accessible };
+      }
+      if (waitlistName?.trim()) {
+        return { name: waitlistName.trim(), status: "waitlist" as const, isAccessible: false };
+      }
+      return null;
+    },
+  });
+}
+
+export function useAdminUniversities() {
+  return useQuery({
+    queryKey: ["admin-universities"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("universities")
+        .select("*")
+        .order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useAdminUniversityWaitlist() {
+  return useQuery({
+    queryKey: ["admin-university-waitlist"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("university_waitlist")
+        .select("*, candidates(full_name, profile_id, profiles(full_name, email))")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useSaveUniversity() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: {
+      id?: string;
+      name: string;
+      institution_type: InstitutionType;
+      country?: string;
+      is_accessible?: boolean;
+    }) => {
+      const row = {
+        name: payload.name.trim(),
+        institution_type: payload.institution_type,
+        country: payload.country?.trim() || "India",
+        is_accessible: payload.is_accessible ?? true,
+      };
+      if (payload.id) {
+        const { error } = await supabase.from("universities").update(row).eq("id", payload.id);
+        if (error) throw error;
+        return;
+      }
+      const { error } = await supabase.from("universities").insert(row);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-universities"] });
+      qc.invalidateQueries({ queryKey: ["universities"] });
+    },
+  });
+}
+
+export function useToggleUniversityAccessible() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, is_accessible }: { id: string; is_accessible: boolean }) => {
+      const { error } = await supabase.from("universities").update({ is_accessible }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-universities"] });
+      qc.invalidateQueries({ queryKey: ["universities"] });
+    },
+  });
+}
+
+export function useApproveUniversityWaitlist() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      waitlistId,
+      makeAccessible = true,
+    }: {
+      waitlistId: string;
+      makeAccessible?: boolean;
+    }) => {
+      const { data: entry, error: fetchError } = await supabase
+        .from("university_waitlist")
+        .select("*")
+        .eq("id", waitlistId)
+        .single();
+      if (fetchError || !entry) throw fetchError ?? new Error("Waitlist entry not found");
+
+      const { data: existing } = await supabase
+        .from("universities")
+        .select("id")
+        .eq("name", entry.university_name)
+        .eq("institution_type", entry.institution_type)
+        .maybeSingle();
+
+      let universityId = existing?.id;
+      if (!universityId) {
+        const { data: created, error: createError } = await supabase
+          .from("universities")
+          .insert({
+            name: entry.university_name,
+            institution_type: entry.institution_type,
+            country: "India",
+            is_accessible: makeAccessible,
+          })
+          .select("id")
+          .single();
+        if (createError) throw createError;
+        universityId = created.id;
+      } else if (makeAccessible) {
+        await supabase.from("universities").update({ is_accessible: true }).eq("id", universityId);
+      }
+
+      await supabase
+        .from("university_waitlist")
+        .update({ status: "approved" })
+        .eq("id", waitlistId);
+
+      await supabase
+        .from("candidates")
+        .update({
+          university_id: universityId,
+          university_waitlist_name: null,
+        })
+        .eq("id", entry.candidate_id);
+
+      await supabase
+        .from("candidates")
+        .update({
+          university_id: universityId,
+          university_waitlist_name: null,
+        })
+        .eq("university_waitlist_name", entry.university_name);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-university-waitlist"] });
+      qc.invalidateQueries({ queryKey: ["admin-universities"] });
+      qc.invalidateQueries({ queryKey: ["universities"] });
+    },
+  });
+}
+
+export function useRejectUniversityWaitlist() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (waitlistId: string) => {
+      const { error } = await supabase
+        .from("university_waitlist")
+        .update({ status: "rejected" })
+        .eq("id", waitlistId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-university-waitlist"] });
+    },
+  });
+}
+
+export function useSaveCandidateUniversity() {
+  const qc = useQueryClient();
+  const { refreshProfile } = useAuth();
+  return useMutation({
+    mutationFn: async ({
+      candidateId,
+      universityId,
+      waitlistName,
+      institutionType = "university",
+    }: {
+      candidateId: string;
+      universityId?: string;
+      waitlistName?: string;
+      institutionType?: InstitutionType;
+    }) => {
+      let resolvedWaitlist = waitlistName?.trim() ?? "";
+
+      if (universityId?.startsWith("seed-")) {
+        const seed = UNIVERSITY_SEED.find((u) => u.id === universityId);
+        if (seed) resolvedWaitlist = seed.name;
+        universityId = undefined;
+      }
+
+      if (universityId) {
+        const { error } = await supabase
+          .from("candidates")
+          .update({
+            university_id: universityId,
+            university_waitlist_name: null,
+          })
+          .eq("id", candidateId);
+        if (error) throw error;
+        return;
+      }
+
+      if (!resolvedWaitlist) throw new Error("Select or enter a university");
+
+      const { error: candError } = await supabase
+        .from("candidates")
+        .update({
+          university_id: null,
+          university_waitlist_name: resolvedWaitlist,
+        })
+        .eq("id", candidateId);
+      if (candError) throw candError;
+
+      const { error: wlError } = await supabase.from("university_waitlist").insert({
+        candidate_id: candidateId,
+        university_name: resolvedWaitlist,
+        institution_type: institutionType,
+      });
+      if (wlError && !wlError.message.includes("does not exist")) throw wlError;
+    },
+    onSuccess: async () => {
+      await refreshProfile();
+      qc.invalidateQueries({ queryKey: ["candidate"] });
+      qc.invalidateQueries({ queryKey: ["my-university"] });
+      qc.invalidateQueries({ queryKey: ["admin-university-waitlist"] });
     },
   });
 }

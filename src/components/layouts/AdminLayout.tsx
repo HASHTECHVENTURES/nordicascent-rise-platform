@@ -19,6 +19,7 @@ import {
   ListChecks,
   Briefcase,
   Users,
+  GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +43,7 @@ const navigation = [
   { name: "Companies", href: "/admin/employers", icon: Building2 },
   { name: "Candidates", href: "/admin/candidates", icon: UserCheck },
   { name: "Program Tasks", href: "/admin/stage-tasks", icon: ListChecks },
+  { name: "Universities", href: "/admin/universities", icon: GraduationCap },
   { name: "Job Moderation", href: "/admin/jobs", icon: Briefcase },
   { name: "Users", href: "/admin/users", icon: Users },
   { name: "Insights CMS", href: "/admin/insights", icon: Megaphone },

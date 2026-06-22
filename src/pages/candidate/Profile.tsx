@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { TagsInput } from "@/components/ui/tags-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Select,
@@ -15,9 +16,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { User, Award, Upload, FileText, Loader2, Download } from "lucide-react";
+import { User, Award, Upload, FileText, Loader2, Download, GraduationCap } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useUpdateMyCandidate } from "@/hooks/useData";
+import { useUpdateMyCandidate, useMyUniversity } from "@/hooks/useData";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import {
@@ -32,6 +33,11 @@ import { markProfileSaved } from "@/hooks/useCandidateOnboarding";
 import { syncEligibleTasks } from "@/lib/syncProfileTasks";
 import { deriveTrackFromExperience, EXPERIENCE_OPTIONS, normalizeExperienceValue, setTrack, TRACK_META } from "@/lib/track";
 import { syncPipelineForTrack } from "@/lib/pipelineProgress";
+import UniversityPickerDialog from "@/components/candidate/UniversityPickerDialog";
+
+function needsUniversityStep(candidate: ReturnType<typeof useAuth>["candidate"]) {
+  return !candidate?.university_id && !candidate?.university_waitlist_name;
+}
 
 type ProfileForm = {
   full_name: string;
@@ -80,7 +86,14 @@ const CandidateProfile = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [universityPickerOpen, setUniversityPickerOpen] = useState(false);
+  const [universityStepRequired, setUniversityStepRequired] = useState(false);
   const [form, setForm] = useState<ProfileForm>(formFromAuth(profile, candidate));
+  const { data: myUniversity, refetch: refetchUniversity } = useMyUniversity(
+    candidate?.id,
+    candidate?.university_id,
+    candidate?.university_waitlist_name
+  );
 
   useEffect(() => {
     if (profile || candidate) {
@@ -198,7 +211,13 @@ const CandidateProfile = () => {
           ? { description: `Program track updated to ${TRACK_META[trackFromExperience].label}.` }
           : {}),
       });
-      navigate("/candidate/dashboard", { replace: true });
+
+      if (needsUniversityStep(freshCandidate)) {
+        setUniversityStepRequired(true);
+        setUniversityPickerOpen(true);
+      } else {
+        navigate("/candidate/dashboard", { replace: true });
+      }
     } catch (err) {
       toast({
         title: "Save failed",
@@ -416,14 +435,52 @@ const CandidateProfile = () => {
               )}
             </div>
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="education">Education</Label>
-              <Input id="education" value={form.education} onChange={(e) => updateField("education", e.target.value)} />
+              <Label htmlFor="education">Degree / qualification</Label>
+              <Input id="education" placeholder="e.g. BE IT, B.Tech CSE" value={form.education} onChange={(e) => updateField("education", e.target.value)} />
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="bio">Bio</Label>
               <Textarea id="bio" rows={3} value={form.bio} onChange={(e) => updateField("bio", e.target.value)} />
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <GraduationCap className="h-5 w-5" />
+            University
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {myUniversity ? (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-lg border p-4">
+              <div>
+                <p className="font-medium">{myUniversity.name}</p>
+                {myUniversity.status === "waitlist" ? (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    On our waitlist — an admin will review and add this university soon.
+                  </p>
+                ) : (
+                  <p className="text-sm text-muted-foreground mt-1">Selected from the directory</p>
+                )}
+              </div>
+              <Badge variant={myUniversity.status === "waitlist" ? "secondary" : "default"}>
+                {myUniversity.status === "waitlist" ? "Pending review" : "Confirmed"}
+              </Badge>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Add the university or institute where you studied.
+            </p>
+          )}
+          <Button type="button" variant="outline" onClick={() => {
+            setUniversityStepRequired(false);
+            setUniversityPickerOpen(true);
+          }}>
+            {myUniversity ? "Change university" : "Add university"}
+          </Button>
         </CardContent>
       </Card>
 
@@ -489,6 +546,25 @@ const CandidateProfile = () => {
           {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Changes"}
         </Button>
       </div>
+
+      {candidate?.id && (
+        <UniversityPickerDialog
+          open={universityPickerOpen}
+          candidateId={candidate.id}
+          required={universityStepRequired}
+          onOpenChange={setUniversityPickerOpen}
+          onComplete={async () => {
+            const wasRequired = universityStepRequired;
+            setUniversityPickerOpen(false);
+            setUniversityStepRequired(false);
+            await refreshProfile();
+            await refetchUniversity();
+            if (wasRequired) {
+              navigate("/candidate/dashboard", { replace: true });
+            }
+          }}
+        />
+      )}
     </div>
   );
 };

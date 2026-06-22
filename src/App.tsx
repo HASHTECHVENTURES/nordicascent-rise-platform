@@ -74,6 +74,7 @@ import AdminMessages from "./pages/admin/Messages";
 import AdminContacts from "./pages/admin/Contacts";
 import AdminInsights from "./pages/admin/Insights";
 import AdminStageTasks from "./pages/admin/StageTasks";
+import AdminUniversities from "./pages/admin/Universities";
 
 import NotFound from "./pages/NotFound";
 
@@ -165,6 +166,7 @@ const App = () => (
                 <Route path="/admin/contacts" element={<AdminContacts />} />
                 <Route path="/admin/insights" element={<AdminInsights />} />
                 <Route path="/admin/stage-tasks" element={<AdminStageTasks />} />
+                <Route path="/admin/universities" element={<AdminUniversities />} />
                 <Route path="/admin/security" element={<AdminSecurity />} />
               </Route>
             </Route>
