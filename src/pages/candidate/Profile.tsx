@@ -4,9 +4,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { TagsInput } from "@/components/ui/tags-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Select,
@@ -42,7 +42,7 @@ type ProfileForm = {
   experience: string;
   education: string;
   bio: string;
-  skills: string;
+  skills: string[];
 };
 
 function formFromAuth(
@@ -63,7 +63,7 @@ function formFromAuth(
     experience: candidate?.experience ?? "",
     education: candidate?.education ?? "",
     bio: candidate?.bio ?? "",
-    skills: (candidate?.skills ?? []).join(", "),
+    skills: candidate?.skills ?? [],
   };
 }
 
@@ -138,7 +138,7 @@ const CandidateProfile = () => {
         experience: form.experience,
         education: form.education,
         bio: form.bio,
-        skills: form.skills.split(",").map((s) => s.trim()).filter(Boolean),
+        skills: form.skills,
       });
 
       await refreshProfile();
@@ -396,13 +396,14 @@ const CandidateProfile = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="skills">Skills (comma-separated)</Label>
-            <Input id="skills" value={form.skills} onChange={(e) => updateField("skills", e.target.value)} />
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {form.skills.split(",").map((s) => s.trim()).filter(Boolean).map((skill) => (
-              <Badge key={skill} variant="secondary">{skill}</Badge>
-            ))}
+            <Label htmlFor="skills">Skills</Label>
+            <TagsInput
+              id="skills"
+              value={form.skills}
+              onChange={(skills) => updateField("skills", skills)}
+              placeholder="Type a skill and press Enter"
+            />
+            <p className="text-xs text-muted-foreground">Press Enter after each skill to add it.</p>
           </div>
         </CardContent>
       </Card>
