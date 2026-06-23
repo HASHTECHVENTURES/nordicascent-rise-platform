@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,13 +14,23 @@ import {
   getPrimaryApplication,
   getSelectionStepState,
 } from "@/lib/applicationJourney";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTrack, getNextStageInTrack } from "@/lib/track";
+import { PIPELINE_STAGES } from "@/lib/pipeline";
+import { stageListPath } from "@/lib/stageRoutes";
+import { completeSelectionIfReady } from "@/lib/pipelineProgress";
+import { useQueryClient } from "@tanstack/react-query";
 
 /** Selection = you were accepted by a company. Tasks mirror your job application — not My Profile. */
 export default function SelectionStageContent() {
+  const { candidate } = useAuth();
+  const [track] = useTrack();
+  const qc = useQueryClient();
   const { data: applications } = useMyApplications();
   const { data: tasks } = useStageTasks("selection");
   const { data: taskProgress } = useMyTaskProgress();
   const completeTask = useCompleteTask();
+  const advancedRef = useRef(false);
 
   const apps = applications ?? [];
   const primary = getPrimaryApplication(apps);
@@ -28,6 +38,11 @@ export default function SelectionStageContent() {
   const steps = getSelectionStepState(apps);
   const completedCount = steps.filter((s) => s.done).length;
   const percent = steps.length ? Math.round((completedCount / steps.length) * 100) : 0;
+  const selectionComplete = percent === 100;
+
+  const nextStageId = getNextStageInTrack("selection", track);
+  const nextStage = nextStageId ? PIPELINE_STAGES.find((s) => s.id === nextStageId) : null;
+  const nextHref = nextStageId ? stageListPath(nextStageId) : "/candidate/dashboard";
 
   const completedIds = new Set(taskProgress?.map((p) => p.task_id) ?? []);
 
@@ -41,6 +56,17 @@ export default function SelectionStageContent() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sync when application-driven steps change
   }, [tasks, steps.map((s) => `${s.id}:${s.done}`).join(",")]);
+
+  // Advance pipeline when employer acceptance steps are done
+  useEffect(() => {
+    if (!candidate?.id || !selectionComplete || advancedRef.current) return;
+    advancedRef.current = true;
+    completeSelectionIfReady(candidate.id, apps).then((didAdvance) => {
+      if (didAdvance) {
+        qc.invalidateQueries({ queryKey: ["stage-progress"] });
+      }
+    });
+  }, [candidate?.id, selectionComplete, apps, qc]);
 
   return (
     <div className="space-y-6">
@@ -133,10 +159,10 @@ export default function SelectionStageContent() {
                 Messages
               </Link>
             </Button>
-            {percent === 100 && (
+            {selectionComplete && nextStage && (
               <Button size="sm" asChild>
-                <Link to="/candidate/readiness">
-                  Continue to Readiness
+                <Link to={nextHref}>
+                  Continue to {nextStage.name}
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </Link>
               </Button>

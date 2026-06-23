@@ -58,7 +58,7 @@ export default function AdminReadinessContentEditor() {
   const [testTitle, setTestTitle] = useState("");
   const [testSubtitle, setTestSubtitle] = useState("");
   const [testMinutes, setTestMinutes] = useState(60);
-  const [testHard, setTestHard] = useState(false);
+  const [testHard, setTestHard] = useState(true);
   const [testActive, setTestActive] = useState(true);
 
   const loadTestForm = (t: NonNullable<typeof tests>[number]) => {

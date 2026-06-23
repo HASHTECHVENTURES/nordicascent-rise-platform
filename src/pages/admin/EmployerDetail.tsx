@@ -2,16 +2,17 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Building2, CheckCircle, Loader2, Ban } from "lucide-react";
-import { useCompanyById, useUpdateCompany, useRemoveCompany } from "@/hooks/useData";
+import { ArrowLeft, Building2, CheckCircle, Loader2 } from "lucide-react";
+import { useCompanyById, useUpdateCompany, useDeleteCompany } from "@/hooks/useData";
 import { useToast } from "@/hooks/use-toast";
+import AdminDeleteButton from "@/components/admin/AdminDeleteButton";
 
 const AdminEmployerDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: company, isLoading } = useCompanyById(id);
   const updateCompany = useUpdateCompany();
-  const removeCompany = useRemoveCompany();
+  const deleteCompany = useDeleteCompany();
   const { toast } = useToast();
 
   if (isLoading) {
@@ -55,17 +56,14 @@ const AdminEmployerDetail = () => {
     }
   };
 
-  const handleRemove = async () => {
-    if (!window.confirm(`Remove "${company.name}" from the platform? All ${jobs.length} job(s) will be closed.`)) {
-      return;
-    }
+  const handleDelete = async () => {
     try {
-      await removeCompany.mutateAsync(company.id);
-      toast({ title: "Company removed", description: "Jobs are closed and hidden from candidates." });
+      await deleteCompany.mutateAsync(company.id);
+      toast({ title: "Company deleted" });
       navigate("/admin/employers");
     } catch (err) {
       toast({
-        title: "Could not remove company",
+        title: "Delete failed",
         description: err instanceof Error ? err.message : "Try again",
         variant: "destructive",
       });
@@ -78,12 +76,19 @@ const AdminEmployerDetail = () => {
         <Button variant="ghost" size="icon" asChild>
           <Link to="/admin/employers"><ArrowLeft className="h-4 w-4" /></Link>
         </Button>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">{company.name}</h1>
+        <div className="flex-1">
+          <h1 className="text-2xl font-medium">{company.name}</h1>
           <p className="text-muted-foreground">
             {primaryContact?.email ?? "—"} · {company.location ?? "—"}
           </p>
         </div>
+        <AdminDeleteButton
+          label="Delete company"
+          title={`Delete ${company.name}?`}
+          description="Permanently removes this company, all jobs, and employer login accounts."
+          isPending={deleteCompany.isPending}
+          onConfirm={handleDelete}
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -146,21 +151,6 @@ const AdminEmployerDetail = () => {
           )}
           {company.status === "verified" && (
             <Badge className="bg-success text-success-foreground">Verified</Badge>
-          )}
-          {company.status !== "suspended" && (
-            <Button
-              variant="destructive"
-              size="sm"
-              className="gap-2"
-              disabled={removeCompany.isPending}
-              onClick={handleRemove}
-            >
-              <Ban className="h-4 w-4" />
-              Remove company
-            </Button>
-          )}
-          {company.status === "suspended" && (
-            <Badge variant="destructive">Removed</Badge>
           )}
         </CardContent>
       </Card>

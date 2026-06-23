@@ -19,10 +19,13 @@ export default function CandidateReadiness() {
   const submitted = tests && attempts ? allTestsSubmitted(tests, attempts) : false;
 
   useEffect(() => {
-    if (ready && submitted) {
-      navigate("/candidate/mentoring", { replace: true });
+    if (!ready || !submitted) return;
+    if (candidate?.jobs_unlocked) {
+      navigate("/candidate/jobs", { replace: true });
+      return;
     }
-  }, [ready, submitted, navigate]);
+    navigate("/candidate/mentoring", { replace: true });
+  }, [ready, submitted, candidate?.jobs_unlocked, navigate]);
 
   if (ready && submitted) {
     return (

@@ -1,16 +1,17 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Filter, Download, Eye, Ban, CheckCircle, MoreHorizontal, MapPin, Briefcase, Loader2 } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Link } from "react-router-dom";
+import { Search, Download, Eye, Loader2 } from "lucide-react";
 import { TRACK_META, type Track } from "@/lib/track";
-import { useAdminCandidates, useAdminCandidateJourneyBrief } from "@/hooks/useData";
+import { useAdminCandidates, useAdminCandidateJourneyBrief, useDeleteCandidate } from "@/hooks/useData";
 import { adminJourneyStageLabel } from "@/lib/adminJourney";
+import AdminDeleteButton from "@/components/admin/AdminDeleteButton";
+import { useToast } from "@/hooks/use-toast";
 
 const TrackBadge = ({ track }: { track: Track }) => (
   <Badge variant="outline" className="border-primary/40 text-primary">
@@ -21,6 +22,8 @@ const TrackBadge = ({ track }: { track: Track }) => (
 const AdminCandidates = () => {
   const { data: candidates, isLoading } = useAdminCandidates();
   const { data: journeyMap } = useAdminCandidateJourneyBrief();
+  const deleteCandidate = useDeleteCandidate();
+  const { toast } = useToast();
   const [trackFilter, setTrackFilter] = useState<"all" | Track>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
@@ -57,7 +60,10 @@ const AdminCandidates = () => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <h1 className="text-2xl font-medium">Candidates</h1>
+        <div>
+          <h1 className="text-2xl font-medium">Candidates</h1>
+          <p className="text-sm text-muted-foreground mt-1">Candidate login accounts only</p>
+        </div>
         <Button variant="outline" className="gap-2" onClick={() => {
           const headers = ["Name", "Email", "Location", "Title", "Status", "Track", "Joined"];
           const rows = filtered.map((c) => {
@@ -71,49 +77,15 @@ const AdminCandidates = () => {
           URL.revokeObjectURL(url);
         }}>
           <Download className="h-4 w-4" />
-          Export candidates
+          Export
         </Button>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{list.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Readiness</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {[...(journeyMap?.values() ?? [])].filter((s) => s === "readiness").length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Mentoring</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {[...(journeyMap?.values() ?? [])].filter((s) => s === "mentoring").length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Jobs open</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {[...(journeyMap?.values() ?? [])].filter((s) => s === "jobs").length}
-            </div>
-          </CardContent>
-        </Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{list.length}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Readiness</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{[...(journeyMap?.values() ?? [])].filter((s) => s === "readiness").length}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Mentoring</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{[...(journeyMap?.values() ?? [])].filter((s) => s === "mentoring").length}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Jobs open</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{[...(journeyMap?.values() ?? [])].filter((s) => s === "jobs").length}</div></CardContent></Card>
       </div>
 
       <Card>
@@ -125,107 +97,82 @@ const AdminCandidates = () => {
             </div>
             <div className="flex gap-2">
               <Select value={trackFilter} onValueChange={(v) => setTrackFilter(v as "all" | Track)}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Track" />
-                </SelectTrigger>
+                <SelectTrigger className="w-[130px]"><SelectValue placeholder="Track" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All tracks</SelectItem>
-                  <SelectItem value="entry">Entry Track</SelectItem>
-                  <SelectItem value="fast">Fast Track</SelectItem>
+                  <SelectItem value="entry">Entry</SelectItem>
+                  <SelectItem value="fast">Fast</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
+                <SelectTrigger className="w-[130px]"><SelectValue placeholder="Status" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="all">All status</SelectItem>
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
                   <SelectItem value="suspended">Suspended</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="outline" size="icon">
-                <Filter className="h-4 w-4" />
-              </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {filtered.length === 0 && (
-              <p className="text-center text-muted-foreground py-8">No candidates on the platform yet.</p>
+              <p className="text-center text-muted-foreground py-8">No candidates found.</p>
             )}
             {filtered.map((candidate) => {
               const profile = candidate.profiles as { full_name: string | null; email: string | null; avatar_url: string | null } | null;
               const name = profile?.full_name ?? "Unknown";
               const stage = journeyMap?.get(candidate.id);
               return (
-              <div key={candidate.id} className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={profile?.avatar_url ?? undefined} />
-                    <AvatarFallback className="bg-candidate-accent/10 text-candidate-accent">
-                      {name.split(" ").map((n) => n[0]).join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-semibold">{name}</h3>
-                      <TrackBadge track={candidate.track as Track} />
-                      {stage && (
-                        <Badge variant="outline">{adminJourneyStageLabel(stage)}</Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground">{profile?.email}</p>
-                    <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        {candidate.location ?? "—"}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Briefcase className="h-3 w-3" />
-                        {candidate.title ?? "—"}
-                      </span>
+                <div key={candidate.id} className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-lg border">
+                  <div className="flex items-center gap-4 min-w-0">
+                    <Avatar className="h-11 w-11">
+                      <AvatarImage src={profile?.avatar_url ?? undefined} />
+                      <AvatarFallback>{name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-medium">{name}</h3>
+                        <TrackBadge track={candidate.track as Track} />
+                        {stage && <Badge variant="outline">{adminJourneyStageLabel(stage)}</Badge>}
+                      </div>
+                      <p className="text-sm text-muted-foreground truncate">{profile?.email}</p>
                     </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right hidden md:block">
-                    <p className="text-xs text-muted-foreground">Joined {candidate.created_at.split("T")[0]}</p>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={candidate.status === "suspended" ? "destructive" : "secondary"}>
+                      {candidate.status}
+                    </Badge>
+                    <Button size="sm" variant="outline" asChild>
+                      <Link to={`/admin/candidates/${candidate.id}`}>
+                        <Eye className="h-4 w-4 mr-1" />
+                        View
+                      </Link>
+                    </Button>
+                    <AdminDeleteButton
+                      label="Delete"
+                      title={`Delete ${name}?`}
+                      description="Permanently removes this candidate account, profile, applications, and readiness data. This cannot be undone."
+                      isPending={deleteCandidate.isPending}
+                      onConfirm={async () => {
+                        try {
+                          await deleteCandidate.mutateAsync(candidate.id);
+                          toast({ title: "Candidate deleted" });
+                        } catch (err) {
+                          toast({
+                            title: "Delete failed",
+                            description: err instanceof Error ? err.message : "Try again",
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                    />
                   </div>
-                  <Badge variant={
-                    candidate.status === "active" ? "default" :
-                    candidate.status === "pending" ? "secondary" : "destructive"
-                  }>
-                    {candidate.status}
-                  </Badge>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild>
-                        <Link to={`/admin/candidates/${candidate.id}`}>
-                          <Eye className="h-4 w-4 mr-2" />
-                          View & fix
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Verify Account
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
-                        <Ban className="h-4 w-4 mr-2" />
-                        Suspend Account
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
                 </div>
-              </div>
-            );})}
+              );
+            })}
           </div>
         </CardContent>
       </Card>

@@ -19,14 +19,14 @@ export async function fetchStageTasksForCandidate(
   candidateId: string | undefined,
   stageId: string
 ) {
-  if (stageId === "internship" && candidateId) {
+  if ((stageId === "internship" || stageId === "activation") && candidateId) {
     const companyId = await getCandidateAcceptedCompanyId(candidateId);
     if (!companyId) return [];
 
     const { data, error } = await supabase
       .from("stage_tasks")
       .select("*")
-      .eq("stage_id", "internship")
+      .eq("stage_id", stageId)
       .eq("company_id", companyId)
       .order("sort_order");
     if (error) throw error;

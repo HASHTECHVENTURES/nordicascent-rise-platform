@@ -76,6 +76,11 @@ export default function StageTaskDetail() {
       </div>
 
       <Card>
+        {task.image_url && (
+          <div className="relative h-48 sm:h-56 w-full overflow-hidden rounded-t-lg">
+            <img src={task.image_url} alt="" className="h-full w-full object-cover" />
+          </div>
+        )}
         <CardHeader>
           <CardTitle className="text-lg font-medium">{task.title}</CardTitle>
         </CardHeader>

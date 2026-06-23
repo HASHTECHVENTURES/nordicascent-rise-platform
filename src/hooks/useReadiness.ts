@@ -146,15 +146,21 @@ export function useStartReadinessAttempt() {
       if (!candidate?.id) throw new Error("Not signed in");
       const expiresAt = new Date(Date.now() + test.timer_minutes * 60 * 1000).toISOString();
 
-      const { data: existing } = await supabase
-        .from("readiness_attempts")
-        .select("*")
-        .eq("candidate_id", candidate.id)
-        .eq("test_id", test.id)
-        .maybeSingle();
+      const loadExisting = async () => {
+        const { data, error } = await supabase
+          .from("readiness_attempts")
+          .select("*")
+          .eq("candidate_id", candidate.id)
+          .eq("test_id", test.id)
+          .maybeSingle();
+        if (error) throw error;
+        return data as ReadinessAttempt | null;
+      };
+
+      const existing = await loadExisting();
 
       if (existing) {
-        if (existing.status !== "in_progress") return existing as ReadinessAttempt;
+        if (existing.status !== "in_progress") return existing;
         if (!existing.expires_at) {
           const backfill =
             existing.started_at != null
@@ -171,7 +177,7 @@ export function useStartReadinessAttempt() {
           if (patchError) throw patchError;
           return patched as ReadinessAttempt;
         }
-        return existing as ReadinessAttempt;
+        return existing;
       }
 
       const { data, error } = await supabase
@@ -184,10 +190,32 @@ export function useStartReadinessAttempt() {
         })
         .select("*")
         .single();
-      if (error) throw error;
+
+      if (error) {
+        // Race: attempt created between SELECT and INSERT (e.g. hub → test navigation).
+        if (error.code === "23505") {
+          const retry = await loadExisting();
+          if (retry) return retry;
+        }
+        throw error;
+      }
+
       return data as ReadinessAttempt;
     },
-    onSuccess: () => {
+    onSuccess: (attempt) => {
+      qc.setQueryData<ReadinessAttempt[]>(
+        ["readiness-attempts", candidate?.id],
+        (prev) => {
+          const rows = prev ?? [];
+          const idx = rows.findIndex((a) => a.test_id === attempt.test_id);
+          if (idx >= 0) {
+            const next = [...rows];
+            next[idx] = attempt;
+            return next;
+          }
+          return [...rows, attempt];
+        }
+      );
       qc.invalidateQueries({ queryKey: ["readiness-attempts"] });
     },
   });

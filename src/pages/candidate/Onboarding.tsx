@@ -1,10 +1,5 @@
-import StageTasksPanel from "@/components/candidate/StageTasksPanel";
+import OnboardingStageContent from "@/components/candidate/OnboardingStageContent";
 
 export default function CandidateOnboarding() {
-  return (
-    <StageTasksPanel
-      stageId="onboarding"
-      description="Physical arrival and workplace integration"
-    />
-  );
+  return <OnboardingStageContent />;
 }

@@ -109,9 +109,7 @@ export default function ReadinessModuleHub({ compact = false, hideHeader = false
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-medium text-sm">{READINESS_LEVEL_LABELS[test.level]}</p>
-                        {test.timer_hard && (
-                          <Badge variant="outline" className="text-xs">60 min limit</Badge>
-                        )}
+                        <Badge variant="outline" className="text-xs">{test.timer_minutes} min limit</Badge>
                         {done && <Badge className="bg-success text-success-foreground">Submitted</Badge>}
                         {inProgress && <Badge className="bg-primary text-primary-foreground">In progress</Badge>}
                       </div>
@@ -120,7 +118,7 @@ export default function ReadinessModuleHub({ compact = false, hideHeader = false
                         <div className="pt-2">
                           <ReadinessCountdown
                             expiresAtMs={getAttemptExpiresAtMs(attempt, test.timer_minutes)}
-                            hard={test.timer_hard}
+                            hard
                             size="sm"
                           />
                         </div>
@@ -136,7 +134,10 @@ export default function ReadinessModuleHub({ compact = false, hideHeader = false
                         <Button size="sm" variant="outline" disabled>Submitted</Button>
                       ) : inProgress ? (
                         <Button size="sm" asChild>
-                          <Link to={`/candidate/readiness/test/${test.id}`}>
+                          <Link
+                            to={`/candidate/readiness/test/${test.id}`}
+                            state={attempt ? { attempt } : undefined}
+                          >
                             Continue <ArrowRight className="ml-1 h-4 w-4" />
                           </Link>
                         </Button>
@@ -146,8 +147,10 @@ export default function ReadinessModuleHub({ compact = false, hideHeader = false
                           disabled={startAttempt.isPending}
                           className="gap-1"
                           onClick={async () => {
-                            await startAttempt.mutateAsync(test);
-                            navigate(`/candidate/readiness/test/${test.id}`);
+                            const started = await startAttempt.mutateAsync(test);
+                            navigate(`/candidate/readiness/test/${test.id}`, {
+                              state: { attempt: started },
+                            });
                           }}
                         >
                           <PlayCircle className="h-4 w-4" />

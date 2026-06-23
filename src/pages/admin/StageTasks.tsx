@@ -28,13 +28,24 @@ const emptyForm = {
   sort_order: 1,
   task_type: "task" as "task" | "course",
   content_url: "",
+  image_url: "",
   content_body: "",
 };
 
-export default function AdminStageTasks() {
+type Props = {
+  fixedStageId?: string;
+  title?: string;
+  description?: string;
+};
+
+export default function AdminStageTasks({
+  fixedStageId,
+  title = "Program Tasks",
+  description = "Content candidates see when they click Continue",
+}: Props) {
   const { toast } = useToast();
   const { data: stages, isLoading: stagesLoading } = usePipelineStages();
-  const [stageId, setStageId] = useState("readiness");
+  const [stageId, setStageId] = useState(fixedStageId ?? "readiness");
   const { data: tasks, isLoading: tasksLoading } = useStageTasks(stageId);
   const saveTask = useSaveStageTask();
   const deleteTask = useDeleteStageTask();
@@ -58,6 +69,7 @@ export default function AdminStageTasks() {
       sort_order: task.sort_order,
       task_type: (task.task_type as "task" | "course") ?? "task",
       content_url: task.content_url ?? "",
+      image_url: (task as { image_url?: string | null }).image_url ?? "",
       content_body: task.content_body ?? "",
     });
   };
@@ -73,6 +85,7 @@ export default function AdminStageTasks() {
         sort_order: form.sort_order,
         task_type: form.task_type,
         content_url: form.content_url.trim() || null,
+        image_url: form.image_url.trim() || null,
         content_body: form.content_body.trim() || null,
       });
       toast({ title: editingId ? "Task updated" : "Task created" });
@@ -104,6 +117,7 @@ export default function AdminStageTasks() {
         sort_order: (tasks?.length ?? 0) + 1,
         task_type: preset.task_type,
         content_url: preset.content_url ?? null,
+        image_url: preset.image_url ?? null,
         content_body: preset.content_body,
       });
       toast({ title: "Task added", description: preset.title });
@@ -126,6 +140,7 @@ export default function AdminStageTasks() {
       ...f,
       description: preset.description,
       task_type: preset.task_type,
+      image_url: preset.image_url ?? f.image_url,
       content_body: preset.content_body,
     }));
     toast({ title: "Template loaded", description: "Review and save" });
@@ -148,8 +163,8 @@ export default function AdminStageTasks() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Program Tasks</h1>
-          <p className="text-muted-foreground">Content candidates see when they click Continue</p>
+          <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+          <p className="text-muted-foreground">{description}</p>
         </div>
         <Button onClick={startNew} className="gap-2">
           <Plus className="h-4 w-4" />
@@ -158,17 +173,21 @@ export default function AdminStageTasks() {
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <Label className="text-sm text-muted-foreground">Stage</Label>
-        <Select value={stageId} onValueChange={(v) => { setStageId(v); startNew(); }}>
-          <SelectTrigger className="w-56">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {(stages ?? []).map((s) => (
-              <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {!fixedStageId && (
+          <>
+            <Label className="text-sm text-muted-foreground">Stage</Label>
+            <Select value={stageId} onValueChange={(v) => { setStageId(v); startNew(); }}>
+              <SelectTrigger className="w-56">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {(stages ?? []).map((s) => (
+                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </>
+        )}
         {(STAGE_TASK_PRESETS[stageId] ?? []).length > 0 && (
           <div className="flex flex-wrap gap-2">
             {(STAGE_TASK_PRESETS[stageId] ?? []).map((p) => (
@@ -209,6 +228,9 @@ export default function AdminStageTasks() {
                     <Badge variant="secondary" className="text-xs">#{task.sort_order}</Badge>
                     {task.content_body && (
                       <Badge variant="outline" className="text-xs text-success border-success/30">Has content</Badge>
+                    )}
+                    {(task as { image_url?: string | null }).image_url && (
+                      <Badge variant="outline" className="text-xs">Has image</Badge>
                     )}
                   </div>
                 </button>
@@ -285,6 +307,21 @@ export default function AdminStageTasks() {
                   />
                 </div>
               </div>
+              <div className="space-y-2">
+                <Label>Cover image URL {stageId === "relocation" && "(shown on guide card)"}</Label>
+                <Input
+                  value={form.image_url}
+                  onChange={(e) => setForm({ ...form, image_url: e.target.value })}
+                  placeholder="https://images.unsplash.com/..."
+                />
+                {form.image_url && (
+                  <img
+                    src={form.image_url}
+                    alt=""
+                    className="h-32 w-full max-w-sm rounded-lg object-cover border"
+                  />
+                )}
+              </div>
               {form.task_type === "course" && (
                 <div className="space-y-2">
                   <Label>Course link (optional)</Label>
@@ -336,6 +373,13 @@ export default function AdminStageTasks() {
               <p className="text-sm text-muted-foreground">Select or edit a task to preview what candidates see.</p>
             ) : (
               <div className="space-y-3">
+                {(form.image_url || (previewTask as { image_url?: string })?.image_url) && (
+                  <img
+                    src={form.image_url || (previewTask as { image_url?: string })?.image_url}
+                    alt=""
+                    className="w-full h-36 object-cover rounded-lg border"
+                  />
+                )}
                 <div>
                   <Badge variant="outline" className="mb-2 capitalize">{form.task_type}</Badge>
                   <p className="font-medium">{form.title || previewTask?.title}</p>

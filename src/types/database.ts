@@ -11,7 +11,7 @@ export type Database = {
       applications: { Row: { id: string; candidate_id: string; job_id: string; status: string; stage_id: string | null; match_score: number | null; needs_action: boolean; notes: string | null; applied_at: string; updated_at: string; interview_meet_url: string | null; interview_scheduled_at: string | null; interview_notes: string | null } };
       pipeline_stages: { Row: { id: string; name: string; sort_order: number; description: string | null } };
       candidate_stage_progress: { Row: { id: string; candidate_id: string; stage_id: string; status: 'not_started' | 'active' | 'completed'; started_at: string | null; completed_at: string | null } };
-      stage_tasks: { Row: { id: string; stage_id: string; company_id: string | null; title: string; description: string | null; sort_order: number; content_url: string | null; task_type: 'task' | 'course'; content_body: string | null } };
+      stage_tasks: { Row: { id: string; stage_id: string; company_id: string | null; title: string; description: string | null; sort_order: number; content_url: string | null; image_url: string | null; task_type: 'task' | 'course'; content_body: string | null } };
       candidate_task_progress: { Row: { id: string; candidate_id: string; task_id: string; completed_at: string } };
       conversations: { Row: { id: string; subject: string | null; created_at: string; updated_at: string } };
       messages: { Row: { id: string; conversation_id: string; sender_id: string; body: string; read_at: string | null; created_at: string } };

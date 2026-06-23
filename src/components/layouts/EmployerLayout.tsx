@@ -15,6 +15,7 @@ import {
   BarChart3,
   AlertTriangle,
   FileCheck,
+  ClipboardCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -28,6 +29,7 @@ const navigation = [
   { name: "Tasks", href: "/employer/tasks", icon: ClipboardList },
   { name: "Candidates", href: "/employer/candidates", icon: Users },
   { name: "Internship", href: "/employer/internship", icon: FileCheck },
+  { name: "Activation", href: "/employer/activation", icon: ClipboardCheck },
   { name: "Job Postings", href: "/employer/jobs", icon: Briefcase },
   { name: "Company Profile", href: "/employer/company", icon: Building2 },
   { name: "Mentoring", href: "/employer/mentoring", icon: Heart },

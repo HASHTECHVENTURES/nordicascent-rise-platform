@@ -21,6 +21,7 @@ import {
   GraduationCap,
   ClipboardCheck,
   Heart,
+  MapPin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,14 +35,19 @@ const journeyNav: NavItem[] = [
   { name: "Universities", href: "/admin/universities", icon: GraduationCap },
   { name: "Readiness", href: "/admin/readiness", icon: ClipboardCheck },
   { name: "Mentoring", href: "/admin/mentoring", icon: Heart },
+  { name: "Relocation", href: "/admin/relocation", icon: MapPin },
+  { name: "Onboarding", href: "/admin/onboarding", icon: Building2 },
+];
+
+const peopleNav: NavItem[] = [
   { name: "Candidates", href: "/admin/candidates", icon: UserCheck },
+  { name: "Companies", href: "/admin/employers", icon: Building2 },
 ];
 
 const platformNav: NavItem[] = [
-  { name: "Companies", href: "/admin/employers", icon: Building2 },
   { name: "Jobs", href: "/admin/jobs", icon: Briefcase },
   { name: "Program Tasks", href: "/admin/stage-tasks", icon: ListChecks },
-  { name: "Users", href: "/admin/users", icon: Users },
+  { name: "Portal admins", href: "/admin/users", icon: Users },
   { name: "Insights", href: "/admin/insights", icon: Megaphone },
   { name: "Announcements", href: "/admin/notifications", icon: Megaphone },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
@@ -164,6 +170,7 @@ const AdminLayout = () => {
           <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
             {renderSection("Overview", operationsNav.slice(0, 1))}
             {renderSection("Candidate journey", journeyNav)}
+            {renderSection("People", peopleNav)}
             {renderSection("Platform", platformNav)}
             {renderSection("Operations", operationsNav.slice(1))}
           </nav>

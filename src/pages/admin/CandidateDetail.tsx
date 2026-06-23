@@ -5,9 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, AlertTriangle, CheckCircle, Send, UserCheck, Loader2 } from "lucide-react";
 import { TRACK_META, type Track } from "@/lib/track";
-import { useCandidateById, useUpdateCandidateTrack, useUpdateCandidateStatus, useCreateIssue, useAdvanceCandidateStage, useCandidateStageProgress, useCandidateTaskProgress, useStageTasks, useAdminMarkTaskComplete, useAdminCandidateJourneyBrief, useUnlockCandidateJobs } from "@/hooks/useData";
+import { useCandidateById, useUpdateCandidateTrack, useUpdateCandidateStatus, useCreateIssue, useAdvanceCandidateStage, useCandidateStageProgress, useCandidateTaskProgress, useStageTasks, useAdminMarkTaskComplete, useAdminCandidateJourneyBrief, useUnlockCandidateJobs, useDeleteCandidate } from "@/hooks/useData";
 import { useToast } from "@/hooks/use-toast";
 import { adminJourneyStageLabel } from "@/lib/adminJourney";
+import AdminDeleteButton from "@/components/admin/AdminDeleteButton";
 
 const AdminCandidateDetail = () => {
   const { id } = useParams();
@@ -15,6 +16,7 @@ const AdminCandidateDetail = () => {
   const { data: candidate, isLoading } = useCandidateById(id);
   const { data: journeyMap } = useAdminCandidateJourneyBrief();
   const unlockJobs = useUnlockCandidateJobs();
+  const deleteCandidate = useDeleteCandidate();
   const updateTrack = useUpdateCandidateTrack();
   const updateStatus = useUpdateCandidateStatus();
   const createIssue = useCreateIssue();
@@ -77,6 +79,25 @@ const AdminCandidateDetail = () => {
           </div>
           <p className="text-muted-foreground">{profile?.email} · {candidate.location ?? "—"}</p>
         </div>
+        <AdminDeleteButton
+          label="Delete candidate"
+          title={`Delete ${profile?.full_name ?? "candidate"}?`}
+          description="Permanently removes this candidate account and all related data. This cannot be undone."
+          isPending={deleteCandidate.isPending}
+          onConfirm={async () => {
+            try {
+              await deleteCandidate.mutateAsync(candidate.id);
+              toast({ title: "Candidate deleted" });
+              navigate("/admin/candidates");
+            } catch (err) {
+              toast({
+                title: "Delete failed",
+                description: err instanceof Error ? err.message : "Try again",
+                variant: "destructive",
+              });
+            }
+          }}
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

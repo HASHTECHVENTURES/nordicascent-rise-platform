@@ -60,10 +60,12 @@ export function useMyStageProgress() {
 }
 
 export function useStageTasks(stageId: string) {
-  const { candidate } = useAuth();
+  const { candidate, session, loading: authLoading } = useAuth();
   return useQuery({
     queryKey: ["stage-tasks", stageId, candidate?.id],
-    enabled: !!stageId,
+    enabled: !!stageId && !authLoading && !!session,
+    staleTime: 0,
+    refetchOnMount: "always",
     queryFn: async () => fetchStageTasksForCandidate(candidate?.id, stageId),
   });
 }
@@ -1206,6 +1208,24 @@ export function useAdminUsers() {
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
+        .eq("role", "admin")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useAdminEmployerUsers() {
+  return useQuery({
+    queryKey: ["admin-employer-users"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select(
+          "id, full_name, email, account_status, created_at, employers(id, title, company_id, companies(id, name))"
+        )
+        .eq("role", "employer")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -1358,6 +1378,90 @@ export function useDeleteEmployerInternshipTask() {
   });
 }
 
+export function useEmployerActivationTasks() {
+  const { profile } = useAuth();
+  return useQuery({
+    queryKey: ["employer-activation-tasks", profile?.id],
+    enabled: profile?.role === "employer",
+    queryFn: async () => {
+      const { data: employer } = await supabase
+        .from("employers")
+        .select("company_id")
+        .eq("profile_id", profile!.id)
+        .single();
+      if (!employer?.company_id) return [];
+      const { data, error } = await supabase
+        .from("stage_tasks")
+        .select("*")
+        .eq("stage_id", "activation")
+        .eq("company_id", employer.company_id)
+        .order("sort_order");
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useSaveEmployerActivationTask() {
+  const qc = useQueryClient();
+  const { profile } = useAuth();
+  return useMutation({
+    mutationFn: async (task: {
+      id?: string;
+      title: string;
+      description?: string | null;
+      sort_order: number;
+      task_type?: "task" | "course";
+      content_url?: string | null;
+      content_body?: string | null;
+    }) => {
+      const { data: employer } = await supabase
+        .from("employers")
+        .select("company_id")
+        .eq("profile_id", profile!.id)
+        .single();
+      if (!employer?.company_id) throw new Error("Company profile required");
+
+      const payload = {
+        stage_id: "activation" as const,
+        company_id: employer.company_id,
+        title: task.title.trim(),
+        description: task.description?.trim() || null,
+        sort_order: task.sort_order,
+        task_type: task.task_type ?? "task",
+        content_url: task.content_url?.trim() || null,
+        content_body: task.content_body?.trim() || null,
+      };
+
+      if (task.id) {
+        const { error } = await supabase.from("stage_tasks").update(payload).eq("id", task.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("stage_tasks").insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["employer-activation-tasks"] });
+      qc.invalidateQueries({ queryKey: ["stage-tasks"] });
+    },
+  });
+}
+
+export function useDeleteEmployerActivationTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("stage_tasks").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["employer-activation-tasks"] });
+      qc.invalidateQueries({ queryKey: ["stage-tasks"] });
+    },
+  });
+}
+
 export function useEmployerJobApplications(jobId: string | undefined) {
   const { profile } = useAuth();
   return useQuery({
@@ -1435,6 +1539,63 @@ export function useRemoveCompany() {
       qc.invalidateQueries({ queryKey: ["jobs-open"] });
       qc.invalidateQueries({ queryKey: ["admin-jobs"] });
       qc.invalidateQueries({ queryKey: ["employer-jobs"] });
+    },
+  });
+}
+
+export function useDeleteCandidate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (candidateId: string) => {
+      const { error } = await supabase.rpc("admin_delete_candidate", {
+        p_candidate_id: candidateId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-candidates"] });
+      qc.invalidateQueries({ queryKey: ["admin-users"] });
+      qc.invalidateQueries({ queryKey: ["admin-journey-stats"] });
+      qc.invalidateQueries({ queryKey: ["admin-candidate-journey-brief"] });
+      qc.invalidateQueries({ queryKey: ["admin-mentoring-pipeline"] });
+      qc.invalidateQueries({ queryKey: ["admin-readiness-overview"] });
+      qc.invalidateQueries({ queryKey: ["platform-stats"] });
+    },
+  });
+}
+
+export function useDeleteCompany() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (companyId: string) => {
+      const { error } = await supabase.rpc("admin_delete_company", {
+        p_company_id: companyId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-employers"] });
+      qc.invalidateQueries({ queryKey: ["admin-employer-users"] });
+      qc.invalidateQueries({ queryKey: ["admin-jobs"] });
+      qc.invalidateQueries({ queryKey: ["jobs-open"] });
+      qc.invalidateQueries({ queryKey: ["platform-stats"] });
+    },
+  });
+}
+
+export function useDeleteEmployerUser() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (profileId: string) => {
+      const { error } = await supabase.rpc("admin_delete_employer_user", {
+        p_profile_id: profileId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-employer-users"] });
+      qc.invalidateQueries({ queryKey: ["admin-employers"] });
+      qc.invalidateQueries({ queryKey: ["platform-stats"] });
     },
   });
 }
@@ -1986,6 +2147,7 @@ export function useSaveStageTask() {
       sort_order: number;
       task_type: "task" | "course";
       content_url?: string | null;
+      image_url?: string | null;
       content_body?: string | null;
     }) => {
       const payload = {
@@ -1996,6 +2158,7 @@ export function useSaveStageTask() {
         sort_order: task.sort_order,
         task_type: task.task_type,
         content_url: task.content_url?.trim() || null,
+        image_url: task.image_url?.trim() || null,
         content_body: task.content_body?.trim() || null,
       };
       if (task.id) {

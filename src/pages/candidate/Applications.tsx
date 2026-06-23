@@ -12,7 +12,7 @@ import {
   ArrowRight,
   Bell,
 } from "lucide-react";
-import { useMyApplications } from "@/hooks/useData";
+import { useMyApplications, useMyStageProgress } from "@/hooks/useData";
 import InterviewInviteCard from "@/components/candidate/InterviewInviteCard";
 import {
   applicationStatusLabel,
@@ -21,11 +21,16 @@ import {
   getApplicationJob,
   hasUnlockedPipeline,
 } from "@/lib/applicationJourney";
+import { stageListPath } from "@/lib/stageRoutes";
 
 export default function CandidateApplications() {
   const { data: applications, isLoading } = useMyApplications();
+  const { data: stageProgress } = useMyStageProgress();
   const apps = applications ?? [];
   const accepted = hasUnlockedPipeline(apps);
+  const selectionDone = stageProgress?.some((s) => s.stage_id === "selection" && s.status === "completed");
+  const continueHref = selectionDone ? stageListPath("internship") : stageListPath("selection");
+  const continueLabel = selectionDone ? "Continue to Internship" : "Continue journey";
 
   if (isLoading) {
     return (
@@ -62,8 +67,8 @@ export default function CandidateApplications() {
                 Your employer journey has started. Continue in My Journey.
               </p>
               <Button size="sm" className="mt-3" asChild>
-                <Link to="/candidate/selection">
-                  Continue journey
+                <Link to={continueHref}>
+                  {continueLabel}
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </Link>
               </Button>

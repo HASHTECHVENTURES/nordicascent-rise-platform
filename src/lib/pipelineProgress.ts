@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { fetchStageTaskIdsForCandidate } from "@/lib/stageTasks";
 import { TRACK_META, type Track } from "@/lib/track";
+import { getSelectionStepState, type ApplicationRow } from "@/lib/applicationJourney";
 
 const FAST_TRACK_SKIP_STAGES = ["internship"] as const;
 
@@ -148,6 +149,27 @@ export async function completeStageIfTasksDone(
   }
 
   await advanceCandidateStage(candidateId, stageId);
+  return true;
+}
+
+/** Selection is driven by application status — advance when employer steps are complete. */
+export async function completeSelectionIfReady(
+  candidateId: string,
+  applications: ApplicationRow[]
+): Promise<boolean> {
+  const steps = getSelectionStepState(applications);
+  if (!steps.length || !steps.every((s) => s.done)) return false;
+
+  const { data: stageRow } = await supabase
+    .from("candidate_stage_progress")
+    .select("id, status")
+    .eq("candidate_id", candidateId)
+    .eq("stage_id", "selection")
+    .maybeSingle();
+
+  if (stageRow?.status === "completed") return false;
+
+  await advanceCandidateStage(candidateId, "selection");
   return true;
 }
 

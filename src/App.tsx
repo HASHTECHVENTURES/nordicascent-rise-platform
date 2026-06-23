@@ -56,6 +56,7 @@ import EmployerMessages from "./pages/employer/Messages";
 import EmployerAnalytics from "./pages/employer/Analytics";
 import EmployerMentoring from "./pages/employer/Mentoring";
 import EmployerInternship from "./pages/employer/Internship";
+import EmployerActivation from "./pages/employer/Activation";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -79,6 +80,8 @@ import AdminStageTasks from "./pages/admin/StageTasks";
 import AdminReadiness from "./pages/admin/Readiness";
 import AdminMentoring from "./pages/admin/Mentoring";
 import AdminUniversities from "./pages/admin/Universities";
+import AdminRelocation from "./pages/admin/Relocation";
+import AdminOnboarding from "./pages/admin/Onboarding";
 
 import NotFound from "./pages/NotFound";
 
@@ -145,6 +148,7 @@ const App = () => (
                 <Route path="/employer/jobs/:id" element={<EmployerJobDetail />} />
                 <Route path="/employer/company" element={<EmployerCompanyProfile />} />
                 <Route path="/employer/internship" element={<EmployerInternship />} />
+                <Route path="/employer/activation" element={<EmployerActivation />} />
                 <Route path="/employer/mentoring" element={<EmployerMentoring />} />
                 <Route path="/employer/messages" element={<EmployerMessages />} />
                 <Route path="/employer/analytics" element={<EmployerAnalytics />} />
@@ -175,6 +179,8 @@ const App = () => (
                 <Route path="/admin/readiness" element={<AdminReadiness />} />
                 <Route path="/admin/mentoring" element={<AdminMentoring />} />
                 <Route path="/admin/universities" element={<AdminUniversities />} />
+                <Route path="/admin/relocation" element={<AdminRelocation />} />
+                <Route path="/admin/onboarding" element={<AdminOnboarding />} />
                 <Route path="/admin/security" element={<AdminSecurity />} />
               </Route>
             </Route>

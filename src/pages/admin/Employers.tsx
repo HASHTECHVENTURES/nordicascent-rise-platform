@@ -1,41 +1,48 @@
+import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Building2, MoreHorizontal, Eye, CheckCircle, Ban, Download, Loader2 } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Link } from "react-router-dom";
-import { useAdminEmployers, useRemoveCompany } from "@/hooks/useData";
-import { useMemo, useState } from "react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, Building2, Eye, Download, Loader2, Users } from "lucide-react";
+import {
+  useAdminEmployers,
+  useAdminEmployerUsers,
+  useDeleteCompany,
+  useDeleteEmployerUser,
+} from "@/hooks/useData";
+import AdminDeleteButton from "@/components/admin/AdminDeleteButton";
 import { useToast } from "@/hooks/use-toast";
 
 const AdminEmployers = () => {
-  const { data: employers, isLoading } = useAdminEmployers();
-  const removeCompany = useRemoveCompany();
+  const { data: employers, isLoading: companiesLoading } = useAdminEmployers();
+  const { data: employerUsers, isLoading: usersLoading } = useAdminEmployerUsers();
+  const deleteCompany = useDeleteCompany();
+  const deleteEmployerUser = useDeleteEmployerUser();
   const { toast } = useToast();
   const [search, setSearch] = useState("");
-  const list = useMemo(() => {
+  const [userSearch, setUserSearch] = useState("");
+
+  const companies = useMemo(() => {
     const q = search.toLowerCase();
     return (employers ?? []).filter(
       (e) => !q || e.name.toLowerCase().includes(q) || (e.location ?? "").toLowerCase().includes(q),
     );
   }, [employers, search]);
 
-  const handleRemove = async (id: string, name: string) => {
-    if (!window.confirm(`Remove "${name}" from the platform? All their jobs will be closed.`)) return;
-    try {
-      await removeCompany.mutateAsync(id);
-      toast({ title: "Company removed", description: "Their jobs no longer appear for candidates." });
-    } catch (err) {
-      toast({
-        title: "Could not remove company",
-        description: err instanceof Error ? err.message : "Try again",
-        variant: "destructive",
-      });
-    }
-  };
+  const users = useMemo(() => {
+    const q = userSearch.toLowerCase();
+    return (employerUsers ?? []).filter(
+      (u) =>
+        !q ||
+        (u.full_name?.toLowerCase().includes(q) ?? false) ||
+        (u.email?.toLowerCase().includes(q) ?? false),
+    );
+  }, [employerUsers, userSearch]);
 
-  if (isLoading) {
+  if (companiesLoading || usersLoading) {
     return (
       <div className="flex justify-center py-20">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -47,77 +54,160 @@ const AdminEmployers = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Company Management</h1>
-          <p className="text-muted-foreground">See and fix company issues</p>
+          <h1 className="text-2xl font-medium">Companies</h1>
+          <p className="text-sm text-muted-foreground mt-1">Company accounts and employer logins</p>
         </div>
-        <Button variant="outline" className="gap-2 w-fit" onClick={() => {
-          const headers = ["Name", "Industry", "Location", "Status", "Joined"];
-          const rows = list.map((e) => [e.name, e.industry ?? "", e.location ?? "", e.status, e.created_at.split("T")[0]]);
-          const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
-          const blob = new Blob([csv], { type: "text/csv" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a"); a.href = url; a.download = "companies-export.csv"; a.click();
-          URL.revokeObjectURL(url);
-        }}>
-          <Download className="h-4 w-4" />Export companies
-        </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{list.length}</div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Verified</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-chart-success">{list.filter((e) => e.status === "verified").length}</div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Pending</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-chart-warning">{list.filter((e) => e.status === "pending").length}</div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Suspended</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold text-destructive">{list.filter((e) => e.status === "suspended").length}</div></CardContent></Card>
-      </div>
+      <Tabs defaultValue="companies">
+        <TabsList>
+          <TabsTrigger value="companies" className="gap-2">
+            <Building2 className="h-4 w-4" />
+            Companies ({companies.length})
+          </TabsTrigger>
+          <TabsTrigger value="users" className="gap-2">
+            <Users className="h-4 w-4" />
+            Company users ({users.length})
+          </TabsTrigger>
+        </TabsList>
 
-      <Card>
-        <CardHeader>
+        <TabsContent value="companies" className="mt-6 space-y-4">
           <div className="flex gap-4">
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input placeholder="Search companies..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
-            <Button variant="outline" size="icon"><Filter className="h-4 w-4" /></Button>
+            <Button variant="outline" className="gap-2" onClick={() => {
+              const headers = ["Name", "Industry", "Location", "Status"];
+              const rows = companies.map((e) => [e.name, e.industry ?? "", e.location ?? "", e.status]);
+              const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
+              const blob = new Blob([csv], { type: "text/csv" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a"); a.href = url; a.download = "companies.csv"; a.click();
+              URL.revokeObjectURL(url);
+            }}>
+              <Download className="h-4 w-4" />
+              Export
+            </Button>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {list.length === 0 && <p className="text-center text-muted-foreground py-8">No companies registered yet.</p>}
-            {list.map((emp) => (
-              <div key={emp.id} className="flex items-center justify-between p-4 rounded-lg border">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-lg bg-employer-accent/10 flex items-center justify-center">
-                    <Building2 className="h-6 w-6 text-employer-accent" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold">{emp.name}</h3>
-                      {emp.status === "verified" && <CheckCircle className="h-4 w-4 text-chart-success" />}
+
+          <Card>
+            <CardContent className="pt-6 space-y-3">
+              {companies.length === 0 && (
+                <p className="text-center text-muted-foreground py-8">No companies registered.</p>
+              )}
+              {companies.map((emp) => {
+                const contacts = (emp.employers ?? []) as Array<{
+                  profiles: { full_name: string | null; email: string | null } | null;
+                }>;
+                const contactEmail = contacts[0]?.profiles?.email;
+                return (
+                  <div key={emp.id} className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-lg border">
+                    <div className="flex items-center gap-4">
+                      <div className="h-11 w-11 rounded-lg bg-muted flex items-center justify-center">
+                        <Building2 className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">{emp.name}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {emp.location ?? "—"} · {contactEmail ?? "No contact"}
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground">{emp.location ?? "—"} · {emp.industry ?? "—"}</p>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary">{emp.status}</Badge>
+                      <Button size="sm" variant="outline" asChild>
+                        <Link to={`/admin/employers/${emp.id}`}>
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
+                        </Link>
+                      </Button>
+                      <AdminDeleteButton
+                        label="Delete"
+                        title={`Delete ${emp.name}?`}
+                        description="Permanently removes this company, all jobs, applications, and employer login accounts. This cannot be undone."
+                        isPending={deleteCompany.isPending}
+                        onConfirm={async () => {
+                          try {
+                            await deleteCompany.mutateAsync(emp.id);
+                            toast({ title: "Company deleted" });
+                          } catch (err) {
+                            toast({
+                              title: "Delete failed",
+                              description: err instanceof Error ? err.message : "Try again",
+                              variant: "destructive",
+                            });
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <Badge variant={emp.status === "verified" ? "default" : "secondary"}>{emp.status}</Badge>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild><Link to={`/admin/employers/${emp.id}`}><Eye className="h-4 w-4 mr-2" />View & fix</Link></DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-destructive"
-                        disabled={removeCompany.isPending}
-                        onClick={() => handleRemove(emp.id, emp.name)}
-                      >
-                        <Ban className="h-4 w-4 mr-2" />Remove company
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-            ))}
+                );
+              })}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="users" className="mt-6 space-y-4">
+          <div className="relative max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Search company users..." className="pl-9" value={userSearch} onChange={(e) => setUserSearch(e.target.value)} />
           </div>
-        </CardContent>
-      </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Employer login accounts</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {users.length === 0 && (
+                <p className="text-center text-muted-foreground py-8">No company users found.</p>
+              )}
+              {users.map((user) => {
+                const employer = (user.employers as Array<{
+                  title: string | null;
+                  companies: { name: string } | null;
+                }> | null)?.[0];
+                const companyName = employer?.companies?.name ?? "—";
+                return (
+                  <div key={user.id} className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-lg border">
+                    <div className="flex items-center gap-4">
+                      <Avatar className="h-11 w-11">
+                        <AvatarFallback>{(user.full_name ?? user.email ?? "?").slice(0, 2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h3 className="font-medium">{user.full_name ?? "Employer user"}</h3>
+                        <p className="text-sm text-muted-foreground">{user.email}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">{companyName}{employer?.title ? ` · ${employer.title}` : ""}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline">Employer</Badge>
+                      <AdminDeleteButton
+                        label="Delete"
+                        title={`Delete ${user.full_name ?? user.email}?`}
+                        description="Removes this employer login account. The company record stays unless you delete the whole company."
+                        isPending={deleteEmployerUser.isPending}
+                        onConfirm={async () => {
+                          try {
+                            await deleteEmployerUser.mutateAsync(user.id);
+                            toast({ title: "Company user deleted" });
+                          } catch (err) {
+                            toast({
+                              title: "Delete failed",
+                              description: err instanceof Error ? err.message : "Try again",
+                              variant: "destructive",
+                            });
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

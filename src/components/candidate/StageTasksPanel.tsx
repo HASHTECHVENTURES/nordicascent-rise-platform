@@ -171,7 +171,7 @@ export default function StageTasksPanel({ stageId, title, description }: Props) 
               {stageId === "internship"
                 ? "Your employer has not added internship tasks yet. Check Messages for updates from the company."
                 : stageId === "activation"
-                  ? "Pre-employment steps will appear here. Check Messages for updates from Nordic Ascent."
+                  ? "Your employer has not added activation tasks yet. Check Messages for updates from the company."
                   : "No tasks configured for this stage yet."}
             </p>
           )}
