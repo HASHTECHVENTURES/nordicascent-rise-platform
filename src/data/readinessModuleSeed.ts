@@ -19,7 +19,7 @@ export const READINESS_TESTS_SEED: ReadinessTestSeed[] = [
     area: "cultural_social",
     level: 1,
     title: "Cultural & Social — Level 1",
-    subtitle: "Awareness · Structured reflection (45–60 min)",
+    subtitle: "Awareness · Structured reflection",
     timer_minutes: 0,
     timer_hard: false,
     questions: [
@@ -74,7 +74,7 @@ export const READINESS_TESTS_SEED: ReadinessTestSeed[] = [
     area: "cultural_social",
     level: 2,
     title: "Cultural & Social — Level 2",
-    subtitle: "Application · Applied case work (60–90 min)",
+    subtitle: "Application · Applied case work",
     timer_minutes: 0,
     timer_hard: false,
     questions: [
@@ -140,7 +140,7 @@ export const READINESS_TESTS_SEED: ReadinessTestSeed[] = [
     area: "cultural_social",
     level: 3,
     title: "Cultural & Social — Level 3",
-    subtitle: "Behaviour · Live / simulated behaviour (60 min hard limit)",
+    subtitle: "Behaviour · Live / simulated behaviour",
     timer_minutes: 60,
     timer_hard: true,
     questions: [
@@ -199,7 +199,7 @@ export const READINESS_TESTS_SEED: ReadinessTestSeed[] = [
     area: "technical",
     level: 1,
     title: "Technical — Level 1",
-    subtitle: "Awareness · Structured reflection (45–60 min)",
+    subtitle: "Awareness · Structured reflection",
     timer_minutes: 0,
     timer_hard: false,
     questions: [
@@ -252,7 +252,7 @@ export const READINESS_TESTS_SEED: ReadinessTestSeed[] = [
     area: "technical",
     level: 2,
     title: "Technical — Level 2",
-    subtitle: "Application · Applied case work (60 min)",
+    subtitle: "Application · Applied case work",
     timer_minutes: 0,
     timer_hard: false,
     questions: [
@@ -304,7 +304,7 @@ export const READINESS_TESTS_SEED: ReadinessTestSeed[] = [
     area: "technical",
     level: 3,
     title: "Technical — Level 3",
-    subtitle: "Behaviour · Live / simulated behaviour (60 min hard limit)",
+    subtitle: "Behaviour · Live / simulated behaviour",
     timer_minutes: 60,
     timer_hard: true,
     questions: [
@@ -365,6 +365,13 @@ export const READINESS_LEVEL_LABELS: Record<number, string> = {
   1: "Level 1 — Awareness",
   2: "Level 2 — Application",
   3: "Level 3 — Behaviour",
+};
+
+/** Display subtitles for each level (timing is shown separately via badges). */
+export const READINESS_LEVEL_SUBTITLES: Record<number, string> = {
+  1: "Awareness · Structured reflection",
+  2: "Application · Applied case work",
+  3: "Behaviour · Live / simulated behaviour",
 };
 
 export const READINESS_SIGNAL_LABELS: Record<string, string> = {

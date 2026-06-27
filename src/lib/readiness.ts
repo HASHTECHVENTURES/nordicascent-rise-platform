@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import { READINESS_TESTS_SEED } from "@/data/readinessModuleSeed";
+import { READINESS_TESTS_SEED, READINESS_LEVEL_SUBTITLES } from "@/data/readinessModuleSeed";
 
 /** Idempotent seed — inserts Module 3 tests and questions if none exist (admin / service role only). */
 export async function seedReadinessModuleIfEmpty(): Promise<{ seeded: boolean; count: number }> {
@@ -91,6 +91,10 @@ export function hasStrictTimer(test: {
   level?: number;
 }) {
   return Boolean(test.timer_hard && (test.timer_minutes ?? 0) > 0);
+}
+
+export function getReadinessLevelSubtitle(level: number, fallback?: string | null) {
+  return READINESS_LEVEL_SUBTITLES[level] ?? fallback ?? "";
 }
 
 export const READINESS_PRE_TEST_NOTE = `You have made it through a demanding selection process. That means we already believe you have what it takes.

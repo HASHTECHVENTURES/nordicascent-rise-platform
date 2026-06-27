@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, BookOpen } from "lucide-react";
-import { READINESS_PRE_TEST_NOTE } from "@/lib/readiness";
+import { READINESS_PRE_TEST_NOTE, getReadinessLevelSubtitle } from "@/lib/readiness";
 import type { ReadinessTest } from "@/hooks/useReadiness";
 import { hasStrictTimer } from "@/lib/readiness";
 
@@ -24,7 +24,11 @@ export default function ReadinessTestIntro({ test, onNext, starting }: Props) {
       <div>
         <p className="text-sm font-medium text-primary">Before you begin</p>
         <h1 className="text-2xl font-bold tracking-tight mt-1">{test.title}</h1>
-        {test.subtitle && <p className="text-sm text-muted-foreground mt-1">{test.subtitle}</p>}
+        {test.subtitle && (
+          <p className="text-sm text-muted-foreground mt-1">
+            {getReadinessLevelSubtitle(test.level, test.subtitle)}
+          </p>
+        )}
       </div>
 
       <Card>

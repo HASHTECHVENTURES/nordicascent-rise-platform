@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Loader2, Lock, PlayCircle, AlertCircle } from "lucide-react";
 import { useReadinessTests, useMyReadinessAttempts } from "@/hooks/useReadiness";
-import { isLevelUnlocked, getAttemptExpiresAtMs, hasStrictTimer } from "@/lib/readiness";
+import { isLevelUnlocked, getAttemptExpiresAtMs, hasStrictTimer, getReadinessLevelSubtitle } from "@/lib/readiness";
 import ReadinessCountdown from "@/components/readiness/ReadinessCountdown";
 import {
   READINESS_AREA_LABELS,
@@ -104,15 +104,21 @@ export default function ReadinessModuleHub({ compact = false, hideHeader = false
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-medium text-sm">{READINESS_LEVEL_LABELS[test.level]}</p>
-                        {strictTimer && (
+                        {strictTimer ? (
                           <Badge variant="outline" className="text-xs">
-                            {test.timer_minutes} min limit
+                            60 min fixed limit
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="text-xs">
+                            No time limit
                           </Badge>
                         )}
                         {done && <Badge className="bg-success text-success-foreground">Submitted</Badge>}
                         {inProgress && <Badge className="bg-primary text-primary-foreground">In progress</Badge>}
                       </div>
-                      <p className="text-xs text-muted-foreground">{test.subtitle}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {getReadinessLevelSubtitle(test.level, test.subtitle)}
+                      </p>
                       {inProgress && attempt && strictTimer && (
                         <div className="pt-2">
                           <ReadinessCountdown

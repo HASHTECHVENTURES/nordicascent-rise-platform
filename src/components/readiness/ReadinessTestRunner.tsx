@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Loader2, Send, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
-import { getAttemptExpiresAtMs, hasStrictTimer } from "@/lib/readiness";
+import { getAttemptExpiresAtMs, hasStrictTimer, getReadinessLevelSubtitle } from "@/lib/readiness";
 import { useCountdown } from "@/hooks/useCountdown";
 import ReadinessCountdown from "@/components/readiness/ReadinessCountdown";
 import {
@@ -184,7 +184,11 @@ export default function ReadinessTestRunner({ test, attempt }: Props) {
             </Badge>
           )}
           <h1 className="text-2xl font-medium">{test.title}</h1>
-          {test.subtitle && <p className="text-muted-foreground mt-1">{test.subtitle}</p>}
+          {test.subtitle && (
+            <p className="text-muted-foreground mt-1">
+              {getReadinessLevelSubtitle(test.level, test.subtitle)}
+            </p>
+          )}
         </div>
         <div className="flex flex-col items-end gap-2">
           <p className="text-sm text-muted-foreground">
