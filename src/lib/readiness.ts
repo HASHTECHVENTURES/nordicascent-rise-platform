@@ -85,10 +85,32 @@ export function formatTimer(seconds: number) {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+export function hasStrictTimer(test: {
+  timer_hard?: boolean;
+  timer_minutes?: number;
+  level?: number;
+}) {
+  return Boolean(test.timer_hard && (test.timer_minutes ?? 0) > 0);
+}
+
+export const READINESS_PRE_TEST_NOTE = `You have made it through a demanding selection process. That means we already believe you have what it takes.
+
+Readiness is not another exam. It tests you on something specific, the real differences between how people work in India and how people work in Nordic teams.
+
+These differences are not small. Nordic workplaces are flat and direct. You are expected to take ownership without being told, speak up when you disagree, including to your manager and move forward without waiting for clear instructions.
+
+Before you start, research Nordic work culture yourself. Not to find the right answers, but to genuinely understand what is different and why it matters. Focus on how decisions are made, how feedback is given, and how people relate to each other at work.
+
+The candidates who do best here are not the ones with the most polished answers. They are the ones who think clearly and answer honestly.
+
+The scenarios describe real workplace situations. If you have work experience, draw on it. If you do not, answer based on how you think you would handle the situation. There are no wrong answers, only honest and dishonest ones.`;
+
 export function getAttemptExpiresAtMs(
   attempt: { expires_at: string | null; started_at: string },
-  timerMinutes: number
+  timerMinutes: number,
+  timerHard = true
 ): number | null {
+  if (!timerHard || !timerMinutes) return null;
   if (attempt.expires_at) return new Date(attempt.expires_at).getTime();
   if (!attempt.started_at || !timerMinutes) return null;
   return new Date(attempt.started_at).getTime() + timerMinutes * 60 * 1000;

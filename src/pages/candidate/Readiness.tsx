@@ -41,13 +41,16 @@ export default function CandidateReadiness() {
         <h1 className="text-2xl font-medium">Readiness</h1>
         <Card>
           <CardContent className="pt-6 space-y-3">
-            <p className="text-sm text-muted-foreground">Complete your profile and university first.</p>
+            <p className="text-sm text-muted-foreground">Complete registration steps 1–3 first.</p>
             <div className="flex flex-wrap gap-2">
               <Button size="sm" asChild>
-                <Link to="/candidate/profile">Profile</Link>
+                <Link to="/candidate/profile">Step 1 — Profile</Link>
               </Button>
               <Button size="sm" variant="outline" asChild>
-                <Link to="/candidate/university">University</Link>
+                <Link to="/candidate/university">Step 2 — University</Link>
+              </Button>
+              <Button size="sm" variant="outline" asChild>
+                <Link to="/candidate/registration-details">Step 3 — Background</Link>
               </Button>
             </div>
           </CardContent>

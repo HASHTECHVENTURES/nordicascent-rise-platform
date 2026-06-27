@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Loader2, Send, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
-import { getAttemptExpiresAtMs } from "@/lib/readiness";
+import { getAttemptExpiresAtMs, hasStrictTimer } from "@/lib/readiness";
 import { useCountdown } from "@/hooks/useCountdown";
 import ReadinessCountdown from "@/components/readiness/ReadinessCountdown";
 import {
@@ -43,11 +43,13 @@ export default function ReadinessTestRunner({ test, attempt }: Props) {
   const autoSubmitTriggeredRef = useRef(false);
   const saveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
+  const strictTimer = hasStrictTimer(test);
+
   const expiresAtMs = useMemo(
-    () => getAttemptExpiresAtMs(attempt, test.timer_minutes),
-    [attempt, test.timer_minutes]
+    () => getAttemptExpiresAtMs(attempt, test.timer_minutes, strictTimer),
+    [attempt, test.timer_minutes, strictTimer]
   );
-  const secondsLeft = useCountdown(expiresAtMs);
+  const secondsLeft = useCountdown(strictTimer ? expiresAtMs : null);
 
   useEffect(() => {
     if (!savedAnswers) return;
@@ -84,14 +86,14 @@ export default function ReadinessTestRunner({ test, attempt }: Props) {
     [attempt.id, navigate, submitAttempt, toast]
   );
 
-  const timeExpired = secondsLeft !== null && secondsLeft <= 0;
+  const timeExpired = strictTimer && secondsLeft !== null && secondsLeft <= 0;
 
   useEffect(() => {
-    if (secondsLeft === null || secondsLeft > 0) return;
+    if (!strictTimer || secondsLeft === null || secondsLeft > 0) return;
     if (submittedRef.current || autoSubmitTriggeredRef.current) return;
     autoSubmitTriggeredRef.current = true;
     handleSubmit(true);
-  }, [secondsLeft, handleSubmit]);
+  }, [strictTimer, secondsLeft, handleSubmit]);
 
   const debouncedSave = (questionId: string, value: string) => {
     if (saveTimers.current[questionId]) clearTimeout(saveTimers.current[questionId]);
@@ -162,7 +164,7 @@ export default function ReadinessTestRunner({ test, attempt }: Props) {
 
   return (
     <div className="space-y-6 max-w-3xl">
-      {expiresAtMs && (
+      {strictTimer && expiresAtMs && (
         <div className="sticky top-0 z-20 -mx-1 px-1 py-2 bg-background/95 backdrop-blur border-b border-border">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-0">
@@ -176,9 +178,11 @@ export default function ReadinessTestRunner({ test, attempt }: Props) {
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <Badge variant="outline" className="mb-2">
-            {test.timer_minutes}-minute limit — auto-submit
-          </Badge>
+          {strictTimer && (
+            <Badge variant="outline" className="mb-2">
+              {test.timer_minutes}-minute limit — auto-submit
+            </Badge>
+          )}
           <h1 className="text-2xl font-medium">{test.title}</h1>
           {test.subtitle && <p className="text-muted-foreground mt-1">{test.subtitle}</p>}
         </div>
@@ -189,16 +193,18 @@ export default function ReadinessTestRunner({ test, attempt }: Props) {
         </div>
       </div>
 
-      <Card className="border-amber-200 bg-amber-50/50 dark:border-amber-900 dark:bg-amber-950/20">
-        <CardContent className="flex items-start gap-3 pt-4 text-sm">
-          <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-          <p>
-            You have a strict <strong>{test.timer_minutes}-minute limit</strong>. The countdown updates
-            live. Your answers auto-save as you type — when time hits 0:00, the test closes and
-            submits automatically.
-          </p>
-        </CardContent>
-      </Card>
+      {strictTimer && (
+        <Card className="border-amber-200 bg-amber-50/50 dark:border-amber-900 dark:bg-amber-950/20">
+          <CardContent className="flex items-start gap-3 pt-4 text-sm">
+            <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+            <p>
+              You have a strict <strong>{test.timer_minutes}-minute limit</strong>. The countdown updates
+              live. Your answers auto-save as you type — when time hits 0:00, the test closes and
+              submits automatically.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="space-y-6">
         {questions.map((q, idx) => (
@@ -277,7 +283,7 @@ export default function ReadinessTestRunner({ test, attempt }: Props) {
       </div>
 
       <div className="sticky bottom-4 flex flex-wrap items-center justify-between gap-3 pb-4">
-        {expiresAtMs && (
+        {strictTimer && expiresAtMs && (
           <ReadinessCountdown expiresAtMs={expiresAtMs} hard size="sm" className="shadow-md" />
         )}
         <div className="flex gap-3 ml-auto">

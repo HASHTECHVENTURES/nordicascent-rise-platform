@@ -1,13 +1,18 @@
 import type { Candidate, Profile } from "@/types/database";
 import { isOnUniversityWaitlist } from "@/lib/candidateAccess";
 import { isJobHuntProfileReady } from "@/lib/profileCompleteness";
+import { isRegistrationDetailsComplete } from "@/lib/candidateRegistration";
 
 export function isUniversitySelected(candidate: Candidate | null | undefined) {
   return Boolean(candidate?.university_id);
 }
 
 export function isPreparationComplete(profile: Profile | null, candidate: Candidate | null | undefined) {
-  return isJobHuntProfileReady(profile, candidate) && isUniversitySelected(candidate);
+  return (
+    isJobHuntProfileReady(profile, candidate) &&
+    isUniversitySelected(candidate) &&
+    isRegistrationDetailsComplete(candidate)
+  );
 }
 
 export function canAccessReadiness(profile: Profile | null, candidate: Candidate | null | undefined) {

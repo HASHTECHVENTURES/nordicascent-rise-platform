@@ -1,14 +1,10 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Loader2, Lock, PlayCircle, AlertCircle } from "lucide-react";
-import {
-  useReadinessTests,
-  useMyReadinessAttempts,
-  useStartReadinessAttempt,
-} from "@/hooks/useReadiness";
-import { isLevelUnlocked, getAttemptExpiresAtMs } from "@/lib/readiness";
+import { useReadinessTests, useMyReadinessAttempts } from "@/hooks/useReadiness";
+import { isLevelUnlocked, getAttemptExpiresAtMs, hasStrictTimer } from "@/lib/readiness";
 import ReadinessCountdown from "@/components/readiness/ReadinessCountdown";
 import {
   READINESS_AREA_LABELS,
@@ -21,10 +17,8 @@ type Props = {
 };
 
 export default function ReadinessModuleHub({ compact = false, hideHeader = false }: Props) {
-  const navigate = useNavigate();
   const { data: tests, isLoading, isError, error } = useReadinessTests();
   const { data: attempts } = useMyReadinessAttempts();
-  const startAttempt = useStartReadinessAttempt();
 
   if (isLoading) {
     return (
@@ -100,6 +94,7 @@ export default function ReadinessModuleHub({ compact = false, hideHeader = false
                 const unlocked = isLevelUnlocked(test.level, area, attempts ?? [], tests ?? []);
                 const done = status === "submitted" || status === "expired";
                 const inProgress = status === "in_progress";
+                const strictTimer = hasStrictTimer(test);
 
                 return (
                   <div
@@ -109,15 +104,23 @@ export default function ReadinessModuleHub({ compact = false, hideHeader = false
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="font-medium text-sm">{READINESS_LEVEL_LABELS[test.level]}</p>
-                        <Badge variant="outline" className="text-xs">{test.timer_minutes} min limit</Badge>
+                        {strictTimer && (
+                          <Badge variant="outline" className="text-xs">
+                            {test.timer_minutes} min limit
+                          </Badge>
+                        )}
                         {done && <Badge className="bg-success text-success-foreground">Submitted</Badge>}
                         {inProgress && <Badge className="bg-primary text-primary-foreground">In progress</Badge>}
                       </div>
                       <p className="text-xs text-muted-foreground">{test.subtitle}</p>
-                      {inProgress && attempt && (
+                      {inProgress && attempt && strictTimer && (
                         <div className="pt-2">
                           <ReadinessCountdown
-                            expiresAtMs={getAttemptExpiresAtMs(attempt, test.timer_minutes)}
+                            expiresAtMs={getAttemptExpiresAtMs(
+                              attempt,
+                              test.timer_minutes,
+                              strictTimer
+                            )}
                             hard
                             size="sm"
                           />
@@ -142,19 +145,11 @@ export default function ReadinessModuleHub({ compact = false, hideHeader = false
                           </Link>
                         </Button>
                       ) : (
-                        <Button
-                          size="sm"
-                          disabled={startAttempt.isPending}
-                          className="gap-1"
-                          onClick={async () => {
-                            const started = await startAttempt.mutateAsync(test);
-                            navigate(`/candidate/readiness/test/${test.id}`, {
-                              state: { attempt: started },
-                            });
-                          }}
-                        >
-                          <PlayCircle className="h-4 w-4" />
-                          Begin test
+                        <Button size="sm" className="gap-1" asChild>
+                          <Link to={`/candidate/readiness/test/${test.id}`}>
+                            <PlayCircle className="h-4 w-4" />
+                            Begin test
+                          </Link>
                         </Button>
                       )}
                     </div>

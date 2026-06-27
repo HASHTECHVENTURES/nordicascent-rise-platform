@@ -55,6 +55,7 @@ export default function UniversityPickerDialog({
   const [search, setSearch] = useState("");
   const [showWaitlistForm, setShowWaitlistForm] = useState(false);
   const [waitlistName, setWaitlistName] = useState("");
+  const [waitlistCity, setWaitlistCity] = useState("");
   const [confirmWaitlistOpen, setConfirmWaitlistOpen] = useState(false);
 
   const list = universities ?? [];
@@ -64,6 +65,7 @@ export default function UniversityPickerDialog({
     setSearch("");
     setShowWaitlistForm(false);
     setWaitlistName("");
+    setWaitlistCity("");
     setConfirmWaitlistOpen(false);
   };
 
@@ -96,6 +98,7 @@ export default function UniversityPickerDialog({
         candidateId,
         waitlistName: name,
         institutionType: "university",
+        city: waitlistCity.trim() || undefined,
       });
       setConfirmWaitlistOpen(false);
       resetState();
@@ -157,7 +160,9 @@ export default function UniversityPickerDialog({
                               disabled={isSaving}
                             >
                               <span>{uni.name}</span>
-                              <span className="ml-auto text-xs text-muted-foreground">{uni.country}</span>
+                              <span className="ml-auto text-xs text-muted-foreground">
+                                {[uni.city, uni.country].filter(Boolean).join(", ")}
+                              </span>
                             </CommandItem>
                           ))}
                         </CommandGroup>
@@ -200,6 +205,13 @@ export default function UniversityPickerDialog({
                   value={waitlistName}
                   onChange={(e) => setWaitlistName(e.target.value)}
                   placeholder="Enter the full name"
+                />
+                <Label htmlFor="waitlist-city">City</Label>
+                <Input
+                  id="waitlist-city"
+                  value={waitlistCity}
+                  onChange={(e) => setWaitlistCity(e.target.value)}
+                  placeholder="e.g. Mumbai"
                 />
                 <p className="text-xs text-muted-foreground">
                   We'll keep your university on our waitlist. An admin will review it and make it selectable.

@@ -7,11 +7,45 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Search, Plus, MoreHorizontal, Eye, MapPin, Users, Clock, Briefcase, Loader2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useEmployerJobs, useCreateJob, useUpdateJob, useMyCompany } from "@/hooks/useData";
 import { useToast } from "@/hooks/use-toast";
 import { isCompanyProfileComplete, type CompanyProfile } from "@/lib/companyProfileCompleteness";
+import {
+  deriveTrackFromJobExperience,
+  ENGINEERING_DISCIPLINES,
+  START_WINDOW_OPTIONS,
+  JOB_EXPERIENCE_LEVELS,
+} from "@/lib/companyRegistration";
+import { TRACK_META } from "@/lib/track";
+
+const emptyForm = {
+  title: "",
+  location: "",
+  job_type: "Full-time",
+  description: "",
+  salary_range: "",
+  engineering_discipline: "",
+  discipline_other: "",
+  positions_count: "1",
+  experience_level: "",
+  target_track: "",
+  core_skills: "",
+  desired_start_window: "",
+};
+
+const selectContentProps = {
+  position: "popper" as const,
+  className: "z-[200]",
+};
 
 const EmployerJobPostings = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -22,13 +56,7 @@ const EmployerJobPostings = () => {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [form, setForm] = useState({
-    title: "",
-    location: "",
-    job_type: "Full-time",
-    description: "",
-    salary_range: "",
-  });
+  const [form, setForm] = useState(emptyForm);
 
   const companyId = employerData?.company_id;
   const company = employerData?.companies as CompanyProfile | null;
@@ -42,9 +70,21 @@ const EmployerJobPostings = () => {
   useEffect(() => {
     if (searchParams.get("new") === "1" && profileReady) {
       setOpen(true);
+      setForm((f) => ({
+        ...f,
+        location: company?.location ?? f.location,
+      }));
       setSearchParams({}, { replace: true });
     }
-  }, [searchParams, profileReady, setSearchParams]);
+  }, [searchParams, profileReady, setSearchParams, company?.location]);
+
+  useEffect(() => {
+    if (!form.experience_level) return;
+    const track = deriveTrackFromJobExperience(form.experience_level);
+    if (track && form.target_track !== track) {
+      setForm((f) => ({ ...f, target_track: track }));
+    }
+  }, [form.experience_level, form.target_track]);
 
   const applicantCount = (job: { applications?: { count: number }[] }) =>
     job.applications?.[0]?.count ?? 0;
@@ -55,17 +95,25 @@ const EmployerJobPostings = () => {
     try {
       await createJob.mutateAsync({
         company_id: companyId,
-        title: form.title,
-        location: form.location,
+        title: form.title.trim(),
+        location: form.location.trim() || company?.location || null,
         job_type: form.job_type,
-        description: form.description,
-        salary_range: form.salary_range,
+        description: form.core_skills.trim() || form.description.trim() || null,
+        salary_range: form.salary_range.trim() || null,
+        engineering_discipline: form.engineering_discipline || null,
+        discipline_other:
+          form.engineering_discipline === "Other" ? form.discipline_other.trim() || null : null,
+        positions_count: parseInt(form.positions_count, 10) || 1,
+        experience_level: form.experience_level || null,
+        target_track: (form.target_track as "entry" | "fast") || null,
+        core_skills: form.core_skills.trim() || null,
+        desired_start_window: form.desired_start_window || null,
         status: "open",
         posted_at: new Date().toISOString(),
       });
       toast({ title: "Job created", description: "Your job posting is now live." });
       setOpen(false);
-      setForm({ title: "", location: "", job_type: "Full-time", description: "", salary_range: "" });
+      setForm(emptyForm);
     } catch (err) {
       toast({ title: "Failed", description: err instanceof Error ? err.message : "Try again", variant: "destructive" });
     }
@@ -88,6 +136,8 @@ const EmployerJobPostings = () => {
     );
   }
 
+  const showDisciplineOther = form.engineering_discipline === "Other";
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -108,20 +158,119 @@ const EmployerJobPostings = () => {
                     description: "Finish Company Profile before posting roles.",
                     variant: "destructive",
                   });
+                } else {
+                  setForm((f) => ({ ...f, location: company?.location ?? f.location }));
                 }
               }}
             >
               <Plus className="h-4 w-4" />Create New Job
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>Create job posting</DialogTitle></DialogHeader>
             <form onSubmit={handleCreate} className="space-y-4">
-              <div className="space-y-2"><Label>Title</Label><Input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
-              <div className="space-y-2"><Label>Location</Label><Input required value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} /></div>
-              <div className="space-y-2"><Label>Job type</Label><Input value={form.job_type} onChange={(e) => setForm({ ...form, job_type: e.target.value })} /></div>
-              <div className="space-y-2"><Label>Salary range</Label><Input value={form.salary_range} onChange={(e) => setForm({ ...form, salary_range: e.target.value })} /></div>
-              <div className="space-y-2"><Label>Description</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
+              <div className="space-y-2">
+                <Label>Job title / role</Label>
+                <Input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Engineering discipline</Label>
+                <Select
+                  value={form.engineering_discipline || undefined}
+                  onValueChange={(value) => setForm({ ...form, engineering_discipline: value })}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select discipline" /></SelectTrigger>
+                  <SelectContent {...selectContentProps}>
+                    {ENGINEERING_DISCIPLINES.map((d) => (
+                      <SelectItem key={d} value={d}>{d}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {showDisciplineOther && (
+                <div className="space-y-2">
+                  <Label>Specify discipline</Label>
+                  <Input
+                    required
+                    value={form.discipline_other}
+                    onChange={(e) => setForm({ ...form, discipline_other: e.target.value })}
+                  />
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Number of positions</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    required
+                    value={form.positions_count}
+                    onChange={(e) => setForm({ ...form, positions_count: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Experience level sought</Label>
+                  <Select
+                    value={form.experience_level || undefined}
+                    onValueChange={(value) => setForm({ ...form, experience_level: value })}
+                  >
+                    <SelectTrigger><SelectValue placeholder="Select level" /></SelectTrigger>
+                    <SelectContent {...selectContentProps}>
+                      {JOB_EXPERIENCE_LEVELS.map((o) => (
+                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Program track</Label>
+                <Select
+                  value={form.target_track || undefined}
+                  onValueChange={(value) => setForm({ ...form, target_track: value })}
+                >
+                  <SelectTrigger><SelectValue placeholder="Entry or Fast track" /></SelectTrigger>
+                  <SelectContent {...selectContentProps}>
+                    <SelectItem value="entry">{TRACK_META.entry.label}</SelectItem>
+                    <SelectItem value="fast">{TRACK_META.fast.label}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Core technical skills required</Label>
+                <Textarea
+                  required
+                  rows={3}
+                  value={form.core_skills}
+                  onChange={(e) => setForm({ ...form, core_skills: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Desired start window</Label>
+                <Select
+                  value={form.desired_start_window || undefined}
+                  onValueChange={(value) => setForm({ ...form, desired_start_window: value })}
+                >
+                  <SelectTrigger><SelectValue placeholder="Select window" /></SelectTrigger>
+                  <SelectContent {...selectContentProps}>
+                    {START_WINDOW_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Location</Label>
+                <Input required value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Job type</Label>
+                <Input value={form.job_type} onChange={(e) => setForm({ ...form, job_type: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Salary range (optional)</Label>
+                <Input value={form.salary_range} onChange={(e) => setForm({ ...form, salary_range: e.target.value })} />
+              </div>
               <Button type="submit" disabled={createJob.isPending} className="w-full">Publish job</Button>
             </form>
           </DialogContent>
@@ -160,7 +309,18 @@ const EmployerJobPostings = () => {
               <p className="text-muted-foreground">No jobs posted yet. Create one so candidates can apply.</p>
               <Button
                 className="gap-2 bg-nordic-orange hover:bg-nordic-orange/90 text-white"
-                onClick={() => setOpen(true)}
+                onClick={() => {
+                  if (!profileReady) {
+                    toast({
+                      title: "Complete company profile first",
+                      description: "Finish Company Profile before posting roles.",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+                  setForm((f) => ({ ...f, location: company?.location ?? f.location }));
+                  setOpen(true);
+                }}
               >
                 <Plus className="h-4 w-4" />
                 Post your first job

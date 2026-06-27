@@ -301,7 +301,7 @@ export function useUniversities() {
     queryFn: async () => {
       let { data, error } = await supabase
         .from("universities")
-        .select("id, name, institution_type, country, is_accessible")
+        .select("id, name, institution_type, country, city, is_accessible")
         .eq("is_accessible", true)
         .eq("institution_type", "university")
         .order("name");
@@ -382,12 +382,14 @@ export function useSaveUniversity() {
       name: string;
       institution_type: InstitutionType;
       country?: string;
+      city?: string;
       is_accessible?: boolean;
     }) => {
       const row = {
         name: payload.name.trim(),
         institution_type: payload.institution_type,
         country: payload.country?.trim() || "India",
+        city: payload.city?.trim() || null,
         is_accessible: payload.is_accessible ?? true,
       };
       if (payload.id) {
@@ -451,6 +453,7 @@ export function useApproveUniversityWaitlist() {
             name: entry.university_name,
             institution_type: entry.institution_type,
             country: "India",
+            city: entry.city ?? null,
             is_accessible: makeAccessible,
           })
           .select("id")
@@ -481,16 +484,6 @@ export function useApproveUniversityWaitlist() {
           university_waitlist_name: null,
         })
         .eq("university_waitlist_name", entry.university_name);
-
-      const { data: cand } = await supabase
-        .from("candidates")
-        .select("track")
-        .eq("id", entry.candidate_id)
-        .single();
-      await completePreparationAndActivateReadiness(
-        entry.candidate_id,
-        (cand?.track ?? "entry") as Track
-      );
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-university-waitlist"] });
@@ -525,11 +518,13 @@ export function useSaveCandidateUniversity() {
       universityId,
       waitlistName,
       institutionType = "university",
+      city,
     }: {
       candidateId: string;
       universityId?: string;
       waitlistName?: string;
       institutionType?: InstitutionType;
+      city?: string;
     }) => {
       let resolvedWaitlist = waitlistName?.trim() ?? "";
 
@@ -548,16 +543,6 @@ export function useSaveCandidateUniversity() {
           })
           .eq("id", candidateId);
         if (error) throw error;
-
-        const { data: cand } = await supabase
-          .from("candidates")
-          .select("track")
-          .eq("id", candidateId)
-          .single();
-        await completePreparationAndActivateReadiness(
-          candidateId,
-          (cand?.track ?? "entry") as Track
-        );
         return;
       }
 
@@ -576,6 +561,7 @@ export function useSaveCandidateUniversity() {
         candidate_id: candidateId,
         university_name: resolvedWaitlist,
         institution_type: institutionType,
+        city: city?.trim() || null,
       });
       if (wlError && !wlError.message.includes("does not exist")) throw wlError;
     },
@@ -1511,6 +1497,39 @@ export function useUpdateCompany() {
       qc.invalidateQueries({ queryKey: ["company", data.id] });
       qc.invalidateQueries({ queryKey: ["jobs-open"] });
       qc.invalidateQueries({ queryKey: ["admin-jobs"] });
+    },
+  });
+}
+
+export function useUpdateEmployerContact() {
+  const qc = useQueryClient();
+  const { profile } = useAuth();
+  return useMutation({
+    mutationFn: async (payload: {
+      employerId: string;
+      contact_name: string;
+      contact_role: string;
+      contact_email: string;
+      contact_phone: string;
+    }) => {
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+          full_name: payload.contact_name.trim(),
+          email: payload.contact_email.trim(),
+          phone: payload.contact_phone.trim() || null,
+        })
+        .eq("id", profile!.id);
+      if (profileError) throw profileError;
+
+      const { error: employerError } = await supabase
+        .from("employers")
+        .update({ title: payload.contact_role.trim() || null })
+        .eq("id", payload.employerId);
+      if (employerError) throw employerError;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-company", profile?.id] });
     },
   });
 }

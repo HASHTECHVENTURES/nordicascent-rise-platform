@@ -20,8 +20,8 @@ export const READINESS_TESTS_SEED: ReadinessTestSeed[] = [
     level: 1,
     title: "Cultural & Social — Level 1",
     subtitle: "Awareness · Structured reflection (45–60 min)",
-    timer_minutes: 60,
-    timer_hard: true,
+    timer_minutes: 0,
+    timer_hard: false,
     questions: [
       {
         scenario_label: "Scenario 1: Taking Initiative",
@@ -75,8 +75,8 @@ export const READINESS_TESTS_SEED: ReadinessTestSeed[] = [
     level: 2,
     title: "Cultural & Social — Level 2",
     subtitle: "Application · Applied case work (60–90 min)",
-    timer_minutes: 60,
-    timer_hard: true,
+    timer_minutes: 0,
+    timer_hard: false,
     questions: [
       {
         scenario_label: "Case 1: Remote Integration Under Uncertainty",
@@ -200,8 +200,8 @@ export const READINESS_TESTS_SEED: ReadinessTestSeed[] = [
     level: 1,
     title: "Technical — Level 1",
     subtitle: "Awareness · Structured reflection (45–60 min)",
-    timer_minutes: 60,
-    timer_hard: true,
+    timer_minutes: 0,
+    timer_hard: false,
     questions: [
       {
         scenario_label: "Scenario 1: Unclear Problem Definition",
@@ -253,8 +253,8 @@ export const READINESS_TESTS_SEED: ReadinessTestSeed[] = [
     level: 2,
     title: "Technical — Level 2",
     subtitle: "Application · Applied case work (60 min)",
-    timer_minutes: 60,
-    timer_hard: true,
+    timer_minutes: 0,
+    timer_hard: false,
     questions: [
       {
         scenario_label: "Case 1: Vague Engineering Task",

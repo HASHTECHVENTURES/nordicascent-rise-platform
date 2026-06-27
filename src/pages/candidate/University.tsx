@@ -19,7 +19,7 @@ export default function CandidateUniversity() {
       return;
     }
     if (hasSelectedUniversity) {
-      navigate("/candidate/readiness", { replace: true });
+      navigate("/candidate/registration-details", { replace: true });
     }
   }, [loading, candidate, hasSelectedUniversity, onWaitlist, navigate]);
 
@@ -40,7 +40,7 @@ export default function CandidateUniversity() {
       required
       onComplete={async () => {
         await refreshProfile();
-        navigate("/candidate/readiness", { replace: true });
+        navigate("/candidate/registration-details", { replace: true });
       }}
       onWaitlistComplete={async () => {
         await refreshProfile();

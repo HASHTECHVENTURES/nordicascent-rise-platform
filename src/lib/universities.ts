@@ -5,6 +5,7 @@ export type University = {
   name: string;
   institution_type: InstitutionType;
   country: string;
+  city?: string | null;
   is_accessible?: boolean;
 };
 

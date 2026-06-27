@@ -53,14 +53,18 @@ export function getContinueStageForExcluded(stageId: string, track: Track): stri
 }
 
 export const EXPERIENCE_OPTIONS: { value: string; label: string; track: Track }[] = [
-  { value: "Fresher", label: "Fresher (no experience)", track: "entry" },
-  { value: "12 months", label: "12 months", track: "entry" },
-  { value: "1 year", label: "1 year", track: "fast" },
-  { value: "2 years", label: "2 years", track: "fast" },
-  { value: "3 years", label: "3 years", track: "fast" },
-  { value: "4 years", label: "4 years", track: "fast" },
-  { value: "5 years", label: "5 years", track: "fast" },
-  { value: "6+ years", label: "6+ years", track: "fast" },
+  { value: "0-12 months", label: "0 – 12 months", track: "entry" },
+  { value: "1-3 years", label: "1 – 3 years", track: "fast" },
+  { value: "3-5 years", label: "3 – 5 years", track: "fast" },
+  { value: "5+ years", label: "5+ years", track: "fast" },
+  { value: "Fresher", label: "Fresher (legacy)", track: "entry" },
+  { value: "12 months", label: "12 months (legacy)", track: "entry" },
+  { value: "1 year", label: "1 year (legacy)", track: "fast" },
+  { value: "2 years", label: "2 years (legacy)", track: "fast" },
+  { value: "3 years", label: "3 years (legacy)", track: "fast" },
+  { value: "4 years", label: "4 years (legacy)", track: "fast" },
+  { value: "5 years", label: "5 years (legacy)", track: "fast" },
+  { value: "6+ years", label: "6+ years (legacy)", track: "fast" },
 ];
 
 /** Map free-text experience to Entry (0–12 mo) or Fast (1+ yr). Returns null if unclear. */
@@ -108,35 +112,26 @@ export function normalizeExperienceValue(experience: string | null | undefined):
   const text = experience?.trim() ?? "";
   if (!text) return "";
 
-  if (text.toLowerCase() === "2+ years") return "2 years";
-  if (text.toLowerCase() === "6 months") return "12 months";
+  if (text.toLowerCase() === "2+ years") return "1-3 years";
+  if (text.toLowerCase() === "6 months") return "0-12 months";
 
   const preset = EXPERIENCE_OPTIONS.find((o) => o.value.toLowerCase() === text.toLowerCase());
   if (preset) return preset.value;
 
   const derived = deriveTrackFromExperience(text);
   if (derived === "fast") {
-    if (text.toLowerCase().includes("6+")) return "6+ years";
+    if (text.toLowerCase().includes("6+") || text.toLowerCase().includes("5+")) return "5+ years";
     const years = text.match(/(\d+(?:\.\d+)?)/);
     if (years) {
       const n = parseFloat(years[1]);
-      if (n >= 6) return "6+ years";
-      if (n >= 5) return "5 years";
-      if (n >= 4) return "4 years";
-      if (n >= 3) return "3 years";
-      if (n >= 2) return "2 years";
-      return "1 year";
+      if (n >= 5) return "5+ years";
+      if (n >= 3) return "3-5 years";
+      return "1-3 years";
     }
-    if (text.toLowerCase().includes("2+")) return "2 years";
-    return "1 year";
+    return "1-3 years";
   }
   if (derived === "entry") {
-    if (/\b(fresher|graduate|intern|none|zero|0)\b/.test(text.toLowerCase())) return "Fresher";
-    const months = text.match(/(\d+)\s*(?:month|months|mo)\b/i);
-    if (months) {
-      return "12 months";
-    }
-    return "12 months";
+    return "0-12 months";
   }
 
   return text;

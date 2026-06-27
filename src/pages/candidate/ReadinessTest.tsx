@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Info } from "lucide-react";
 import ReadinessTestRunner from "@/components/readiness/ReadinessTestRunner";
+import ReadinessTestIntro from "@/components/readiness/ReadinessTestIntro";
 import { useAuth } from "@/contexts/AuthContext";
 import { canAccessReadiness } from "@/lib/candidateJourney";
 import {
@@ -33,34 +34,28 @@ export default function CandidateReadinessTest() {
   const {
     data: attempts,
     isLoading: attemptsLoading,
-    isFetching: attemptsFetching,
     isError: attemptsError,
     error: attemptsQueryError,
     refetch: refetchAttempts,
   } = useMyReadinessAttempts();
   const startAttempt = useStartReadinessAttempt();
   const [startError, setStartError] = useState<string | null>(null);
-  const startRequestedRef = useRef<string | null>(null);
 
   const test = tests?.find((t) => t.id === testId);
   const attempt =
     attempts?.find((a) => a.test_id === testId) ??
     (routeAttempt?.test_id === testId ? routeAttempt : undefined);
 
-  useEffect(() => {
-    if (authLoading || !candidate?.id || !test || attempt || startAttempt.isPending) return;
-    if (startRequestedRef.current === test.id) return;
-
-    startRequestedRef.current = test.id;
+  const handleStartFromIntro = async () => {
+    if (!test) return;
     setStartError(null);
-
-    startAttempt
-      .mutateAsync(test)
-      .catch((err) => {
-        startRequestedRef.current = null;
-        setStartError(err instanceof Error ? err.message : "Could not start this test.");
-      });
-  }, [authLoading, candidate?.id, test, attempt, startAttempt]);
+    try {
+      await startAttempt.mutateAsync(test);
+      await refetchAttempts();
+    } catch (err) {
+      setStartError(err instanceof Error ? err.message : "Could not start this test.");
+    }
+  };
 
   if (!ready) {
     return (
@@ -122,42 +117,7 @@ export default function CandidateReadinessTest() {
     );
   }
 
-  if (!attempt) {
-    return (
-      <div className="space-y-4 max-w-lg">
-        <Button variant="ghost" size="sm" asChild>
-          <Link to="/candidate/readiness">Back to Readiness</Link>
-        </Button>
-        {startError ? (
-          <Card className="border-destructive/40 bg-destructive/5">
-            <CardContent className="pt-6 space-y-3">
-              <p className="font-medium">Could not open this test</p>
-              <p className="text-sm text-muted-foreground">{startError}</p>
-              <Button
-                size="sm"
-                onClick={() => {
-                  startRequestedRef.current = null;
-                  setStartError(null);
-                  startAttempt.mutate(test);
-                }}
-              >
-                Try again
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="flex justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        )}
-        {attemptsFetching && !startError && (
-          <p className="text-xs text-center text-muted-foreground">Loading your test session…</p>
-        )}
-      </div>
-    );
-  }
-
-  if (attempt.status === "submitted" || attempt.status === "expired") {
+  if (attempt?.status === "submitted" || attempt?.status === "expired") {
     return (
       <div className="space-y-4 max-w-lg">
         <Button variant="ghost" size="sm" asChild>
@@ -167,6 +127,29 @@ export default function CandidateReadinessTest() {
         <p className="text-sm text-muted-foreground">
           Your answers are under review. Continue with other levels if available.
         </p>
+      </div>
+    );
+  }
+
+  if (!attempt || attempt.status !== "in_progress") {
+    return (
+      <div className="space-y-4">
+        {startError && (
+          <Card className="border-destructive/40 bg-destructive/5 max-w-2xl">
+            <CardContent className="pt-6 space-y-3">
+              <p className="font-medium">Could not start this test</p>
+              <p className="text-sm text-muted-foreground">{startError}</p>
+              <Button size="sm" variant="outline" onClick={() => setStartError(null)}>
+                Dismiss
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+        <ReadinessTestIntro
+          test={test}
+          onNext={handleStartFromIntro}
+          starting={startAttempt.isPending}
+        />
       </div>
     );
   }

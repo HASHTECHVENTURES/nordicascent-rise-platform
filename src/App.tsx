@@ -26,6 +26,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 // Candidate Pages
 import CandidateDashboard from "./pages/candidate/Dashboard";
 import CandidateProfile from "./pages/candidate/Profile";
+import CandidateRegistrationDetails from "./pages/candidate/RegistrationDetails";
 import CandidateUniversity from "./pages/candidate/University";
 import CandidatePreparation from "./pages/candidate/Preparation";
 import CandidateSelection from "./pages/candidate/Selection";
@@ -126,6 +127,7 @@ const App = () => (
                 <Route path="/candidate/onboarding" element={<CandidateOnboarding />} />
                 <Route path="/candidate/followup" element={<CandidateFollowup />} />
                 <Route path="/candidate/profile" element={<CandidateProfile />} />
+                <Route path="/candidate/registration-details" element={<CandidateRegistrationDetails />} />
                 <Route path="/candidate/university" element={<CandidateUniversity />} />
                 <Route path="/candidate/jobs" element={<CandidateJobs />} />
                 <Route path="/candidate/jobs/:id" element={<CandidateJobDetail />} />

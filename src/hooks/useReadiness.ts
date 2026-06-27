@@ -144,7 +144,10 @@ export function useStartReadinessAttempt() {
   return useMutation({
     mutationFn: async (test: ReadinessTest) => {
       if (!candidate?.id) throw new Error("Not signed in");
-      const expiresAt = new Date(Date.now() + test.timer_minutes * 60 * 1000).toISOString();
+      const strict = test.timer_hard && test.timer_minutes > 0;
+      const expiresAt = strict
+        ? new Date(Date.now() + test.timer_minutes * 60 * 1000).toISOString()
+        : null;
 
       const loadExisting = async () => {
         const { data, error } = await supabase
@@ -161,7 +164,7 @@ export function useStartReadinessAttempt() {
 
       if (existing) {
         if (existing.status !== "in_progress") return existing;
-        if (!existing.expires_at) {
+        if (strict && !existing.expires_at) {
           const backfill =
             existing.started_at != null
               ? new Date(
@@ -171,6 +174,16 @@ export function useStartReadinessAttempt() {
           const { data: patched, error: patchError } = await supabase
             .from("readiness_attempts")
             .update({ expires_at: backfill })
+            .eq("id", existing.id)
+            .select("*")
+            .single();
+          if (patchError) throw patchError;
+          return patched as ReadinessAttempt;
+        }
+        if (!strict && existing.expires_at) {
+          const { data: patched, error: patchError } = await supabase
+            .from("readiness_attempts")
+            .update({ expires_at: null })
             .eq("id", existing.id)
             .select("*")
             .single();

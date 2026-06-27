@@ -39,6 +39,7 @@ export default function AdminUniversities() {
     name: "",
     institution_type: "university" as InstitutionType,
     country: "India",
+    city: "",
     is_accessible: true,
   });
 
@@ -50,7 +51,7 @@ export default function AdminUniversities() {
     try {
       await saveUniversity.mutateAsync(form);
       toast({ title: "University added" });
-      setForm({ name: "", institution_type: "university", country: "India", is_accessible: true });
+      setForm({ name: "", institution_type: "university", country: "India", city: "", is_accessible: true });
     } catch (err) {
       toast({
         title: "Failed",
@@ -124,6 +125,14 @@ export default function AdminUniversities() {
                     onChange={(e) => setForm((f) => ({ ...f, country: e.target.value }))}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label>City</Label>
+                  <Input
+                    value={form.city}
+                    onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
+                    placeholder="e.g. Mumbai"
+                  />
+                </div>
                 <div className="flex items-center gap-2 md:col-span-2">
                   <Switch
                     checked={form.is_accessible}
@@ -154,7 +163,7 @@ export default function AdminUniversities() {
                   <div>
                     <p className="font-medium">{uni.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {INSTITUTION_TYPE_LABELS[uni.institution_type as InstitutionType]} · {uni.country}
+                      {INSTITUTION_TYPE_LABELS[uni.institution_type as InstitutionType]} · {[uni.city, uni.country].filter(Boolean).join(", ")}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
@@ -205,7 +214,8 @@ export default function AdminUniversities() {
                       <div>
                         <p className="font-medium">{entry.university_name}</p>
                         <p className="text-sm text-muted-foreground">
-                          {INSTITUTION_TYPE_LABELS[entry.institution_type as InstitutionType]} · requested by{" "}
+                          {INSTITUTION_TYPE_LABELS[entry.institution_type as InstitutionType]}
+                          {entry.city ? ` · ${entry.city}` : ""} · requested by{" "}
                           {candidateName}
                           {candidate?.profiles?.email ? ` (${candidate.profiles.email})` : ""}
                         </p>
