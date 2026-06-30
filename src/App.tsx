@@ -43,6 +43,7 @@ import CandidateMentoring from "./pages/candidate/Mentoring";
 import CandidateSupport from "./pages/candidate/Support";
 import CandidateJobs from "./pages/candidate/Jobs";
 import CandidateJobDetail from "./pages/candidate/JobDetail";
+import CandidateJobApplication from "./pages/candidate/JobApplication";
 import CandidateApplications from "./pages/candidate/Applications";
 
 // Employer Pages
@@ -56,6 +57,7 @@ import EmployerCandidateDetail from "./pages/employer/CandidateDetail";
 import EmployerMessages from "./pages/employer/Messages";
 import EmployerAnalytics from "./pages/employer/Analytics";
 import EmployerMentoring from "./pages/employer/Mentoring";
+import EmployerSelectionApplication from "./pages/employer/SelectionApplication";
 import EmployerInternship from "./pages/employer/Internship";
 import EmployerActivation from "./pages/employer/Activation";
 
@@ -83,6 +85,8 @@ import AdminMentoring from "./pages/admin/Mentoring";
 import AdminUniversities from "./pages/admin/Universities";
 import AdminRelocation from "./pages/admin/Relocation";
 import AdminOnboarding from "./pages/admin/Onboarding";
+import AdminSelection from "./pages/admin/Selection";
+import AdminSelectionApplication from "./pages/admin/SelectionApplication";
 
 import NotFound from "./pages/NotFound";
 
@@ -130,6 +134,7 @@ const App = () => (
                 <Route path="/candidate/registration-details" element={<CandidateRegistrationDetails />} />
                 <Route path="/candidate/university" element={<CandidateUniversity />} />
                 <Route path="/candidate/jobs" element={<CandidateJobs />} />
+                <Route path="/candidate/jobs/:id/apply" element={<CandidateJobApplication />} />
                 <Route path="/candidate/jobs/:id" element={<CandidateJobDetail />} />
                 <Route path="/candidate/applications" element={<CandidateApplications />} />
                 <Route path="/candidate/messages" element={<CandidateMessages />} />
@@ -145,6 +150,7 @@ const App = () => (
                 <Route path="/employer/dashboard" element={<EmployerDashboard />} />
                 <Route path="/employer/tasks" element={<EmployerTasks />} />
                 <Route path="/employer/candidates" element={<EmployerCandidates />} />
+                <Route path="/employer/candidates/:candidateId/selection/:applicationId" element={<EmployerSelectionApplication />} />
                 <Route path="/employer/candidates/:candidateId" element={<EmployerCandidateDetail />} />
                 <Route path="/employer/jobs" element={<EmployerJobPostings />} />
                 <Route path="/employer/jobs/:id" element={<EmployerJobDetail />} />
@@ -183,6 +189,8 @@ const App = () => (
                 <Route path="/admin/universities" element={<AdminUniversities />} />
                 <Route path="/admin/relocation" element={<AdminRelocation />} />
                 <Route path="/admin/onboarding" element={<AdminOnboarding />} />
+                <Route path="/admin/selection/:applicationId" element={<AdminSelectionApplication />} />
+                <Route path="/admin/selection" element={<AdminSelection />} />
                 <Route path="/admin/security" element={<AdminSecurity />} />
               </Route>
             </Route>

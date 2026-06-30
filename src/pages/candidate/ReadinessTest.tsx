@@ -19,6 +19,10 @@ type TestLocationState = {
   attempt?: ReadinessAttempt;
 };
 
+function isActiveAttempt(attempt: ReadinessAttempt | undefined): attempt is ReadinessAttempt {
+  return Boolean(attempt && attempt.status === "in_progress");
+}
+
 export default function CandidateReadinessTest() {
   const { testId } = useParams();
   const location = useLocation();
@@ -40,19 +44,28 @@ export default function CandidateReadinessTest() {
   } = useMyReadinessAttempts();
   const startAttempt = useStartReadinessAttempt();
   const [startError, setStartError] = useState<string | null>(null);
+  const [startedAttempt, setStartedAttempt] = useState<ReadinessAttempt | null>(null);
 
   const test = tests?.find((t) => t.id === testId);
+  const attemptFromQuery = attempts?.find((a) => a.test_id === testId);
   const attempt =
-    attempts?.find((a) => a.test_id === testId) ??
-    (routeAttempt?.test_id === testId ? routeAttempt : undefined);
+    (isActiveAttempt(startedAttempt) ? startedAttempt : undefined) ??
+    (isActiveAttempt(attemptFromQuery) ? attemptFromQuery : undefined) ??
+    (routeAttempt?.test_id === testId && isActiveAttempt(routeAttempt) ? routeAttempt : undefined);
+  const closedAttempt = attemptFromQuery ?? (routeAttempt?.test_id === testId ? routeAttempt : undefined);
 
   const handleStartFromIntro = async () => {
     if (!test) return;
     setStartError(null);
     try {
-      await startAttempt.mutateAsync(test);
+      const created = await startAttempt.mutateAsync(test);
+      if (created.status !== "in_progress") {
+        throw new Error("This test has already been submitted.");
+      }
+      setStartedAttempt(created);
       await refetchAttempts();
     } catch (err) {
+      setStartedAttempt(null);
       setStartError(err instanceof Error ? err.message : "Could not start this test.");
     }
   };
@@ -117,7 +130,7 @@ export default function CandidateReadinessTest() {
     );
   }
 
-  if (attempt?.status === "submitted" || attempt?.status === "expired") {
+  if (closedAttempt?.status === "submitted" || closedAttempt?.status === "expired") {
     return (
       <div className="space-y-4 max-w-lg">
         <Button variant="ghost" size="sm" asChild>
@@ -131,7 +144,7 @@ export default function CandidateReadinessTest() {
     );
   }
 
-  if (!attempt || attempt.status !== "in_progress") {
+  if (!attempt) {
     return (
       <div className="space-y-4">
         {startError && (

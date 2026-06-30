@@ -10,6 +10,12 @@ export const COMPANY_COUNTRIES = [
   "Other",
 ] as const;
 
+export const COMPANY_DESCRIPTION_MAX_WORDS = 300;
+
+export function countCompanyDescriptionWords(text: string) {
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
 export const PHONE_COUNTRY_OPTIONS = [
   { country: "Norway", prefix: "+47" },
   { country: "Sweden", prefix: "+46" },
@@ -39,6 +45,7 @@ export const ENGINEERING_DISCIPLINES = [
 ] as const;
 
 export const JOB_EXPERIENCE_LEVELS: { value: string; label: string; track: Track }[] = [
+  { value: "final-year-student", label: "Final year student", track: "entry" },
   { value: "0-12 months", label: "0 – 12 months", track: "entry" },
   { value: "1-3 years", label: "1 – 3 years", track: "fast" },
   { value: "3-5 years", label: "3 – 5 years", track: "fast" },
@@ -48,6 +55,10 @@ export const JOB_EXPERIENCE_LEVELS: { value: string; label: string; track: Track
 export const START_WINDOW_OPTIONS = [
   { value: "3-6 months", label: "3 – 6 months" },
   { value: "6-12 months", label: "6 – 12 months" },
+  { value: "Q1 2027", label: "Q1 2027" },
+  { value: "Q2 2027", label: "Q2 2027" },
+  { value: "Q3 2027", label: "Q3 2027" },
+  { value: "Q4 2027", label: "Q4 2027" },
 ] as const;
 
 export const WORKPLACE_LANGUAGE_OPTIONS = [

@@ -22,6 +22,7 @@ import {
   ClipboardCheck,
   Heart,
   MapPin,
+  ClipboardList,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +47,7 @@ const peopleNav: NavItem[] = [
 
 const platformNav: NavItem[] = [
   { name: "Jobs", href: "/admin/jobs", icon: Briefcase },
+  { name: "Selection", href: "/admin/selection", icon: ClipboardList },
   { name: "Program Tasks", href: "/admin/stage-tasks", icon: ListChecks },
   { name: "Portal admins", href: "/admin/users", icon: Users },
   { name: "Insights", href: "/admin/insights", icon: Megaphone },

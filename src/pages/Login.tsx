@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -44,6 +44,8 @@ const roleConfig = {
 
 export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, null> }) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get("redirect");
   const { toast } = useToast();
   const { signIn, signInAsAdmin, signUp } = useAuth();
   const { data: publicConfig } = usePublicConfig();
@@ -63,11 +65,19 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
       setSelectedRole(fixedRole);
       return;
     }
-    const saved = sessionStorage.getItem(ROLE_STORAGE_KEY);
-    if (saved === "candidate" || saved === "employer" || saved === "internal") {
-      setSelectedRole(saved);
+    const roleParam = searchParams.get("role");
+    if (roleParam === "candidate" || roleParam === "employer" || roleParam === "internal") {
+      setSelectedRole(roleParam);
+    } else {
+      const saved = sessionStorage.getItem(ROLE_STORAGE_KEY);
+      if (saved === "candidate" || saved === "employer" || saved === "internal") {
+        setSelectedRole(saved);
+      }
     }
-  }, [fixedRole]);
+    if (searchParams.get("signup") === "1") {
+      setAuthMode("signup");
+    }
+  }, [fixedRole, searchParams]);
 
   useEffect(() => {
     if (selectedRole) {
@@ -123,6 +133,8 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
 
     setIsLoading(true);
     const config = roleConfig[selectedRole];
+    const safeRedirect =
+      redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//") ? redirectTo : null;
 
     try {
       if (authMode === "signin") {
@@ -134,9 +146,8 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
         sessionStorage.removeItem(ROLE_STORAGE_KEY);
         toast({ title: "Welcome back!", description: `Logged in as ${config.title}` });
         navigate(
-          selectedRole === "employer"
-            ? "/employer/dashboard"
-            : config.redirectTo
+          safeRedirect ??
+            (selectedRole === "employer" ? "/employer/dashboard" : config.redirectTo)
         );
       } else {
         await signUp(email, password, {
@@ -155,9 +166,10 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
                 : `Welcome to Nordic Ascent, ${config.title}.`,
         });
         navigate(
-          selectedRole === "candidate"
-            ? "/candidate/profile"
-            : config.redirectTo
+          safeRedirect ??
+            (selectedRole === "candidate"
+              ? "/candidate/profile"
+              : config.redirectTo)
         );
       }
     } catch (err) {

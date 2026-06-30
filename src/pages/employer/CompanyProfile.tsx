@@ -28,6 +28,8 @@ import {
 } from "@/lib/companyProfileCompleteness";
 import {
   COMPANY_COUNTRIES,
+  COMPANY_DESCRIPTION_MAX_WORDS,
+  countCompanyDescriptionWords,
   HEARD_ABOUT_OPTIONS,
   lookupPostalLocation,
   normalizeContactPhone,
@@ -183,6 +185,15 @@ const EmployerCompanyProfile = () => {
   const handleSave = async () => {
     if (!company.id) {
       toast({ title: "No company found", variant: "destructive" });
+      return;
+    }
+
+    if (countCompanyDescriptionWords(form.description) > COMPANY_DESCRIPTION_MAX_WORDS) {
+      toast({
+        title: "Description too long",
+        description: `Company description must be ${COMPANY_DESCRIPTION_MAX_WORDS} words or fewer.`,
+        variant: "destructive",
+      });
       return;
     }
 
@@ -425,7 +436,7 @@ const EmployerCompanyProfile = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="company-description">Description</Label>
+            <Label htmlFor="company-description">Description (max {COMPANY_DESCRIPTION_MAX_WORDS} words, shown on job postings)</Label>
             <Textarea
               id="company-description"
               rows={4}
@@ -433,6 +444,9 @@ const EmployerCompanyProfile = () => {
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               placeholder="What your company does and why candidates should join..."
             />
+            <p className={`text-xs ${countCompanyDescriptionWords(form.description) > COMPANY_DESCRIPTION_MAX_WORDS ? "text-destructive" : "text-muted-foreground"}`}>
+              {countCompanyDescriptionWords(form.description)} / {COMPANY_DESCRIPTION_MAX_WORDS} words
+            </p>
           </div>
         </CardContent>
       </Card>

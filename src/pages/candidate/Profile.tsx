@@ -44,6 +44,7 @@ import {
   type Step1Form,
 } from "@/lib/candidateRegistration";
 import { needsRegistrationDetailsStep } from "@/pages/candidate/RegistrationDetails";
+import { CV_ACCEPT, resolveCvContentType, validateCvFile } from "@/lib/cvUpload";
 import { cn } from "@/lib/utils";
 
 function needsUniversityStep(candidate: ReturnType<typeof useAuth>["candidate"]) {
@@ -270,8 +271,11 @@ const CandidateProfile = () => {
   const handleCvUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !profile?.id) return;
-    if (file.size > 10 * 1024 * 1024) {
-      toast({ title: "File too large", description: "Maximum size is 10 MB", variant: "destructive" });
+
+    const validation = validateCvFile(file);
+    if (!validation.ok) {
+      toast({ title: validation.message.includes("MB") ? "File too large" : "Invalid file", description: validation.message, variant: "destructive" });
+      if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
@@ -279,7 +283,10 @@ const CandidateProfile = () => {
     try {
       const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
       const path = `${profile.id}/cv/${Date.now()}-${safeName}`;
-      const { error: uploadError } = await supabase.storage.from("documents").upload(path, file, { contentType: file.type });
+      const contentType = resolveCvContentType(file);
+      const { error: uploadError } = await supabase.storage
+        .from("documents")
+        .upload(path, file, { contentType, upsert: false });
       if (uploadError) throw uploadError;
 
       await updateCandidate.mutateAsync({ cv_url: path });
@@ -364,7 +371,7 @@ const CandidateProfile = () => {
         </Card>
       )}
 
-      <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={handleCvUpload} />
+      <input ref={fileInputRef} type="file" accept={CV_ACCEPT} className="hidden" onChange={handleCvUpload} />
 
       <Card className={cn(fieldInvalid("avatar") && "border-destructive/50")}>
         <CardHeader>

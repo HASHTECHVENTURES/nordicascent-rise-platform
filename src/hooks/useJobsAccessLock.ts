@@ -7,7 +7,7 @@ import { canAccessJobs } from "@/lib/candidateJourney";
 
 const JOB_PATHS = ["/candidate/jobs", "/candidate/applications"];
 
-/** Block jobs/applications until admin unlocks from Mentoring panel. */
+/** Jobs open after preparation complete (Module 2: apply before Readiness). */
 export function useJobsAccessLock() {
   const navigate = useNavigate();
   const location = useLocation();

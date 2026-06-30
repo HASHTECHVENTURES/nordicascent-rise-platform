@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,22 +14,27 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useApplyToJob, useMyApplications, useOpenJobs } from "@/hooks/useData";
+import { useMyApplications, useOpenJobs } from "@/hooks/useData";
 import { useToast } from "@/hooks/use-toast";
-import { isJobHuntProfileReady, getMissingProfileFields } from "@/lib/profileCompleteness";
+import { isPreparationComplete } from "@/lib/candidateJourney";
+import { jobApplyPath, loginPathForJobApply, setPendingJobApplication } from "@/lib/pendingJobApplication";
+import {
+  getCandidateCompanyName,
+  getCandidateJobLocation,
+  getJobTrackBadge,
+  isAnonymousCompany,
+} from "@/lib/jobPostingDisplay";
 import ProfileReadinessAlert from "@/components/candidate/ProfileReadinessAlert";
-import ApplicationSubmittedDialog from "@/components/candidate/ApplicationSubmittedDialog";
 
 export default function CandidateJobs() {
-  const { profile, candidate } = useAuth();
+  const navigate = useNavigate();
+  const { profile, candidate, session } = useAuth();
   const { data: jobs, isLoading: jobsLoading } = useOpenJobs();
   const { data: applications, isLoading: appsLoading } = useMyApplications();
-  const applyToJob = useApplyToJob();
   const { toast } = useToast();
   const [search, setSearch] = useState("");
-  const [submittedJob, setSubmittedJob] = useState<string | null>(null);
 
-  const profileReady = isJobHuntProfileReady(profile, candidate);
+  const profileReady = isPreparationComplete(profile, candidate);
   const appliedJobIds = useMemo(
     () => new Set((applications ?? []).map((a) => a.job_id)),
     [applications]
@@ -49,28 +54,23 @@ export default function CandidateJobs() {
     });
   }, [jobs, search]);
 
-  const handleApply = async (jobId: string) => {
+  const handleApply = (jobId: string) => {
+    setPendingJobApplication(jobId);
+    if (!session) {
+      navigate(loginPathForJobApply(jobId));
+      return;
+    }
     if (!profileReady) {
-      const missing = getMissingProfileFields(profile, candidate).map((m) => m.label).join(", ");
       toast({
         title: "Complete your profile first",
-        description: `Still needed: ${missing}. Save Changes in My Profile.`,
+        description: "Finish registration steps 1–3 before applying.",
         variant: "destructive",
       });
+      navigate("/candidate/profile");
       return;
     }
     if (appliedJobIds.has(jobId)) return;
-
-    try {
-      const { jobTitle } = await applyToJob.mutateAsync(jobId);
-      setSubmittedJob(jobTitle);
-    } catch (err) {
-      toast({
-        title: "Could not apply",
-        description: err instanceof Error ? err.message : "Try again",
-        variant: "destructive",
-      });
-    }
+    navigate(jobApplyPath(jobId));
   };
 
   if (jobsLoading || appsLoading) {
@@ -83,12 +83,6 @@ export default function CandidateJobs() {
 
   return (
     <div className="space-y-6">
-      <ApplicationSubmittedDialog
-        open={!!submittedJob}
-        onOpenChange={(open) => !open && setSubmittedJob(null)}
-        jobTitle={submittedJob ?? ""}
-      />
-
       <div>
         <h1 className="text-2xl font-medium text-foreground">Jobs</h1>
         <p className="text-muted-foreground">Open roles you can apply to.</p>
@@ -116,41 +110,53 @@ export default function CandidateJobs() {
             </p>
           )}
           {openJobs.map((job) => {
-            const company = job.companies as { name: string; logo_url: string | null; location: string | null } | null;
+            const company = job.companies as {
+              name: string;
+              logo_url: string | null;
+              location: string | null;
+              status: string | null;
+            } | null;
             const applied = appliedJobIds.has(job.id);
+            const companyName = getCandidateCompanyName(company);
+            const location = getCandidateJobLocation(job, company);
+            const trackBadge = getJobTrackBadge(job);
+            const anonymous = isAnonymousCompany(company?.status);
             return (
               <div
                 key={job.id}
                 className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg border"
               >
                 <div className="flex gap-4 min-w-0 flex-1">
-                  <Avatar className="h-12 w-12 rounded-lg shrink-0">
-                    <AvatarImage src={company?.logo_url ?? undefined} className="object-contain p-1" />
-                    <AvatarFallback className="rounded-lg text-xs">
-                      {(company?.name ?? "CO").slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
+                  {!anonymous && company?.logo_url ? (
+                    <Avatar className="h-12 w-12 rounded-lg shrink-0">
+                      <AvatarImage src={company.logo_url} className="object-contain p-1" />
+                      <AvatarFallback className="rounded-lg text-xs">
+                        {companyName.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  ) : (
+                    <div className="h-12 w-12 rounded-lg shrink-0 bg-muted flex items-center justify-center">
+                      <Building2 className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                  )}
                   <div className="min-w-0 space-y-2">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-medium">{job.title}</h3>
-                      <Badge variant="outline">{job.job_type}</Badge>
-                      {applied && <Badge variant="secondary">Applied</Badge>}
+                      {trackBadge && <Badge variant="secondary">{trackBadge}</Badge>}
+                      {applied && <Badge variant="outline">Applied</Badge>}
                     </div>
                     <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Building2 className="h-4 w-4" />
-                        {company?.name ?? "Company"}
+                        {companyName}
                       </span>
-                      {job.location && (
+                      {location && (
                         <span className="flex items-center gap-1">
                           <MapPin className="h-4 w-4" />
-                          {job.location}
+                          {location}
                         </span>
                       )}
                     </div>
-                    {job.description && (
-                      <p className="text-sm text-muted-foreground line-clamp-2">{job.description}</p>
-                    )}
                   </div>
                 </div>
                 <div className="flex gap-2 shrink-0">
@@ -163,7 +169,7 @@ export default function CandidateJobs() {
                   {!applied && (
                     <Button
                       size="sm"
-                      disabled={!profileReady || applyToJob.isPending}
+                      disabled={!profileReady || job.status !== "open"}
                       onClick={() => handleApply(job.id)}
                     >
                       <Briefcase className="h-4 w-4 mr-1" />

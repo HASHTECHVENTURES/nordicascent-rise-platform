@@ -17,6 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUpdateMyCandidate } from "@/hooks/useData";
 import { useToast } from "@/hooks/use-toast";
 import { completePreparationAndActivateReadiness } from "@/lib/preparationProgress";
+import { consumePendingJobApplyPath } from "@/lib/pendingJobApplication";
 import {
   countWords,
   getMissingStep3Fields,
@@ -120,6 +121,12 @@ export default function CandidateRegistrationDetails() {
 
       await refreshProfile();
       await completePreparationAndActivateReadiness(candidate.id, track);
+      const pendingApply = consumePendingJobApplyPath();
+      if (pendingApply) {
+        toast({ title: "Registration complete", description: "Continue with your job application." });
+        navigate(pendingApply, { replace: true });
+        return;
+      }
       toast({ title: "Registration complete", description: "You can now start Readiness tests." });
       navigate("/candidate/readiness", { replace: true });
     } catch (err) {

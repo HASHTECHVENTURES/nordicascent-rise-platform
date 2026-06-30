@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { useMyApplications, useMyStageProgress } from "@/hooks/useData";
 import InterviewInviteCard from "@/components/candidate/InterviewInviteCard";
+import SelectionProgressTracker from "@/components/selection/SelectionProgressTracker";
+import { isSelectionPipelineStatus } from "@/lib/selectionModule";
 import {
   applicationStatusLabel,
   applicationStatusNextStep,
@@ -118,6 +120,10 @@ export default function CandidateApplications() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {isSelectionPipelineStatus(app.status) && (
+                    <SelectionProgressTracker status={app.status} />
+                  )}
+
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Clock className="h-3 w-3" />
                     Applied {new Date(app.applied_at).toLocaleString()}

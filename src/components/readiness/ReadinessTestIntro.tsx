@@ -35,7 +35,7 @@ export default function ReadinessTestIntro({ test, onNext, starting }: Props) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <BookOpen className="h-5 w-5" />
-            Read this before you start
+            Read this first
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">

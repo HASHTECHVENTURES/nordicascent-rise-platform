@@ -15,8 +15,30 @@ export function isPreparationComplete(profile: Profile | null, candidate: Candid
   );
 }
 
-export function canAccessReadiness(profile: Profile | null, candidate: Candidate | null | undefined) {
+/** Readiness unlocks after selection + mentor assignment (Module 2), or legacy prep-complete path. */
+export function canAccessReadiness(
+  profile: Profile | null,
+  candidate: Candidate | null | undefined,
+  applications?: { status: string; assigned_mentor_id: string | null; readiness_unlocked_at: string | null }[]
+) {
   if (isOnUniversityWaitlist(candidate)) return false;
+
+  const selectedUnlocked = (applications ?? []).some(
+    (a) =>
+      a.status === "selected_for_readiness" &&
+      a.assigned_mentor_id &&
+      a.readiness_unlocked_at
+  );
+  if (selectedUnlocked) return true;
+
+  const inSelection = (applications ?? []).some(
+    (a) =>
+      a.status !== "rejected" &&
+      a.status !== "selection_rejected" &&
+      !["applied", "reviewing", "interview", "offer", "accepted"].includes(a.status)
+  );
+  if (inSelection) return false;
+
   return isPreparationComplete(profile, candidate);
 }
 
@@ -35,9 +57,11 @@ export function isJobsUnlocked(candidate: Candidate | null | undefined) {
 export function canAccessJobs(
   profile: Profile | null,
   candidate: Candidate | null | undefined,
-  readinessTestsSubmitted: boolean
+  _readinessTestsSubmitted?: boolean
 ) {
-  return canAccessMentoring(profile, candidate, readinessTestsSubmitted) && isJobsUnlocked(candidate);
+  if (isOnUniversityWaitlist(candidate)) return false;
+  if (candidate?.pool_category === "waitlist" || candidate?.pool_category === "alumni") return false;
+  return isPreparationComplete(profile, candidate) || isJobsUnlocked(candidate);
 }
 
 export type EarlyJourneyStep = {

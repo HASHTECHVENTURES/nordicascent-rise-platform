@@ -163,6 +163,9 @@ export function useStartReadinessAttempt() {
       const existing = await loadExisting();
 
       if (existing) {
+        if (existing.status === "submitted" || existing.status === "expired") {
+          throw new Error("This test has already been submitted.");
+        }
         if (existing.status !== "in_progress") return existing;
         if (strict && !existing.expires_at) {
           const backfill =

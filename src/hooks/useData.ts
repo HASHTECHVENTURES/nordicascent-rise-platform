@@ -12,6 +12,7 @@ import {
   onApplicationStatusChange,
   onApplicationSubmitted,
   notifyEmployersNewApplication,
+  notifyAdminsNewApplicationComplete,
 } from "@/lib/applicationEffects";
 import { getOrCreateConversationWithProfile, resolveConversationParticipant } from "@/lib/conversations";
 import { sendInterviewInvite } from "@/lib/sendInterviewInvite";
@@ -19,6 +20,7 @@ import {
   ensureCompanyActiveWhenPublishingJob,
   isCandidateVisibleJob,
 } from "@/lib/jobVisibility";
+import { CANDIDATE_JOB_COMPANY_SELECT } from "@/lib/jobPostingDisplay";
 import {
   computeStageReadiness,
   isTaskManuallyCompletable,
@@ -585,7 +587,7 @@ export function useOpenJobs() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("jobs")
-        .select("*, companies!inner(name, logo_url, location, status)")
+        .select(`*, companies!inner(${CANDIDATE_JOB_COMPANY_SELECT})`)
         .eq("status", "open")
         .order("posted_at", { ascending: false });
       if (error) throw error;
@@ -678,7 +680,7 @@ export function useJobById(id: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("jobs")
-        .select("*, companies(name, logo_url, location, status)")
+        .select(`*, companies(${CANDIDATE_JOB_COMPANY_SELECT})`)
         .eq("id", id!)
         .maybeSingle();
       if (error) throw error;
@@ -742,6 +744,103 @@ export function useMyApplications() {
         .order("applied_at", { ascending: false });
       if (error) throw error;
       return data;
+    },
+  });
+}
+
+export function useSubmitJobApplication() {
+  const qc = useQueryClient();
+  const { candidate } = useAuth();
+  return useMutation({
+    mutationFn: async ({
+      jobId,
+      track,
+      motivation_statement,
+      academic_transcript_path,
+      project_descriptions_text,
+      project_descriptions_path,
+      work_experience_path,
+      portfolio_path,
+    }: {
+      jobId: string;
+      track: Track;
+    } & import("@/lib/jobApplication").JobApplicationForm) => {
+      const { data: job } = await supabase.from("jobs").select("title").eq("id", jobId).single();
+      const { data: app, error } = await supabase
+        .from("applications")
+        .insert({
+          candidate_id: candidate!.id,
+          job_id: jobId,
+          stage_id: "preparation",
+          status: "application_complete",
+          needs_action: true,
+          track,
+          source: "apply",
+          motivation_statement: motivation_statement.trim(),
+          academic_transcript_path,
+          project_descriptions_text: project_descriptions_text.trim() || null,
+          project_descriptions_path: project_descriptions_path || null,
+          work_experience_path: work_experience_path || null,
+          portfolio_path: portfolio_path || null,
+        })
+        .select("id")
+        .single();
+      if (error) throw error;
+      await supabase.from("candidates").update({ pool_category: "active" }).eq("id", candidate!.id);
+      return { jobTitle: job?.title ?? "this role", jobId, applicationId: app.id };
+    },
+    onSuccess: async ({ jobTitle, jobId, applicationId }) => {
+      qc.invalidateQueries({ queryKey: ["applications"] });
+      qc.invalidateQueries({ queryKey: ["employer-applications"] });
+      qc.invalidateQueries({ queryKey: ["my-applications"] });
+      qc.invalidateQueries({ queryKey: ["notifications"] });
+
+      if (!candidate?.id) return;
+
+      const { data: cand } = await supabase
+        .from("candidates")
+        .select("profile_id, profiles(full_name)")
+        .eq("id", candidate.id)
+        .single();
+      if (cand?.profile_id) {
+        await onApplicationSubmitted(cand.profile_id, jobTitle);
+        const candidateName =
+          (cand.profiles as { full_name: string | null } | null)?.full_name ?? "A candidate";
+        await notifyEmployersNewApplication(
+          jobId,
+          jobTitle,
+          candidateName,
+          applicationId,
+          candidate.id
+        );
+        await notifyAdminsNewApplicationComplete(
+          jobTitle,
+          candidateName,
+          applicationId,
+          jobId,
+          candidate.id
+        );
+      }
+
+      const { data: tasks } = await supabase.from("stage_tasks").select("id, title");
+      const { data: completed } = await supabase
+        .from("candidate_task_progress")
+        .select("task_id")
+        .eq("candidate_id", candidate.id);
+      const done = new Set((completed ?? []).map((c) => c.task_id));
+
+      for (const task of tasks ?? []) {
+        const title = task.title.toLowerCase();
+        if (!title.includes("apply") && !title.includes("job")) continue;
+        if (done.has(task.id)) continue;
+        await supabase.from("candidate_task_progress").insert({
+          candidate_id: candidate.id,
+          task_id: task.id,
+        });
+      }
+
+      qc.invalidateQueries({ queryKey: ["task-progress"] });
+      qc.invalidateQueries({ queryKey: ["stage-progress"] });
     },
   });
 }
@@ -2259,6 +2358,61 @@ export function useAdminMarkTaskComplete() {
 }
 
 // ─── Mentoring ───────────────────────────────────────────────────────────────
+
+export function useCompanyMentors() {
+  const { profile } = useAuth();
+  return useQuery({
+    queryKey: ["company-mentors", profile?.id],
+    enabled: profile?.role === "employer",
+    queryFn: async () => {
+      const { data: employer } = await supabase
+        .from("employers")
+        .select("company_id")
+        .eq("profile_id", profile!.id)
+        .single();
+      if (!employer?.company_id) return [];
+      const { data, error } = await supabase
+        .from("company_mentors")
+        .select("*")
+        .eq("company_id", employer.company_id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+export function useCreateCompanyMentor() {
+  const qc = useQueryClient();
+  const { profile } = useAuth();
+  return useMutation({
+    mutationFn: async (mentor: {
+      name: string;
+      role_title?: string;
+      email: string;
+      phone?: string;
+    }) => {
+      const { data: employer } = await supabase
+        .from("employers")
+        .select("company_id")
+        .eq("profile_id", profile!.id)
+        .single();
+      if (!employer?.company_id) throw new Error("Company not found");
+      const { error } = await supabase.from("company_mentors").insert({
+        company_id: employer.company_id,
+        name: mentor.name.trim(),
+        role_title: mentor.role_title?.trim() || null,
+        email: mentor.email.trim().toLowerCase(),
+        phone: mentor.phone?.trim() || null,
+        status: "active",
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["company-mentors"] });
+    },
+  });
+}
 
 export function useCreateMentoringSession() {
   const qc = useQueryClient();

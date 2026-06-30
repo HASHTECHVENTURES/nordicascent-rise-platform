@@ -17,11 +17,32 @@ async function notifyCandidate(
   });
 }
 
+export async function notifyAdminsNewApplicationComplete(
+  jobTitle: string,
+  candidateName: string,
+  applicationId: string,
+  jobId: string,
+  candidateId: string
+) {
+  const { data: admins } = await supabase.from("profiles").select("id").eq("role", "admin");
+  if (!admins?.length) return;
+
+  const inserts = admins.map((admin) => ({
+    user_id: admin.id,
+    title: "New application complete",
+    body: `${candidateName} submitted a complete application for ${jobTitle}. Review in Admin → Selection.`,
+    type: "application_complete",
+    metadata: { applicationId, jobId, jobTitle, candidateName, candidateId },
+  }));
+
+  await supabase.from("notifications").insert(inserts);
+}
+
 export async function onApplicationSubmitted(profileId: string, jobTitle: string) {
   await notifyCandidate(
     profileId,
     "Application submitted",
-    `Your application for ${jobTitle} was sent. The employer will review your profile — we'll notify you when there's an update.`,
+    `Your application for ${jobTitle} was sent. Our team will review it — track progress in My Applications.`,
     "application_submitted",
     { jobTitle }
   );
@@ -120,6 +141,7 @@ export async function onApplicationStatusChange(
         "application_rejected",
         { applicationId: id, jobTitle: job_title }
       );
+      await supabase.from("candidates").update({ pool_category: "alumni" }).eq("id", candidate_id);
       break;
 
     default:

@@ -1,5 +1,10 @@
 import type { Candidate, Profile } from "@/types/database";
 import { isJobHuntProfileReady } from "@/lib/profileCompleteness";
+import {
+  candidateTrackerMessage,
+  isSelectionPipelineStatus,
+  selectionStatusLabel,
+} from "@/lib/selectionModule";
 
 export type ApplicationRow = {
   id: string;
@@ -25,7 +30,22 @@ export type JourneyStep = {
   state: JourneyStepState;
 };
 
-const ACTIVE_STATUSES = ["applied", "reviewing", "interview", "offer"] as const;
+const ACTIVE_STATUSES = [
+  "applied",
+  "application_complete",
+  "reviewing",
+  "interview",
+  "offer",
+  "eligibility_review",
+  "eligibility_pass",
+  "offee_review",
+  "offee_pass",
+  "step3_review",
+  "step3_pass",
+  "step4_review",
+  "step4_pass",
+  "selection_hold",
+] as const;
 
 export function hasUnlockedPipeline(applications: ApplicationRow[]) {
   return applications.some((a) => a.status === "accepted");
@@ -46,8 +66,10 @@ export function getPrimaryApplication(applications: ApplicationRow[]) {
 }
 
 export function applicationStatusLabel(status: string) {
+  if (isSelectionPipelineStatus(status)) return selectionStatusLabel(status);
   switch (status) {
     case "applied":
+    case "application_complete":
       return "Submitted — waiting for review";
     case "reviewing":
       return "Under review";
@@ -65,8 +87,10 @@ export function applicationStatusLabel(status: string) {
 }
 
 export function applicationStatusNextStep(status: string) {
+  if (isSelectionPipelineStatus(status)) return candidateTrackerMessage(status);
   switch (status) {
     case "applied":
+    case "application_complete":
       return "The employer will review your profile. You can still apply to other open roles.";
     case "reviewing":
       return "Your application is being reviewed. Check Messages if the employer contacts you.";

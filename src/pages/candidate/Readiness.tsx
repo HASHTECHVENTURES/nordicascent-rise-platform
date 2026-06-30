@@ -7,12 +7,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import ReadinessModuleHub from "@/components/readiness/ReadinessModuleHub";
 import { canAccessReadiness } from "@/lib/candidateJourney";
 import { useMyReadinessAttempts, useReadinessTests } from "@/hooks/useReadiness";
+import { useMyApplications } from "@/hooks/useData";
 import { allTestsSubmitted } from "@/lib/readiness";
+import { isSelectionPipelineStatus } from "@/lib/selectionModule";
 
 export default function CandidateReadiness() {
   const navigate = useNavigate();
   const { profile, candidate } = useAuth();
-  const ready = canAccessReadiness(profile, candidate);
+  const { data: applications } = useMyApplications();
+  const ready = canAccessReadiness(profile, candidate, applications ?? []);
   const { data: tests } = useReadinessTests();
   const { data: attempts } = useMyReadinessAttempts();
 
@@ -36,23 +39,49 @@ export default function CandidateReadiness() {
   }
 
   if (!ready) {
+    const inSelection = (applications ?? []).some((a) => isSelectionPipelineStatus(a.status));
+    const awaitingMentor = (applications ?? []).some(
+      (a) => a.status === "selected_for_readiness" && !a.readiness_unlocked_at
+    );
     return (
       <div className="space-y-6 max-w-lg">
         <h1 className="text-2xl font-medium">Readiness</h1>
         <Card>
           <CardContent className="pt-6 space-y-3">
-            <p className="text-sm text-muted-foreground">Complete registration steps 1–3 first.</p>
-            <div className="flex flex-wrap gap-2">
-              <Button size="sm" asChild>
-                <Link to="/candidate/profile">Step 1 — Profile</Link>
-              </Button>
-              <Button size="sm" variant="outline" asChild>
-                <Link to="/candidate/university">Step 2 — University</Link>
-              </Button>
-              <Button size="sm" variant="outline" asChild>
-                <Link to="/candidate/registration-details">Step 3 — Background</Link>
-              </Button>
-            </div>
+            {awaitingMentor ? (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  Congratulations — you were selected. Readiness unlocks once your company assigns a mentor.
+                </p>
+                <Button size="sm" variant="outline" asChild>
+                  <Link to="/candidate/applications">View application status</Link>
+                </Button>
+              </>
+            ) : inSelection ? (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  Readiness opens after you pass selection and a mentor is assigned. Track your application in My Applications.
+                </p>
+                <Button size="sm" variant="outline" asChild>
+                  <Link to="/candidate/applications">My Applications</Link>
+                </Button>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground">Complete registration steps 1–3 first.</p>
+                <div className="flex flex-wrap gap-2">
+                  <Button size="sm" asChild>
+                    <Link to="/candidate/profile">Step 1 — Profile</Link>
+                  </Button>
+                  <Button size="sm" variant="outline" asChild>
+                    <Link to="/candidate/university">Step 2 — University</Link>
+                  </Button>
+                  <Button size="sm" variant="outline" asChild>
+                    <Link to="/candidate/registration-details">Step 3 — Background</Link>
+                  </Button>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
