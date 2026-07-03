@@ -17,6 +17,7 @@ import {
 import { Search, Plus, MoreHorizontal, Eye, MapPin, Users, Clock, Briefcase, Loader2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useEmployerJobs, useCreateJob, useUpdateJob, useMyCompany } from "@/hooks/useData";
+import { countHoldApplicationsForJob } from "@/lib/jobCloseEffects";
 import { useToast } from "@/hooks/use-toast";
 import { isCompanyProfileComplete, type CompanyProfile } from "@/lib/companyProfileCompleteness";
 import {
@@ -121,8 +122,24 @@ const EmployerJobPostings = () => {
 
   const setStatus = async (id: string, status: string) => {
     try {
-      await updateJob.mutateAsync({ id, status });
-      toast({ title: "Job updated" });
+      if (status === "closed") {
+        const holdCount = await countHoldApplicationsForJob(id);
+        if (holdCount > 0) {
+          const ok = window.confirm(
+            `Close this job? ${holdCount} backup candidate(s) on HOLD will be notified and moved to Alumni.`
+          );
+          if (!ok) return;
+        }
+      }
+      const result = await updateJob.mutateAsync({ id, status });
+      if (status === "closed" && result.holdRejected > 0) {
+        toast({
+          title: "Job closed",
+          description: `${result.holdRejected} backup candidate(s) notified.`,
+        });
+      } else {
+        toast({ title: "Job updated" });
+      }
     } catch (err) {
       toast({ title: "Failed", description: err instanceof Error ? err.message : "Try again", variant: "destructive" });
     }

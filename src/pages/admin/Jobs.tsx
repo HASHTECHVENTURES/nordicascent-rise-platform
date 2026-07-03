@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Eye, CheckCircle, XCircle, MoreHorizontal, Building2, MapPin, Clock, Loader2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAdminJobs, useUpdateJob } from "@/hooks/useData";
+import { countHoldApplicationsForJob } from "@/lib/jobCloseEffects";
 import { useMemo, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -32,8 +33,24 @@ const AdminJobs = () => {
 
   const setStatus = async (id: string, status: string) => {
     try {
-      await updateJob.mutateAsync({ id, status });
-      toast({ title: status === "open" ? "Job approved" : "Job closed" });
+      if (status === "closed") {
+        const holdCount = await countHoldApplicationsForJob(id);
+        if (holdCount > 0) {
+          const ok = window.confirm(
+            `Close this job? ${holdCount} backup candidate(s) on HOLD will be notified and moved to Alumni.`
+          );
+          if (!ok) return;
+        }
+      }
+      const result = await updateJob.mutateAsync({ id, status });
+      if (status === "closed" && result.holdRejected > 0) {
+        toast({
+          title: "Job closed",
+          description: `${result.holdRejected} backup candidate(s) notified.`,
+        });
+      } else {
+        toast({ title: status === "open" ? "Job approved" : "Job closed" });
+      }
     } catch (err) {
       toast({ title: "Failed", description: err instanceof Error ? err.message : "Try again", variant: "destructive" });
     }

@@ -1,5 +1,6 @@
 import type { Candidate, Profile } from "@/types/database";
 import { isOnUniversityWaitlist } from "@/lib/candidateAccess";
+import { isSelectionInProgress } from "@/lib/applicationStatusFlow";
 import { isJobHuntProfileReady } from "@/lib/profileCompleteness";
 import { isRegistrationDetailsComplete } from "@/lib/candidateRegistration";
 
@@ -23,20 +24,19 @@ export function canAccessReadiness(
 ) {
   if (isOnUniversityWaitlist(candidate)) return false;
 
-  const selectedUnlocked = (applications ?? []).some(
+  const hasReadinessUnlocked = (applications ?? []).some(
+    (a) => Boolean(a.assigned_mentor_id) && Boolean(a.readiness_unlocked_at)
+  );
+  if (hasReadinessUnlocked) return true;
+
+  const awaitingMentor = (applications ?? []).some(
     (a) =>
       a.status === "selected_for_readiness" &&
-      a.assigned_mentor_id &&
-      a.readiness_unlocked_at
+      !a.readiness_unlocked_at
   );
-  if (selectedUnlocked) return true;
+  if (awaitingMentor) return false;
 
-  const inSelection = (applications ?? []).some(
-    (a) =>
-      a.status !== "rejected" &&
-      a.status !== "selection_rejected" &&
-      !["applied", "reviewing", "interview", "offer", "accepted"].includes(a.status)
-  );
+  const inSelection = (applications ?? []).some((a) => isSelectionInProgress(a.status));
   if (inSelection) return false;
 
   return isPreparationComplete(profile, candidate);
@@ -60,7 +60,7 @@ export function canAccessJobs(
   _readinessTestsSubmitted?: boolean
 ) {
   if (isOnUniversityWaitlist(candidate)) return false;
-  if (candidate?.pool_category === "waitlist" || candidate?.pool_category === "alumni") return false;
+  if (candidate?.pool_category === "waitlist") return false;
   return isPreparationComplete(profile, candidate) || isJobsUnlocked(candidate);
 }
 

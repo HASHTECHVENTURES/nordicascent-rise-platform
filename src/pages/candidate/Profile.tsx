@@ -90,13 +90,14 @@ const CandidateProfile = () => {
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url ?? "");
 
   useEffect(() => {
-    if (!profile?.id && !candidate?.id) return;
-    const syncKey = `${profile?.id}:${candidate?.id}:${candidate?.updated_at ?? ""}`;
+    if (!profile?.id || !candidate?.id) return;
+    // Sync from server on first load only — CV/avatar upload refreshes candidate and must not wipe unsaved form fields.
+    const syncKey = `${profile.id}:${candidate.id}`;
     if (lastSyncedAt.current === syncKey) return;
     lastSyncedAt.current = syncKey;
     setForm(formFromAuth(profile, candidate));
     setAvatarUrl(profile?.avatar_url ?? candidate?.avatar_url ?? "");
-  }, [profile, candidate]);
+  }, [profile?.id, candidate?.id]);
 
   const isIndia = form.country === DEFAULT_COUNTRY;
   const isSaving = saving || updateCandidate.isPending;
@@ -213,7 +214,9 @@ const CandidateProfile = () => {
       qc.invalidateQueries({ queryKey: ["stage-progress"] });
 
       markProfileSaved();
-      lastSyncedAt.current = `${profile.id}:${candidate.id}:${freshCandidate?.updated_at ?? ""}`;
+      lastSyncedAt.current = `${profile.id}:${candidate.id}`;
+      setForm(formFromAuth(freshProfile ?? profile, freshCandidate ?? candidate));
+      setAvatarUrl(freshProfile?.avatar_url ?? freshCandidate?.avatar_url ?? avatarUrl);
 
       toast({
         title: "Profile saved",
@@ -296,10 +299,12 @@ const CandidateProfile = () => {
         return next;
       });
       await refreshProfile();
-      const { data: freshCandidate } = await supabase.from("candidates").select("*").eq("id", candidate!.id).single();
-      const { data: freshProfile } = await supabase.from("profiles").select("*").eq("id", profile!.id).single();
-      if (freshCandidate && freshProfile) {
-        await syncEligibleTasks(candidate!.id, freshProfile, freshCandidate);
+      if (candidate?.id && profile.id) {
+        const { data: freshCandidate } = await supabase.from("candidates").select("*").eq("id", candidate.id).single();
+        const { data: freshProfile } = await supabase.from("profiles").select("*").eq("id", profile.id).single();
+        if (freshCandidate && freshProfile) {
+          await syncEligibleTasks(candidate.id, freshProfile, freshCandidate);
+        }
       }
       qc.invalidateQueries({ queryKey: ["task-progress"] });
       toast({ title: "CV uploaded" });

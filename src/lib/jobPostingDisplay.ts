@@ -7,7 +7,7 @@ import {
 
 export const ANONYMOUS_COMPANY_NAME = "Leading Nordic engineering company";
 
-export const NORDIC_ASCENT_PROCESS_TEXT = `Nordic Ascent connects top engineering talent from India with leading Nordic companies through a structured process. You will go through a selection process, a Readiness programme that prepares you for Nordic work culture, and a mentoring relationship with a senior person at the company — all before you make the decision to relocate. You are not just applying for a job. You are entering a process designed to make sure it works for both sides.`;
+export const NORDIC_ASCENT_PROCESS_TEXT = `Nordic Ascent connects skilled engineers and technologists from India with leading Nordic companies through a structured process. Before you decide to relocate, you go through a selection process, a Readiness programme that prepares you for Nordic work culture, and a mentoring relationship with a senior colleague at the company. The process is designed to make sure the move works for both you and the employer.`;
 
 export type CandidateJobCompany = {
   name: string;

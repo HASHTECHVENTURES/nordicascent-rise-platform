@@ -22,7 +22,7 @@ const EmployerSelectionApplication = () => {
   const board = useSelectionBoardDecision();
   const { toast } = useToast();
 
-  const step = app ? getSelectionStepFromStatus(app.status) : 1;
+  const step = app ? getSelectionStepFromStatus(app.status, app.selection_step) : 1;
   const [techFeedback, setTechFeedback] = useState("");
   const [motFeedback, setMotFeedback] = useState("");
   const [boardDecision, setBoardDecision] = useState<"selected" | "hold" | "rejected">("selected");
@@ -149,6 +149,21 @@ const EmployerSelectionApplication = () => {
                 <p className="capitalize">{summary.admin_recommendation.replace("_", " ")}</p>
                 {summary.admin_reason && (
                   <p className="text-muted-foreground mt-1">{summary.admin_reason}</p>
+                )}
+              </div>
+            )}
+            {(summary.company_feedback_step3 || summary.company_feedback_step4) && (
+              <div className="rounded-lg border p-3 text-sm space-y-2">
+                <p className="font-medium">Your session feedback</p>
+                {summary.company_feedback_step3 && (
+                  <p className="text-muted-foreground">
+                    <span className="text-foreground">Technical:</span> {summary.company_feedback_step3}
+                  </p>
+                )}
+                {summary.company_feedback_step4 && (
+                  <p className="text-muted-foreground">
+                    <span className="text-foreground">Motivation:</span> {summary.company_feedback_step4}
+                  </p>
                 )}
               </div>
             )}

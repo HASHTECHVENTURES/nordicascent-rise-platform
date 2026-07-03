@@ -114,18 +114,34 @@ export function isSelectionPipelineStatus(status: string) {
   );
 }
 
-export function getSelectionStepFromStatus(status: string): SelectionStepId {
+/**
+ * Active selection step for admin/employer actions.
+ * Uses `selection_step` when present — pass statuses (e.g. eligibility_pass) alone
+ * would otherwise point at the completed step, not the next one.
+ */
+export function getSelectionStepFromStatus(
+  status: string,
+  selectionStep?: number | null
+): SelectionStepId {
+  if (
+    status === SELECTION_STATUSES.SELECTED_FOR_READINESS ||
+    status === SELECTION_STATUSES.SELECTION_HOLD
+  ) {
+    return 5;
+  }
+  if (status === SELECTION_STATUSES.SELECTION_REJECTED || status === SELECTION_STATUSES.REJECTED) {
+    if (selectionStep != null && selectionStep >= 1 && selectionStep <= 5) {
+      return selectionStep as SelectionStepId;
+    }
+    return 5;
+  }
+  if (selectionStep != null && selectionStep >= 1 && selectionStep <= 5) {
+    return selectionStep as SelectionStepId;
+  }
   if (status === SELECTION_STATUSES.APPLICATION_COMPLETE || status.startsWith("eligibility_")) return 1;
   if (status.startsWith("offee_")) return 2;
   if (status.startsWith("step3_")) return 3;
   if (status.startsWith("step4_")) return 4;
-  if (
-    status === SELECTION_STATUSES.SELECTED_FOR_READINESS ||
-    status === SELECTION_STATUSES.SELECTION_HOLD ||
-    status === SELECTION_STATUSES.SELECTION_REJECTED
-  ) {
-    return 5;
-  }
   return 1;
 }
 
@@ -212,9 +228,9 @@ export function selectionStatusLabel(status: string) {
     case SELECTION_STATUSES.ELIGIBILITY_PASS:
       return "Eligibility passed";
     case SELECTION_STATUSES.OFFEE_REVIEW:
-      return "Offee — under review";
+      return "Assessment in progress";
     case SELECTION_STATUSES.OFFEE_PASS:
-      return "Offee passed";
+      return "Assessment complete";
     case SELECTION_STATUSES.STEP3_REVIEW:
       return "Technical — under review";
     case SELECTION_STATUSES.STEP3_PASS:
@@ -235,6 +251,28 @@ export function selectionStatusLabel(status: string) {
   }
 }
 
+/** Candidate-facing status — no internal labels (e.g. HOLD shows as under review). */
+export function candidateSelectionStatusLabel(status: string) {
+  if (status === SELECTION_STATUSES.SELECTION_HOLD) {
+    return "Under review";
+  }
+  return selectionStatusLabel(status);
+}
+
+/** Max selected + hold-active candidates per job (spec: 2–3 per position). */
+export function maxSelectionsForJob(positionsCount: number | null | undefined) {
+  const positions = Math.max(1, positionsCount ?? 2);
+  return Math.min(3, Math.max(2, positions));
+}
+
+export function canSelectMoreForJob(
+  applications: Pick<Application, "status" | "board_company_decision">[],
+  positionsCount: number | null | undefined
+) {
+  const selected = countSelectedForJob(applications);
+  return selected < maxSelectionsForJob(positionsCount);
+}
+
 /** Candidate-facing tracker stages (no scores). */
 export type CandidateTrackerStage = {
   id: string;
@@ -242,23 +280,28 @@ export type CandidateTrackerStage = {
   state: "done" | "current" | "upcoming" | "failed";
 };
 
-export function getCandidateTrackerStages(status: string): CandidateTrackerStage[] {
+export function getCandidateTrackerStages(
+  status: string,
+  selectionStep?: number | null
+): CandidateTrackerStage[] {
   const failed =
     status === SELECTION_STATUSES.SELECTION_REJECTED || status === SELECTION_STATUSES.REJECTED;
 
   const currentIndex = (() => {
-    if (failed) return 4;
-    if (status === SELECTION_STATUSES.APPLICATION_COMPLETE) return 1;
-    if (status.startsWith("eligibility_")) return 1;
-    if (status.startsWith("offee_") || status.startsWith("step3_")) return 2;
-    if (status.startsWith("step4_")) return 3;
-    if (
-      status === SELECTION_STATUSES.SELECTED_FOR_READINESS ||
-      status === SELECTION_STATUSES.SELECTION_HOLD ||
-      status === SELECTION_STATUSES.SELECTION_REJECTED
-    ) {
+    const step = getSelectionStepFromStatus(status, selectionStep);
+    if (failed) {
+      if (step <= 1) return 1;
+      if (step <= 3) return 2;
+      if (step === 4) return 3;
       return 4;
     }
+    if (status === SELECTION_STATUSES.SELECTED_FOR_READINESS) return 4;
+    if (status === SELECTION_STATUSES.SELECTION_HOLD) return 4;
+    if (status === SELECTION_STATUSES.APPLICATION_COMPLETE) return 1;
+    if (step === 1) return 1;
+    if (step === 2 || step === 3) return 2;
+    if (step === 4) return 3;
+    if (step === 5) return 4;
     return 0;
   })();
 
@@ -285,23 +328,37 @@ export function getCandidateTrackerStages(status: string): CandidateTrackerStage
   });
 }
 
-export function candidateTrackerMessage(status: string) {
+export function candidateTrackerMessage(status: string, selectionStep?: number | null) {
   if (status === SELECTION_STATUSES.SELECTION_REJECTED || status === SELECTION_STATUSES.REJECTED) {
     return "This application was not selected. You can apply to other open roles.";
   }
   if (status === SELECTION_STATUSES.SELECTED_FOR_READINESS) {
-    return "You have been selected for the Nordic Ascent Readiness programme. Your mentor will be assigned shortly.";
+    return "You have been selected for the Nordic Ascent Readiness programme.";
   }
   if (status === SELECTION_STATUSES.SELECTION_HOLD) {
     return "Your application remains under review.";
   }
-  if (status === SELECTION_STATUSES.ELIGIBILITY_PASS) {
-    return "Your application has passed initial review.";
+  if (
+    status === SELECTION_STATUSES.ELIGIBILITY_PASS ||
+    status === SELECTION_STATUSES.OFFEE_REVIEW ||
+    status.startsWith("offee_") ||
+    status.startsWith("step3_")
+  ) {
+    if (status === SELECTION_STATUSES.OFFEE_PASS || status === SELECTION_STATUSES.STEP3_PASS) {
+      return "Assessment complete — we'll notify you about next steps.";
+    }
+    if (isReviewStatus(status)) {
+      return "Assessment in progress.";
+    }
+    return "Assessment in progress. Nordic Ascent will share Offee details with you.";
   }
-  if (status.startsWith("offee_")) {
+  if (status.startsWith("step4_")) {
     return isReviewStatus(status)
-      ? "Assessment in progress."
-      : "Assessment complete — we'll notify you of next steps.";
+      ? "Motivation session in progress."
+      : "Motivation session complete — the selection board will decide soon.";
+  }
+  if (status === SELECTION_STATUSES.APPLICATION_COMPLETE || status.startsWith("eligibility_")) {
+    return "We're reviewing your application. No action needed — we'll notify you when something changes.";
   }
   return "We're reviewing your application. No action needed — we'll notify you when something changes.";
 }
@@ -321,10 +378,22 @@ export function canActivateHold(app: SelectionApplication) {
 }
 
 export function isReadinessUnlocked(app: Pick<Application, "status" | "assigned_mentor_id" | "readiness_unlocked_at">) {
+  const journeyStatuses = [
+    "mentor_assigned",
+    "readiness_active",
+    "readiness_complete",
+    "internship",
+    "go_no_go",
+    "pre_arrival",
+    "relocation",
+    "onboarding",
+    "followup",
+    "journey_complete",
+  ];
   return (
-    app.status === SELECTION_STATUSES.SELECTED_FOR_READINESS &&
     Boolean(app.assigned_mentor_id) &&
-    Boolean(app.readiness_unlocked_at)
+    Boolean(app.readiness_unlocked_at) &&
+    (app.status === SELECTION_STATUSES.SELECTED_FOR_READINESS || journeyStatuses.includes(app.status))
   );
 }
 

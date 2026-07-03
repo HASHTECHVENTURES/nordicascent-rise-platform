@@ -121,7 +121,7 @@ export default function CandidateApplications() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {isSelectionPipelineStatus(app.status) && (
-                    <SelectionProgressTracker status={app.status} />
+                    <SelectionProgressTracker status={app.status} selectionStep={app.selection_step} />
                   )}
 
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -134,7 +134,7 @@ export default function CandidateApplications() {
                       <Bell className="h-4 w-4 text-primary" />
                       What happens next
                     </p>
-                    <p className="text-muted-foreground">{applicationStatusNextStep(app.status)}</p>
+                    <p className="text-muted-foreground">{applicationStatusNextStep(app.status, app.selection_step)}</p>
                   </div>
 
                   {app.interview_meet_url && app.interview_scheduled_at && (

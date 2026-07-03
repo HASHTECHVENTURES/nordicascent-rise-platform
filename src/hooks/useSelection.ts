@@ -3,19 +3,22 @@ import { supabase } from "@/lib/supabase";
 import {
   SELECTION_STATUSES,
   computeEligibilityAutoChecks,
+  canSelectMoreForJob,
   getNextStatusAfterDecision,
   getNextStepAfterPass,
   getSelectionStepFromStatus,
+  maxSelectionsForJob,
   type BoardDecision,
   type SelectionApplication,
   type SelectionStepId,
   type StepDecision,
 } from "@/lib/selectionModule";
-import { onSelectionStatusChange } from "@/lib/selectionEffects";
+import { onHoldCandidateActivated, onSelectionStatusChange } from "@/lib/selectionEffects";
+import { APPLICATION_JOURNEY_STATUSES } from "@/lib/applicationStatusFlow";
 
 const ADMIN_SELECTION_SELECT = `
   *,
-  jobs(id, title, positions_count, target_track, company_id, companies(id, name)),
+  jobs(id, title, positions_count, target_track, company_id, core_skills, engineering_discipline, experience_level, requirements, companies(id, name)),
   candidates(
     id, profile_id, full_name, track, university_id, university_waitlist_name,
     gpa_or_standing, field_of_study, cv_url,
@@ -54,7 +57,7 @@ export function useAdminJobSelectionApplications(jobId: string | undefined, step
 
       const apps = (data ?? []) as SelectionApplication[];
       if (stepFilter === "all" || !stepFilter) return apps;
-      return apps.filter((a) => getSelectionStepFromStatus(a.status) === stepFilter);
+      return apps.filter((a) => getSelectionStepFromStatus(a.status, a.selection_step) === stepFilter);
     },
   });
 }
@@ -127,7 +130,7 @@ export function useSelectionStepDecision() {
       if (fetchErr) throw fetchErr;
       const row = app as SelectionApplication;
 
-      const currentStep = getSelectionStepFromStatus(row.status);
+      const currentStep = getSelectionStepFromStatus(row.status, row.selection_step);
       if (currentStep !== step && !row.status.endsWith("_review")) {
         throw new Error("This application is not at the requested step.");
       }
@@ -140,6 +143,21 @@ export function useSelectionStepDecision() {
         needs_action: decision === "review",
         updated_at: now,
       };
+
+      let companyRejectReason: string | null = null;
+      if (decision === "reject") {
+        if (step === 3) {
+          companyRejectReason =
+            (typeof fields.technical_assessor_notes === "string"
+              ? fields.technical_assessor_notes.trim()
+              : row.technical_assessor_notes?.trim()) || null;
+        } else if (step === 4) {
+          companyRejectReason =
+            (typeof fields.motivation_session_notes === "string"
+              ? fields.motivation_session_notes.trim()
+              : row.motivation_session_notes?.trim()) || null;
+        }
+      }
 
       if (decision === "pass") {
         updates.selection_step = getNextStepAfterPass(step);
@@ -156,9 +174,9 @@ export function useSelectionStepDecision() {
       const { error } = await supabase.from("applications").update(updates).eq("id", applicationId);
       if (error) throw error;
 
-      return { app: row, newStatus, step, decision };
+      return { app: row, newStatus, step, decision, companyRejectReason, fields };
     },
-    onSuccess: async ({ app, newStatus, step, decision }) => {
+    onSuccess: async ({ app, newStatus, step, decision, companyRejectReason, fields }) => {
       qc.invalidateQueries({ queryKey: ["admin-selection-applications"] });
       qc.invalidateQueries({ queryKey: ["admin-selection-application"] });
       qc.invalidateQueries({ queryKey: ["employer-selection-applications"] });
@@ -179,10 +197,14 @@ export function useSelectionStepDecision() {
             step,
             decision,
             newStatus,
-            companyParticipatedStep3: Boolean(app.technical_company_participated),
-            companyParticipatedStep4: Boolean(app.motivation_company_participated),
+            companyParticipatedStep3: Boolean(
+              fields.technical_company_participated ?? app.technical_company_participated
+            ),
+            companyParticipatedStep4: Boolean(
+              fields.motivation_company_participated ?? app.motivation_company_participated
+            ),
           },
-          step === 3 ? (app.technical_company_feedback as string | null) : null
+          companyRejectReason
         );
       }
     },
@@ -215,6 +237,22 @@ export function useSelectionBoardDecision() {
         .eq("id", applicationId)
         .single();
       if (fetchErr) throw fetchErr;
+
+      const row = app as SelectionApplication;
+
+      if (companyDecision === "selected") {
+        const { data: jobApps, error: countErr } = await supabase
+          .from("applications")
+          .select("id, status, board_company_decision")
+          .eq("job_id", row.job_id);
+        if (countErr) throw countErr;
+        const others = (jobApps ?? []).filter((a) => a.id !== applicationId);
+        if (!canSelectMoreForJob(others, row.jobs?.positions_count)) {
+          throw new Error(
+            `This job already has ${maxSelectionsForJob(row.jobs?.positions_count)} selected candidates (maximum for this role).`
+          );
+        }
+      }
 
       const { error } = await supabase
         .from("applications")
@@ -266,11 +304,19 @@ export function useActivateHoldCandidate() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ applicationId, mentorId }: { applicationId: string; mentorId: string }) => {
+      const { data: app, error: fetchErr } = await supabase
+        .from("applications")
+        .select(ADMIN_SELECTION_SELECT)
+        .eq("id", applicationId)
+        .single();
+      if (fetchErr) throw fetchErr;
+      const row = app as SelectionApplication;
+
       const now = new Date().toISOString();
       const { error } = await supabase
         .from("applications")
         .update({
-          status: SELECTION_STATUSES.SELECTED_FOR_READINESS,
+          status: APPLICATION_JOURNEY_STATUSES.READINESS_ACTIVE,
           board_company_decision: "selected",
           hold_activated_at: now,
           assigned_mentor_id: mentorId,
@@ -279,11 +325,25 @@ export function useActivateHoldCandidate() {
         })
         .eq("id", applicationId);
       if (error) throw error;
+      return row;
     },
-    onSuccess: () => {
+    onSuccess: async (app) => {
       qc.invalidateQueries({ queryKey: ["admin-selection-applications"] });
       qc.invalidateQueries({ queryKey: ["admin-selection-application"] });
       qc.invalidateQueries({ queryKey: ["my-applications"] });
+      qc.invalidateQueries({ queryKey: ["notifications"] });
+
+      const profile = app.candidates?.profiles;
+      if (profile?.id) {
+        await onHoldCandidateActivated({
+          applicationId: app.id,
+          candidateId: app.candidate_id,
+          profileId: profile.id,
+          jobId: app.job_id,
+          jobTitle: app.jobs?.title ?? "the role",
+          companyId: app.jobs?.company_id ?? null,
+        });
+      }
     },
   });
 }
@@ -298,6 +358,7 @@ export function useAssignMentorToApplication() {
         .update({
           assigned_mentor_id: mentorId,
           readiness_unlocked_at: now,
+          status: APPLICATION_JOURNEY_STATUSES.READINESS_ACTIVE,
           updated_at: now,
         })
         .eq("id", applicationId);
@@ -340,11 +401,20 @@ export function useRefreshEligibilityChecks() {
 
 export function useBulkSelectionDecision() {
   const decide = useSelectionStepDecision();
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: async (items: StepDecisionInput[]) => {
       for (const item of items) {
         await decide.mutateAsync(item);
       }
+      return items.length;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-selection-applications"] });
+      qc.invalidateQueries({ queryKey: ["admin-selection-application"] });
+      qc.invalidateQueries({ queryKey: ["employer-selection-applications"] });
+      qc.invalidateQueries({ queryKey: ["my-applications"] });
+      qc.invalidateQueries({ queryKey: ["notifications"] });
     },
   });
 }

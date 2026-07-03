@@ -2,7 +2,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Briefcase, Loader2, UserPlus } from "lucide-react";
 import { useInsightArticle, useJobById } from "@/hooks/useData";
-import { loginPathForJobApply, setPendingJobApplication, signupPathForNetwork, jobApplyPath } from "@/lib/pendingJobApplication";
+import { signupPathForJobApply, setPendingJobApplication, signupPathForNetwork, jobApplyPath } from "@/lib/pendingJobApplication";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { isCandidateVisibleJob } from "@/lib/jobVisibility";
@@ -19,7 +19,7 @@ export default function JobDetail() {
 
   const isLoading = articleLoading || jobLoading;
   const jobApplyPathForId = id ? jobApplyPath(id) : "/candidate/jobs";
-  const loginApplyPath = id ? loginPathForJobApply(id) : "/login?role=candidate";
+  const loginApplyPath = id ? signupPathForJobApply(id) : "/login?role=candidate&signup=1";
 
   if (isLoading) {
     return (

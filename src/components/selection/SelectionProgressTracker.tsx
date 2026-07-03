@@ -4,6 +4,7 @@ import { getCandidateTrackerStages, type CandidateTrackerStage } from "@/lib/sel
 
 type Props = {
   status: string;
+  selectionStep?: number | null;
   className?: string;
 };
 
@@ -14,8 +15,8 @@ function StageIcon({ state }: { state: CandidateTrackerStage["state"] }) {
   return <Circle className="h-4 w-4 text-muted-foreground/40 shrink-0" />;
 }
 
-export default function SelectionProgressTracker({ status, className }: Props) {
-  const stages = getCandidateTrackerStages(status);
+export default function SelectionProgressTracker({ status, selectionStep, className }: Props) {
+  const stages = getCandidateTrackerStages(status, selectionStep);
 
   return (
     <div className={cn("flex flex-wrap gap-2 sm:gap-0 sm:justify-between", className)}>

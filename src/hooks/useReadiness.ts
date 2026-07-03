@@ -2,6 +2,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { activateMentoringStage } from "@/lib/preparationProgress";
+import {
+  APPLICATION_JOURNEY_STATUSES,
+  syncPrimaryApplicationStatus,
+} from "@/lib/applicationStatusFlow";
 import { seedReadinessModuleIfEmpty, allTestsSubmitted } from "@/lib/readiness";
 
 export type ReadinessTest = {
@@ -328,6 +332,10 @@ export function useSubmitReadinessAttempt() {
           .eq("candidate_id", candidate.id);
         if (tests && attempts && allTestsSubmitted(tests, attempts)) {
           await activateMentoringStage(candidate.id);
+          await syncPrimaryApplicationStatus(
+            candidate.id,
+            APPLICATION_JOURNEY_STATUSES.READINESS_COMPLETE
+          );
         }
       }
 

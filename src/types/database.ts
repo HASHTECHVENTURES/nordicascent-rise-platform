@@ -40,7 +40,7 @@ export type Database = {
       track_type: 'entry' | 'fast';
       stage_status: 'not_started' | 'active' | 'completed';
       job_status: 'draft' | 'open' | 'closed';
-      application_status: 'applied' | 'application_complete' | 'reviewing' | 'interview' | 'offer' | 'rejected' | 'accepted' | 'eligibility_review' | 'eligibility_pass' | 'offee_review' | 'offee_pass' | 'step3_review' | 'step3_pass' | 'step4_review' | 'step4_pass' | 'selected_for_readiness' | 'selection_hold' | 'selection_rejected';
+      application_status: 'applied' | 'application_complete' | 'reviewing' | 'interview' | 'offer' | 'rejected' | 'accepted' | 'eligibility_review' | 'eligibility_pass' | 'offee_review' | 'offee_pass' | 'step3_review' | 'step3_pass' | 'step4_review' | 'step4_pass' | 'selected_for_readiness' | 'selection_hold' | 'selection_rejected' | 'mentor_assigned' | 'readiness_active' | 'readiness_complete' | 'internship' | 'go_no_go' | 'pre_arrival' | 'relocation' | 'onboarding' | 'followup' | 'journey_complete';
     };
   };
 };

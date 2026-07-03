@@ -41,7 +41,7 @@ export function normalizeRegistrationExperience(experience: string | null | unde
   return "";
 }
 
-export const NORDICS_MOTIVATION_MAX_WORDS = 300;
+export const NORDICS_MOTIVATION_MAX_WORDS = 500;
 
 export function countWords(text: string) {
   return text.trim().split(/\s+/).filter(Boolean).length;
@@ -151,7 +151,7 @@ export function getMissingStep3Fields(track: Track, form: Step3Form) {
   if (!hasValue(form.nordics_motivation)) {
     missing.push({ key: "nordics_motivation", label: "Why work in the Nordics" });
   } else if (countWords(form.nordics_motivation) > NORDICS_MOTIVATION_MAX_WORDS) {
-    missing.push({ key: "nordics_motivation", label: "Motivation (max 300 words)" });
+    missing.push({ key: "nordics_motivation", label: "Motivation (max 500 words)" });
   }
   if (track === "entry") {
     if (!hasValue(form.expected_graduation_date)) {

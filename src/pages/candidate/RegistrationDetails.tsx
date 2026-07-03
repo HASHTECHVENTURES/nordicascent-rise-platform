@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUpdateMyCandidate } from "@/hooks/useData";
 import { useToast } from "@/hooks/use-toast";
 import { completePreparationAndActivateReadiness } from "@/lib/preparationProgress";
-import { consumePendingJobApplyPath } from "@/lib/pendingJobApplication";
+import { consumePendingJobApplyPath, pendingJobApplyPath } from "@/lib/pendingJobApplication";
 import {
   countWords,
   getMissingStep3Fields,
@@ -50,20 +50,23 @@ export default function CandidateRegistrationDetails() {
   const [saving, setSaving] = useState(false);
   const [gradMonth, setGradMonth] = useState("");
   const [gradYear, setGradYear] = useState("");
+  const syncedCandidateId = useRef<string | null>(null);
 
   const track = (candidate?.track ?? "entry") as Track;
   const isEntry = track === "entry";
   const motivationWords = countWords(form.nordics_motivation);
 
   useEffect(() => {
-    if (!candidate) return;
+    if (!candidate?.id) return;
+    if (syncedCandidateId.current === candidate.id) return;
+    syncedCandidateId.current = candidate.id;
     setForm(step3FormFromCandidate(candidate));
     const parts = (candidate.expected_graduation_date ?? "").split("/");
     if (parts.length === 2) {
       setGradMonth(parts[0] ?? "");
       setGradYear(parts[1] ?? "");
     }
-  }, [candidate?.id, candidate?.updated_at]);
+  }, [candidate?.id]);
 
   useEffect(() => {
     if (loading || !candidate) return;
@@ -76,7 +79,8 @@ export default function CandidateRegistrationDetails() {
       return;
     }
     if (isRegistrationDetailsComplete(candidate)) {
-      navigate("/candidate/readiness", { replace: true });
+      const pendingApply = pendingJobApplyPath();
+      navigate(pendingApply ?? "/candidate/readiness", { replace: true });
     }
   }, [loading, candidate, navigate]);
 
@@ -120,6 +124,7 @@ export default function CandidateRegistrationDetails() {
       });
 
       await refreshProfile();
+      setForm(step3FormFromCandidate({ ...candidate, ...payload }));
       await completePreparationAndActivateReadiness(candidate.id, track);
       const pendingApply = consumePendingJobApplyPath();
       if (pendingApply) {

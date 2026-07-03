@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { rejectHoldApplicationsForClosedJob } from "@/lib/jobCloseEffects";
 import { activateJobsAfterMentoringUnlock } from "@/lib/preparationProgress";
 import type { Track } from "@/lib/track";
 import type { AdminCandidateJourneyStage } from "@/lib/adminJourney";
@@ -664,11 +665,20 @@ export function useUpdateJob() {
       }
       const { error } = await supabase.from("jobs").update(updates).eq("id", id);
       if (error) throw error;
+
+      let holdRejected = 0;
+      if (updates.status === "closed") {
+        holdRejected = await rejectHoldApplicationsForClosedJob(id);
+      }
+      return { holdRejected };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       qc.invalidateQueries({ queryKey: ["employer-jobs"] });
       qc.invalidateQueries({ queryKey: ["admin-jobs"] });
       qc.invalidateQueries({ queryKey: ["jobs-open"] });
+      qc.invalidateQueries({ queryKey: ["admin-selection-applications"] });
+      qc.invalidateQueries({ queryKey: ["my-applications"] });
+      return result;
     },
   });
 }

@@ -2,14 +2,17 @@ import type { Candidate, Profile } from "@/types/database";
 import { isJobHuntProfileReady } from "@/lib/profileCompleteness";
 import {
   candidateTrackerMessage,
+  candidateSelectionStatusLabel,
   isSelectionPipelineStatus,
   selectionStatusLabel,
 } from "@/lib/selectionModule";
+import { applicationJourneyStatusLabel, isPostSelectionJourneyStatus } from "@/lib/applicationStatusFlow";
 
 export type ApplicationRow = {
   id: string;
   job_id: string;
   status: string;
+  selection_step?: number | null;
   applied_at: string;
   interview_meet_url?: string | null;
   interview_scheduled_at?: string | null;
@@ -45,6 +48,15 @@ const ACTIVE_STATUSES = [
   "step4_review",
   "step4_pass",
   "selection_hold",
+  "mentor_assigned",
+  "readiness_active",
+  "readiness_complete",
+  "internship",
+  "go_no_go",
+  "pre_arrival",
+  "relocation",
+  "onboarding",
+  "followup",
 ] as const;
 
 export function hasUnlockedPipeline(applications: ApplicationRow[]) {
@@ -66,7 +78,10 @@ export function getPrimaryApplication(applications: ApplicationRow[]) {
 }
 
 export function applicationStatusLabel(status: string) {
-  if (isSelectionPipelineStatus(status)) return selectionStatusLabel(status);
+  if (isPostSelectionJourneyStatus(status)) {
+    return applicationJourneyStatusLabel(status) ?? status.replace(/_/g, " ");
+  }
+  if (isSelectionPipelineStatus(status)) return candidateSelectionStatusLabel(status);
   switch (status) {
     case "applied":
     case "application_complete":
@@ -86,8 +101,34 @@ export function applicationStatusLabel(status: string) {
   }
 }
 
-export function applicationStatusNextStep(status: string) {
-  if (isSelectionPipelineStatus(status)) return candidateTrackerMessage(status);
+export function applicationStatusNextStep(status: string, selectionStep?: number | null) {
+  if (isPostSelectionJourneyStatus(status)) {
+    switch (status) {
+      case "mentor_assigned":
+        return "Your mentor is being assigned. Readiness opens shortly.";
+      case "readiness_active":
+        return "Complete your Readiness tests in My Journey.";
+      case "readiness_complete":
+        return "Readiness is complete. Your employer journey continues in My Journey.";
+      case "internship":
+        return "Your internship stage is in progress.";
+      case "go_no_go":
+        return "Go / No-Go review is in progress.";
+      case "pre_arrival":
+        return "Pre-arrival preparation is in progress.";
+      case "relocation":
+        return "Relocation steps are in progress.";
+      case "onboarding":
+        return "Onboarding is in progress.";
+      case "followup":
+        return "Follow-up stage is in progress.";
+      case "journey_complete":
+        return "You have completed the Nordic Ascent journey for this role.";
+      default:
+        return "Continue in My Journey.";
+    }
+  }
+  if (isSelectionPipelineStatus(status)) return candidateTrackerMessage(status, selectionStep);
   switch (status) {
     case "applied":
     case "application_complete":

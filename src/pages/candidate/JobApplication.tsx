@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,8 +25,7 @@ import {
 import { supabase } from "@/lib/supabase";
 import { TRACK_META, type Track } from "@/lib/track";
 import ApplicationSubmittedDialog from "@/components/candidate/ApplicationSubmittedDialog";
-import { clearPendingJobApplication } from "@/lib/pendingJobApplication";
-import { loginPathForJobApply } from "@/lib/pendingJobApplication";
+import { clearPendingJobApplication, loginPathForJobApply, setPendingJobApplication } from "@/lib/pendingJobApplication";
 
 const emptyForm: JobApplicationForm = {
   motivation_statement: "",
@@ -48,6 +47,10 @@ export default function CandidateJobApplication() {
   const [form, setForm] = useState<JobApplicationForm>(emptyForm);
   const [uploading, setUploading] = useState<string | null>(null);
   const [submittedJob, setSubmittedJob] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (jobId) setPendingJobApplication(jobId);
+  }, [jobId]);
 
   const track = ((job?.target_track ?? candidate?.track ?? "entry") as Track);
   const alreadyApplied = (applications ?? []).some((a) => a.job_id === jobId);
@@ -103,7 +106,10 @@ export default function CandidateJobApplication() {
   };
 
   if (!session) {
-    if (jobId) navigate(loginPathForJobApply(jobId), { replace: true });
+    if (jobId) {
+      setPendingJobApplication(jobId);
+      navigate(loginPathForJobApply(jobId), { replace: true });
+    }
     return null;
   }
 
@@ -171,7 +177,8 @@ export default function CandidateJobApplication() {
           <CardContent className="pt-6 space-y-3">
             <p className="font-medium">Not eligible to apply yet</p>
             <p className="text-sm text-muted-foreground">
-              Active candidates at partner universities can apply. Waitlist and network registrations cannot apply until approved.
+              Complete your profile and link a partner university to apply. Waitlist candidates cannot apply until approved.
+              Alumni may apply again to other open roles.
             </p>
           </CardContent>
         </Card>

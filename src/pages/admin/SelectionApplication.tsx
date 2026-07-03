@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import StepDecisionButtons from "@/components/selection/StepDecisionButtons";
 import {
   useAdminSelectionApplication,
+  useAdminJobSelectionApplications,
   useAssignMentorToApplication,
   useAdminCompanyMentors,
   useActivateHoldCandidate,
@@ -24,10 +25,12 @@ import {
   SELECTION_STEPS,
   buildOffeeCsvRows,
   canActivateHold,
+  countSelectedForJob,
   downloadCsv,
   getSelectionStepFromStatus,
   isReadinessUnlocked,
   isStepOverdue,
+  maxSelectionsForJob,
   selectionStatusLabel,
   type EligibilityAutoChecks,
   type StepDecision,
@@ -36,6 +39,7 @@ import {
 const AdminSelectionApplication = () => {
   const { id } = useParams<{ id: string }>();
   const { data: app, isLoading } = useAdminSelectionApplication(id);
+  const { data: jobApplications } = useAdminJobSelectionApplications(app?.job_id, "all");
   const decide = useSelectionStepDecision();
   const board = useSelectionBoardDecision();
   const refreshChecks = useRefreshEligibilityChecks();
@@ -192,10 +196,14 @@ const AdminSelectionApplication = () => {
   }
 
   const profile = app.candidates?.profiles;
-  const step = getSelectionStepFromStatus(app.status);
+  const step = getSelectionStepFromStatus(app.status, app.selection_step);
   const checks = app.eligibility_auto_checks as EligibilityAutoChecks | null;
   const overdue = isStepOverdue(step, app.selection_step_entered_at);
   const readinessOpen = isReadinessUnlocked(app);
+  const positions = app.jobs?.positions_count ?? 2;
+  const selectedCount = countSelectedForJob(jobApplications ?? []);
+  const maxSelected = maxSelectionsForJob(positions);
+  const job = app.jobs;
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -257,8 +265,14 @@ const AdminSelectionApplication = () => {
 
       {/* Step 2 — Offee */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-lg">Step 2 — Offee</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between gap-3">
+          <div>
+            <CardTitle className="text-lg">Step 2 — Offee</CardTitle>
+            <p className="text-xs text-muted-foreground mt-1">
+              External tool — export CSV, run Offee outside the platform, then enter results here.
+              Live Offee integration is not connected yet.
+            </p>
+          </div>
           <Button
             variant="outline"
             size="sm"
@@ -329,6 +343,11 @@ const AdminSelectionApplication = () => {
           <div className="space-y-2">
             <Label>Assessor notes</Label>
             <Textarea value={techAssessorNotes} onChange={(e) => setTechAssessorNotes(e.target.value)} rows={2} />
+            {techCompanyParticipated && (
+              <p className="text-xs text-muted-foreground">
+                If you reject after company participation, these notes may be shared with the company as a brief reason.
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Checkbox
@@ -373,6 +392,11 @@ const AdminSelectionApplication = () => {
           <div className="space-y-2">
             <Label>Session notes</Label>
             <Textarea value={motNotes} onChange={(e) => setMotNotes(e.target.value)} rows={2} />
+            {motCompanyParticipated && (
+              <p className="text-xs text-muted-foreground">
+                If you reject after company participation, these notes may be shared with the company as a brief reason.
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Checkbox
@@ -400,6 +424,28 @@ const AdminSelectionApplication = () => {
           <CardTitle className="text-lg">Step 5 — Selection board</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="rounded-lg border p-3 text-sm space-y-2 bg-muted/20">
+            <p className="font-medium">Role requirement profile</p>
+            <div className="grid grid-cols-2 gap-2 text-muted-foreground">
+              <p><span className="text-foreground">Track:</span> {job?.target_track ?? "—"}</p>
+              <p><span className="text-foreground">Level:</span> {job?.experience_level ?? "—"}</p>
+              <p><span className="text-foreground">Discipline:</span> {job?.engineering_discipline ?? "—"}</p>
+              <p>
+                <span className="text-foreground">Capacity:</span>{" "}
+                {positions} positions · {selectedCount} selected (max {maxSelected})
+              </p>
+            </div>
+            {job?.core_skills && (
+              <p><span className="text-foreground">Core skills:</span> {job.core_skills}</p>
+            )}
+            {(job?.requirements ?? []).length > 0 && (
+              <ul className="list-disc list-inside text-muted-foreground">
+                {(job.requirements ?? []).slice(0, 5).map((req) => (
+                  <li key={req}>{req}</li>
+                ))}
+              </ul>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Admin recommendation</Label>

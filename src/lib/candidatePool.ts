@@ -17,9 +17,10 @@ export function computeCandidatePoolCategory(
   candidate: Candidate | null | undefined
 ): CandidatePoolCategory {
   if (!candidate) return "network";
-  if (candidate.pool_category === "alumni") return "alumni";
   if (isOnUniversityWaitlist(candidate)) return "waitlist";
+  // Partner university + complete profile → eligible to apply (includes alumni re-applying).
   if (isPreparationComplete(profile, candidate) && candidate.university_id) return "active";
+  if (candidate.pool_category === "alumni") return "alumni";
   if (candidate.university_id || candidate.university_waitlist_name) {
     return isOnUniversityWaitlist(candidate) ? "waitlist" : "network";
   }
@@ -29,5 +30,7 @@ export function computeCandidatePoolCategory(
 export function canCandidateApply(profile: Profile | null, candidate: Candidate | null | undefined) {
   if (!candidate) return false;
   if (isOnUniversityWaitlist(candidate)) return false;
-  return computeCandidatePoolCategory(profile, candidate) === "active";
+  if (!isPreparationComplete(profile, candidate)) return false;
+  if (!candidate.university_id) return false;
+  return true;
 }

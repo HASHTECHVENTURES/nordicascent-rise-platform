@@ -13,6 +13,10 @@ import { usePublicConfig } from "@/hooks/useData";
 import type { UserRole } from "@/types/database";
 import logoImage from "@/assets/nordic-ascent-logo.png";
 import { HARDCODED_ADMIN_EMAIL, HARDCODED_ADMIN_PASSWORD } from "@/lib/adminCredentials";
+import {
+  postCandidateSignupPath,
+  rememberPendingJobFromPath,
+} from "@/lib/pendingJobApplication";
 
 type LoginRole = "candidate" | "employer" | "internal" | null;
 
@@ -77,6 +81,7 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
     if (searchParams.get("signup") === "1") {
       setAuthMode("signup");
     }
+    rememberPendingJobFromPath(searchParams.get("redirect"));
   }, [fixedRole, searchParams]);
 
   useEffect(() => {
@@ -144,6 +149,7 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
           await signIn(email, password);
         }
         sessionStorage.removeItem(ROLE_STORAGE_KEY);
+        rememberPendingJobFromPath(safeRedirect);
         toast({ title: "Welcome back!", description: `Logged in as ${config.title}` });
         navigate(
           safeRedirect ??
@@ -156,6 +162,7 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
           company_name: selectedRole === "employer" ? companyName : undefined,
         });
         sessionStorage.removeItem(ROLE_STORAGE_KEY);
+        rememberPendingJobFromPath(safeRedirect);
         toast({
           title: "Account created!",
           description:
@@ -166,10 +173,9 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
                 : `Welcome to Nordic Ascent, ${config.title}.`,
         });
         navigate(
-          safeRedirect ??
-            (selectedRole === "candidate"
-              ? "/candidate/profile"
-              : config.redirectTo)
+          selectedRole === "candidate"
+            ? postCandidateSignupPath(safeRedirect)
+            : safeRedirect ?? config.redirectTo
         );
       }
     } catch (err) {

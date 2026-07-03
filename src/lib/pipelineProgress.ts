@@ -2,6 +2,11 @@ import { supabase } from "@/lib/supabase";
 import { fetchStageTaskIdsForCandidate } from "@/lib/stageTasks";
 import { TRACK_META, type Track } from "@/lib/track";
 import { getSelectionStepState, type ApplicationRow } from "@/lib/applicationJourney";
+import {
+  applicationStatusForStageActivation,
+  applicationStatusForStageCompletion,
+  syncPrimaryApplicationStatus,
+} from "@/lib/applicationStatusFlow";
 
 const FAST_TRACK_SKIP_STAGES = ["internship"] as const;
 
@@ -227,6 +232,10 @@ export async function advanceCandidateStage(candidateId: string, currentStageId?
   const now = new Date().toISOString();
   const currentRow = progress?.find((p) => p.stage_id === stageId);
   if (currentRow) {
+    const completeStatus = applicationStatusForStageCompletion(stageId);
+    if (completeStatus) {
+      await syncPrimaryApplicationStatus(candidateId, completeStatus);
+    }
     await supabase
       .from("candidate_stage_progress")
       .update({ status: "completed", completed_at: now })
@@ -257,6 +266,10 @@ export async function advanceCandidateStage(candidateId: string, currentStageId?
 
   const next = stages[nextIdx];
   if (next) {
+    const activateStatus = applicationStatusForStageActivation(next.id);
+    if (activateStatus) {
+      await syncPrimaryApplicationStatus(candidateId, activateStatus);
+    }
     const nextRow = progress?.find((p) => p.stage_id === next.id);
     if (nextRow) {
       await supabase

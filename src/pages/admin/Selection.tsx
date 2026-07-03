@@ -3,22 +3,47 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, AlertTriangle, ChevronRight, Users } from "lucide-react";
-import { useAdminSelectionJobs, useAdminJobSelectionApplications } from "@/hooks/useSelection";
 import {
+  useAdminSelectionJobs,
+  useAdminJobSelectionApplications,
+  useBulkSelectionDecision,
+} from "@/hooks/useSelection";
+import { useToast } from "@/hooks/use-toast";
+import {
+  SELECTION_STATUSES,
   SELECTION_STEPS,
   countSelectedForJob,
   getSelectionStepFromStatus,
   isStepOverdue,
+  isTerminalSelectionStatus,
+  maxSelectionsForJob,
   selectionStatusLabel,
   type SelectionStepId,
+  type StepDecision,
 } from "@/lib/selectionModule";
+import type { SelectionApplication } from "@/lib/selectionModule";
+
+function isBulkEligibleStep1(app: SelectionApplication) {
+  const step = getSelectionStepFromStatus(app.status, app.selection_step);
+  if (step !== 1) return false;
+  if (isTerminalSelectionStatus(app.status)) return false;
+  return (
+    app.status === SELECTION_STATUSES.APPLICATION_COMPLETE ||
+    app.status === SELECTION_STATUSES.ELIGIBILITY_REVIEW ||
+    app.status.startsWith("eligibility_")
+  );
+}
 
 const AdminSelection = () => {
   const { data: jobs, isLoading: jobsLoading } = useAdminSelectionJobs();
   const [jobId, setJobId] = useState<string>("");
   const [stepFilter, setStepFilter] = useState<SelectionStepId | "all">("all");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const bulkDecide = useBulkSelectionDecision();
+  const { toast } = useToast();
 
   const selectedJobId = jobId || jobs?.[0]?.id;
   const { data: applications, isLoading: appsLoading } = useAdminJobSelectionApplications(
@@ -26,11 +51,16 @@ const AdminSelection = () => {
     stepFilter
   );
 
+  const bulkEligible = useMemo(
+    () => (applications ?? []).filter(isBulkEligibleStep1),
+    [applications]
+  );
+
   const funnelCounts = useMemo(() => {
     const all = applications ?? [];
     const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     all.forEach((a) => {
-      const step = getSelectionStepFromStatus(a.status);
+      const step = getSelectionStepFromStatus(a.status, a.selection_step);
       counts[step] = (counts[step] ?? 0) + 1;
     });
     return counts;
@@ -38,7 +68,57 @@ const AdminSelection = () => {
 
   const selectedJob = jobs?.find((j) => j.id === selectedJobId);
   const positions = selectedJob?.positions_count ?? 2;
+  const maxSelected = maxSelectionsForJob(positions);
   const selectedCount = countSelectedForJob(applications ?? []);
+
+  const toggleOne = (id: string, checked: boolean) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  };
+
+  const toggleAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedIds(new Set(bulkEligible.map((a) => a.id)));
+    } else {
+      setSelectedIds(new Set());
+    }
+  };
+
+  const runBulk = async (decision: StepDecision) => {
+    const ids = [...selectedIds].filter((id) => bulkEligible.some((a) => a.id === id));
+    if (ids.length === 0) {
+      toast({ title: "No candidates selected", variant: "destructive" });
+      return;
+    }
+    try {
+      await bulkDecide.mutateAsync(
+        ids.map((applicationId) => ({
+          applicationId,
+          step: 1 as const,
+          decision,
+          fields: {},
+        }))
+      );
+      setSelectedIds(new Set());
+      toast({
+        title: decision === "pass" ? "Bulk pass complete" : decision === "reject" ? "Bulk reject complete" : "Marked for review",
+        description: `${ids.length} candidate(s) updated.`,
+      });
+    } catch (err) {
+      toast({
+        title: "Bulk action failed",
+        description: err instanceof Error ? err.message : "Try again",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const showBulkBar = stepFilter === 1 && bulkEligible.length > 0;
+  const allSelected = bulkEligible.length > 0 && bulkEligible.every((a) => selectedIds.has(a.id));
 
   if (jobsLoading) {
     return (
@@ -58,7 +138,13 @@ const AdminSelection = () => {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
-        <Select value={selectedJobId} onValueChange={setJobId}>
+        <Select
+          value={selectedJobId}
+          onValueChange={(v) => {
+            setJobId(v);
+            setSelectedIds(new Set());
+          }}
+        >
           <SelectTrigger className="w-full sm:w-80">
             <SelectValue placeholder="Select a job" />
           </SelectTrigger>
@@ -76,7 +162,10 @@ const AdminSelection = () => {
 
         <Select
           value={String(stepFilter)}
-          onValueChange={(v) => setStepFilter(v === "all" ? "all" : (Number(v) as SelectionStepId))}
+          onValueChange={(v) => {
+            setStepFilter(v === "all" ? "all" : (Number(v) as SelectionStepId));
+            setSelectedIds(new Set());
+          }}
         >
           <SelectTrigger className="w-full sm:w-48">
             <SelectValue placeholder="Filter step" />
@@ -97,7 +186,12 @@ const AdminSelection = () => {
           <CardContent className="pt-4 flex flex-wrap items-center gap-4 text-sm">
             <span className="font-medium">{positions} positions available</span>
             <span className="text-muted-foreground">·</span>
-            <span>{selectedCount} selected</span>
+            <span>
+              {selectedCount} selected
+              {selectedCount >= maxSelected && (
+                <span className="text-amber-600 ml-1">(at capacity)</span>
+              )}
+            </span>
             <span className="text-muted-foreground">·</span>
             <span>{(applications ?? []).length} total applications</span>
           </CardContent>
@@ -109,7 +203,10 @@ const AdminSelection = () => {
           <Card
             key={s.step}
             className="cursor-pointer hover:border-primary/40 transition-colors"
-            onClick={() => setStepFilter(s.step)}
+            onClick={() => {
+              setStepFilter(s.step);
+              setSelectedIds(new Set());
+            }}
           >
             <CardHeader className="pb-1 pt-4">
               <CardTitle className="text-xs font-medium text-muted-foreground">
@@ -125,11 +222,45 @@ const AdminSelection = () => {
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <Users className="h-5 w-5" />
             Candidates
           </CardTitle>
+          {showBulkBar && (
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="flex items-center gap-2 text-sm text-muted-foreground mr-2">
+                <Checkbox
+                  checked={allSelected}
+                  onCheckedChange={(v) => toggleAll(Boolean(v))}
+                />
+                Select all ({bulkEligible.length})
+              </label>
+              <Button
+                size="sm"
+                disabled={selectedIds.size === 0 || bulkDecide.isPending}
+                onClick={() => runBulk("pass")}
+              >
+                Pass
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                disabled={selectedIds.size === 0 || bulkDecide.isPending}
+                onClick={() => runBulk("reject")}
+              >
+                Reject
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={selectedIds.size === 0 || bulkDecide.isPending}
+                onClick={() => runBulk("review")}
+              >
+                Review
+              </Button>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           {appsLoading ? (
@@ -145,34 +276,46 @@ const AdminSelection = () => {
               {(applications ?? []).map((app) => {
                 const cand = app.candidates;
                 const profile = cand?.profiles;
-                const step = getSelectionStepFromStatus(app.status);
+                const step = getSelectionStepFromStatus(app.status, app.selection_step);
                 const overdue = isStepOverdue(step, app.selection_step_entered_at);
+                const canBulk = isBulkEligibleStep1(app);
                 return (
-                  <Link
+                  <div
                     key={app.id}
-                    to={`/admin/selection/${app.id}`}
-                    className="flex items-center justify-between gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                    className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
                   >
-                    <div className="min-w-0">
-                      <p className="font-medium truncate">
-                        {profile?.full_name ?? cand?.full_name ?? "Candidate"}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {profile?.email} · Step {step}: {SELECTION_STEPS.find((s) => s.step === step)?.label}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      {overdue && (
-                        <Badge variant="destructive" className="gap-1">
-                          <AlertTriangle className="h-3 w-3" />
-                          SLA
-                        </Badge>
-                      )}
-                      {app.needs_action && <Badge variant="secondary">Review</Badge>}
-                      <Badge variant="outline">{selectionStatusLabel(app.status)}</Badge>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </Link>
+                    {showBulkBar && (
+                      <Checkbox
+                        disabled={!canBulk}
+                        checked={selectedIds.has(app.id)}
+                        onCheckedChange={(v) => toggleOne(app.id, Boolean(v))}
+                      />
+                    )}
+                    <Link
+                      to={`/admin/selection/${app.id}`}
+                      className="flex flex-1 items-center justify-between gap-3 min-w-0"
+                    >
+                      <div className="min-w-0">
+                        <p className="font-medium truncate">
+                          {profile?.full_name ?? cand?.full_name ?? "Candidate"}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {profile?.email} · Step {step}: {SELECTION_STEPS.find((s) => s.step === step)?.label}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {overdue && (
+                          <Badge variant="destructive" className="gap-1">
+                            <AlertTriangle className="h-3 w-3" />
+                            SLA
+                          </Badge>
+                        )}
+                        {app.needs_action && <Badge variant="secondary">Review</Badge>}
+                        <Badge variant="outline">{selectionStatusLabel(app.status)}</Badge>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                    </Link>
+                  </div>
                 );
               })}
             </div>
