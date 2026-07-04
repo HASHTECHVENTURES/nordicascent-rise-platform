@@ -7,7 +7,7 @@ import { Info } from "lucide-react";
 import ReadinessTestRunner from "@/components/readiness/ReadinessTestRunner";
 import ReadinessTestIntro from "@/components/readiness/ReadinessTestIntro";
 import { useAuth } from "@/contexts/AuthContext";
-import { canAccessReadiness } from "@/lib/candidateJourney";
+import { canAccessReadiness, hasBeenSelected } from "@/lib/candidateJourney";
 import { useMyApplications } from "@/hooks/useData";
 import {
   useReadinessTests,
@@ -73,8 +73,12 @@ export default function CandidateReadinessTest() {
   };
 
   if (!ready) {
+    const selected = hasBeenSelected(applications ?? []);
+    const awaitingMentor = (applications ?? []).some(
+      (a) => a.status === "selected_for_readiness" && !a.readiness_unlocked_at
+    );
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 max-w-lg">
         <Button variant="ghost" size="sm" asChild>
           <Link to="/candidate/readiness">Back to Readiness</Link>
         </Button>
@@ -82,7 +86,11 @@ export default function CandidateReadinessTest() {
           <CardContent className="pt-6 flex items-start gap-3">
             <Info className="h-5 w-5 text-primary mt-0.5 shrink-0" />
             <p className="text-sm text-muted-foreground">
-              Complete your profile and select your university before starting tests.
+              {awaitingMentor
+                ? "You were selected — Readiness unlocks once your company assigns a mentor."
+                : selected
+                  ? "Readiness opens after mentor assignment. Check My Applications for status."
+                  : "Readiness opens after selection and mentor assignment. Complete registration and apply to jobs first."}
             </p>
           </CardContent>
         </Card>
