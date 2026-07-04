@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { isCompanyProfileComplete, type CompanyProfile } from "@/lib/companyProfileCompleteness";
 
-export const VISIBLE_COMPANY_STATUSES = ["active", "verified"] as const;
+export const VISIBLE_COMPANY_STATUSES = ["active", "verified", "intake_received"] as const;
 
 const LISTABLE_COMPANY_STATUSES = [...VISIBLE_COMPANY_STATUSES, "pending"] as const;
 
@@ -18,7 +18,7 @@ export function isCandidateVisibleJob(job: JobWithCompany) {
   return LISTABLE_COMPANY_STATUSES.includes(status as (typeof LISTABLE_COMPANY_STATUSES)[number]);
 }
 
-/** Pending companies become active when they publish an open role (profile already complete in UI). */
+/** Pending/intake companies become active when they publish an open role (profile already complete in UI). */
 export async function ensureCompanyActiveWhenPublishingJob(companyId: string) {
   const { data: company, error } = await supabase
     .from("companies")
@@ -31,7 +31,7 @@ export async function ensureCompanyActiveWhenPublishingJob(companyId: string) {
     return;
   }
 
-  if (company.status !== "pending") return;
+  if (company.status !== "pending" && company.status !== "intake_received") return;
 
   const profile: CompanyProfile = {
     name: company.name,

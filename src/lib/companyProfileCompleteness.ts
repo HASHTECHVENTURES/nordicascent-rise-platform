@@ -24,6 +24,7 @@ export type CompanyProfile = {
   relocation_support?: string | null;
   heard_about?: string | null;
   registration_notes?: string | null;
+  gdpr_consent?: boolean | null;
 };
 
 export type CompanyJobDraft = {
@@ -52,7 +53,8 @@ export type CompanyFieldKey =
   | "hired_international_before"
   | "workplace_language"
   | "relocation_support"
-  | "heard_about";
+  | "heard_about"
+  | "gdpr_consent";
 
 export const COMPANY_PROFILE_REQUIREMENTS: { key: CompanyFieldKey; label: string }[] = [
   { key: "country", label: "Country" },
@@ -70,6 +72,7 @@ export const COMPANY_PROFILE_REQUIREMENTS: { key: CompanyFieldKey; label: string
   { key: "workplace_language", label: "Workplace language" },
   { key: "relocation_support", label: "Relocation support" },
   { key: "heard_about", label: "How you heard about us" },
+  { key: "gdpr_consent", label: "GDPR consent" },
 ];
 
 export const JOB_DRAFT_REQUIREMENTS: { key: keyof CompanyJobDraft; label: string }[] = [
@@ -119,6 +122,8 @@ export function isCompanyFieldComplete(key: CompanyFieldKey, company: CompanyPro
       return hasValue(company.relocation_support);
     case "heard_about":
       return hasValue(company.heard_about);
+    case "gdpr_consent":
+      return company.gdpr_consent === true;
     default:
       return false;
   }
@@ -189,6 +194,7 @@ export function companyToForm(company: CompanyProfile) {
     relocation_support: company.relocation_support ?? "",
     heard_about: company.heard_about ?? "",
     registration_notes: company.registration_notes ?? "",
+    gdpr_consent: company.gdpr_consent === true,
   };
 }
 

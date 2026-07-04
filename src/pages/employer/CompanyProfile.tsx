@@ -15,11 +15,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Building2, Loader2, Upload, User, HelpCircle } from "lucide-react";
+import { Building2, Loader2, Upload, User, HelpCircle, ShieldCheck } from "lucide-react";
 import { useMyCompany, useUpdateCompany, useUpdateEmployerContact } from "@/hooks/useData";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
+import { notifyAdminsNewCompanyIntake } from "@/lib/companyEffects";
 import {
   companyToForm,
   getMissingCompanyFields,
@@ -197,6 +198,15 @@ const EmployerCompanyProfile = () => {
       return;
     }
 
+    if (!form.gdpr_consent) {
+      toast({
+        title: "GDPR consent required",
+        description: "Please accept the GDPR consent checkbox to submit your registration.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const contactPhone = normalizeContactPhone(form.contact_phone_country, form.contact_phone);
 
     const saved: CompanyProfile = {
@@ -226,6 +236,7 @@ const EmployerCompanyProfile = () => {
       relocation_support: form.relocation_support.trim(),
       heard_about: form.heard_about.trim(),
       registration_notes: form.registration_notes.trim() || null,
+      gdpr_consent: form.gdpr_consent,
     };
 
     const wasPending = company.status === "pending";
@@ -234,6 +245,7 @@ const EmployerCompanyProfile = () => {
 
     setSaving(true);
     try {
+      const nextStatus = wasPending && complete ? "intake_received" : company.status;
       const updated = await updateCompany.mutateAsync({
         id: company.id,
         name: saved.name,
@@ -256,8 +268,17 @@ const EmployerCompanyProfile = () => {
         relocation_support: saved.relocation_support || null,
         heard_about: saved.heard_about || null,
         registration_notes: saved.registration_notes,
-        status: wasPending && complete ? "active" : company.status,
+        gdpr_consent: saved.gdpr_consent,
+        status: nextStatus,
       });
+
+      if (wasPending && complete) {
+        await notifyAdminsNewCompanyIntake(
+          saved.name,
+          saved.contact_email ?? "",
+          company.id
+        );
+      }
 
       if (employerData?.id) {
         await updateEmployerContact.mutateAsync({
@@ -615,13 +636,37 @@ const EmployerCompanyProfile = () => {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader>
+          <SectionHeading step={4} title="Consent" icon={ShieldCheck} />
+        </CardHeader>
+        <CardContent>
+          <label htmlFor="gdpr-consent" className="flex items-start gap-3 cursor-pointer">
+            <input
+              id="gdpr-consent"
+              type="checkbox"
+              checked={form.gdpr_consent}
+              onChange={(e) => setForm({ ...form, gdpr_consent: e.target.checked })}
+              className="mt-1 h-4 w-4 rounded border-input accent-nordic-orange"
+            />
+            <span className="text-sm text-muted-foreground">
+              I consent to Nordic Ascent processing this company&apos;s and contact person&apos;s data
+              for the purpose of recruitment and onboarding, in line with the GDPR. We may share
+              relevant details with matched candidates and our partner universities.
+            </span>
+          </label>
+        </CardContent>
+      </Card>
+
       <div className="flex items-center justify-between gap-4 pb-8">
         <p className="text-sm text-muted-foreground">
           Status:{" "}
           <strong>
             {company.status === "pending"
-              ? "Pending — complete profile and save to continue to job posting"
-              : company.status}
+              ? "Pending — complete profile and save to submit for review"
+              : company.status === "intake_received"
+                ? "Submitted — awaiting Nordic Ascent review"
+                : company.status}
           </strong>
         </p>
         <Button

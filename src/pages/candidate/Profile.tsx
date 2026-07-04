@@ -386,8 +386,8 @@ const CandidateProfile = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="flex items-center gap-6">
-            <Avatar className="h-24 w-24 shrink-0">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+            <Avatar className="h-24 w-24 shrink-0 self-start sm:self-auto">
               <AvatarImage
                 src={avatarUrl || profile?.avatar_url || undefined}
                 className="object-cover object-center"
