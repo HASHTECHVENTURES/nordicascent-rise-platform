@@ -8,6 +8,7 @@ import ReadinessTestRunner from "@/components/readiness/ReadinessTestRunner";
 import ReadinessTestIntro from "@/components/readiness/ReadinessTestIntro";
 import { useAuth } from "@/contexts/AuthContext";
 import { canAccessReadiness } from "@/lib/candidateJourney";
+import { useMyApplications } from "@/hooks/useData";
 import {
   useReadinessTests,
   useMyReadinessAttempts,
@@ -28,7 +29,8 @@ export default function CandidateReadinessTest() {
   const location = useLocation();
   const routeAttempt = (location.state as TestLocationState | null)?.attempt;
   const { profile, candidate, loading: authLoading } = useAuth();
-  const ready = canAccessReadiness(profile, candidate);
+  const { data: applications } = useMyApplications();
+  const ready = canAccessReadiness(profile, candidate, applications ?? []);
   const {
     data: tests,
     isLoading: testsLoading,

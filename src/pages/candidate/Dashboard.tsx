@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyReadinessAttempts, useReadinessTests } from "@/hooks/useReadiness";
+import { useMyApplications } from "@/hooks/useData";
 import PreparationStageCard from "@/components/candidate/PreparationStageCard";
 import {
   computeEarlyJourneySteps,
@@ -15,10 +16,12 @@ const CandidateDashboard = () => {
   const { profile, candidate } = useAuth();
   const { data: tests, isLoading } = useReadinessTests();
   const { data: attempts } = useMyReadinessAttempts();
+  const { data: applications } = useMyApplications();
 
   const submitted = tests && attempts ? allTestsSubmitted(tests, attempts) : false;
-  const activeStageId = getEffectiveJourneyStage(profile, candidate, submitted);
-  const steps = computeEarlyJourneySteps(profile, candidate, submitted);
+  const apps = applications ?? [];
+  const activeStageId = getEffectiveJourneyStage(profile, candidate, submitted, apps);
+  const steps = computeEarlyJourneySteps(profile, candidate, submitted, apps);
   const currentStep = steps.find((s) => s.state === "current");
 
   if (isLoading) {

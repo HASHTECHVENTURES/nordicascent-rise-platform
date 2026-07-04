@@ -1,8 +1,15 @@
 import type { Candidate, Profile } from "@/types/database";
 import { isOnUniversityWaitlist } from "@/lib/candidateAccess";
-import { isSelectionInProgress } from "@/lib/applicationStatusFlow";
+import { isPostSelectionJourneyStatus } from "@/lib/applicationStatusFlow";
 import { isJobHuntProfileReady } from "@/lib/profileCompleteness";
 import { isRegistrationDetailsComplete } from "@/lib/candidateRegistration";
+import { SELECTION_STATUSES } from "@/lib/selectionModule";
+
+export type ApplicationAccessRow = {
+  status: string;
+  assigned_mentor_id: string | null;
+  readiness_unlocked_at: string | null;
+};
 
 export function isUniversitySelected(candidate: Candidate | null | undefined) {
   return Boolean(candidate?.university_id);
@@ -16,44 +23,61 @@ export function isPreparationComplete(profile: Profile | null, candidate: Candid
   );
 }
 
-/** Readiness unlocks after selection + mentor assignment (Module 2), or legacy prep-complete path. */
+/** Selected for Readiness AND a mentor has been assigned → Readiness unlocked. */
+export function hasReadinessUnlocked(
+  applications: ApplicationAccessRow[] | undefined
+) {
+  return (applications ?? []).some(
+    (a) => Boolean(a.assigned_mentor_id) && Boolean(a.readiness_unlocked_at)
+  );
+}
+
+/** Candidate has been selected at the board (mentor may still be pending). */
+export function hasBeenSelected(
+  applications: ApplicationAccessRow[] | undefined
+) {
+  return (applications ?? []).some(
+    (a) =>
+      a.status === SELECTION_STATUSES.SELECTED_FOR_READINESS ||
+      isPostSelectionJourneyStatus(a.status)
+  );
+}
+
+/**
+ * Readiness unlocks ONLY after selection + mentor assignment (Module 2).
+ * Legacy `jobs_unlocked` candidates keep access for backward compatibility.
+ */
 export function canAccessReadiness(
   profile: Profile | null,
   candidate: Candidate | null | undefined,
-  applications?: { status: string; assigned_mentor_id: string | null; readiness_unlocked_at: string | null }[]
+  applications?: ApplicationAccessRow[]
 ) {
   if (isOnUniversityWaitlist(candidate)) return false;
 
-  const hasReadinessUnlocked = (applications ?? []).some(
-    (a) => Boolean(a.assigned_mentor_id) && Boolean(a.readiness_unlocked_at)
-  );
-  if (hasReadinessUnlocked) return true;
+  if (hasReadinessUnlocked(applications)) return true;
 
-  const awaitingMentor = (applications ?? []).some(
-    (a) =>
-      a.status === "selected_for_readiness" &&
-      !a.readiness_unlocked_at
-  );
-  if (awaitingMentor) return false;
+  // Legacy candidates who already had jobs unlocked can still access Readiness.
+  if (candidate?.jobs_unlocked) return true;
 
-  const inSelection = (applications ?? []).some((a) => isSelectionInProgress(a.status));
-  if (inSelection) return false;
-
-  return isPreparationComplete(profile, candidate);
+  return false;
 }
 
 export function canAccessMentoring(
   profile: Profile | null,
   candidate: Candidate | null | undefined,
-  readinessTestsSubmitted: boolean
+  readinessTestsSubmitted: boolean,
+  applications?: ApplicationAccessRow[]
 ) {
-  return canAccessReadiness(profile, candidate) && readinessTestsSubmitted;
+  return (
+    canAccessReadiness(profile, candidate, applications) && readinessTestsSubmitted
+  );
 }
 
 export function isJobsUnlocked(candidate: Candidate | null | undefined) {
   return Boolean(candidate?.jobs_unlocked);
 }
 
+/** Jobs/apply open after preparation (Module 2: apply before Readiness). */
 export function canAccessJobs(
   profile: Profile | null,
   candidate: Candidate | null | undefined,
@@ -76,9 +100,13 @@ export type EarlyJourneyStep = {
 export function getEffectiveJourneyStage(
   profile: Profile | null,
   candidate: Candidate | null | undefined,
-  readinessTestsSubmitted: boolean
+  readinessTestsSubmitted: boolean,
+  applications?: ApplicationAccessRow[]
 ): string {
   if (!isPreparationComplete(profile, candidate)) return "preparation";
+  // After preparation → Selection (apply to jobs). Readiness only after selected + mentor.
+  if (!hasBeenSelected(applications)) return "selection";
+  if (!hasReadinessUnlocked(applications)) return "selection";
   if (!readinessTestsSubmitted) return "readiness";
   if (!isJobsUnlocked(candidate)) return "mentoring";
   return "selection";
@@ -87,34 +115,36 @@ export function getEffectiveJourneyStage(
 export function computeEarlyJourneySteps(
   profile: Profile | null,
   candidate: Candidate | null | undefined,
-  readinessTestsSubmitted: boolean
+  readinessTestsSubmitted: boolean,
+  applications?: ApplicationAccessRow[]
 ): EarlyJourneyStep[] {
-  const jobsUnlocked = isJobsUnlocked(candidate);
   const profileDone = isJobHuntProfileReady(profile, candidate);
   const waitlist = isOnUniversityWaitlist(candidate);
   const uniDone = isUniversitySelected(candidate);
   const prepDone = isPreparationComplete(profile, candidate);
+  const selected = hasBeenSelected(applications);
+  const readinessUnlocked = hasReadinessUnlocked(applications);
 
   const stepState = (id: string): "done" | "current" | "upcoming" => {
     switch (id) {
       case "profile":
-        if (profileDone) return "done";
-        return "current";
+        return profileDone ? "done" : "current";
       case "university":
         if (!profileDone) return "upcoming";
         if (waitlist) return "current";
-        if (uniDone) return "done";
+        return uniDone ? "done" : "current";
+      case "jobs":
+        if (!prepDone) return "upcoming";
+        if (selected) return "done";
         return "current";
       case "readiness":
-        if (!prepDone) return "upcoming";
+        if (!prepDone || !selected) return "upcoming";
+        if (!readinessUnlocked) return "upcoming";
         if (readinessTestsSubmitted) return "done";
         return "current";
       case "mentoring":
-        if (!readinessTestsSubmitted) return "upcoming";
-        if (jobsUnlocked) return "done";
-        return "current";
-      case "jobs":
-        if (!jobsUnlocked) return "upcoming";
+        if (!readinessUnlocked || !readinessTestsSubmitted) return "upcoming";
+        if (isJobsUnlocked(candidate)) return "done";
         return "current";
       default:
         return "upcoming";
@@ -141,9 +171,16 @@ export function computeEarlyJourneySteps(
       href: "/candidate/university",
     },
     {
+      id: "jobs",
+      label: "Jobs",
+      description: selected ? "Application submitted" : "Browse roles and apply",
+      state: stepState("jobs"),
+      href: "/candidate/jobs",
+    },
+    {
       id: "readiness",
       label: "Readiness",
-      description: "Timed Q&A tests",
+      description: "Timed Q&A tests (after selection)",
       state: stepState("readiness"),
       href: "/candidate/readiness",
     },
@@ -153,13 +190,6 @@ export function computeEarlyJourneySteps(
       description: "Connect with your mentor",
       state: stepState("mentoring"),
       href: "/candidate/mentoring",
-    },
-    {
-      id: "jobs",
-      label: "Jobs",
-      description: "Browse roles and submit applications",
-      state: stepState("jobs"),
-      href: "/candidate/jobs",
     },
   ];
 

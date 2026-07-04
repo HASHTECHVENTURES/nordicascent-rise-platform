@@ -6,7 +6,6 @@ import type { Track } from "@/lib/track";
 import type { AdminCandidateJourneyStage } from "@/lib/adminJourney";
 import { inferCandidateJourneyStage } from "@/lib/adminJourney";
 import type { TrackType } from "@/types/database";
-import { completePreparationAndActivateReadiness } from "@/lib/preparationProgress";
 import { useAuth } from "@/contexts/AuthContext";
 import { advanceCandidateStage, completePreparationIfReady, completeStageIfTasksDone, syncPipelineForTrack } from "@/lib/pipelineProgress";
 import {

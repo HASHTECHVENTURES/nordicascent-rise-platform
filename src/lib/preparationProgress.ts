@@ -3,7 +3,76 @@ import { TRACK_META, type Track } from "@/lib/track";
 
 const FAST_TRACK_SKIP_STAGES = ["internship"] as const;
 
-/** After profile + university, mark preparation done and open Readiness. */
+/** After profile + university, mark preparation done. Does NOT open Readiness —
+ *  candidates go to Selection (apply to jobs) next. Readiness unlocks after
+ *  selection + mentor assignment (Module 2). */
+export async function completePreparationStage(candidateId: string, track: Track) {
+  const now = new Date().toISOString();
+  const { data: progress } = await supabase
+    .from("candidate_stage_progress")
+    .select("id, stage_id, status")
+    .eq("candidate_id", candidateId);
+
+  const rows = progress ?? [];
+
+  const prep = rows.find((p) => p.stage_id === "preparation");
+  if (prep && prep.status !== "completed") {
+    await supabase
+      .from("candidate_stage_progress")
+      .update({ status: "completed", completed_at: now })
+      .eq("id", prep.id);
+  } else if (!prep) {
+    await supabase.from("candidate_stage_progress").insert({
+      candidate_id: candidateId,
+      stage_id: "preparation",
+      status: "completed",
+      completed_at: now,
+    });
+  }
+
+  // Activate the next stage in track (Selection after preparation).
+  const nextStage = TRACK_META[track].stages.includes("selection")
+    ? "selection"
+    : TRACK_META[track].stages[1] ?? null;
+  if (nextStage) {
+    const nextRow = rows.find((p) => p.stage_id === nextStage);
+    if (nextRow) {
+      if (nextRow.status === "not_started") {
+        await supabase
+          .from("candidate_stage_progress")
+          .update({ status: "active", started_at: now })
+          .eq("id", nextRow.id);
+      }
+    } else {
+      await supabase.from("candidate_stage_progress").insert({
+        candidate_id: candidateId,
+        stage_id: nextStage,
+        status: "active",
+        started_at: now,
+      });
+    }
+  }
+
+  if (track === "fast") {
+    const internship = rows.find((p) => p.stage_id === "internship");
+    if (internship && internship.status !== "completed") {
+      await supabase
+        .from("candidate_stage_progress")
+        .update({ status: "completed", completed_at: now })
+        .eq("id", internship.id);
+    } else if (!internship) {
+      await supabase.from("candidate_stage_progress").insert({
+        candidate_id: candidateId,
+        stage_id: "internship",
+        status: "completed",
+        completed_at: now,
+      });
+    }
+  }
+}
+
+/** Legacy: mark preparation done and open Readiness directly.
+ *  Kept for backward compatibility — prefer completePreparationStage for new flow. */
 export async function completePreparationAndActivateReadiness(candidateId: string, track: Track) {
   const now = new Date().toISOString();
   const { data: progress } = await supabase

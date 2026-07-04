@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { CheckCircle, Circle, Lock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyReadinessAttempts, useReadinessTests } from "@/hooks/useReadiness";
+import { useMyApplications } from "@/hooks/useData";
 import { allTestsSubmitted } from "@/lib/readiness";
 import {
   canAccessJobs,
@@ -17,18 +18,19 @@ function isStepAccessible(
   step: EarlyJourneyStep,
   profile: Profile | null,
   candidate: Candidate | null | undefined,
-  readinessSubmitted: boolean
+  readinessSubmitted: boolean,
+  applications: { status: string; assigned_mentor_id: string | null; readiness_unlocked_at: string | null }[]
 ) {
   switch (step.id) {
     case "profile":
     case "university":
       return true;
-    case "readiness":
-      return canAccessReadiness(profile, candidate);
-    case "mentoring":
-      return canAccessMentoring(profile, candidate, readinessSubmitted);
     case "jobs":
       return canAccessJobs(profile, candidate, readinessSubmitted);
+    case "readiness":
+      return canAccessReadiness(profile, candidate, applications);
+    case "mentoring":
+      return canAccessMentoring(profile, candidate, readinessSubmitted, applications);
     default:
       return false;
   }
@@ -38,15 +40,16 @@ export default function JourneyProgress() {
   const { profile, candidate } = useAuth();
   const { data: tests } = useReadinessTests();
   const { data: attempts } = useMyReadinessAttempts();
+  const { data: applications } = useMyApplications();
 
   const submitted = tests && attempts ? allTestsSubmitted(tests, attempts) : false;
-  const steps = computeEarlyJourneySteps(profile, candidate, submitted);
+  const steps = computeEarlyJourneySteps(profile, candidate, submitted, applications ?? []);
 
   return (
     <div className="bg-card border-b px-6 py-3">
       <div className="flex flex-wrap items-center gap-2 md:gap-3">
         {steps.map((step, i) => {
-          const accessible = isStepAccessible(step, profile, candidate, submitted);
+          const accessible = isStepAccessible(step, profile, candidate, submitted, applications ?? []);
           const clickable = accessible && step.href && (step.state === "current" || step.state === "done");
           const locked = !accessible;
 

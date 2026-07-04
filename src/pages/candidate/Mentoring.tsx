@@ -3,9 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyReadinessAttempts, useReadinessTests } from "@/hooks/useReadiness";
+import { useMyApplications, useMentoringSessions } from "@/hooks/useData";
 import { allTestsSubmitted } from "@/lib/readiness";
 import { canAccessMentoring } from "@/lib/candidateJourney";
-import { useMentoringSessions } from "@/hooks/useData";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar, Video, Loader2, ExternalLink } from "lucide-react";
@@ -15,10 +15,11 @@ const CandidateMentoring = () => {
   const { profile, candidate } = useAuth();
   const { data: tests } = useReadinessTests();
   const { data: attempts } = useMyReadinessAttempts();
+  const { data: applications } = useMyApplications();
   const { data: sessions, isLoading } = useMentoringSessions();
 
   const submitted = tests && attempts ? allTestsSubmitted(tests, attempts) : false;
-  const mentoringOpen = canAccessMentoring(profile, candidate, submitted);
+  const mentoringOpen = canAccessMentoring(profile, candidate, submitted, applications ?? []);
 
   if (!mentoringOpen) {
     return (

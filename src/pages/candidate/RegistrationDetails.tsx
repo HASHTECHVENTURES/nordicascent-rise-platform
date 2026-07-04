@@ -16,7 +16,7 @@ import { Loader2, GraduationCap } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUpdateMyCandidate } from "@/hooks/useData";
 import { useToast } from "@/hooks/use-toast";
-import { completePreparationAndActivateReadiness } from "@/lib/preparationProgress";
+import { completePreparationStage } from "@/lib/preparationProgress";
 import { consumePendingJobApplyPath, pendingJobApplyPath } from "@/lib/pendingJobApplication";
 import {
   countWords,
@@ -125,15 +125,15 @@ export default function CandidateRegistrationDetails() {
 
       await refreshProfile();
       setForm(step3FormFromCandidate({ ...candidate, ...payload }));
-      await completePreparationAndActivateReadiness(candidate.id, track);
+      await completePreparationStage(candidate.id, track);
       const pendingApply = consumePendingJobApplyPath();
       if (pendingApply) {
         toast({ title: "Registration complete", description: "Continue with your job application." });
         navigate(pendingApply, { replace: true });
         return;
       }
-      toast({ title: "Registration complete", description: "You can now start Readiness tests." });
-      navigate("/candidate/readiness", { replace: true });
+      toast({ title: "Registration complete", description: "You can now browse and apply for jobs." });
+      navigate("/candidate/jobs", { replace: true });
     } catch (err) {
       toast({
         title: "Save failed",
@@ -153,7 +153,7 @@ export default function CandidateRegistrationDetails() {
         <p className="text-sm font-medium text-primary">Step 3 of 3</p>
         <h1 className="text-2xl font-bold tracking-tight">Academic & motivation</h1>
         <p className="text-sm text-muted-foreground">
-          {TRACK_META[track].label} — a few more details before Readiness tests.
+          {TRACK_META[track].label} — a few more details before applying to jobs.
         </p>
       </div>
 

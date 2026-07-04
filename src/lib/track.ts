@@ -9,12 +9,12 @@ export const TRACK_META: Record<Track, { label: string; short: string; stages: s
   entry: {
     label: "Entry Track",
     short: "12-month program · 0–12 months experience",
-    stages: ["preparation", "readiness", "mentoring", "selection", "internship", "activation", "relocation", "onboarding", "followup"],
+    stages: ["preparation", "selection", "readiness", "mentoring", "internship", "activation", "relocation", "onboarding", "followup"],
   },
   fast: {
     label: "Fast Track",
     short: "Accelerated · 1+ years experience · no internship",
-    stages: ["preparation", "readiness", "mentoring", "selection", "activation", "relocation", "onboarding", "followup"],
+    stages: ["preparation", "selection", "readiness", "mentoring", "activation", "relocation", "onboarding", "followup"],
   },
 };
 
@@ -30,9 +30,9 @@ export const getNextStageInTrack = (stageId: string, track: Track): string | nul
 
 const ALL_PIPELINE_STAGE_IDS = [
   "preparation",
+  "selection",
   "readiness",
   "mentoring",
-  "selection",
   "internship",
   "activation",
   "relocation",
