@@ -129,10 +129,15 @@ const AdminLayout = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div
+      className={cn(
+        "min-h-screen bg-background grid",
+        collapsed ? "grid-cols-[4rem_minmax(0,1fr)]" : "grid-cols-[16rem_minmax(0,1fr)]"
+      )}
+    >
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 h-screen bg-white border-r border-border transition-all duration-300",
+          "sticky top-0 z-40 h-screen bg-white border-r border-border transition-all duration-300",
           collapsed ? "w-16" : "w-64"
         )}
       >
@@ -185,7 +190,7 @@ const AdminLayout = () => {
         </div>
       </aside>
 
-      <div className={cn("transition-all duration-300", collapsed ? "ml-16" : "ml-64")}>
+      <div className="min-w-0">
         <header className="sticky top-0 z-30 h-16 bg-background/95 backdrop-blur border-b">
           <div className="flex h-full items-center justify-between px-6">
             <div className="relative">

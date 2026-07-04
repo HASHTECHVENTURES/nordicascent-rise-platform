@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { CheckCircle, Circle, Lock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyReadinessAttempts, useReadinessTests } from "@/hooks/useReadiness";
-import { useMyApplications } from "@/hooks/useData";
+import { useMyApplications, useMyStageProgress } from "@/hooks/useData";
 import { allTestsSubmitted } from "@/lib/readiness";
 import {
   canAccessJobs,
@@ -12,6 +12,7 @@ import {
   computeEarlyJourneySteps,
   isJobsUnlocked,
   type EarlyJourneyStep,
+  type StageProgressRow,
 } from "@/lib/candidateJourney";
 import { cn } from "@/lib/utils";
 
@@ -20,7 +21,8 @@ function isStepAccessible(
   profile: Profile | null,
   candidate: Candidate | null | undefined,
   readinessSubmitted: boolean,
-  applications: { status: string; assigned_mentor_id: string | null; readiness_unlocked_at: string | null }[]
+  applications: { status: string; assigned_mentor_id: string | null; readiness_unlocked_at: string | null }[],
+  stageProgress: StageProgressRow[]
 ) {
   switch (step.id) {
     case "preparation":
@@ -32,8 +34,21 @@ function isStepAccessible(
     case "mentoring":
       return canAccessMentoring(profile, candidate, readinessSubmitted, applications);
     case "internship":
-    case "activation":
       return isJobsUnlocked(candidate);
+    case "activation":
+    case "relocation":
+    case "onboarding":
+    case "followup": {
+      const row = stageProgress.find((p) => p.stage_id === step.id);
+      if (row?.status === "active" || row?.status === "completed") return true;
+      if (step.id === "activation") return isJobsUnlocked(candidate);
+      const tail = ["activation", "relocation", "onboarding", "followup"];
+      const idx = tail.indexOf(step.id);
+      return tail.slice(0, idx).every((id) => {
+        const prior = stageProgress.find((p) => p.stage_id === id);
+        return prior?.status === "completed";
+      });
+    }
     default:
       return false;
   }
@@ -44,15 +59,33 @@ export default function JourneyProgress() {
   const { data: tests } = useReadinessTests();
   const { data: attempts } = useMyReadinessAttempts();
   const { data: applications } = useMyApplications();
+  const { data: stageProgressRaw } = useMyStageProgress();
 
   const submitted = tests && attempts ? allTestsSubmitted(tests, attempts) : false;
-  const steps = computeEarlyJourneySteps(profile, candidate, submitted, applications ?? []);
+  const stageProgress: StageProgressRow[] = (stageProgressRaw ?? []).map((p) => ({
+    stage_id: p.stage_id,
+    status: p.status,
+  }));
+  const steps = computeEarlyJourneySteps(
+    profile,
+    candidate,
+    submitted,
+    applications ?? [],
+    stageProgress
+  );
 
   return (
     <div className="bg-card border-b px-6 py-3 overflow-x-auto">
       <div className="flex flex-wrap items-center gap-2 md:gap-3 min-w-max">
         {steps.map((step, i) => {
-          const accessible = isStepAccessible(step, profile, candidate, submitted, applications ?? []);
+          const accessible = isStepAccessible(
+            step,
+            profile,
+            candidate,
+            submitted,
+            applications ?? [],
+            stageProgress
+          );
           const clickable = accessible && step.href && (step.state === "current" || step.state === "done");
           const locked = !accessible;
 

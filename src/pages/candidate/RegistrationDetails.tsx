@@ -17,6 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUpdateMyCandidate } from "@/hooks/useData";
 import { useToast } from "@/hooks/use-toast";
 import { completePreparationStage } from "@/lib/preparationProgress";
+import { syncPipelineForTrack } from "@/lib/pipelineProgress";
 import { consumePendingJobApplyPath, pendingJobApplyPath } from "@/lib/pendingJobApplication";
 import {
   countWords,
@@ -80,7 +81,7 @@ export default function CandidateRegistrationDetails() {
     }
     if (isRegistrationDetailsComplete(candidate)) {
       const pendingApply = pendingJobApplyPath();
-      navigate(pendingApply ?? "/candidate/readiness", { replace: true });
+      navigate(pendingApply ?? "/candidate/jobs", { replace: true });
     }
   }, [loading, candidate, navigate]);
 
@@ -126,6 +127,7 @@ export default function CandidateRegistrationDetails() {
       await refreshProfile();
       setForm(step3FormFromCandidate({ ...candidate, ...payload }));
       await completePreparationStage(candidate.id, track);
+      await syncPipelineForTrack(candidate.id, track);
       const pendingApply = consumePendingJobApplyPath();
       if (pendingApply) {
         toast({ title: "Registration complete", description: "Continue with your job application." });
@@ -267,7 +269,7 @@ export default function CandidateRegistrationDetails() {
 
       <div className="flex justify-end pb-8">
         <Button onClick={handleSave} disabled={saving || updateCandidate.isPending} className="min-w-[160px]">
-          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save & continue to Readiness"}
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save & continue to Roles"}
         </Button>
       </div>
     </div>

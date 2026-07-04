@@ -69,6 +69,7 @@ export function allTestsSubmitted(
   tests: { id: string }[],
   attempts: { test_id: string; status: string }[]
 ) {
+  if (!tests.length) return false;
   return tests.every((t) => {
     const a = attempts.find((x) => x.test_id === t.id);
     return a?.status === "submitted" || a?.status === "expired";

@@ -8,14 +8,17 @@ import {
   isJobHuntProfileReady,
   isProfileFieldComplete,
 } from "@/lib/profileCompleteness";
-import { isUniversitySelected } from "@/lib/candidateJourney";
+import { isUniversitySelected, isPreparationComplete } from "@/lib/candidateJourney";
+import { isRegistrationDetailsComplete } from "@/lib/candidateRegistration";
 import { isOnUniversityWaitlist } from "@/lib/candidateAccess";
 
-/** Preparation = profile + university (before Readiness Q&A). */
+/** Preparation = profile + university + registration details (before applying to roles). */
 export default function PreparationStageCard() {
   const { profile, candidate } = useAuth();
   const profileReady = isJobHuntProfileReady(profile, candidate);
   const uniDone = isUniversitySelected(candidate);
+  const regDone = isRegistrationDetailsComplete(candidate);
+  const prepDone = isPreparationComplete(profile, candidate);
   const onWaitlist = isOnUniversityWaitlist(candidate);
 
   const profilePct = Math.round(
@@ -60,7 +63,7 @@ export default function PreparationStageCard() {
                   ? "On waitlist — admin review in progress"
                   : uniDone
                     ? "University linked"
-                    : "Required before Readiness"}
+                    : "Required before applying to roles"}
               </p>
             </div>
           </div>
@@ -72,10 +75,19 @@ export default function PreparationStageCard() {
         </div>
       </div>
 
-      {profileReady && uniDone && (
+      {profileReady && uniDone && !prepDone && (
         <Button className="w-full btn-professional" asChild>
-          <Link to="/candidate/readiness">
-            Start Readiness
+          <Link to="/candidate/registration-details">
+            {regDone ? "Continue" : "Complete registration (step 3)"}
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
+        </Button>
+      )}
+
+      {prepDone && (
+        <Button className="w-full btn-professional" asChild>
+          <Link to="/candidate/jobs">
+            Browse roles
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>

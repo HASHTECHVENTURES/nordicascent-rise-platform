@@ -37,8 +37,8 @@ import {
 } from "@/lib/selectionModule";
 
 const AdminSelectionApplication = () => {
-  const { id } = useParams<{ id: string }>();
-  const { data: app, isLoading } = useAdminSelectionApplication(id);
+  const { applicationId } = useParams<{ applicationId: string }>();
+  const { data: app, isLoading, isError, error } = useAdminSelectionApplication(applicationId);
   const { data: jobApplications } = useAdminJobSelectionApplications(app?.job_id, "all");
   const decide = useSelectionStepDecision();
   const board = useSelectionBoardDecision();
@@ -187,10 +187,24 @@ const AdminSelectionApplication = () => {
     }
   };
 
-  if (isLoading || !app) {
+  if (isLoading) {
     return (
       <div className="flex justify-center py-20">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (isError || !app) {
+    return (
+      <div className="space-y-4 max-w-lg py-12">
+        <h1 className="text-xl font-medium">Application not found</h1>
+        <p className="text-sm text-muted-foreground">
+          {error instanceof Error ? error.message : "This application could not be loaded."}
+        </p>
+        <Button variant="outline" asChild>
+          <Link to="/admin/selection">Back to Selection pipeline</Link>
+        </Button>
       </div>
     );
   }

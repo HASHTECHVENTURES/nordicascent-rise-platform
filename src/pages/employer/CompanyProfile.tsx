@@ -24,6 +24,7 @@ import { notifyAdminsNewCompanyIntake } from "@/lib/companyEffects";
 import {
   companyToForm,
   getMissingCompanyFields,
+  isCompanyIntakeSubmitted,
   isCompanyProfileComplete,
   type CompanyProfile,
 } from "@/lib/companyProfileCompleteness";
@@ -245,8 +246,11 @@ const EmployerCompanyProfile = () => {
 
     setSaving(true);
     try {
-      const nextStatus = wasPending && complete ? "intake_received" : company.status;
-      const updated = await updateCompany.mutateAsync({
+      const submittingIntake = wasPending && complete;
+      const nextStatus = submittingIntake ? "intake_received" : company.status;
+      const now = new Date().toISOString();
+
+      const buildUpdate = (status: string, intakeSubmittedAt?: string | null) => ({
         id: company.id,
         name: saved.name,
         industry: saved.industry || null,
@@ -269,10 +273,25 @@ const EmployerCompanyProfile = () => {
         heard_about: saved.heard_about || null,
         registration_notes: saved.registration_notes,
         gdpr_consent: saved.gdpr_consent,
-        status: nextStatus,
+        status,
+        ...(intakeSubmittedAt !== undefined ? { intake_submitted_at: intakeSubmittedAt } : {}),
       });
 
-      if (wasPending && complete) {
+      let updated;
+      try {
+        updated = await updateCompany.mutateAsync(buildUpdate(nextStatus, submittingIntake ? now : undefined));
+      } catch (statusErr) {
+        const msg = statusErr instanceof Error ? statusErr.message : "";
+        const enumMissing =
+          submittingIntake &&
+          (msg.includes("intake_received") || msg.includes("entity_status"));
+        if (!enumMissing) throw statusErr;
+        updated = await updateCompany.mutateAsync(
+          buildUpdate(company.status, now)
+        );
+      }
+
+      if (submittingIntake) {
         await notifyAdminsNewCompanyIntake(
           saved.name,
           saved.contact_email ?? "",
@@ -662,9 +681,9 @@ const EmployerCompanyProfile = () => {
         <p className="text-sm text-muted-foreground">
           Status:{" "}
           <strong>
-            {company.status === "pending"
+            {company.status === "pending" && !isCompanyIntakeSubmitted(company)
               ? "Pending — complete profile and save to submit for review"
-              : company.status === "intake_received"
+              : isCompanyIntakeSubmitted(company)
                 ? "Submitted — awaiting Nordic Ascent review"
                 : company.status}
           </strong>

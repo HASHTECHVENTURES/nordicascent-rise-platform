@@ -116,7 +116,7 @@ const AdminJobs = () => {
                   <Badge variant={job.status === "open" ? "default" : job.status === "draft" ? "secondary" : "outline"}>{job.status}</Badge>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+                    <DropdownMenuContent align="end" className="z-[200]">
                       <DropdownMenuItem onClick={() => setViewJobId(job.id)}>
                         <Eye className="h-4 w-4 mr-2" />View Details
                       </DropdownMenuItem>

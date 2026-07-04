@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import ReadinessModuleHub from "@/components/readiness/ReadinessModuleHub";
-import { canAccessReadiness } from "@/lib/candidateJourney";
+import { canAccessReadiness, isPreparationComplete } from "@/lib/candidateJourney";
 import { useMyReadinessAttempts, useReadinessTests } from "@/hooks/useReadiness";
 import { useMyApplications } from "@/hooks/useData";
 import { allTestsSubmitted } from "@/lib/readiness";
@@ -13,22 +13,35 @@ import { isSelectionPipelineStatus } from "@/lib/selectionModule";
 
 export default function CandidateReadiness() {
   const navigate = useNavigate();
-  const { profile, candidate } = useAuth();
+  const { profile, candidate, loading } = useAuth();
   const { data: applications } = useMyApplications();
   const ready = canAccessReadiness(profile, candidate, applications ?? []);
   const { data: tests } = useReadinessTests();
   const { data: attempts } = useMyReadinessAttempts();
 
-  const submitted = tests && attempts ? allTestsSubmitted(tests, attempts) : false;
+  const submitted =
+    tests && tests.length > 0 && attempts ? allTestsSubmitted(tests, attempts) : false;
 
   useEffect(() => {
-    if (!ready || !submitted) return;
-    if (candidate?.jobs_unlocked) {
-      navigate("/candidate/jobs", { replace: true });
+    if (loading) return;
+    if (ready) {
+      if (submitted && candidate?.jobs_unlocked) {
+        navigate("/candidate/mentoring", { replace: true });
+      }
       return;
     }
-    navigate("/candidate/mentoring", { replace: true });
-  }, [ready, submitted, candidate?.jobs_unlocked, navigate]);
+    if (isPreparationComplete(profile, candidate)) {
+      navigate("/candidate/jobs", { replace: true });
+    }
+  }, [ready, submitted, candidate?.jobs_unlocked, profile, candidate, loading, navigate]);
+
+  if (loading || (!ready && isPreparationComplete(profile, candidate))) {
+    return (
+      <div className="flex justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   if (ready && submitted) {
     return (

@@ -25,6 +25,7 @@ export type CompanyProfile = {
   heard_about?: string | null;
   registration_notes?: string | null;
   gdpr_consent?: boolean | null;
+  intake_submitted_at?: string | null;
 };
 
 export type CompanyJobDraft = {
@@ -230,4 +231,10 @@ export function jobToDraft(job: {
     core_skills: job.core_skills ?? "",
     desired_start_window: job.desired_start_window ?? "",
   };
+}
+
+export function isCompanyIntakeSubmitted(
+  company: Pick<CompanyProfile, "status" | "intake_submitted_at"> | null | undefined
+) {
+  return company?.status === "intake_received" || Boolean(company?.intake_submitted_at);
 }

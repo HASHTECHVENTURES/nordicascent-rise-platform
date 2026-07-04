@@ -45,7 +45,7 @@ export function hasBeenSelected(
 
 /**
  * Readiness unlocks ONLY after selection + mentor assignment (Module 2).
- * Legacy `jobs_unlocked` candidates keep access for backward compatibility.
+ * Applies to Entry Track and Fast Track alike.
  */
 export function canAccessReadiness(
   profile: Profile | null,
@@ -53,13 +53,7 @@ export function canAccessReadiness(
   applications?: ApplicationAccessRow[]
 ) {
   if (isOnUniversityWaitlist(candidate)) return false;
-
-  if (hasReadinessUnlocked(applications)) return true;
-
-  // Legacy candidates who already had jobs unlocked can still access Readiness.
-  if (candidate?.jobs_unlocked) return true;
-
-  return false;
+  return hasReadinessUnlocked(applications);
 }
 
 export function canAccessMentoring(
@@ -96,12 +90,51 @@ export type EarlyJourneyStep = {
   href?: string;
 };
 
+export type StageProgressRow = {
+  stage_id: string;
+  status: "not_started" | "active" | "completed";
+};
+
+const TAIL_JOURNEY_STAGES = ["activation", "relocation", "onboarding", "followup"] as const;
+
+function tailStageState(
+  stageId: (typeof TAIL_JOURNEY_STAGES)[number],
+  stageProgress: StageProgressRow[] | undefined,
+  jobsUnlocked: boolean
+): "done" | "current" | "upcoming" {
+  const row = stageProgress?.find((p) => p.stage_id === stageId);
+  if (row?.status === "completed") return "done";
+  if (row?.status === "active") return "current";
+
+  const idx = TAIL_JOURNEY_STAGES.indexOf(stageId);
+  const priorComplete = TAIL_JOURNEY_STAGES.slice(0, idx).every((id) => {
+    const prior = stageProgress?.find((p) => p.stage_id === id);
+    return prior?.status === "completed";
+  });
+
+  if (idx === 0) {
+    if (jobsUnlocked) return "current";
+    return "upcoming";
+  }
+
+  if (priorComplete) {
+    const anyLaterActive = TAIL_JOURNEY_STAGES.slice(idx + 1).some((id) => {
+      const later = stageProgress?.find((p) => p.stage_id === id);
+      return later?.status === "active" || later?.status === "completed";
+    });
+    if (!anyLaterActive) return "current";
+  }
+
+  return "upcoming";
+}
+
 /** Full candidate journey — always visible (done / current / upcoming). */
 export function computeEarlyJourneySteps(
   profile: Profile | null,
   candidate: Candidate | null | undefined,
   readinessTestsSubmitted: boolean,
-  applications?: ApplicationAccessRow[]
+  applications?: ApplicationAccessRow[],
+  stageProgress?: StageProgressRow[]
 ): EarlyJourneyStep[] {
   const waitlist = isOnUniversityWaitlist(candidate);
   const prepDone = isPreparationComplete(profile, candidate);
@@ -131,8 +164,10 @@ export function computeEarlyJourneySteps(
         if (isJobsUnlocked(candidate)) return "done";
         return "upcoming";
       case "activation":
-        if (isJobsUnlocked(candidate)) return "current";
-        return "upcoming";
+      case "relocation":
+      case "onboarding":
+      case "followup":
+        return tailStageState(id, stageProgress, isJobsUnlocked(candidate));
       default:
         return "upcoming";
     }
@@ -179,13 +214,36 @@ export function computeEarlyJourneySteps(
     });
   }
 
-  steps.push({
-    id: "activation",
-    label: "Activation",
-    description: "Pre-arrival and employment activation",
-    state: stepState("activation"),
-    href: "/candidate/activation",
-  });
+  steps.push(
+    {
+      id: "activation",
+      label: "Activation",
+      description: "Pre-arrival and employment activation",
+      state: stepState("activation"),
+      href: "/candidate/activation",
+    },
+    {
+      id: "relocation",
+      label: "Relocation",
+      description: "Move and settle in the Nordics",
+      state: stepState("relocation"),
+      href: "/candidate/relocation",
+    },
+    {
+      id: "onboarding",
+      label: "Onboarding",
+      description: "First weeks at your new company",
+      state: stepState("onboarding"),
+      href: "/candidate/onboarding",
+    },
+    {
+      id: "followup",
+      label: "Follow-up",
+      description: "Ongoing check-ins after arrival",
+      state: stepState("followup"),
+      href: "/candidate/followup",
+    }
+  );
 
   if (waitlist && !prepDone) {
     return steps.map((s) =>
