@@ -15,7 +15,7 @@ const adminStages = [
   { id: 2, name: "Users", href: "/admin/users", icon: Users },
   { id: 3, name: "Employers", href: "/admin/employers", icon: Building2 },
   { id: 4, name: "Candidates", href: "/admin/candidates", icon: UserCheck },
-  { id: 5, name: "Jobs", href: "/admin/jobs", icon: Briefcase },
+  { id: 5, name: "Roles", href: "/admin/jobs", icon: Briefcase },
   { id: 6, name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { id: 7, name: "Security", href: "/admin/security", icon: Shield },
   { id: 8, name: "Settings", href: "/admin/settings", icon: Settings },

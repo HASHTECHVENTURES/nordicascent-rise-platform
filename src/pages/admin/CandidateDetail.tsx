@@ -160,7 +160,7 @@ const AdminCandidateDetail = () => {
                 onClick={async () => {
                   try {
                     await unlockJobs.mutateAsync({ candidateId: candidate.id, unlock: true });
-                    toast({ title: "Jobs unlocked" });
+                    toast({ title: "Activation unlocked" });
                   } catch (err) {
                     toast({
                       title: "Failed",
@@ -170,7 +170,7 @@ const AdminCandidateDetail = () => {
                   }
                 }}
               >
-                Unlock jobs
+                Unlock activation
               </Button>
             )}
           </div>

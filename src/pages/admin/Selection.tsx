@@ -326,7 +326,7 @@ const AdminSelection = () => {
       {!jobs?.length && (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            No open jobs yet. Approve job postings first.
+            No open roles yet. Approve role postings first.
             <Button variant="link" asChild className="block mx-auto mt-2">
               <Link to="/admin/jobs">Go to Jobs</Link>
             </Button>

@@ -13,35 +13,55 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { GraduationCap, Loader2, Plus } from "lucide-react";
+import { GraduationCap, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import {
   useAdminUniversities,
   useAdminUniversityWaitlist,
   useApproveUniversityWaitlist,
+  useDeleteUniversity,
   useRejectUniversityWaitlist,
   useSaveUniversity,
   useToggleUniversityAccessible,
 } from "@/hooks/useData";
 import { useToast } from "@/hooks/use-toast";
 import { INSTITUTION_TYPE_LABELS, type InstitutionType } from "@/lib/universities";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+type UniversityForm = {
+  name: string;
+  institution_type: InstitutionType;
+  country: string;
+  city: string;
+  is_accessible: boolean;
+};
+
+const emptyForm = (): UniversityForm => ({
+  name: "",
+  institution_type: "university",
+  country: "India",
+  city: "",
+  is_accessible: true,
+});
 
 export default function AdminUniversities() {
   const { toast } = useToast();
   const { data: universities, isLoading } = useAdminUniversities();
   const { data: waitlist, isLoading: waitlistLoading } = useAdminUniversityWaitlist();
   const saveUniversity = useSaveUniversity();
+  const deleteUniversity = useDeleteUniversity();
   const toggleAccessible = useToggleUniversityAccessible();
   const approveWaitlist = useApproveUniversityWaitlist();
   const rejectWaitlist = useRejectUniversityWaitlist();
 
-  const [form, setForm] = useState({
-    name: "",
-    institution_type: "university" as InstitutionType,
-    country: "India",
-    city: "",
-    is_accessible: true,
-  });
+  const [form, setForm] = useState<UniversityForm>(emptyForm());
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<UniversityForm>(emptyForm());
 
   const list = universities ?? [];
   const pendingWaitlist = (waitlist ?? []).filter((w) => w.status === "pending");
@@ -51,10 +71,51 @@ export default function AdminUniversities() {
     try {
       await saveUniversity.mutateAsync(form);
       toast({ title: "University added" });
-      setForm({ name: "", institution_type: "university", country: "India", city: "", is_accessible: true });
+      setForm(emptyForm());
     } catch (err) {
       toast({
         title: "Failed",
+        description: err instanceof Error ? err.message : "Try again",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const openEdit = (uni: (typeof list)[number]) => {
+    setEditingId(uni.id);
+    setEditForm({
+      name: uni.name,
+      institution_type: uni.institution_type as InstitutionType,
+      country: uni.country ?? "India",
+      city: uni.city ?? "",
+      is_accessible: uni.is_accessible ?? true,
+    });
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingId) return;
+    try {
+      await saveUniversity.mutateAsync({ id: editingId, ...editForm });
+      toast({ title: "University updated" });
+      setEditingId(null);
+    } catch (err) {
+      toast({
+        title: "Failed",
+        description: err instanceof Error ? err.message : "Try again",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!window.confirm(`Remove "${name}" from the directory? This cannot be undone.`)) return;
+    try {
+      await deleteUniversity.mutateAsync(id);
+      toast({ title: "University removed" });
+    } catch (err) {
+      toast({
+        title: "Cannot remove",
         description: err instanceof Error ? err.message : "Try again",
         variant: "destructive",
       });
@@ -182,11 +243,84 @@ export default function AdminUniversities() {
                     <Badge variant={uni.is_accessible ? "default" : "secondary"}>
                       {uni.is_accessible ? "Live" : "Off"}
                     </Badge>
+                    <Button type="button" variant="outline" size="sm" onClick={() => openEdit(uni)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                      disabled={deleteUniversity.isPending}
+                      onClick={() => handleDelete(uni.id, uni.name)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               ))}
             </CardContent>
           </Card>
+
+          <Dialog open={Boolean(editingId)} onOpenChange={(open) => !open && setEditingId(null)}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Edit university</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSaveEdit} className="grid grid-cols-1 gap-4">
+                <div className="space-y-2">
+                  <Label>Name</Label>
+                  <Input
+                    required
+                    value={editForm.name}
+                    onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Type</Label>
+                  <Select
+                    value={editForm.institution_type}
+                    onValueChange={(v) => setEditForm((f) => ({ ...f, institution_type: v as InstitutionType }))}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="university">{INSTITUTION_TYPE_LABELS.university}</SelectItem>
+                      <SelectItem value="institute">{INSTITUTION_TYPE_LABELS.institute}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Country</Label>
+                  <Input
+                    value={editForm.country}
+                    onChange={(e) => setEditForm((f) => ({ ...f, country: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>City</Label>
+                  <Input
+                    value={editForm.city}
+                    onChange={(e) => setEditForm((f) => ({ ...f, city: e.target.value }))}
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={editForm.is_accessible}
+                    onCheckedChange={(checked) => setEditForm((f) => ({ ...f, is_accessible: checked }))}
+                  />
+                  <Label>Accessible to candidates</Label>
+                </div>
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button type="button" variant="outline" onClick={() => setEditingId(null)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={saveUniversity.isPending}>
+                    Save changes
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         </TabsContent>
 
         <TabsContent value="waitlist" className="mt-6">

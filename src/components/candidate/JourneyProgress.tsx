@@ -10,6 +10,7 @@ import {
   canAccessMentoring,
   canAccessReadiness,
   computeEarlyJourneySteps,
+  isJobsUnlocked,
   type EarlyJourneyStep,
 } from "@/lib/candidateJourney";
 import { cn } from "@/lib/utils";
@@ -22,15 +23,17 @@ function isStepAccessible(
   applications: { status: string; assigned_mentor_id: string | null; readiness_unlocked_at: string | null }[]
 ) {
   switch (step.id) {
-    case "profile":
-    case "university":
+    case "preparation":
       return true;
-    case "jobs":
+    case "selection":
       return canAccessJobs(profile, candidate, readinessSubmitted);
     case "readiness":
       return canAccessReadiness(profile, candidate, applications);
     case "mentoring":
       return canAccessMentoring(profile, candidate, readinessSubmitted, applications);
+    case "internship":
+    case "activation":
+      return isJobsUnlocked(candidate);
     default:
       return false;
   }
@@ -46,8 +49,8 @@ export default function JourneyProgress() {
   const steps = computeEarlyJourneySteps(profile, candidate, submitted, applications ?? []);
 
   return (
-    <div className="bg-card border-b px-6 py-3">
-      <div className="flex flex-wrap items-center gap-2 md:gap-3">
+    <div className="bg-card border-b px-6 py-3 overflow-x-auto">
+      <div className="flex flex-wrap items-center gap-2 md:gap-3 min-w-max">
         {steps.map((step, i) => {
           const accessible = isStepAccessible(step, profile, candidate, submitted, applications ?? []);
           const clickable = accessible && step.href && (step.state === "current" || step.state === "done");
@@ -56,7 +59,7 @@ export default function JourneyProgress() {
           const content = (
             <div
               className={cn(
-                "flex items-center gap-1.5 text-sm",
+                "flex items-center gap-1.5 text-sm whitespace-nowrap",
                 step.state === "current" && "text-primary font-medium",
                 step.state === "done" && "text-muted-foreground",
                 step.state === "upcoming" && "text-muted-foreground/50",

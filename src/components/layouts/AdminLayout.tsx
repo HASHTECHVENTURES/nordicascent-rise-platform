@@ -34,6 +34,7 @@ type NavItem = { name: string; href: string; icon: React.ElementType };
 
 const journeyNav: NavItem[] = [
   { name: "Universities", href: "/admin/universities", icon: GraduationCap },
+  { name: "Selection", href: "/admin/selection", icon: ClipboardList },
   { name: "Readiness", href: "/admin/readiness", icon: ClipboardCheck },
   { name: "Mentoring", href: "/admin/mentoring", icon: Heart },
   { name: "Relocation", href: "/admin/relocation", icon: MapPin },
@@ -46,8 +47,7 @@ const peopleNav: NavItem[] = [
 ];
 
 const platformNav: NavItem[] = [
-  { name: "Jobs", href: "/admin/jobs", icon: Briefcase },
-  { name: "Selection", href: "/admin/selection", icon: ClipboardList },
+  { name: "Roles", href: "/admin/jobs", icon: Briefcase },
   { name: "Program Tasks", href: "/admin/stage-tasks", icon: ListChecks },
   { name: "Portal admins", href: "/admin/users", icon: Users },
   { name: "Insights", href: "/admin/insights", icon: Megaphone },

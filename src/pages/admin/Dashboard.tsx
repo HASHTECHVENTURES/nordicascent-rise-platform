@@ -32,14 +32,14 @@ const AdminDashboard = () => {
     {
       title: "Mentoring",
       count: stats?.mentoringPipeline ?? 0,
-      label: "ready · jobs locked",
+      label: "ready · activation locked",
       href: "/admin/mentoring",
       icon: Heart,
     },
     {
-      title: "Jobs",
+      title: "Roles",
       count: stats?.jobsUnlocked ?? 0,
-      label: "candidates unlocked",
+      label: "candidates in activation",
       href: "/admin/jobs",
       icon: Briefcase,
     },
@@ -50,7 +50,7 @@ const AdminDashboard = () => {
       <div>
         <h1 className="text-2xl font-medium">Dashboard</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Universities → Readiness → Mentoring → Jobs
+          Universities → Selection → Readiness → Mentoring → Activation
         </p>
       </div>
 

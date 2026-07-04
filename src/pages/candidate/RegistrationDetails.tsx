@@ -132,7 +132,7 @@ export default function CandidateRegistrationDetails() {
         navigate(pendingApply, { replace: true });
         return;
       }
-      toast({ title: "Registration complete", description: "You can now browse and apply for jobs." });
+      toast({ title: "Registration complete", description: "You can now browse and apply for roles." });
       navigate("/candidate/jobs", { replace: true });
     } catch (err) {
       toast({
@@ -153,7 +153,7 @@ export default function CandidateRegistrationDetails() {
         <p className="text-sm font-medium text-primary">Step 3 of 3</p>
         <h1 className="text-2xl font-bold tracking-tight">Academic & motivation</h1>
         <p className="text-sm text-muted-foreground">
-          {TRACK_META[track].label} — a few more details before applying to jobs.
+          {TRACK_META[track].label} — a few more details before applying to roles.
         </p>
       </div>
 

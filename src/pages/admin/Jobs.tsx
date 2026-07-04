@@ -67,13 +67,13 @@ const AdminJobs = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Job Moderation</h1>
-        <p className="text-muted-foreground">Review and moderate job postings</p>
+        <h1 className="text-3xl font-bold tracking-tight">Role moderation</h1>
+        <p className="text-muted-foreground">Review and moderate role postings</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total Jobs</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total roles</CardTitle></CardHeader>
           <CardContent><div className="text-2xl font-bold">{list.length}</div></CardContent>
         </Card>
         <Card>
@@ -94,12 +94,12 @@ const AdminJobs = () => {
         <CardHeader>
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search jobs..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
+            <Input placeholder="Search roles..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {list.length === 0 && <p className="text-center text-muted-foreground py-8">No jobs posted yet.</p>}
+            {list.length === 0 && <p className="text-center text-muted-foreground py-8">No roles posted yet.</p>}
             {list.map((job) => {
               const company = job.companies as { name: string } | null;
               return (

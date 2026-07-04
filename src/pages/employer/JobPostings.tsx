@@ -159,7 +159,7 @@ const EmployerJobPostings = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Job Postings</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Role postings</h1>
           <p className="text-muted-foreground">Manage your job listings</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
@@ -317,7 +317,7 @@ const EmployerJobPostings = () => {
         <CardHeader>
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search jobs..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
+            <Input placeholder="Search roles..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
         </CardHeader>
         <CardContent className="space-y-4">

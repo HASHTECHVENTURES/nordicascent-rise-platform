@@ -111,7 +111,7 @@ export default function AdminMentoring() {
         <TabsContent value="pipeline" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">After Readiness — unlock jobs here</CardTitle>
+              <CardTitle className="text-base">After Readiness — unlock activation here</CardTitle>
             </CardHeader>
             <CardContent>
               {pipelineLoading ? (
@@ -128,7 +128,7 @@ export default function AdminMentoring() {
                         <TableHead>Candidate</TableHead>
                         <TableHead>Readiness</TableHead>
                         <TableHead>Sessions</TableHead>
-                        <TableHead>Jobs</TableHead>
+                        <TableHead>Activation</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -158,7 +158,7 @@ export default function AdminMentoring() {
                                 onClick={async () => {
                                   try {
                                     await unlockJobs.mutateAsync({ candidateId: row.id, unlock: true });
-                                    toast({ title: "Jobs unlocked", description: row.fullName });
+                                    toast({ title: "Activation unlocked", description: row.fullName });
                                   } catch (err) {
                                     toast({
                                       title: "Failed",
@@ -168,7 +168,7 @@ export default function AdminMentoring() {
                                   }
                                 }}
                               >
-                                Unlock jobs
+                                Unlock activation
                               </Button>
                             )}
                             <Button

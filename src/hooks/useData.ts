@@ -423,6 +423,30 @@ export function useToggleUniversityAccessible() {
   });
 }
 
+export function useDeleteUniversity() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { count, error: countError } = await supabase
+        .from("candidates")
+        .select("id", { count: "exact", head: true })
+        .eq("university_id", id);
+      if (countError) throw countError;
+      if ((count ?? 0) > 0) {
+        throw new Error(
+          `Cannot remove: ${count} candidate(s) are linked to this university. Hide it instead.`
+        );
+      }
+      const { error } = await supabase.from("universities").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-universities"] });
+      qc.invalidateQueries({ queryKey: ["universities"] });
+    },
+  });
+}
+
 export function useApproveUniversityWaitlist() {
   const qc = useQueryClient();
   return useMutation({

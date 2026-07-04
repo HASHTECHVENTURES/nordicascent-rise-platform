@@ -84,7 +84,8 @@ export default function CandidateJobs() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-medium text-foreground">Jobs</h1>
+        <h1 className="text-2xl font-medium text-foreground">Roles</h1>
+        <p className="text-muted-foreground mt-1">Browse open positions and apply.</p>
         <p className="text-muted-foreground">Open roles you can apply to.</p>
       </div>
 
@@ -96,7 +97,7 @@ export default function CandidateJobs() {
           <div className="relative w-full sm:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search jobs..."
+              placeholder="Search roles..."
               className="pl-9"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -106,7 +107,7 @@ export default function CandidateJobs() {
         <CardContent className="space-y-4">
           {openJobs.length === 0 && (
             <p className="text-sm text-muted-foreground text-center py-8">
-              No open jobs right now.
+              No open roles right now.
             </p>
           )}
           {openJobs.map((job) => {

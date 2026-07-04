@@ -1,5 +1,13 @@
 import type { LucideIcon } from "lucide-react";
-import { GraduationCap, ClipboardCheck, Heart, Briefcase } from "lucide-react";
+import {
+  GraduationCap,
+  ClipboardCheck,
+  Heart,
+  ClipboardList,
+  Briefcase,
+  MapPin,
+  Building2,
+} from "lucide-react";
 
 export type AdminJourneyStep = {
   id: string;
@@ -9,7 +17,7 @@ export type AdminJourneyStep = {
   match: (pathname: string) => boolean;
 };
 
-/** Admin workflow mirrors candidate journey: Prep → Readiness → Mentoring → Jobs */
+/** Admin workflow mirrors candidate journey: Universities → Selection → Readiness → … */
 export const ADMIN_JOURNEY_STEPS: AdminJourneyStep[] = [
   {
     id: "universities",
@@ -17,6 +25,13 @@ export const ADMIN_JOURNEY_STEPS: AdminJourneyStep[] = [
     href: "/admin/universities",
     icon: GraduationCap,
     match: (p) => p.startsWith("/admin/universities"),
+  },
+  {
+    id: "selection",
+    label: "Selection",
+    href: "/admin/selection",
+    icon: ClipboardList,
+    match: (p) => p.startsWith("/admin/selection"),
   },
   {
     id: "readiness",
@@ -33,30 +48,47 @@ export const ADMIN_JOURNEY_STEPS: AdminJourneyStep[] = [
     match: (p) => p.startsWith("/admin/mentoring"),
   },
   {
-    id: "jobs",
-    label: "Jobs",
+    id: "roles",
+    label: "Roles",
     href: "/admin/jobs",
     icon: Briefcase,
     match: (p) => p.startsWith("/admin/jobs"),
+  },
+  {
+    id: "relocation",
+    label: "Relocation",
+    href: "/admin/relocation",
+    icon: MapPin,
+    match: (p) => p.startsWith("/admin/relocation"),
+  },
+  {
+    id: "onboarding",
+    label: "Onboarding",
+    href: "/admin/onboarding",
+    icon: Building2,
+    match: (p) => p.startsWith("/admin/onboarding"),
   },
 ];
 
 export type AdminCandidateJourneyStage =
   | "preparation"
+  | "selection"
   | "readiness"
   | "mentoring"
-  | "jobs";
+  | "activation";
 
 export function adminJourneyStageLabel(stage: AdminCandidateJourneyStage) {
   switch (stage) {
     case "preparation":
       return "Preparation";
+    case "selection":
+      return "Selection";
     case "readiness":
       return "Readiness";
     case "mentoring":
       return "Mentoring";
-    case "jobs":
-      return "Jobs open";
+    case "activation":
+      return "Activation";
   }
 }
 
@@ -67,8 +99,9 @@ export function inferCandidateJourneyStage(input: {
   testsTotal: number;
 }): AdminCandidateJourneyStage {
   const { universityId, jobsUnlocked, testsSubmitted, testsTotal } = input;
-  if (jobsUnlocked) return "jobs";
+  if (!universityId) return "preparation";
+  if (jobsUnlocked) return "activation";
   if (testsTotal > 0 && testsSubmitted >= testsTotal) return "mentoring";
-  if (universityId) return "readiness";
-  return "preparation";
+  if (testsSubmitted > 0) return "readiness";
+  return "selection";
 }

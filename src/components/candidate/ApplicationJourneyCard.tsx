@@ -64,7 +64,7 @@ export default function ApplicationJourneyCard() {
 
         <div className="flex flex-wrap gap-2 pt-2 border-t">
           <Button size="sm" variant="outline" asChild>
-            <Link to="/candidate/jobs">Browse jobs</Link>
+            <Link to="/candidate/jobs">Browse roles</Link>
           </Button>
           {apps.length > 0 && (
             <Button size="sm" variant="outline" asChild>

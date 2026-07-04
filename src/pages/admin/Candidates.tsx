@@ -85,7 +85,7 @@ const AdminCandidates = () => {
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{list.length}</div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Readiness</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{[...(journeyMap?.values() ?? [])].filter((s) => s === "readiness").length}</div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Mentoring</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{[...(journeyMap?.values() ?? [])].filter((s) => s === "mentoring").length}</div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Jobs open</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{[...(journeyMap?.values() ?? [])].filter((s) => s === "jobs").length}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Activation</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{[...(journeyMap?.values() ?? [])].filter((s) => s === "activation").length}</div></CardContent></Card>
       </div>
 
       <Card>

@@ -56,7 +56,7 @@ export default function ApplicationSubmittedDialog({ open, onOpenChange, jobTitl
           </Button>
           <Button variant="outline" className="w-full" asChild>
             <Link to="/candidate/jobs" onClick={() => onOpenChange(false)}>
-              Browse more jobs
+              Browse more roles
             </Link>
           </Button>
         </DialogFooter>

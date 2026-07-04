@@ -96,44 +96,24 @@ export type EarlyJourneyStep = {
   href?: string;
 };
 
-/** UI stage when DB progress may still say preparation. */
-export function getEffectiveJourneyStage(
-  profile: Profile | null,
-  candidate: Candidate | null | undefined,
-  readinessTestsSubmitted: boolean,
-  applications?: ApplicationAccessRow[]
-): string {
-  if (!isPreparationComplete(profile, candidate)) return "preparation";
-  // After preparation → Selection (apply to jobs). Readiness only after selected + mentor.
-  if (!hasBeenSelected(applications)) return "selection";
-  if (!hasReadinessUnlocked(applications)) return "selection";
-  if (!readinessTestsSubmitted) return "readiness";
-  if (!isJobsUnlocked(candidate)) return "mentoring";
-  return "selection";
-}
-
+/** Full candidate journey — always visible (done / current / upcoming). */
 export function computeEarlyJourneySteps(
   profile: Profile | null,
   candidate: Candidate | null | undefined,
   readinessTestsSubmitted: boolean,
   applications?: ApplicationAccessRow[]
 ): EarlyJourneyStep[] {
-  const profileDone = isJobHuntProfileReady(profile, candidate);
   const waitlist = isOnUniversityWaitlist(candidate);
-  const uniDone = isUniversitySelected(candidate);
   const prepDone = isPreparationComplete(profile, candidate);
   const selected = hasBeenSelected(applications);
   const readinessUnlocked = hasReadinessUnlocked(applications);
+  const track = (candidate?.track ?? "entry") as "entry" | "fast";
 
   const stepState = (id: string): "done" | "current" | "upcoming" => {
     switch (id) {
-      case "profile":
-        return profileDone ? "done" : "current";
-      case "university":
-        if (!profileDone) return "upcoming";
-        if (waitlist) return "current";
-        return uniDone ? "done" : "current";
-      case "jobs":
+      case "preparation":
+        return prepDone ? "done" : "current";
+      case "selection":
         if (!prepDone) return "upcoming";
         if (selected) return "done";
         return "current";
@@ -146,35 +126,31 @@ export function computeEarlyJourneySteps(
         if (!readinessUnlocked || !readinessTestsSubmitted) return "upcoming";
         if (isJobsUnlocked(candidate)) return "done";
         return "current";
+      case "internship":
+        if (!readinessUnlocked || !readinessTestsSubmitted) return "upcoming";
+        if (isJobsUnlocked(candidate)) return "done";
+        return "upcoming";
+      case "activation":
+        if (isJobsUnlocked(candidate)) return "current";
+        return "upcoming";
       default:
         return "upcoming";
     }
   };
 
-  const allSteps: EarlyJourneyStep[] = [
+  const steps: EarlyJourneyStep[] = [
     {
-      id: "profile",
-      label: "Profile",
-      description: "Details, skills, and CV",
-      state: stepState("profile"),
-      href: "/candidate/profile",
+      id: "preparation",
+      label: "Preparation",
+      description: prepDone ? "Profile, university, and background complete" : "Profile, university, and background",
+      state: stepState("preparation"),
+      href: prepDone ? "/candidate/dashboard" : "/candidate/profile",
     },
     {
-      id: "university",
-      label: "University",
-      description: waitlist
-        ? "University under admin review"
-        : uniDone
-          ? "University linked"
-          : "Choose your institution",
-      state: stepState("university"),
-      href: "/candidate/university",
-    },
-    {
-      id: "jobs",
-      label: "Jobs",
-      description: selected ? "Application submitted" : "Browse roles and apply",
-      state: stepState("jobs"),
+      id: "selection",
+      label: "Selection",
+      description: selected ? "Application in selection pipeline" : "Browse roles and apply",
+      state: stepState("selection"),
       href: "/candidate/jobs",
     },
     {
@@ -193,10 +169,46 @@ export function computeEarlyJourneySteps(
     },
   ];
 
-  if (prepDone) {
-    return allSteps.filter((s) => !["profile", "university"].includes(s.id));
+  if (track === "entry") {
+    steps.push({
+      id: "internship",
+      label: "Internship",
+      description: "Company internship phase",
+      state: stepState("internship"),
+      href: "/candidate/internship",
+    });
   }
-  return allSteps;
+
+  steps.push({
+    id: "activation",
+    label: "Activation",
+    description: "Pre-arrival and employment activation",
+    state: stepState("activation"),
+    href: "/candidate/activation",
+  });
+
+  if (waitlist && !prepDone) {
+    return steps.map((s) =>
+      s.id === "preparation" ? { ...s, state: "current" as const } : { ...s, state: "upcoming" as const }
+    );
+  }
+
+  return steps;
+}
+
+/** UI stage when DB progress may still say preparation. */
+export function getEffectiveJourneyStage(
+  profile: Profile | null,
+  candidate: Candidate | null | undefined,
+  readinessTestsSubmitted: boolean,
+  applications?: ApplicationAccessRow[]
+): string {
+  if (!isPreparationComplete(profile, candidate)) return "preparation";
+  if (!hasBeenSelected(applications)) return "selection";
+  if (!hasReadinessUnlocked(applications)) return "selection";
+  if (!readinessTestsSubmitted) return "readiness";
+  if (!isJobsUnlocked(candidate)) return "mentoring";
+  return "activation";
 }
 
 /** Stages that require readiness approval before job hunt (legacy pipeline tail). */
