@@ -135,6 +135,7 @@ export default function ReadinessEvaluationPanel({ candidateId }: Props) {
   const [redFlag, setRedFlag] = useState(false);
   const [redFlagNote, setRedFlagNote] = useState("");
   const [notes, setNotes] = useState("");
+  const [approvedForActivation, setApprovedForActivation] = useState(false);
 
   useEffect(() => {
     if (!evaluation) return;
@@ -143,6 +144,7 @@ export default function ReadinessEvaluationPanel({ candidateId }: Props) {
     setRedFlag(evaluation.red_flag);
     setRedFlagNote(evaluation.red_flag_note ?? "");
     setNotes(evaluation.evaluator_notes ?? "");
+    setApprovedForActivation(evaluation.approved_for_activation);
   }, [evaluation]);
 
   if (isLoading) {
@@ -219,7 +221,11 @@ export default function ReadinessEvaluationPanel({ candidateId }: Props) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Checkbox id="red-flag" checked={redFlag} onCheckedChange={(v) => setRedFlag(v === true)} />
+          <Checkbox id="red-flag" checked={redFlag} onCheckedChange={(v) => {
+            const checked = v === true;
+            setRedFlag(checked);
+            if (checked) setApprovedForActivation(false);
+          }} />
           <Label htmlFor="red-flag">Red flag — serious concern regardless of scores</Label>
         </div>
         {redFlag && (
@@ -235,6 +241,18 @@ export default function ReadinessEvaluationPanel({ candidateId }: Props) {
           <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} />
         </div>
 
+        <div className="flex items-center gap-2">
+          <Checkbox
+            id="approved-activation"
+            checked={approvedForActivation}
+            onCheckedChange={(v) => setApprovedForActivation(v === true)}
+            disabled={redFlag}
+          />
+          <Label htmlFor="approved-activation">
+            Approve for activation (Go) — visible to company on Go/No-Go summary
+          </Label>
+        </div>
+
         <div className="flex flex-wrap gap-3">
           <Button
             disabled={saveEval.isPending || !cultural || !technical}
@@ -247,6 +265,7 @@ export default function ReadinessEvaluationPanel({ candidateId }: Props) {
                   red_flag: redFlag,
                   red_flag_note: redFlagNote || null,
                   evaluator_notes: notes || null,
+                  approved_for_activation: redFlag ? false : approvedForActivation,
                 });
                 toast({ title: "Evaluation saved" });
               } catch (err) {

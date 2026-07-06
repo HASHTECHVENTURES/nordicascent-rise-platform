@@ -385,6 +385,31 @@ export function useAdminReadinessEvaluation(candidateId: string | undefined) {
   });
 }
 
+export function useEmployerReadinessEvaluation(candidateId: string | undefined) {
+  return useQuery({
+    queryKey: ["employer-readiness-evaluation", candidateId],
+    enabled: Boolean(candidateId),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("readiness_evaluations")
+        .select(
+          "cultural_signal, technical_signal, red_flag, approved_for_activation, evaluated_at"
+        )
+        .eq("candidate_id", candidateId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data as Pick<
+        ReadinessEvaluation,
+        | "cultural_signal"
+        | "technical_signal"
+        | "red_flag"
+        | "approved_for_activation"
+        | "evaluated_at"
+      > | null;
+    },
+  });
+}
+
 export function useSaveReadinessEvaluation() {
   const qc = useQueryClient();
   const { profile } = useAuth();
@@ -396,6 +421,7 @@ export function useSaveReadinessEvaluation() {
       red_flag,
       red_flag_note,
       evaluator_notes,
+      approved_for_activation,
     }: {
       candidateId: string;
       cultural_signal: "strong" | "acceptable" | "weak" | null;
@@ -403,6 +429,7 @@ export function useSaveReadinessEvaluation() {
       red_flag: boolean;
       red_flag_note: string | null;
       evaluator_notes: string | null;
+      approved_for_activation: boolean;
     }) => {
       const now = new Date().toISOString();
       const payload = {
@@ -412,6 +439,7 @@ export function useSaveReadinessEvaluation() {
         red_flag,
         red_flag_note,
         evaluator_notes,
+        approved_for_activation,
         evaluated_by: profile?.id ?? null,
         evaluated_at: now,
         updated_at: now,
@@ -436,6 +464,7 @@ export function useSaveReadinessEvaluation() {
     },
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ["readiness-evaluation", vars.candidateId] });
+      qc.invalidateQueries({ queryKey: ["employer-readiness-evaluation", vars.candidateId] });
       qc.invalidateQueries({ queryKey: ["candidate", vars.candidateId] });
       qc.invalidateQueries({ queryKey: ["stage-progress"] });
       qc.invalidateQueries({ queryKey: ["admin-readiness-overview"] });

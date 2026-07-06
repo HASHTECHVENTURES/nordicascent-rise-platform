@@ -14,6 +14,7 @@ import {
   useSelectionBoardDecision,
 } from "@/hooks/useSelection";
 import { employerBoardSummary, getSelectionStepFromStatus, selectionStatusLabel } from "@/lib/selectionModule";
+import EmployerReadinessSummary from "@/components/employer/EmployerReadinessSummary";
 
 const EmployerSelectionApplication = () => {
   const { applicationId } = useParams<{ applicationId: string }>();
@@ -197,6 +198,10 @@ const EmployerSelectionApplication = () => {
             </Button>
           </CardContent>
         </Card>
+      )}
+
+      {app.readiness_unlocked_at && app.candidate_id && (
+        <EmployerReadinessSummary candidateId={app.candidate_id} />
       )}
 
       {step < 3 && (

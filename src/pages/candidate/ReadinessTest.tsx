@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Info } from "lucide-react";
 import ReadinessTestRunner from "@/components/readiness/ReadinessTestRunner";
-import ReadinessTestIntro from "@/components/readiness/ReadinessTestIntro";
 import { useAuth } from "@/contexts/AuthContext";
 import { canAccessReadiness, hasBeenSelected } from "@/lib/candidateJourney";
 import { useMyApplications } from "@/hooks/useData";
@@ -47,6 +46,7 @@ export default function CandidateReadinessTest() {
   const startAttempt = useStartReadinessAttempt();
   const [startError, setStartError] = useState<string | null>(null);
   const [startedAttempt, setStartedAttempt] = useState<ReadinessAttempt | null>(null);
+  const autoStartRef = useRef(false);
 
   const test = tests?.find((t) => t.id === testId);
   const attemptFromQuery = attempts?.find((a) => a.test_id === testId);
@@ -56,21 +56,38 @@ export default function CandidateReadinessTest() {
     (routeAttempt?.test_id === testId && isActiveAttempt(routeAttempt) ? routeAttempt : undefined);
   const closedAttempt = attemptFromQuery ?? (routeAttempt?.test_id === testId ? routeAttempt : undefined);
 
-  const handleStartFromIntro = async () => {
-    if (!test) return;
+  useEffect(() => {
+    if (!ready || !test || attempt || autoStartRef.current) return;
+    if (closedAttempt?.status === "submitted" || closedAttempt?.status === "expired") return;
+    if (authLoading || testsLoading || attemptsLoading || startAttempt.isPending) return;
+
+    autoStartRef.current = true;
     setStartError(null);
-    try {
-      const created = await startAttempt.mutateAsync(test);
-      if (created.status !== "in_progress") {
-        throw new Error("This test has already been submitted.");
-      }
-      setStartedAttempt(created);
-      await refetchAttempts();
-    } catch (err) {
-      setStartedAttempt(null);
-      setStartError(err instanceof Error ? err.message : "Could not start this test.");
-    }
-  };
+
+    startAttempt
+      .mutateAsync(test)
+      .then(async (created) => {
+        if (created.status !== "in_progress") {
+          throw new Error("This test has already been submitted.");
+        }
+        setStartedAttempt(created);
+        await refetchAttempts();
+      })
+      .catch((err) => {
+        autoStartRef.current = false;
+        setStartError(err instanceof Error ? err.message : "Could not start this test.");
+      });
+  }, [
+    ready,
+    test,
+    attempt,
+    closedAttempt,
+    authLoading,
+    testsLoading,
+    attemptsLoading,
+    startAttempt,
+    refetchAttempts,
+  ]);
 
   if (!ready) {
     if (authLoading || applicationsLoading) {
@@ -164,23 +181,32 @@ export default function CandidateReadinessTest() {
 
   if (!attempt) {
     return (
-      <div className="space-y-4">
-        {startError && (
-          <Card className="border-destructive/40 bg-destructive/5 max-w-2xl">
+      <div className="space-y-4 max-w-lg">
+        <Button variant="ghost" size="sm" asChild>
+          <Link to="/candidate/readiness">Back to Readiness</Link>
+        </Button>
+        {startError ? (
+          <Card className="border-destructive/40 bg-destructive/5">
             <CardContent className="pt-6 space-y-3">
               <p className="font-medium">Could not start this test</p>
               <p className="text-sm text-muted-foreground">{startError}</p>
-              <Button size="sm" variant="outline" onClick={() => setStartError(null)}>
-                Dismiss
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setStartError(null);
+                  autoStartRef.current = false;
+                }}
+              >
+                Try again
               </Button>
             </CardContent>
           </Card>
+        ) : (
+          <div className="flex justify-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
         )}
-        <ReadinessTestIntro
-          test={test}
-          onNext={handleStartFromIntro}
-          starting={startAttempt.isPending}
-        />
       </div>
     );
   }
