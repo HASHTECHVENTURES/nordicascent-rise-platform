@@ -1,11 +1,6 @@
-import StageTasksPanel from "@/components/candidate/StageTasksPanel";
+import { Navigate } from "react-router-dom";
 
+/** Internship is nested under Activation (Entry Track). Legacy URL redirects here. */
 export default function CandidateInternship() {
-  return (
-    <StageTasksPanel
-      stageId="internship"
-      title="Internship"
-      description="6–10 week company internship program"
-    />
-  );
+  return <Navigate to="/candidate/activation" replace />;
 }

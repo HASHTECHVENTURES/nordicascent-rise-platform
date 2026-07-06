@@ -9,7 +9,7 @@ export const TRACK_META: Record<Track, { label: string; short: string; stages: s
   entry: {
     label: "Entry Track",
     short: "12-month program · 0–12 months experience",
-    stages: ["preparation", "selection", "readiness", "mentoring", "internship", "activation", "relocation", "onboarding", "followup"],
+    stages: ["preparation", "selection", "readiness", "mentoring", "activation", "relocation", "onboarding", "followup"],
   },
   fast: {
     label: "Fast Track",

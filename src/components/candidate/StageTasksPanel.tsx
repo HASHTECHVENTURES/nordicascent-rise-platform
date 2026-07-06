@@ -24,9 +24,21 @@ type Props = {
   stageId: string;
   title?: string;
   description?: string;
+  /** Render as a subsection inside Activation (no page header / continue card). */
+  embedded?: boolean;
+  sectionTitle?: string;
+  /** Internship tasks shown inside Activation for Entry Track even though internship is not a top-level stage. */
+  nestedInActivation?: boolean;
 };
 
-export default function StageTasksPanel({ stageId, title, description }: Props) {
+export default function StageTasksPanel({
+  stageId,
+  title,
+  description,
+  embedded = false,
+  sectionTitle,
+  nestedInActivation = false,
+}: Props) {
   const [track] = useTrack();
   const stageMeta = PIPELINE_STAGES.find((s) => s.id === stageId);
   const { data: tasks, isLoading: tasksLoading } = useStageTasks(stageId);
@@ -61,7 +73,7 @@ export default function StageTasksPanel({ stageId, title, description }: Props) 
     advanceStage.mutate(stageId);
   }, [stageId, stageTasksDone, stageStatus]);
 
-  if (!isStageInTrack(stageId, track)) {
+  if (!nestedInActivation && !isStageInTrack(stageId, track)) {
     const continueStageId = getContinueStageForExcluded(stageId, track);
     const continueMeta = PIPELINE_STAGES.find((s) => s.id === continueStageId);
     return (
@@ -139,28 +151,75 @@ export default function StageTasksPanel({ stageId, title, description }: Props) 
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-medium text-foreground">{title ?? stageMeta?.name}</h1>
-          <p className="text-muted-foreground">{description ?? stageMeta?.name}</p>
+    <div className={embedded ? "space-y-4" : "space-y-6"}>
+      {!embedded && (
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-medium text-foreground">{title ?? stageMeta?.name}</h1>
+            <p className="text-muted-foreground">{description ?? stageMeta?.name}</p>
+          </div>
+          {statusBadge()}
         </div>
-        {statusBadge()}
-      </div>
+      )}
+
+      {embedded && sectionTitle && (
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-lg font-medium text-foreground">{sectionTitle}</h2>
+          {statusBadge()}
+        </div>
+      )}
 
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-medium">Stage progress</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">{completedCount} of {taskList.length} tasks</span>
-            <span className="text-sm font-medium">{readiness}%</span>
-          </div>
-          <Progress value={readiness} className="h-2" />
-        </CardContent>
+        {embedded ? (
+          <CardContent className="pt-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">{completedCount} of {taskList.length} tasks</span>
+              <span className="text-sm font-medium">{readiness}%</span>
+            </div>
+            <Progress value={readiness} className="h-2" />
+            <div className="space-y-2 pt-2">
+              {taskList.length === 0 && (
+                <p className="text-sm text-muted-foreground py-2">
+                  {stageId === "internship"
+                    ? "Your employer has not added internship tasks yet. Check Messages for updates."
+                    : "Your employer has not added pre-arrival tasks yet. Check Messages for updates."}
+                </p>
+              )}
+              {taskList.map((task) => (
+                <StageTaskRow
+                  key={task.id}
+                  taskId={task.id}
+                  title={task.title}
+                  description={task.description}
+                  done={completedIds.has(task.id)}
+                  contentUrl={task.content_url}
+                  taskType={task.task_type as "task" | "course" | undefined}
+                  continueTo={
+                    STAGES_WITH_TASK_PAGES.includes(stageId as (typeof STAGES_WITH_TASK_PAGES)[number])
+                      ? stageTaskPath(stageId, task.id)
+                      : undefined
+                  }
+                />
+              ))}
+            </div>
+          </CardContent>
+        ) : (
+          <>
+            <CardHeader>
+              <CardTitle className="text-lg font-medium">Stage progress</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-muted-foreground">{completedCount} of {taskList.length} tasks</span>
+                <span className="text-sm font-medium">{readiness}%</span>
+              </div>
+              <Progress value={readiness} className="h-2" />
+            </CardContent>
+          </>
+        )}
       </Card>
 
+      {!embedded && (
       <Card>
         <CardHeader>
           <CardTitle className="text-lg font-medium">Tasks</CardTitle>
@@ -193,8 +252,9 @@ export default function StageTasksPanel({ stageId, title, description }: Props) 
           ))}
         </CardContent>
       </Card>
+      )}
 
-      {stageTasksDone && nextStageMeta && (
+      {stageTasksDone && nextStageMeta && !embedded && (
         <Card className="border-success/30 bg-success/5">
           <CardContent className="pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>

@@ -159,10 +159,6 @@ export function computeEarlyJourneySteps(
         if (!readinessUnlocked || !readinessTestsSubmitted) return "upcoming";
         if (isJobsUnlocked(candidate)) return "done";
         return "current";
-      case "internship":
-        if (!readinessUnlocked || !readinessTestsSubmitted) return "upcoming";
-        if (isJobsUnlocked(candidate)) return "done";
-        return "upcoming";
       case "activation":
       case "relocation":
       case "onboarding":
@@ -204,21 +200,14 @@ export function computeEarlyJourneySteps(
     },
   ];
 
-  if (track === "entry") {
-    steps.push({
-      id: "internship",
-      label: "Internship",
-      description: "Company internship phase",
-      state: stepState("internship"),
-      href: "/candidate/internship",
-    });
-  }
-
   steps.push(
     {
       id: "activation",
       label: "Activation",
-      description: "Pre-arrival and employment activation",
+      description:
+        track === "entry"
+          ? "Internship, then pre-arrival employment"
+          : "Pre-arrival and employment activation",
       state: stepState("activation"),
       href: "/candidate/activation",
     },
@@ -271,5 +260,5 @@ export function getEffectiveJourneyStage(
 
 /** Stages that require readiness approval before job hunt (legacy pipeline tail). */
 export function isJobHuntStage(stageId: string) {
-  return ["selection", "internship", "activation", "relocation", "onboarding", "followup"].includes(stageId);
+  return ["selection", "activation", "relocation", "onboarding", "followup"].includes(stageId);
 }

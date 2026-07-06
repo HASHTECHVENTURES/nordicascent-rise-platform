@@ -10,6 +10,7 @@ import { useMyReadinessAttempts, useReadinessTests } from "@/hooks/useReadiness"
 import { useMyApplications } from "@/hooks/useData";
 import { allTestsSubmitted } from "@/lib/readiness";
 import { isSelectionPipelineStatus } from "@/lib/selectionModule";
+import { hasSeenReadinessIntro } from "@/lib/readinessIntro";
 
 export default function CandidateReadiness() {
   const navigate = useNavigate();
@@ -27,13 +28,17 @@ export default function CandidateReadiness() {
     if (ready) {
       if (submitted && candidate?.jobs_unlocked) {
         navigate("/candidate/mentoring", { replace: true });
+        return;
+      }
+      if (candidate?.id && !hasSeenReadinessIntro(candidate.id)) {
+        navigate("/candidate/readiness/intro", { replace: true });
       }
       return;
     }
     if (isPreparationComplete(profile, candidate)) {
       navigate("/candidate/jobs", { replace: true });
     }
-  }, [ready, submitted, candidate?.jobs_unlocked, profile, candidate, loading, navigate]);
+  }, [ready, submitted, candidate?.jobs_unlocked, candidate?.id, profile, candidate, loading, navigate]);
 
   if (loading || (!ready && isPreparationComplete(profile, candidate))) {
     return (

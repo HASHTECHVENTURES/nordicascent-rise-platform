@@ -33,8 +33,6 @@ function isStepAccessible(
       return canAccessReadiness(profile, candidate, applications);
     case "mentoring":
       return canAccessMentoring(profile, candidate, readinessSubmitted, applications);
-    case "internship":
-      return isJobsUnlocked(candidate);
     case "activation":
     case "relocation":
     case "onboarding":

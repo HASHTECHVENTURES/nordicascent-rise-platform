@@ -31,6 +31,7 @@ import CandidateUniversity from "./pages/candidate/University";
 import CandidatePreparation from "./pages/candidate/Preparation";
 import CandidateSelection from "./pages/candidate/Selection";
 import CandidateReadiness from "./pages/candidate/Readiness";
+import CandidateReadinessIntro from "./pages/candidate/ReadinessIntro";
 import CandidateReadinessTest from "./pages/candidate/ReadinessTest";
 import CandidateStageTaskDetail from "./pages/candidate/StageTaskDetail";
 import CandidateInternship from "./pages/candidate/Internship";
@@ -122,6 +123,7 @@ const App = () => (
                 <Route path="/candidate/dashboard" element={<CandidateDashboard />} />
                 <Route path="/candidate/preparation" element={<CandidatePreparation />} />
                 <Route path="/candidate/selection" element={<CandidateSelection />} />
+                <Route path="/candidate/readiness/intro" element={<CandidateReadinessIntro />} />
                 <Route path="/candidate/readiness" element={<CandidateReadiness />} />
                 <Route path="/candidate/readiness/test/:testId" element={<CandidateReadinessTest />} />
                 <Route path="/candidate/:stagePath/tasks/:taskId" element={<CandidateStageTaskDetail />} />
