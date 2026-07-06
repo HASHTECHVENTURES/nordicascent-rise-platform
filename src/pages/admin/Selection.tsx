@@ -24,6 +24,7 @@ import {
   type SelectionStepId,
   type StepDecision,
 } from "@/lib/selectionModule";
+import { isMentorAssignmentOverdue } from "@/lib/mentorProgram";
 import type { SelectionApplication } from "@/lib/selectionModule";
 
 function isBulkEligibleStep1(app: SelectionApplication) {
@@ -278,6 +279,10 @@ const AdminSelection = () => {
                 const profile = cand?.profiles;
                 const step = getSelectionStepFromStatus(app.status, app.selection_step);
                 const overdue = isStepOverdue(step, app.selection_step_entered_at);
+                const mentorOverdue =
+                  (app.status === "selected_for_readiness" || step >= 5) &&
+                  !app.assigned_mentor_id &&
+                  isMentorAssignmentOverdue(app.board_decided_at);
                 const canBulk = isBulkEligibleStep1(app);
                 return (
                   <div
@@ -308,6 +313,12 @@ const AdminSelection = () => {
                           <Badge variant="destructive" className="gap-1">
                             <AlertTriangle className="h-3 w-3" />
                             SLA
+                          </Badge>
+                        )}
+                        {mentorOverdue && (
+                          <Badge variant="destructive" className="gap-1">
+                            <AlertTriangle className="h-3 w-3" />
+                            Mentor
                           </Badge>
                         )}
                         {app.needs_action && <Badge variant="secondary">Review</Badge>}

@@ -12,13 +12,20 @@ import {
   useEmployerSelectionApplication,
   useEmployerSelectionFeedback,
   useSelectionBoardDecision,
+  useAssignMentorToApplication,
 } from "@/hooks/useSelection";
+import { useCompanyMentors } from "@/hooks/useData";
 import { employerBoardSummary, getSelectionStepFromStatus, selectionStatusLabel } from "@/lib/selectionModule";
 import EmployerReadinessSummary from "@/components/employer/EmployerReadinessSummary";
+import MentorProgramPanel from "@/components/mentor/MentorProgramPanel";
+import { isMentorAssignmentOverdue } from "@/lib/mentorProgram";
+import type { Track } from "@/lib/track";
 
 const EmployerSelectionApplication = () => {
   const { applicationId } = useParams<{ applicationId: string }>();
   const { data: app, isLoading, isError, error } = useEmployerSelectionApplication(applicationId);
+  const { data: mentors } = useCompanyMentors();
+  const assignMentor = useAssignMentorToApplication();
   const feedbackMut = useEmployerSelectionFeedback();
   const board = useSelectionBoardDecision();
   const { toast } = useToast();
@@ -27,13 +34,37 @@ const EmployerSelectionApplication = () => {
   const [techFeedback, setTechFeedback] = useState("");
   const [motFeedback, setMotFeedback] = useState("");
   const [boardDecision, setBoardDecision] = useState<"selected" | "hold" | "rejected">("selected");
+  const [mentorId, setMentorId] = useState("");
 
   useEffect(() => {
     if (!app) return;
     setTechFeedback(app.technical_company_feedback ?? "");
     setMotFeedback(app.motivation_company_feedback ?? "");
     setBoardDecision((app.board_company_decision as typeof boardDecision) ?? "selected");
+    setMentorId(app.assigned_mentor_id ?? "");
   }, [app]);
+
+  const appTrack =
+    (app?.track as Track | null) ??
+    ((app?.candidates as { track?: Track } | null)?.track ?? "entry");
+
+  const handleAssignMentor = async () => {
+    if (!app || !mentorId) return;
+    try {
+      await assignMentor.mutateAsync({
+        applicationId: app.id,
+        mentorId,
+        track: appTrack,
+      });
+      toast({ title: "Mentor assigned — Readiness unlocked" });
+    } catch (err) {
+      toast({
+        title: "Failed",
+        description: err instanceof Error ? err.message : "Try again",
+        variant: "destructive",
+      });
+    }
+  };
 
   const saveFeedback = async (stepNum: 3 | 4) => {
     if (!app) return;
@@ -198,6 +229,48 @@ const EmployerSelectionApplication = () => {
             </Button>
           </CardContent>
         </Card>
+      )}
+
+      {(app.status === "selected_for_readiness" || app.readiness_unlocked_at) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Mentor assignment</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {isMentorAssignmentOverdue(app.board_decided_at) && !app.assigned_mentor_id && (
+              <p className="text-sm text-destructive font-medium">
+                Overdue — no mentor assigned within 5 days of selection.
+              </p>
+            )}
+            <p className="text-sm text-muted-foreground">
+              Readiness stays locked until a mentor is assigned.
+            </p>
+            <Select value={mentorId} onValueChange={setMentorId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select mentor" />
+              </SelectTrigger>
+              <SelectContent>
+                {(mentors ?? []).map((m) => (
+                  <SelectItem key={m.id} value={m.id}>
+                    {m.name} — {m.email}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button onClick={handleAssignMentor} disabled={!mentorId || assignMentor.isPending}>
+              Assign mentor & unlock Readiness
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {app.readiness_unlocked_at && (
+        <MentorProgramPanel
+          applicationId={app.id}
+          track={appTrack}
+          canEdit
+          showObservations={false}
+        />
       )}
 
       {app.readiness_unlocked_at && app.candidate_id && (

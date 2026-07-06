@@ -35,6 +35,9 @@ import {
   type EligibilityAutoChecks,
   type StepDecision,
 } from "@/lib/selectionModule";
+import type { Track } from "@/lib/track";
+import MentorProgramPanel from "@/components/mentor/MentorProgramPanel";
+import { isMentorAssignmentOverdue } from "@/lib/mentorProgram";
 
 const AdminSelectionApplication = () => {
   const { applicationId } = useParams<{ applicationId: string }>();
@@ -175,7 +178,11 @@ const AdminSelectionApplication = () => {
       if (canActivateHold(app)) {
         await activateHold.mutateAsync({ applicationId: app.id, mentorId });
       } else {
-        await assignMentor.mutateAsync({ applicationId: app.id, mentorId });
+        await assignMentor.mutateAsync({
+          applicationId: app.id,
+          mentorId,
+          track: (app.track as Track | null) ?? (app.candidates as { track?: Track })?.track,
+        });
       }
       toast({ title: "Mentor assigned — Readiness unlocked" });
     } catch (err) {
@@ -502,6 +509,11 @@ const AdminSelectionApplication = () => {
             <CardTitle className="text-lg">Mentor assignment</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {isMentorAssignmentOverdue(app.board_decided_at) && !app.assigned_mentor_id && (
+              <p className="text-sm text-destructive font-medium">
+                Overdue — no mentor assigned within 5 days of board decision.
+              </p>
+            )}
             <p className="text-sm text-muted-foreground">
               Readiness stays locked until a mentor is assigned.
             </p>
@@ -522,6 +534,15 @@ const AdminSelectionApplication = () => {
             </Button>
           </CardContent>
         </Card>
+      )}
+
+      {app.readiness_unlocked_at && (
+        <MentorProgramPanel
+          applicationId={app.id}
+          track={(app.track as Track | null) ?? (app.candidates as { track?: Track })?.track}
+          canEdit
+          showObservations
+        />
       )}
 
       {app.motivation_statement && (

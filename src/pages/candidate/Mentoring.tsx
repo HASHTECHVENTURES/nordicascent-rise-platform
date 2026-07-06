@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar, Video, Loader2, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
+import MentorAssignedBanner from "@/components/mentor/MentorAssignedBanner";
+import { useMyMentorProgramContext } from "@/hooks/useMentorProgram";
 
 const CandidateMentoring = () => {
   const { profile, candidate } = useAuth();
@@ -17,6 +19,7 @@ const CandidateMentoring = () => {
   const { data: attempts } = useMyReadinessAttempts();
   const { data: applications } = useMyApplications();
   const { data: sessions, isLoading } = useMentoringSessions();
+  const mentorCtx = useMyMentorProgramContext();
 
   const submitted = tests && attempts ? allTestsSubmitted(tests, attempts) : false;
   const mentoringOpen = canAccessMentoring(profile, candidate, submitted, applications ?? []);
@@ -41,7 +44,9 @@ const CandidateMentoring = () => {
   const upcoming = list.filter((s) => s.status === "scheduled" && new Date(s.scheduled_at) >= new Date());
   const past = list.filter((s) => s.status === "completed" || new Date(s.scheduled_at) < new Date());
   const next = upcoming[0];
-  const mentor = next?.mentor as { full_name: string | null; avatar_url: string | null } | null;
+  const legacyMentor = next?.mentor as { full_name: string | null; avatar_url: string | null } | null;
+  const mentorName = mentorCtx.mentor?.name ?? legacyMentor?.full_name;
+  const mentorAvatar = legacyMentor?.avatar_url;
 
   if (isLoading) {
     return (
@@ -55,22 +60,42 @@ const CandidateMentoring = () => {
     <div className="space-y-6">
       <h1 className="text-2xl font-medium">Mentoring</h1>
 
+      {mentorCtx.mentor ? (
+        <MentorAssignedBanner
+          mentor={mentorCtx.mentor}
+          company={mentorCtx.company}
+          meetings={mentorCtx.meetings}
+          track={mentorCtx.track}
+        />
+      ) : (
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground">
+              Your mentor will appear here once assigned.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-1">
-          <CardHeader><CardTitle className="text-base">Mentor</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">Mentor contact</CardTitle></CardHeader>
           <CardContent>
-            {mentor ? (
+            {mentorName ? (
               <div className="flex items-center gap-4">
                 <Avatar className="h-14 w-14">
-                  <AvatarImage src={mentor.avatar_url ?? undefined} />
-                  <AvatarFallback>{(mentor.full_name ?? "?").slice(0, 2)}</AvatarFallback>
+                  <AvatarImage src={mentorAvatar ?? undefined} />
+                  <AvatarFallback>{mentorName.slice(0, 2)}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <h3 className="font-medium">{mentor.full_name}</h3>
+                  <h3 className="font-medium">{mentorName}</h3>
+                  {mentorCtx.mentor?.role_title && (
+                    <p className="text-sm text-muted-foreground">{mentorCtx.mentor.role_title}</p>
+                  )}
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">Your mentor will appear here once assigned.</p>
+              <p className="text-sm text-muted-foreground">No mentor assigned yet.</p>
             )}
           </CardContent>
         </Card>

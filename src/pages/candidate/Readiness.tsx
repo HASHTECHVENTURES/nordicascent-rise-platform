@@ -11,11 +11,14 @@ import { useMyApplications } from "@/hooks/useData";
 import { allTestsSubmitted } from "@/lib/readiness";
 import { isSelectionPipelineStatus } from "@/lib/selectionModule";
 import { hasSeenReadinessIntro } from "@/lib/readinessIntro";
+import MentorAssignedBanner from "@/components/mentor/MentorAssignedBanner";
+import { useMyMentorProgramContext } from "@/hooks/useMentorProgram";
 
 export default function CandidateReadiness() {
   const navigate = useNavigate();
   const { profile, candidate, loading } = useAuth();
   const { data: applications, isLoading: applicationsLoading } = useMyApplications();
+  const mentorCtx = useMyMentorProgramContext();
   const ready = canAccessReadiness(profile, candidate, applications ?? []);
   const { data: tests } = useReadinessTests();
   const { data: attempts } = useMyReadinessAttempts();
@@ -123,6 +126,14 @@ export default function CandidateReadiness() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-medium">Readiness</h1>
+      {mentorCtx.mentor && (
+        <MentorAssignedBanner
+          mentor={mentorCtx.mentor}
+          company={mentorCtx.company}
+          meetings={mentorCtx.meetings}
+          track={mentorCtx.track}
+        />
+      )}
       <ReadinessModuleHub hideHeader />
     </div>
   );

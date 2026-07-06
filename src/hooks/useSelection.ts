@@ -15,6 +15,8 @@ import {
 } from "@/lib/selectionModule";
 import { onHoldCandidateActivated, onSelectionStatusChange } from "@/lib/selectionEffects";
 import { APPLICATION_JOURNEY_STATUSES } from "@/lib/applicationStatusFlow";
+import { initializeMentorMeetings } from "@/lib/mentorProgram";
+import type { Track } from "@/lib/track";
 
 const ADMIN_SELECTION_SELECT = `
   *,
@@ -325,6 +327,12 @@ export function useActivateHoldCandidate() {
         })
         .eq("id", applicationId);
       if (error) throw error;
+
+      const track =
+        (row.track as Track | null) ??
+        ((row.candidates as { track?: Track } | null)?.track ?? "entry");
+      await initializeMentorMeetings(applicationId, track);
+
       return row;
     },
     onSuccess: async (app) => {
@@ -351,7 +359,15 @@ export function useActivateHoldCandidate() {
 export function useAssignMentorToApplication() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ applicationId, mentorId }: { applicationId: string; mentorId: string }) => {
+    mutationFn: async ({
+      applicationId,
+      mentorId,
+      track,
+    }: {
+      applicationId: string;
+      mentorId: string;
+      track?: Track | null;
+    }) => {
       const now = new Date().toISOString();
       const { error } = await supabase
         .from("applications")
@@ -363,12 +379,28 @@ export function useAssignMentorToApplication() {
         })
         .eq("id", applicationId);
       if (error) throw error;
+
+      let resolvedTrack = track ?? null;
+      if (!resolvedTrack) {
+        const { data: app } = await supabase
+          .from("applications")
+          .select("track, candidates(track)")
+          .eq("id", applicationId)
+          .single();
+        resolvedTrack =
+          (app?.track as Track | null) ??
+          ((app?.candidates as { track?: Track } | null)?.track ?? "entry");
+      }
+      await initializeMentorMeetings(applicationId, resolvedTrack);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-selection-applications"] });
       qc.invalidateQueries({ queryKey: ["admin-selection-application"] });
       qc.invalidateQueries({ queryKey: ["employer-selection-applications"] });
+      qc.invalidateQueries({ queryKey: ["employer-selection-application"] });
       qc.invalidateQueries({ queryKey: ["my-applications"] });
+      qc.invalidateQueries({ queryKey: ["mentor-program-meetings"] });
+      qc.invalidateQueries({ queryKey: ["assigned-mentor"] });
     },
   });
 }
