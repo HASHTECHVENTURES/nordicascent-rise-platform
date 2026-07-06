@@ -15,7 +15,7 @@ import { hasSeenReadinessIntro } from "@/lib/readinessIntro";
 export default function CandidateReadiness() {
   const navigate = useNavigate();
   const { profile, candidate, loading } = useAuth();
-  const { data: applications } = useMyApplications();
+  const { data: applications, isLoading: applicationsLoading } = useMyApplications();
   const ready = canAccessReadiness(profile, candidate, applications ?? []);
   const { data: tests } = useReadinessTests();
   const { data: attempts } = useMyReadinessAttempts();
@@ -24,7 +24,7 @@ export default function CandidateReadiness() {
     tests && tests.length > 0 && attempts ? allTestsSubmitted(tests, attempts) : false;
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || applicationsLoading) return;
     if (ready) {
       if (submitted && candidate?.jobs_unlocked) {
         navigate("/candidate/mentoring", { replace: true });
@@ -38,9 +38,23 @@ export default function CandidateReadiness() {
     if (isPreparationComplete(profile, candidate)) {
       navigate("/candidate/jobs", { replace: true });
     }
-  }, [ready, submitted, candidate?.jobs_unlocked, candidate?.id, profile, candidate, loading, navigate]);
+  }, [
+    ready,
+    submitted,
+    candidate?.jobs_unlocked,
+    candidate?.id,
+    profile,
+    candidate,
+    loading,
+    applicationsLoading,
+    navigate,
+  ]);
 
-  if (loading || (!ready && isPreparationComplete(profile, candidate))) {
+  if (
+    loading ||
+    applicationsLoading ||
+    (!ready && isPreparationComplete(profile, candidate))
+  ) {
     return (
       <div className="flex justify-center py-20">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

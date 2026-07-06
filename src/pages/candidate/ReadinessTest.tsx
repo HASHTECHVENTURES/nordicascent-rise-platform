@@ -29,7 +29,7 @@ export default function CandidateReadinessTest() {
   const location = useLocation();
   const routeAttempt = (location.state as TestLocationState | null)?.attempt;
   const { profile, candidate, loading: authLoading } = useAuth();
-  const { data: applications } = useMyApplications();
+  const { data: applications, isLoading: applicationsLoading } = useMyApplications();
   const ready = canAccessReadiness(profile, candidate, applications ?? []);
   const {
     data: tests,
@@ -73,6 +73,14 @@ export default function CandidateReadinessTest() {
   };
 
   if (!ready) {
+    if (authLoading || applicationsLoading) {
+      return (
+        <div className="flex justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      );
+    }
+
     const selected = hasBeenSelected(applications ?? []);
     const awaitingMentor = (applications ?? []).some(
       (a) => a.status === "selected_for_readiness" && !a.readiness_unlocked_at

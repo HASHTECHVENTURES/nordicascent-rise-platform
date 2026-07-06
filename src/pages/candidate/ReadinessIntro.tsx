@@ -12,17 +12,17 @@ import { markReadinessIntroSeen } from "@/lib/readinessIntro";
 export default function CandidateReadinessIntro() {
   const navigate = useNavigate();
   const { profile, candidate, loading } = useAuth();
-  const { data: applications } = useMyApplications();
+  const { data: applications, isLoading: applicationsLoading } = useMyApplications();
   const ready = canAccessReadiness(profile, candidate, applications ?? []);
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || applicationsLoading) return;
     if (!ready || !candidate?.id) {
       navigate("/candidate/readiness", { replace: true });
     }
-  }, [loading, ready, candidate?.id, navigate]);
+  }, [loading, applicationsLoading, ready, candidate?.id, navigate]);
 
-  if (loading || !ready || !candidate?.id) {
+  if (loading || applicationsLoading || !ready || !candidate?.id) {
     return (
       <div className="flex justify-center py-20">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
