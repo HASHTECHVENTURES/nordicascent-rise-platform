@@ -67,15 +67,15 @@ const EmployerDashboard = () => {
         <Card className="border-nordic-orange/30 bg-nordic-orange/5">
           <CardContent className="pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <p className="font-medium">Post your first job</p>
+              <p className="font-medium">Post your first job role</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Candidates browse open roles — create one to start receiving applications.
+                Candidates browse open job roles — post one to start receiving applications.
               </p>
             </div>
             <Button className="gap-2 bg-nordic-orange hover:bg-nordic-orange/90 text-white shrink-0" asChild>
               <Link to="/employer/jobs?new=1">
                 <Plus className="h-4 w-4" />
-                Create job posting
+                Post job role
               </Link>
             </Button>
           </CardContent>
@@ -149,7 +149,7 @@ const EmployerDashboard = () => {
               </div>
               <div>
                 <p className="text-4xl font-bold">{openRoles}</p>
-                <p className="text-sm text-muted-foreground">Open Roles</p>
+                <p className="text-sm text-muted-foreground">Open job roles</p>
               </div>
             </CardContent>
           </Card>

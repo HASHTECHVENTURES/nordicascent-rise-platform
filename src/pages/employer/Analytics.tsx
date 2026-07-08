@@ -52,7 +52,7 @@ const EmployerAnalytics = () => {
           <CardContent><div className="text-2xl font-bold">{totalApps}</div></CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground flex items-center gap-2"><Briefcase className="h-4 w-4" />Open Roles</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground flex items-center gap-2"><Briefcase className="h-4 w-4" />Open job roles</CardTitle></CardHeader>
           <CardContent><div className="text-2xl font-bold">{openJobs}</div></CardContent>
         </Card>
         <Card>

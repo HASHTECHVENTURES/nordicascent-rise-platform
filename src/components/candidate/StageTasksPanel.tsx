@@ -121,7 +121,7 @@ export default function StageTasksPanel({
                 Then {stageMeta?.name} and the rest of your journey will begin here.
               </p>
               <Button size="sm" asChild>
-                <Link to="/candidate/jobs">Go to Jobs <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                <Link to="/candidate/jobs">Go to Job Roles <ArrowRight className="ml-2 h-4 w-4" /></Link>
               </Button>
             </div>
           </CardContent>
@@ -282,7 +282,7 @@ export default function StageTasksPanel({
                 {waitingOnEmployer
                   ? "Your applications are with employers. Track updates in My Applications."
                   : hasApplications
-                    ? "Apply to more roles or check status in My Applications."
+                    ? "Apply to more job roles or check status in My Applications."
                     : "Next step: apply to an open job."}
               </p>
             </div>

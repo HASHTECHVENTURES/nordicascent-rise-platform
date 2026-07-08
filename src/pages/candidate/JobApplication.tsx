@@ -126,7 +126,7 @@ export default function CandidateJobApplication() {
       <div className="text-center py-20 space-y-4">
         <p className="text-muted-foreground">This job is no longer available.</p>
         <Button asChild variant="outline">
-          <Link to="/candidate/jobs">Back to Jobs</Link>
+          <Link to="/candidate/jobs">Back to Job Roles</Link>
         </Button>
       </div>
     );
@@ -136,9 +136,9 @@ export default function CandidateJobApplication() {
     return (
       <div className="space-y-4 max-w-lg">
         <Button variant="ghost" size="sm" asChild>
-          <Link to={`/candidate/jobs/${jobId}`}>Back to job posting</Link>
+          <Link to={`/candidate/jobs/${jobId}`}>Back to job role</Link>
         </Button>
-        <p className="font-medium">You have already applied for this role.</p>
+        <p className="font-medium">You have already applied for this job role.</p>
         <Button asChild>
           <Link to="/candidate/applications">View my applications</Link>
         </Button>
@@ -150,7 +150,7 @@ export default function CandidateJobApplication() {
     return (
       <div className="space-y-4 max-w-lg">
         <Button variant="ghost" size="sm" asChild>
-          <Link to={`/candidate/jobs/${jobId}`}>Back to job posting</Link>
+          <Link to={`/candidate/jobs/${jobId}`}>Back to job role</Link>
         </Button>
         <Card>
           <CardContent className="pt-6 space-y-3">
@@ -171,14 +171,14 @@ export default function CandidateJobApplication() {
     return (
       <div className="space-y-4 max-w-lg">
         <Button variant="ghost" size="sm" asChild>
-          <Link to={`/candidate/jobs/${jobId}`}>Back to job posting</Link>
+          <Link to={`/candidate/jobs/${jobId}`}>Back to job role</Link>
         </Button>
         <Card className="border-amber-200 bg-amber-50/50">
           <CardContent className="pt-6 space-y-3">
             <p className="font-medium">Not eligible to apply yet</p>
             <p className="text-sm text-muted-foreground">
               Complete your profile and link a partner university to apply. Waitlist candidates cannot apply until approved.
-              Alumni may apply again to other open roles.
+              Alumni may apply again to other open job roles.
             </p>
           </CardContent>
         </Card>
@@ -204,14 +204,14 @@ export default function CandidateJobApplication() {
       <Button variant="ghost" size="sm" asChild>
         <Link to={`/candidate/jobs/${jobId}`}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to job posting
+          Back to job role
         </Link>
       </Button>
 
       <div>
         <h1 className="text-2xl font-medium">Application for {job.title}</h1>
         <p className="text-muted-foreground mt-1">
-          Your profile is already on file. Complete the role-specific fields below.
+          Your profile is already on file. Complete the job role-specific fields below.
         </p>
         <Badge variant="secondary" className="mt-2">{TRACK_META[track].label}</Badge>
       </div>
@@ -222,13 +222,13 @@ export default function CandidateJobApplication() {
             <CardTitle className="text-base">Motivation statement</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Label htmlFor="motivation">Why this role and company? (max {APPLICATION_MOTIVATION_MAX_WORDS} words)</Label>
+            <Label htmlFor="motivation">Why this job role and company? (max {APPLICATION_MOTIVATION_MAX_WORDS} words)</Label>
             <Textarea
               id="motivation"
               rows={8}
               value={form.motivation_statement}
               onChange={(e) => setForm({ ...form, motivation_statement: e.target.value })}
-              placeholder="Explain your motivation for this specific role..."
+              placeholder="Explain your motivation for this specific job role..."
             />
             <p className={`text-xs ${motivationWords > APPLICATION_MOTIVATION_MAX_WORDS ? "text-destructive" : "text-muted-foreground"}`}>
               {motivationWords} / {APPLICATION_MOTIVATION_MAX_WORDS} words
@@ -263,7 +263,7 @@ export default function CandidateJobApplication() {
                   rows={6}
                   value={form.project_descriptions_text}
                   onChange={(e) => setForm({ ...form, project_descriptions_text: e.target.value })}
-                  placeholder="Describe academic or personal projects relevant to this role..."
+                  placeholder="Describe academic or personal projects relevant to this job role..."
                 />
               </div>
               <PdfUploadField

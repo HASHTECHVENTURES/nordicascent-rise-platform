@@ -137,7 +137,7 @@ export async function onApplicationStatusChange(
       await notifyCandidate(
         profile_id,
         "Application update",
-        `Your application for ${job_title} was not selected this time. You can apply to other open roles in Jobs.`,
+        `Your application for ${job_title} was not selected this time. You can apply to other open job roles in Job Roles.`,
         "application_rejected",
         { applicationId: id, jobTitle: job_title }
       );

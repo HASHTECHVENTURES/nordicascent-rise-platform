@@ -14,7 +14,7 @@ const employerStages = [
   { id: 1, name: "Overview", href: "/employer/dashboard", icon: LayoutDashboard },
   { id: 2, name: "Tasks", href: "/employer/tasks", icon: ClipboardList },
   { id: 3, name: "Candidates", href: "/employer/candidates", icon: Users },
-  { id: 4, name: "Roles", href: "/employer/jobs", icon: Briefcase },
+  { id: 4, name: "Job Roles", href: "/employer/jobs", icon: Briefcase },
   { id: 5, name: "Company", href: "/employer/company", icon: Building2 },
   { id: 6, name: "Mentoring", href: "/employer/mentoring", icon: Heart },
   { id: 7, name: "Messages", href: "/employer/messages", icon: MessageSquare },

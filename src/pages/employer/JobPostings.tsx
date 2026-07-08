@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type Dispatch, type SetStateAction } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Plus, MoreHorizontal, Eye, MapPin, Users, Clock, Briefcase, Loader2 } from "lucide-react";
+import { Search, Plus, MoreHorizontal, Eye, MapPin, Users, Clock, Briefcase, Loader2, Pencil } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useEmployerJobs, useCreateJob, useUpdateJob, useMyCompany } from "@/hooks/useData";
 import { countHoldApplicationsForJob } from "@/lib/jobCloseEffects";
@@ -28,7 +28,22 @@ import {
 } from "@/lib/companyRegistration";
 import { TRACK_META } from "@/lib/track";
 
-const emptyForm = {
+type JobForm = {
+  title: string;
+  location: string;
+  job_type: string;
+  description: string;
+  salary_range: string;
+  engineering_discipline: string;
+  discipline_other: string;
+  positions_count: string;
+  experience_level: string;
+  target_track: string;
+  core_skills: string;
+  desired_start_window: string;
+};
+
+const emptyForm: JobForm = {
   title: "",
   location: "",
   job_type: "Full-time",
@@ -48,6 +63,161 @@ const selectContentProps = {
   className: "z-[200]",
 };
 
+type JobRow = NonNullable<ReturnType<typeof useEmployerJobs>["data"]>[number];
+
+function jobToForm(job: JobRow): JobForm {
+  return {
+    title: job.title ?? "",
+    location: job.location ?? "",
+    job_type: job.job_type ?? "Full-time",
+    description: job.description ?? "",
+    salary_range: job.salary_range ?? "",
+    engineering_discipline: job.engineering_discipline ?? "",
+    discipline_other: job.discipline_other ?? "",
+    positions_count: String(job.positions_count ?? 1),
+    experience_level: job.experience_level ?? "",
+    target_track: job.target_track ?? "",
+    core_skills: job.core_skills ?? job.description ?? "",
+    desired_start_window: job.desired_start_window ?? "",
+  };
+}
+
+function formToPayload(form: JobForm, company?: CompanyProfile | null) {
+  return {
+    title: form.title.trim(),
+    location: form.location.trim() || company?.location || null,
+    job_type: form.job_type,
+    description: form.core_skills.trim() || form.description.trim() || null,
+    salary_range: form.salary_range.trim() || null,
+    engineering_discipline: form.engineering_discipline || null,
+    discipline_other:
+      form.engineering_discipline === "Other" ? form.discipline_other.trim() || null : null,
+    positions_count: parseInt(form.positions_count, 10) || 1,
+    experience_level: form.experience_level || null,
+    target_track: (form.target_track as "entry" | "fast") || null,
+    core_skills: form.core_skills.trim() || null,
+    desired_start_window: form.desired_start_window || null,
+  };
+}
+
+function JobRoleFormFields({
+  form,
+  setForm,
+  showDisciplineOther,
+}: {
+  form: JobForm;
+  setForm: Dispatch<SetStateAction<JobForm>>;
+  showDisciplineOther: boolean;
+}) {
+  return (
+    <>
+      <div className="space-y-2">
+        <Label>Job role title</Label>
+        <Input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+      </div>
+      <div className="space-y-2">
+        <Label>Engineering discipline</Label>
+        <Select
+          value={form.engineering_discipline || undefined}
+          onValueChange={(value) => setForm({ ...form, engineering_discipline: value })}
+        >
+          <SelectTrigger><SelectValue placeholder="Select discipline" /></SelectTrigger>
+          <SelectContent {...selectContentProps}>
+            {ENGINEERING_DISCIPLINES.map((d) => (
+              <SelectItem key={d} value={d}>{d}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      {showDisciplineOther && (
+        <div className="space-y-2">
+          <Label>Specify discipline</Label>
+          <Input
+            required
+            value={form.discipline_other}
+            onChange={(e) => setForm({ ...form, discipline_other: e.target.value })}
+          />
+        </div>
+      )}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Number of positions</Label>
+          <Input
+            type="number"
+            min={1}
+            required
+            value={form.positions_count}
+            onChange={(e) => setForm({ ...form, positions_count: e.target.value })}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Experience level sought</Label>
+          <Select
+            value={form.experience_level || undefined}
+            onValueChange={(value) => setForm({ ...form, experience_level: value })}
+          >
+            <SelectTrigger><SelectValue placeholder="Select level" /></SelectTrigger>
+            <SelectContent {...selectContentProps}>
+              {JOB_EXPERIENCE_LEVELS.map((o) => (
+                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label>Program track</Label>
+        <Select
+          value={form.target_track || undefined}
+          onValueChange={(value) => setForm({ ...form, target_track: value })}
+        >
+          <SelectTrigger><SelectValue placeholder="Entry or Fast track" /></SelectTrigger>
+          <SelectContent {...selectContentProps}>
+            <SelectItem value="entry">{TRACK_META.entry.label}</SelectItem>
+            <SelectItem value="fast">{TRACK_META.fast.label}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label>Role description & core technical skills</Label>
+        <Textarea
+          required
+          rows={4}
+          value={form.core_skills}
+          onChange={(e) => setForm({ ...form, core_skills: e.target.value })}
+          placeholder="Describe the role and required skills — candidates see this text."
+        />
+      </div>
+      <div className="space-y-2">
+        <Label>Desired start window</Label>
+        <Select
+          value={form.desired_start_window || undefined}
+          onValueChange={(value) => setForm({ ...form, desired_start_window: value })}
+        >
+          <SelectTrigger><SelectValue placeholder="Select window" /></SelectTrigger>
+          <SelectContent {...selectContentProps}>
+            {START_WINDOW_OPTIONS.map((o) => (
+              <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label>Location</Label>
+        <Input required value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
+      </div>
+      <div className="space-y-2">
+        <Label>Employment type</Label>
+        <Input value={form.job_type} onChange={(e) => setForm({ ...form, job_type: e.target.value })} />
+      </div>
+      <div className="space-y-2">
+        <Label>Salary range (optional)</Label>
+        <Input value={form.salary_range} onChange={(e) => setForm({ ...form, salary_range: e.target.value })} />
+      </div>
+    </>
+  );
+}
+
 const EmployerJobPostings = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { data: jobs, isLoading } = useEmployerJobs();
@@ -56,8 +226,11 @@ const EmployerJobPostings = () => {
   const updateJob = useUpdateJob();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editingJobId, setEditingJobId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState<JobForm>(emptyForm);
+  const [editForm, setEditForm] = useState<JobForm>(emptyForm);
 
   const companyId = employerData?.company_id;
   const company = employerData?.companies as CompanyProfile | null;
@@ -87,6 +260,14 @@ const EmployerJobPostings = () => {
     }
   }, [form.experience_level, form.target_track]);
 
+  useEffect(() => {
+    if (!editForm.experience_level) return;
+    const track = deriveTrackFromJobExperience(editForm.experience_level);
+    if (track && editForm.target_track !== track) {
+      setEditForm((f) => ({ ...f, target_track: track }));
+    }
+  }, [editForm.experience_level, editForm.target_track]);
+
   const applicantCount = (job: { applications?: { count: number }[] }) =>
     job.applications?.[0]?.count ?? 0;
 
@@ -96,25 +277,35 @@ const EmployerJobPostings = () => {
     try {
       await createJob.mutateAsync({
         company_id: companyId,
-        title: form.title.trim(),
-        location: form.location.trim() || company?.location || null,
-        job_type: form.job_type,
-        description: form.core_skills.trim() || form.description.trim() || null,
-        salary_range: form.salary_range.trim() || null,
-        engineering_discipline: form.engineering_discipline || null,
-        discipline_other:
-          form.engineering_discipline === "Other" ? form.discipline_other.trim() || null : null,
-        positions_count: parseInt(form.positions_count, 10) || 1,
-        experience_level: form.experience_level || null,
-        target_track: (form.target_track as "entry" | "fast") || null,
-        core_skills: form.core_skills.trim() || null,
-        desired_start_window: form.desired_start_window || null,
+        ...formToPayload(form, company),
         status: "open",
         posted_at: new Date().toISOString(),
       });
-      toast({ title: "Job created", description: "Your job posting is now live." });
+      toast({ title: "Job role published", description: "Your job role is now live." });
       setOpen(false);
       setForm(emptyForm);
+    } catch (err) {
+      toast({ title: "Failed", description: err instanceof Error ? err.message : "Try again", variant: "destructive" });
+    }
+  };
+
+  const openEdit = (job: JobRow) => {
+    setEditingJobId(job.id);
+    setEditForm(jobToForm(job));
+    setEditOpen(true);
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingJobId) return;
+    try {
+      await updateJob.mutateAsync({
+        id: editingJobId,
+        ...formToPayload(editForm, company),
+      });
+      toast({ title: "Job role updated", description: "Changes are visible to candidates." });
+      setEditOpen(false);
+      setEditingJobId(null);
     } catch (err) {
       toast({ title: "Failed", description: err instanceof Error ? err.message : "Try again", variant: "destructive" });
     }
@@ -126,7 +317,7 @@ const EmployerJobPostings = () => {
         const holdCount = await countHoldApplicationsForJob(id);
         if (holdCount > 0) {
           const ok = window.confirm(
-            `Close this job? ${holdCount} backup candidate(s) on HOLD will be notified and moved to Alumni.`
+            `Close this job role? ${holdCount} backup candidate(s) on HOLD will be notified and moved to Alumni.`
           );
           if (!ok) return;
         }
@@ -134,11 +325,11 @@ const EmployerJobPostings = () => {
       const result = await updateJob.mutateAsync({ id, status });
       if (status === "closed" && result.holdRejected > 0) {
         toast({
-          title: "Job closed",
+          title: "Job role closed",
           description: `${result.holdRejected} backup candidate(s) notified.`,
         });
       } else {
-        toast({ title: "Job updated" });
+        toast({ title: "Job role updated" });
       }
     } catch (err) {
       toast({ title: "Failed", description: err instanceof Error ? err.message : "Try again", variant: "destructive" });
@@ -154,13 +345,14 @@ const EmployerJobPostings = () => {
   }
 
   const showDisciplineOther = form.engineering_discipline === "Other";
+  const showEditDisciplineOther = editForm.engineering_discipline === "Other";
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Role postings</h1>
-          <p className="text-muted-foreground">Manage your job listings</p>
+          <h1 className="text-3xl font-bold tracking-tight">Job role postings</h1>
+          <p className="text-muted-foreground">Create and manage open job roles</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -172,7 +364,7 @@ const EmployerJobPostings = () => {
                   e.preventDefault();
                   toast({
                     title: "Complete company profile first",
-                    description: "Finish Company Profile before posting roles.",
+                    description: "Finish Company Profile before posting job roles.",
                     variant: "destructive",
                   });
                 } else {
@@ -180,123 +372,32 @@ const EmployerJobPostings = () => {
                 }
               }}
             >
-              <Plus className="h-4 w-4" />Create New Job
+              <Plus className="h-4 w-4" />Post job role
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-            <DialogHeader><DialogTitle>Create job posting</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>Post a job role</DialogTitle></DialogHeader>
             <form onSubmit={handleCreate} className="space-y-4">
-              <div className="space-y-2">
-                <Label>Job title / role</Label>
-                <Input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <Label>Engineering discipline</Label>
-                <Select
-                  value={form.engineering_discipline || undefined}
-                  onValueChange={(value) => setForm({ ...form, engineering_discipline: value })}
-                >
-                  <SelectTrigger><SelectValue placeholder="Select discipline" /></SelectTrigger>
-                  <SelectContent {...selectContentProps}>
-                    {ENGINEERING_DISCIPLINES.map((d) => (
-                      <SelectItem key={d} value={d}>{d}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              {showDisciplineOther && (
-                <div className="space-y-2">
-                  <Label>Specify discipline</Label>
-                  <Input
-                    required
-                    value={form.discipline_other}
-                    onChange={(e) => setForm({ ...form, discipline_other: e.target.value })}
-                  />
-                </div>
-              )}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Number of positions</Label>
-                  <Input
-                    type="number"
-                    min={1}
-                    required
-                    value={form.positions_count}
-                    onChange={(e) => setForm({ ...form, positions_count: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Experience level sought</Label>
-                  <Select
-                    value={form.experience_level || undefined}
-                    onValueChange={(value) => setForm({ ...form, experience_level: value })}
-                  >
-                    <SelectTrigger><SelectValue placeholder="Select level" /></SelectTrigger>
-                    <SelectContent {...selectContentProps}>
-                      {JOB_EXPERIENCE_LEVELS.map((o) => (
-                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Program track</Label>
-                <Select
-                  value={form.target_track || undefined}
-                  onValueChange={(value) => setForm({ ...form, target_track: value })}
-                >
-                  <SelectTrigger><SelectValue placeholder="Entry or Fast track" /></SelectTrigger>
-                  <SelectContent {...selectContentProps}>
-                    <SelectItem value="entry">{TRACK_META.entry.label}</SelectItem>
-                    <SelectItem value="fast">{TRACK_META.fast.label}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Core technical skills required</Label>
-                <Textarea
-                  required
-                  rows={3}
-                  value={form.core_skills}
-                  onChange={(e) => setForm({ ...form, core_skills: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Desired start window</Label>
-                <Select
-                  value={form.desired_start_window || undefined}
-                  onValueChange={(value) => setForm({ ...form, desired_start_window: value })}
-                >
-                  <SelectTrigger><SelectValue placeholder="Select window" /></SelectTrigger>
-                  <SelectContent {...selectContentProps}>
-                    {START_WINDOW_OPTIONS.map((o) => (
-                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Location</Label>
-                <Input required value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <Label>Job type</Label>
-                <Input value={form.job_type} onChange={(e) => setForm({ ...form, job_type: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <Label>Salary range (optional)</Label>
-                <Input value={form.salary_range} onChange={(e) => setForm({ ...form, salary_range: e.target.value })} />
-              </div>
-              <Button type="submit" disabled={createJob.isPending} className="w-full">Publish job</Button>
+              <JobRoleFormFields form={form} setForm={setForm} showDisciplineOther={showDisciplineOther} />
+              <Button type="submit" disabled={createJob.isPending} className="w-full">Publish job role</Button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
+      <Dialog open={editOpen} onOpenChange={(o) => { setEditOpen(o); if (!o) setEditingJobId(null); }}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>Edit job role</DialogTitle></DialogHeader>
+          <form onSubmit={handleUpdate} className="space-y-4">
+            <JobRoleFormFields form={editForm} setForm={setEditForm} showDisciplineOther={showEditDisciplineOther} />
+            <Button type="submit" disabled={updateJob.isPending} className="w-full">Save changes</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="bg-primary/5 border-primary/20">
-          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Open Jobs</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Open job roles</CardTitle></CardHeader>
           <CardContent><div className="text-2xl font-bold">{list.filter((j) => j.status === "open").length}</div></CardContent>
         </Card>
         <Card>
@@ -317,20 +418,20 @@ const EmployerJobPostings = () => {
         <CardHeader>
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search roles..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
+            <Input placeholder="Search job roles..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {list.length === 0 && (
             <div className="text-center py-10 space-y-4">
-              <p className="text-muted-foreground">No jobs posted yet. Create one so candidates can apply.</p>
+              <p className="text-muted-foreground">No job roles posted yet. Post one so candidates can apply.</p>
               <Button
                 className="gap-2 bg-nordic-orange hover:bg-nordic-orange/90 text-white"
                 onClick={() => {
                   if (!profileReady) {
                     toast({
                       title: "Complete company profile first",
-                      description: "Finish Company Profile before posting roles.",
+                      description: "Finish Company Profile before posting job roles.",
                       variant: "destructive",
                     });
                     return;
@@ -340,7 +441,7 @@ const EmployerJobPostings = () => {
                 }}
               >
                 <Plus className="h-4 w-4" />
-                Post your first job
+                Post your first job role
               </Button>
             </div>
           )}
@@ -366,6 +467,9 @@ const EmployerJobPostings = () => {
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
                       <Link to={`/employer/jobs/${job.id}`}><Eye className="h-4 w-4 mr-2" />View</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => openEdit(job)}>
+                      <Pencil className="h-4 w-4 mr-2" />Edit text
                     </DropdownMenuItem>
                     {job.status !== "open" && (
                       <DropdownMenuItem onClick={() => setStatus(job.id, "open")}>Publish</DropdownMenuItem>

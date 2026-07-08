@@ -37,7 +37,7 @@ const AdminDashboard = () => {
       icon: Heart,
     },
     {
-      title: "Roles",
+      title: "Job Roles",
       count: stats?.jobsUnlocked ?? 0,
       label: "candidates in activation",
       href: "/admin/jobs",

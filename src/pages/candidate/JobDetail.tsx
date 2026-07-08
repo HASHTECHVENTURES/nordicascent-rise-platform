@@ -52,7 +52,7 @@ export default function CandidateJobDetail() {
       <div className="text-center py-20 space-y-4">
         <p className="text-muted-foreground">This job is no longer available.</p>
         <Button asChild variant="outline">
-          <Link to="/candidate/jobs">Back to Jobs</Link>
+          <Link to="/candidate/jobs">Back to Job Roles</Link>
         </Button>
       </div>
     );
@@ -86,7 +86,7 @@ export default function CandidateJobDetail() {
       <Button variant="ghost" size="sm" asChild>
         <Link to="/candidate/jobs">
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Jobs
+          Back to Job Roles
         </Link>
       </Button>
 

@@ -8,6 +8,7 @@ import { useMyApplications } from "@/hooks/useData";
 import { canAccessReadiness } from "@/lib/candidateJourney";
 import { READINESS_PRE_TEST_NOTE } from "@/lib/readiness";
 import { markReadinessIntroSeen } from "@/lib/readinessIntro";
+import { syncPrimaryApplicationStatus, APPLICATION_JOURNEY_STATUSES } from "@/lib/applicationStatusFlow";
 
 export default function CandidateReadinessIntro() {
   const navigate = useNavigate();
@@ -30,8 +31,9 @@ export default function CandidateReadinessIntro() {
     );
   }
 
-  const handleNext = () => {
+  const handleNext = async () => {
     markReadinessIntroSeen(candidate.id);
+    await syncPrimaryApplicationStatus(candidate.id, APPLICATION_JOURNEY_STATUSES.READINESS_ACTIVE);
     navigate("/candidate/readiness", { replace: true });
   };
 

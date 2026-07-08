@@ -7,7 +7,7 @@ export default function StatsBar() {
   const displayStats = [
     { value: String(stats?.candidates ?? 0), label: "Candidates on Platform" },
     { value: String(stats?.companies ?? 0), label: "Partner Companies" },
-    { value: String(stats?.openJobs ?? 0), label: "Open Roles" },
+    { value: String(stats?.openJobs ?? 0), label: "Open job roles" },
     { value: "4", label: "Nordic Countries" },
   ];
 

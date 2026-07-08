@@ -134,7 +134,7 @@ export default function CandidateRegistrationDetails() {
         navigate(pendingApply, { replace: true });
         return;
       }
-      toast({ title: "Registration complete", description: "You can now browse and apply for roles." });
+      toast({ title: "Registration complete", description: "You can now browse and apply for job roles." });
       navigate("/candidate/jobs", { replace: true });
     } catch (err) {
       toast({
@@ -155,7 +155,7 @@ export default function CandidateRegistrationDetails() {
         <p className="text-sm font-medium text-primary">Step 3 of 3</p>
         <h1 className="text-2xl font-bold tracking-tight">Academic & motivation</h1>
         <p className="text-sm text-muted-foreground">
-          {TRACK_META[track].label} — a few more details before applying to roles.
+          {TRACK_META[track].label} — a few more details before applying to job roles.
         </p>
       </div>
 
@@ -254,9 +254,9 @@ export default function CandidateRegistrationDetails() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="role-title" className={labelClass("current_role_title")}>Role title</Label>
+                <Label htmlFor="jobrole-title" className={labelClass("current_role_title")}>Job role title</Label>
                 <Input
-                  id="role-title"
+                  id="jobrole-title"
                   className={inputClass("current_role_title")}
                   value={form.current_role_title}
                   onChange={(e) => setForm({ ...form, current_role_title: e.target.value })}
@@ -269,7 +269,7 @@ export default function CandidateRegistrationDetails() {
 
       <div className="flex justify-end pb-8">
         <Button onClick={handleSave} disabled={saving || updateCandidate.isPending} className="min-w-[160px]">
-          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save & continue to Roles"}
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save & continue to Job Roles"}
         </Button>
       </div>
     </div>

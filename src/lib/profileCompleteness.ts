@@ -190,7 +190,7 @@ export function getTaskActionLabel(taskTitle: string, done: boolean) {
   if (title.includes("profile")) return "Go to Profile";
   if (title.includes("document") || title.includes("upload")) return "Upload CV";
   if (title.includes("skills")) return "Add skills";
-  if (title.includes("apply") || title.includes("job") || title.includes("role")) return "Browse roles";
+  if (title.includes("apply") || title.includes("job") || title.includes("role")) return "Browse job roles";
   if (title.includes("matching") || title.includes("employer")) return "My Applications";
   if (title.includes("screening")) return "My Applications";
   return "View details";

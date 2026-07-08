@@ -7,6 +7,7 @@ import type { AdminCandidateJourneyStage } from "@/lib/adminJourney";
 import { inferCandidateJourneyStage } from "@/lib/adminJourney";
 import type { TrackType } from "@/types/database";
 import { useAuth } from "@/contexts/AuthContext";
+import { syncCandidatePoolCategory } from "@/lib/candidatePoolSync";
 import { advanceCandidateStage, completePreparationIfReady, completeStageIfTasksDone, syncPipelineForTrack } from "@/lib/pipelineProgress";
 import {
   onApplicationStatusChange,
@@ -246,7 +247,7 @@ export function useUpdateCandidateTrack() {
 
 export function useUpdateMyCandidate() {
   const qc = useQueryClient();
-  const { candidate, refreshProfile } = useAuth();
+  const { candidate, profile, refreshProfile } = useAuth();
   return useMutation({
     mutationFn: async (updates: Record<string, unknown>) => {
       const { error } = await supabase
@@ -256,8 +257,12 @@ export function useUpdateMyCandidate() {
       if (error) throw error;
     },
     onSuccess: async () => {
+      if (candidate?.id) {
+        await syncCandidatePoolCategory(candidate.id, profile);
+      }
       await refreshProfile();
       qc.invalidateQueries({ queryKey: ["candidate"] });
+      qc.invalidateQueries({ queryKey: ["admin-candidates"] });
     },
   });
 }

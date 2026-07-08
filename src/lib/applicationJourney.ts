@@ -123,7 +123,7 @@ export function applicationStatusNextStep(status: string, selectionStep?: number
       case "followup":
         return "Follow-up stage is in progress.";
       case "journey_complete":
-        return "You have completed the Nordic Ascent journey for this role.";
+        return "You have completed the Nordic Ascent journey for this job role.";
       default:
         return "Continue in My Journey.";
     }
@@ -132,7 +132,7 @@ export function applicationStatusNextStep(status: string, selectionStep?: number
   switch (status) {
     case "applied":
     case "application_complete":
-      return "The employer will review your profile. You can still apply to other open roles.";
+      return "The employer will review your profile. You can still apply to other open job roles.";
     case "reviewing":
       return "Your application is being reviewed. Check Messages if the employer contacts you.";
     case "interview":
@@ -142,7 +142,7 @@ export function applicationStatusNextStep(status: string, selectionStep?: number
     case "accepted":
       return "Congratulations! Continue your journey in My Journey → Selection.";
     case "rejected":
-      return "This role was not a match. Browse Jobs to apply elsewhere.";
+      return "This job role was not a match. Browse Job Roles to apply elsewhere.";
     default:
       return "We'll notify you when something changes.";
   }
@@ -226,10 +226,10 @@ export function getSelectionStepState(applications: ApplicationRow[]): Selection
       taskKey: "employer matching",
       title: "Matched with an employer",
       description: matchedDone
-        ? `You were accepted for ${job?.title ?? "a role"} at ${company}.`
-        : "Apply to a job and wait for an employer to accept you.",
+        ? `You were accepted for ${job?.title ?? "a job role"} at ${company}.`
+        : "Apply to a job role and wait for an employer to accept you.",
       done: matchedDone,
-      hint: matchedDone ? undefined : "Go to Jobs → apply → wait for acceptance in My Applications.",
+      hint: matchedDone ? undefined : "Go to Job Roles → apply → wait for acceptance in My Applications.",
     },
     {
       id: "screening",
@@ -270,7 +270,7 @@ export function computeJourneySteps(
     {
       id: "apply",
       label: "Apply to a job",
-      description: "Submit your profile to an open role",
+      description: "Submit your profile to an open job role",
       state: !profileDone ? "upcoming" : applied ? "done" : "current",
     },
     {

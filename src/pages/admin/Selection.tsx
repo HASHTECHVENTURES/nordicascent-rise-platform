@@ -339,7 +339,7 @@ const AdminSelection = () => {
           <CardContent className="py-12 text-center text-muted-foreground">
             No open roles yet. Approve role postings first.
             <Button variant="link" asChild className="block mx-auto mt-2">
-              <Link to="/admin/jobs">Go to Jobs</Link>
+              <Link to="/admin/jobs">Go to Job Roles</Link>
             </Button>
           </CardContent>
         </Card>

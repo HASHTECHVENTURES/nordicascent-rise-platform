@@ -1,11 +1,16 @@
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Loader2, MapPin, Users } from "lucide-react";
+import { ArrowLeft, Loader2, MapPin, Pencil, Users } from "lucide-react";
 import { useEmployerJobApplications, useJobById, useUpdateJob } from "@/hooks/useData";
 import { applicationStatusLabel, applicationStatusVariant } from "@/lib/applicationJourney";
+import { getRoleSkillsText } from "@/lib/jobPostingDisplay";
 import { useToast } from "@/hooks/use-toast";
 
 export default function EmployerJobDetail() {
@@ -14,14 +19,48 @@ export default function EmployerJobDetail() {
   const { data: applications } = useEmployerJobApplications(id);
   const updateJob = useUpdateJob();
   const { toast } = useToast();
+  const [editing, setEditing] = useState(false);
+  const [title, setTitle] = useState("");
+  const [location, setLocation] = useState("");
+  const [jobType, setJobType] = useState("");
+  const [salaryRange, setSalaryRange] = useState("");
+  const [roleText, setRoleText] = useState("");
 
   const company = job?.companies as { name: string; logo_url?: string | null } | null;
+
+  useEffect(() => {
+    if (!job) return;
+    setTitle(job.title ?? "");
+    setLocation(job.location ?? "");
+    setJobType(job.job_type ?? "");
+    setSalaryRange(job.salary_range ?? "");
+    setRoleText(getRoleSkillsText(job) ?? "");
+  }, [job]);
 
   const setStatus = async (status: string) => {
     if (!id) return;
     try {
       await updateJob.mutateAsync({ id, status });
-      toast({ title: "Job updated" });
+      toast({ title: "Job role updated" });
+    } catch (err) {
+      toast({ title: "Failed", description: err instanceof Error ? err.message : "Try again", variant: "destructive" });
+    }
+  };
+
+  const handleSave = async () => {
+    if (!id) return;
+    try {
+      await updateJob.mutateAsync({
+        id,
+        title: title.trim(),
+        location: location.trim() || null,
+        job_type: jobType.trim() || null,
+        salary_range: salaryRange.trim() || null,
+        core_skills: roleText.trim() || null,
+        description: roleText.trim() || null,
+      });
+      toast({ title: "Job role saved", description: "Candidates will see the updated text." });
+      setEditing(false);
     } catch (err) {
       toast({ title: "Failed", description: err instanceof Error ? err.message : "Try again", variant: "destructive" });
     }
@@ -39,10 +78,12 @@ export default function EmployerJobDetail() {
     return (
       <div className="space-y-4">
         <Button variant="ghost" size="icon" asChild><Link to="/employer/jobs"><ArrowLeft className="h-4 w-4" /></Link></Button>
-        <p className="text-muted-foreground">Job not found.</p>
+        <p className="text-muted-foreground">Job role not found.</p>
       </div>
     );
   }
+
+  const displayText = getRoleSkillsText(job);
 
   return (
     <div className="space-y-6">
@@ -63,18 +104,64 @@ export default function EmployerJobDetail() {
           <Button size="sm" onClick={() => setStatus("open")} disabled={updateJob.isPending}>Publish</Button>
         )}
         {job.status === "open" && (
-          <Button size="sm" variant="outline" onClick={() => setStatus("closed")} disabled={updateJob.isPending}>Close posting</Button>
+          <Button size="sm" variant="outline" onClick={() => setStatus("closed")} disabled={updateJob.isPending}>Close job role</Button>
+        )}
+        {!editing && (
+          <Button size="sm" variant="outline" className="gap-2" onClick={() => setEditing(true)}>
+            <Pencil className="h-4 w-4" />
+            Edit text
+          </Button>
         )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
-          <CardHeader><CardTitle className="text-base">Job details</CardTitle></CardHeader>
-          <CardContent className="space-y-2 text-sm">
-            <p><span className="text-muted-foreground">Type </span>{job.job_type ?? "—"}</p>
-            <p><span className="text-muted-foreground">Salary </span>{job.salary_range ?? "—"}</p>
-            {job.posted_at && <p><span className="text-muted-foreground">Posted </span>{job.posted_at.split("T")[0]}</p>}
-            {job.description && <p className="pt-2 text-muted-foreground whitespace-pre-wrap">{job.description}</p>}
+          <CardHeader><CardTitle className="text-base">Job role details</CardTitle></CardHeader>
+          <CardContent className="space-y-4 text-sm">
+            {editing ? (
+              <form
+                className="space-y-4"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSave();
+                }}
+              >
+                <div className="space-y-2">
+                  <Label>Job role title</Label>
+                  <Input value={title} onChange={(e) => setTitle(e.target.value)} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Location</Label>
+                  <Input value={location} onChange={(e) => setLocation(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Employment type</Label>
+                  <Input value={jobType} onChange={(e) => setJobType(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Salary range</Label>
+                  <Input value={salaryRange} onChange={(e) => setSalaryRange(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Role description & skills (shown to candidates)</Label>
+                  <Textarea rows={6} value={roleText} onChange={(e) => setRoleText(e.target.value)} required />
+                </div>
+                <div className="flex gap-2">
+                  <Button type="submit" disabled={updateJob.isPending}>Save changes</Button>
+                  <Button type="button" variant="outline" onClick={() => setEditing(false)}>Cancel</Button>
+                </div>
+              </form>
+            ) : (
+              <>
+                <p><span className="text-muted-foreground">Type </span>{job.job_type ?? "—"}</p>
+                <p><span className="text-muted-foreground">Salary </span>{job.salary_range ?? "—"}</p>
+                {job.posted_at && <p><span className="text-muted-foreground">Posted </span>{job.posted_at.split("T")[0]}</p>}
+                <div className="pt-2">
+                  <p className="text-muted-foreground mb-1">Description</p>
+                  <p className="whitespace-pre-wrap">{displayText || "No description yet — use Edit text to add one."}</p>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 

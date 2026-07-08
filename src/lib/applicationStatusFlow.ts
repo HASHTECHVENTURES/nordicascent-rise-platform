@@ -110,7 +110,7 @@ export function applicationStatusForStageActivation(stageId: string): string | n
     case "activation":
       return APPLICATION_JOURNEY_STATUSES.GO_NO_GO;
     case "relocation":
-      return APPLICATION_JOURNEY_STATUSES.PRE_ARRIVAL;
+      return APPLICATION_JOURNEY_STATUSES.RELOCATION;
     case "onboarding":
       return APPLICATION_JOURNEY_STATUSES.ONBOARDING;
     case "followup":

@@ -14,7 +14,6 @@ import {
   ClipboardList,
   BarChart3,
   AlertTriangle,
-  FileCheck,
   ClipboardCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,9 +27,8 @@ const navigation = [
   { name: "Pipeline Overview", href: "/employer/dashboard", icon: LayoutDashboard },
   { name: "Tasks", href: "/employer/tasks", icon: ClipboardList },
   { name: "Candidates", href: "/employer/candidates", icon: Users },
-  { name: "Internship", href: "/employer/internship", icon: FileCheck },
   { name: "Activation", href: "/employer/activation", icon: ClipboardCheck },
-  { name: "Role postings", href: "/employer/jobs", icon: Briefcase },
+  { name: "Job Roles", href: "/employer/jobs", icon: Briefcase },
   { name: "Company Profile", href: "/employer/company", icon: Building2 },
   { name: "Mentoring", href: "/employer/mentoring", icon: Heart },
   { name: "Messages", href: "/employer/messages", icon: MessageSquare },

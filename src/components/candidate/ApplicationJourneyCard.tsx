@@ -64,7 +64,7 @@ export default function ApplicationJourneyCard() {
 
         <div className="flex flex-wrap gap-2 pt-2 border-t">
           <Button size="sm" variant="outline" asChild>
-            <Link to="/candidate/jobs">Browse roles</Link>
+            <Link to="/candidate/jobs">Browse job roles</Link>
           </Button>
           {apps.length > 0 && (
             <Button size="sm" variant="outline" asChild>
@@ -81,7 +81,7 @@ export default function ApplicationJourneyCard() {
           )}
           {primary?.status === "rejected" && !unlocked && (
             <Button size="sm" asChild>
-              <Link to="/candidate/jobs">Apply to another role</Link>
+              <Link to="/candidate/jobs">Apply to another job role</Link>
             </Button>
           )}
         </div>

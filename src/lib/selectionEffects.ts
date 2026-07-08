@@ -106,7 +106,7 @@ export async function onSelectionStatusChange(ctx: SelectionChangeContext, rejec
     await notifyUser(
       profileId,
       "Application update",
-      `Thank you for your interest in ${jobTitle}. After careful review, we will not be moving forward with your application for this role. You may apply to other open positions.`,
+      `Thank you for your interest in ${jobTitle}. After careful review, we will not be moving forward with your application for this job role. You may apply to other open positions.`,
       "selection_rejected",
       { applicationId, jobId, jobTitle }
     );

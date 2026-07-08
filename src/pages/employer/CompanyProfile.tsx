@@ -318,7 +318,7 @@ const EmployerCompanyProfile = () => {
       if (complete) {
         toast({
           title: "Company profile saved",
-          description: "Next, create your first job posting.",
+          description: "Next, post your first job role.",
         });
         navigate("/employer/jobs?new=1", { replace: true });
       } else {
@@ -345,7 +345,7 @@ const EmployerCompanyProfile = () => {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Company Registration</h1>
         <p className="text-sm text-muted-foreground">
-          Tell us about your company and contact person. You&apos;ll create job postings on the next step.
+          Tell us about your company and contact person. You&apos;ll post job roles on the next step.
         </p>
       </div>
 
@@ -476,7 +476,7 @@ const EmployerCompanyProfile = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="company-description">Description (max {COMPANY_DESCRIPTION_MAX_WORDS} words, shown on job postings)</Label>
+            <Label htmlFor="company-description">Description (max {COMPANY_DESCRIPTION_MAX_WORDS} words, shown on job roles)</Label>
             <Textarea
               id="company-description"
               rows={4}

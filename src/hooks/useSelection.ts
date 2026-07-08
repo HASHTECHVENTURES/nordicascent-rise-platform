@@ -318,7 +318,7 @@ export function useActivateHoldCandidate() {
       const { error } = await supabase
         .from("applications")
         .update({
-          status: APPLICATION_JOURNEY_STATUSES.READINESS_ACTIVE,
+          status: APPLICATION_JOURNEY_STATUSES.MENTOR_ASSIGNED,
           board_company_decision: "selected",
           hold_activated_at: now,
           assigned_mentor_id: mentorId,
@@ -374,7 +374,7 @@ export function useAssignMentorToApplication() {
         .update({
           assigned_mentor_id: mentorId,
           readiness_unlocked_at: now,
-          status: APPLICATION_JOURNEY_STATUSES.READINESS_ACTIVE,
+          status: APPLICATION_JOURNEY_STATUSES.MENTOR_ASSIGNED,
           updated_at: now,
         })
         .eq("id", applicationId);

@@ -48,7 +48,7 @@ export default function CandidateApplications() {
         <div>
           <h1 className="text-2xl font-medium text-foreground">My Applications</h1>
           <p className="text-muted-foreground">
-            Track every role you applied to. Status updates appear here and in Notifications.
+            Track every job role you applied to. Status updates appear here and in Notifications.
           </p>
         </div>
         <Button variant="outline" asChild>
@@ -85,7 +85,7 @@ export default function CandidateApplications() {
             <Briefcase className="h-10 w-10 text-muted-foreground mx-auto" />
             <p className="text-muted-foreground">No applications yet.</p>
             <Button asChild>
-              <Link to="/candidate/jobs">Find open roles</Link>
+              <Link to="/candidate/jobs">Find open job roles</Link>
             </Button>
           </CardContent>
         </Card>
@@ -106,7 +106,7 @@ export default function CandidateApplications() {
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <CardTitle className="text-lg font-medium">{job?.title ?? "Role"}</CardTitle>
+                        <CardTitle className="text-lg font-medium">{job?.title ?? "Job role"}</CardTitle>
                         <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                           <MapPin className="h-3 w-3" />
                           {company?.name ?? "Company"}
@@ -139,7 +139,7 @@ export default function CandidateApplications() {
 
                   {app.interview_meet_url && app.interview_scheduled_at && (
                     <InterviewInviteCard
-                      jobTitle={job?.title ?? "Role"}
+                      jobTitle={job?.title ?? "Job role"}
                       companyName={company?.name}
                       meetUrl={app.interview_meet_url}
                       scheduledAt={app.interview_scheduled_at}
@@ -154,7 +154,7 @@ export default function CandidateApplications() {
                       </Button>
                     )}
                     <Button size="sm" variant="ghost" asChild>
-                      <Link to="/candidate/jobs">Apply to another role</Link>
+                      <Link to="/candidate/jobs">Apply to another job role</Link>
                     </Button>
                   </div>
                 </CardContent>

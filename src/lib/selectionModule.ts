@@ -330,7 +330,7 @@ export function getCandidateTrackerStages(
 
 export function candidateTrackerMessage(status: string, selectionStep?: number | null) {
   if (status === SELECTION_STATUSES.SELECTION_REJECTED || status === SELECTION_STATUSES.REJECTED) {
-    return "This application was not selected. You can apply to other open roles.";
+    return "This application was not selected. You can apply to other open job roles.";
   }
   if (status === SELECTION_STATUSES.SELECTED_FOR_READINESS) {
     return "You have been selected for the Nordic Ascent Readiness programme.";

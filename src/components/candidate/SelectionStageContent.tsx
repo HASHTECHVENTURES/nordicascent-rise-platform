@@ -96,7 +96,7 @@ export default function SelectionStageContent() {
 
       {primary?.interview_meet_url && primary.interview_scheduled_at && (
         <InterviewInviteCard
-          jobTitle={job?.title ?? "Role"}
+          jobTitle={job?.title ?? "Job role"}
           companyName={job?.companies?.name}
           meetUrl={primary.interview_meet_url}
           scheduledAt={primary.interview_scheduled_at}

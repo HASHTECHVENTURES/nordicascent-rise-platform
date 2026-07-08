@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Download, Eye, Loader2 } from "lucide-react";
 import { TRACK_META, type Track } from "@/lib/track";
+import { POOL_CATEGORY_LABELS, type CandidatePoolCategory } from "@/lib/candidatePool";
 import { useAdminCandidates, useAdminCandidateJourneyBrief, useDeleteCandidate } from "@/hooks/useData";
 import { adminJourneyStageLabel } from "@/lib/adminJourney";
 import AdminDeleteButton from "@/components/admin/AdminDeleteButton";
@@ -25,6 +26,7 @@ const AdminCandidates = () => {
   const deleteCandidate = useDeleteCandidate();
   const { toast } = useToast();
   const [trackFilter, setTrackFilter] = useState<"all" | Track>("all");
+  const [poolFilter, setPoolFilter] = useState<"all" | CandidatePoolCategory>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
 
@@ -41,10 +43,11 @@ const AdminCandidates = () => {
         return (
           matchesSearch &&
           (trackFilter === "all" || c.track === trackFilter) &&
+          (poolFilter === "all" || c.pool_category === poolFilter) &&
           (statusFilter === "all" || c.status === statusFilter)
         );
       }),
-    [candidates, trackFilter, statusFilter, search],
+    [candidates, trackFilter, poolFilter, statusFilter, search],
   );
 
   if (isLoading) {
@@ -65,10 +68,10 @@ const AdminCandidates = () => {
           <p className="text-sm text-muted-foreground mt-1">Candidate login accounts only</p>
         </div>
         <Button variant="outline" className="gap-2" onClick={() => {
-          const headers = ["Name", "Email", "Location", "Title", "Status", "Track", "Joined"];
+          const headers = ["Name", "Email", "Location", "Title", "Status", "Pool", "Track", "Joined"];
           const rows = filtered.map((c) => {
             const p = c.profiles as { full_name: string | null; email: string | null } | null;
-            return [p?.full_name ?? "", p?.email ?? "", c.location ?? "", c.title ?? "", c.status, TRACK_META[c.track as Track].label, c.created_at.split("T")[0]];
+            return [p?.full_name ?? "", p?.email ?? "", c.location ?? "", c.title ?? "", c.status, POOL_CATEGORY_LABELS[c.pool_category as CandidatePoolCategory], TRACK_META[c.track as Track].label, c.created_at.split("T")[0]];
           });
           const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
           const blob = new Blob([csv], { type: "text/csv" });
@@ -81,11 +84,12 @@ const AdminCandidates = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{list.length}</div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Readiness</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{[...(journeyMap?.values() ?? [])].filter((s) => s === "readiness").length}</div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Mentoring</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{[...(journeyMap?.values() ?? [])].filter((s) => s === "mentoring").length}</div></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Activation</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{[...(journeyMap?.values() ?? [])].filter((s) => s === "activation").length}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Active</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{list.filter((c) => c.pool_category === "active").length}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Waitlist</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{list.filter((c) => c.pool_category === "waitlist").length}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Network</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{list.filter((c) => c.pool_category === "network").length}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Alumni</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{list.filter((c) => c.pool_category === "alumni").length}</div></CardContent></Card>
       </div>
 
       <Card>
@@ -102,6 +106,16 @@ const AdminCandidates = () => {
                   <SelectItem value="all">All tracks</SelectItem>
                   <SelectItem value="entry">Entry</SelectItem>
                   <SelectItem value="fast">Fast</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={poolFilter} onValueChange={(v) => setPoolFilter(v as "all" | CandidatePoolCategory)}>
+                <SelectTrigger className="w-[140px]"><SelectValue placeholder="Pool" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All pools</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="waitlist">Waitlist</SelectItem>
+                  <SelectItem value="network">Network</SelectItem>
+                  <SelectItem value="alumni">Alumni</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -136,6 +150,7 @@ const AdminCandidates = () => {
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-medium">{name}</h3>
                         <TrackBadge track={candidate.track as Track} />
+                        <Badge variant="outline">{POOL_CATEGORY_LABELS[candidate.pool_category as CandidatePoolCategory]}</Badge>
                         {stage && <Badge variant="outline">{adminJourneyStageLabel(stage)}</Badge>}
                       </div>
                       <p className="text-sm text-muted-foreground truncate">{profile?.email}</p>

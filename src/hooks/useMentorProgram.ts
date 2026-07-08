@@ -160,6 +160,7 @@ export function useSaveMentorObservation() {
       duration_minutes,
       key_observations,
       concerns,
+      addon_topics,
     }: {
       meetingId: string;
       applicationId: string;
@@ -169,6 +170,7 @@ export function useSaveMentorObservation() {
       duration_minutes: number;
       key_observations: string;
       concerns?: string;
+      addon_topics?: string;
     }) => {
       const { error: obsErr } = await supabase.from("mentor_meeting_observations").upsert(
         {
@@ -177,6 +179,7 @@ export function useSaveMentorObservation() {
           duration_minutes,
           key_observations,
           concerns: concerns?.trim() || null,
+          addon_topics: addon_topics?.trim() || null,
           submitted_by: profile?.id ?? null,
           submitted_at: new Date().toISOString(),
         },

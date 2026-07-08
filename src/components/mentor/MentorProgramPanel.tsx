@@ -57,6 +57,7 @@ export default function MentorProgramPanel({
   const [duration, setDuration] = useState("60");
   const [observations, setObservations] = useState("");
   const [concerns, setConcerns] = useState("");
+  const [addonTopics, setAddonTopics] = useState("");
 
   const [signalForm, setSignalForm] = useState({
     communication_clarity: "",
@@ -121,6 +122,7 @@ export default function MentorProgramPanel({
     setDuration(String(obs?.duration_minutes ?? 60));
     setObservations(obs?.key_observations ?? "");
     setConcerns(obs?.concerns ?? "");
+    setAddonTopics(obs?.addon_topics ?? "");
   };
 
   const submitObservation = async (meetingNumber: number) => {
@@ -140,6 +142,7 @@ export default function MentorProgramPanel({
         duration_minutes: Number(duration) || 60,
         key_observations: observations.trim(),
         concerns: concerns.trim() || undefined,
+        addon_topics: addonTopics.trim() || undefined,
       });
       toast({ title: `Meeting ${meetingNumber} saved` });
       setActiveMeeting(null);
@@ -213,6 +216,7 @@ export default function MentorProgramPanel({
                           {obs.meeting_date} · {obs.duration_minutes} min
                         </p>
                         <p className="whitespace-pre-wrap text-foreground">{obs.key_observations}</p>
+                        {obs.addon_topics && <p>Add-on topics: {obs.addon_topics}</p>}
                         {obs.concerns && <p>Concerns: {obs.concerns}</p>}
                       </div>
                     )}
@@ -268,6 +272,15 @@ export default function MentorProgramPanel({
                             rows={2}
                             value={concerns}
                             onChange={(e) => setConcerns(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label>Add-on topics (optional)</Label>
+                          <Textarea
+                            rows={2}
+                            value={addonTopics}
+                            onChange={(e) => setAddonTopics(e.target.value)}
+                            placeholder="Extra topics you covered beyond the standard session theme..."
                           />
                         </div>
                         <div className="flex gap-2">

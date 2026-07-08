@@ -49,7 +49,7 @@ export const ADMIN_JOURNEY_STEPS: AdminJourneyStep[] = [
   },
   {
     id: "roles",
-    label: "Roles",
+    label: "Job Roles",
     href: "/admin/jobs",
     icon: Briefcase,
     match: (p) => p.startsWith("/admin/jobs"),

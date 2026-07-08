@@ -45,11 +45,11 @@ const AdminJobs = () => {
       const result = await updateJob.mutateAsync({ id, status });
       if (status === "closed" && result.holdRejected > 0) {
         toast({
-          title: "Job closed",
+          title: "Job role closed",
           description: `${result.holdRejected} backup candidate(s) notified.`,
         });
       } else {
-        toast({ title: status === "open" ? "Job approved" : "Job closed" });
+        toast({ title: status === "open" ? "Job role approved" : "Job role closed" });
       }
     } catch (err) {
       toast({ title: "Failed", description: err instanceof Error ? err.message : "Try again", variant: "destructive" });
@@ -67,7 +67,7 @@ const AdminJobs = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Role moderation</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Job role moderation</h1>
         <p className="text-muted-foreground">Review and moderate role postings</p>
       </div>
 

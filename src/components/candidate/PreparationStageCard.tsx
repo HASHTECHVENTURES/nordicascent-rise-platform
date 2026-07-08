@@ -12,7 +12,7 @@ import { isUniversitySelected, isPreparationComplete } from "@/lib/candidateJour
 import { isRegistrationDetailsComplete } from "@/lib/candidateRegistration";
 import { isOnUniversityWaitlist } from "@/lib/candidateAccess";
 
-/** Preparation = profile + university + registration details (before applying to roles). */
+/** Preparation = profile + university + registration details (before applying to job roles). */
 export default function PreparationStageCard() {
   const { profile, candidate } = useAuth();
   const profileReady = isJobHuntProfileReady(profile, candidate);
@@ -63,7 +63,7 @@ export default function PreparationStageCard() {
                   ? "On waitlist — admin review in progress"
                   : uniDone
                     ? "University linked"
-                    : "Required before applying to roles"}
+                    : "Required before applying to job roles"}
               </p>
             </div>
           </div>
@@ -87,7 +87,7 @@ export default function PreparationStageCard() {
       {prepDone && (
         <Button className="w-full btn-professional" asChild>
           <Link to="/candidate/jobs">
-            Browse roles
+            Browse job roles
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>

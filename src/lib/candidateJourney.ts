@@ -180,7 +180,7 @@ export function computeEarlyJourneySteps(
     {
       id: "selection",
       label: "Selection",
-      description: selected ? "Application in selection pipeline" : "Browse roles and apply",
+      description: selected ? "Application in selection pipeline" : "Browse job roles and apply",
       state: stepState("selection"),
       href: "/candidate/jobs",
     },

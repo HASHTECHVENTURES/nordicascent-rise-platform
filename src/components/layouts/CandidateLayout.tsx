@@ -33,8 +33,8 @@ import { CANDIDATE_PROFILE_PATH } from "@/lib/candidateAccess";
 // Standalone nav items
 const standaloneNav = [
   { name: "My Profile", href: "/candidate/profile", icon: User, tooltip: "Complete your profile, upload CV, and add skills" },
-  { name: "Roles", href: "/candidate/jobs", icon: Briefcase, tooltip: "Browse open roles — apply to multiple positions" },
-  { name: "My Applications", href: "/candidate/applications", icon: ClipboardList, tooltip: "Track status of every role you applied to" },
+  { name: "Job Roles", href: "/candidate/jobs", icon: Briefcase, tooltip: "Browse open job roles — apply to multiple positions" },
+  { name: "My Applications", href: "/candidate/applications", icon: ClipboardList, tooltip: "Track status of every job role you applied to" },
   { name: "Mentoring", href: "/candidate/mentoring", icon: Heart, tooltip: "Connect with your dedicated company mentor" },
   { name: "Messages", href: "/candidate/messages", icon: MessageSquare, tooltip: "Communication with employers and Nordic Ascent team" },
   { name: "Support", href: "/candidate/support", icon: AlertTriangle, tooltip: "Open a support ticket with Nordic Ascent" },

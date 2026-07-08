@@ -13,6 +13,7 @@ import {
 } from "@/hooks/useData";
 import { useToast } from "@/hooks/use-toast";
 import { STAGE_TASK_PRESETS } from "@/lib/stageTaskPresets";
+import EmployerInternshipTasksPanel from "@/components/employer/EmployerInternshipTasksPanel";
 
 const emptyForm = {
   title: "",
@@ -112,17 +113,19 @@ export default function EmployerActivation() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-medium">Activation</h1>
         <p className="text-muted-foreground">
-          Set work permit and pre-employment steps for accepted candidates at {companyName}.
+          Internship first, then pre-arrival employment — both part of activation at {companyName}.
         </p>
       </div>
 
+      <EmployerInternshipTasksPanel embedded />
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
-          <CardTitle className="text-lg">Activation tasks</CardTitle>
+          <CardTitle className="text-lg">Step 2 — Pre-arrival employment</CardTitle>
           {!showForm && (
             <Button size="sm" className="gap-2" onClick={() => setShowForm(true)}>
               <Plus className="h-4 w-4" />
@@ -133,7 +136,7 @@ export default function EmployerActivation() {
         <CardContent className="space-y-4">
           {taskList.length === 0 && !showForm && (
             <p className="text-sm text-muted-foreground">
-              No activation tasks yet. Add work permit steps, contracts, or onboarding forms for your hires.
+              No pre-arrival tasks yet. Add work permit steps, contracts, or onboarding forms.
             </p>
           )}
 

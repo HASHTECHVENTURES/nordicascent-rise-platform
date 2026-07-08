@@ -28,6 +28,7 @@ export type MentorMeetingObservation = {
   duration_minutes: number;
   key_observations: string;
   concerns: string | null;
+  addon_topics: string | null;
   submitted_at: string;
 };
 
