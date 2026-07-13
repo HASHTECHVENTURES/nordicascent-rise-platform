@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { rejectHoldApplicationsForClosedJob } from "@/lib/jobCloseEffects";
 import { activateJobsAfterMentoringUnlock } from "@/lib/preparationProgress";
 import type { Track } from "@/lib/track";
+import { initializeActivationForApplication } from "@/lib/activationModule";
 import type { AdminCandidateJourneyStage } from "@/lib/adminJourney";
 import { inferCandidateJourneyStage } from "@/lib/adminJourney";
 import type { TrackType } from "@/types/database";
@@ -2591,6 +2592,18 @@ export function useUnlockCandidateJobs() {
           .eq("id", candidateId)
           .single();
         await activateJobsAfterMentoringUnlock(candidateId, (cand?.track ?? "entry") as Track);
+
+        const { data: app } = await supabase
+          .from("applications")
+          .select("id")
+          .eq("candidate_id", candidateId)
+          .in("status", ["accepted", "mentor_assigned", "readiness_active", "readiness_complete"])
+          .order("applied_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (app?.id) {
+          await initializeActivationForApplication(app.id);
+        }
       }
     },
     onSuccess: (_, { candidateId }) => {

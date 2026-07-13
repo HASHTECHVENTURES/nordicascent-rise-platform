@@ -7,6 +7,7 @@ import {
   syncPrimaryApplicationStatus,
 } from "@/lib/applicationStatusFlow";
 import { seedReadinessModuleIfEmpty, allTestsSubmitted } from "@/lib/readiness";
+import { refreshMentorMeetingUnlocksForCandidate } from "@/lib/mentorProgram";
 
 export type ReadinessTest = {
   id: string;
@@ -325,6 +326,7 @@ export function useSubmitReadinessAttempt() {
       if (error) throw error;
 
       if (candidate?.id) {
+        await refreshMentorMeetingUnlocksForCandidate(candidate.id);
         const { data: tests } = await supabase.from("readiness_tests").select("id").eq("active", true);
         const { data: attempts } = await supabase
           .from("readiness_attempts")
@@ -344,6 +346,7 @@ export function useSubmitReadinessAttempt() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["readiness-attempts"] });
       qc.invalidateQueries({ queryKey: ["stage-progress"] });
+      qc.invalidateQueries({ queryKey: ["mentor-program-meetings"] });
     },
   });
 }

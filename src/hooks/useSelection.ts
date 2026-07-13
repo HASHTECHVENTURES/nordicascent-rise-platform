@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   SELECTION_STATUSES,
   computeEligibilityAutoChecks,
@@ -18,7 +19,7 @@ import { APPLICATION_JOURNEY_STATUSES } from "@/lib/applicationStatusFlow";
 import { initializeMentorMeetings } from "@/lib/mentorProgram";
 import type { Track } from "@/lib/track";
 
-const ADMIN_SELECTION_SELECT = `
+export const ADMIN_SELECTION_SELECT = `
   *,
   jobs(id, title, positions_count, target_track, company_id, core_skills, engineering_discipline, experience_level, requirements, companies(id, name)),
   candidates(
@@ -81,13 +82,22 @@ export function useAdminSelectionApplication(applicationId: string | undefined) 
 }
 
 export function useEmployerSelectionApplications(jobId?: string) {
+  const { profile } = useAuth();
   return useQuery({
-    queryKey: ["employer-selection-applications", jobId],
+    queryKey: ["employer-selection-applications", profile?.id, jobId],
+    enabled: profile?.role === "employer",
     queryFn: async () => {
+      const { data: employer } = await supabase
+        .from("employers")
+        .select("company_id")
+        .eq("profile_id", profile!.id)
+        .single();
+      if (!employer) return [];
+
       let query = supabase
         .from("applications")
-        .select(ADMIN_SELECTION_SELECT)
-        .gte("selection_step", 3)
+        .select(`${ADMIN_SELECTION_SELECT}, jobs!inner(company_id)`)
+        .eq("jobs.company_id", employer.company_id)
         .order("applied_at", { ascending: false });
       if (jobId) query = query.eq("job_id", jobId);
       const { data, error } = await query;
@@ -109,6 +119,46 @@ export function useEmployerSelectionApplication(applicationId: string | undefine
         .single();
       if (error) throw error;
       return data as SelectionApplication;
+    },
+  });
+}
+
+export function useAdminMentoringApplications() {
+  return useQuery({
+    queryKey: ["admin-mentoring-applications"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("applications")
+        .select(ADMIN_SELECTION_SELECT)
+        .not("readiness_unlocked_at", "is", null)
+        .order("applied_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as SelectionApplication[];
+    },
+  });
+}
+
+export function useEmployerMentoringApplications() {
+  const { profile } = useAuth();
+  return useQuery({
+    queryKey: ["employer-mentoring-applications", profile?.id],
+    enabled: profile?.role === "employer",
+    queryFn: async () => {
+      const { data: employer } = await supabase
+        .from("employers")
+        .select("company_id")
+        .eq("profile_id", profile!.id)
+        .single();
+      if (!employer) return [];
+
+      const { data, error } = await supabase
+        .from("applications")
+        .select(`${ADMIN_SELECTION_SELECT}, jobs!inner(company_id)`)
+        .eq("jobs.company_id", employer.company_id)
+        .not("readiness_unlocked_at", "is", null)
+        .order("applied_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as SelectionApplication[];
     },
   });
 }

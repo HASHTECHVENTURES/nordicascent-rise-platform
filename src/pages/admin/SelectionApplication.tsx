@@ -36,8 +36,8 @@ import {
   type StepDecision,
 } from "@/lib/selectionModule";
 import type { Track } from "@/lib/track";
-import MentorProgramPanel from "@/components/mentor/MentorProgramPanel";
 import { isMentorAssignmentOverdue } from "@/lib/mentorProgram";
+import CandidateDocumentsPanel from "@/components/selection/CandidateDocumentsPanel";
 
 const AdminSelectionApplication = () => {
   const { applicationId } = useParams<{ applicationId: string }>();
@@ -274,6 +274,17 @@ const AdminSelectionApplication = () => {
           <div className="space-y-2">
             <Label>Admin notes</Label>
             <Textarea value={eligibilityNotes} onChange={(e) => setEligibilityNotes(e.target.value)} rows={2} />
+          </div>
+          <div className="space-y-2">
+            <Label>Candidate documents</Label>
+            <CandidateDocumentsPanel
+              cvUrl={app.candidates?.cv_url}
+              academicTranscriptPath={app.academic_transcript_path}
+              projectDescriptionsPath={app.project_descriptions_path}
+              workExperiencePath={app.work_experience_path}
+              portfolioPath={app.portfolio_path}
+              projectDescriptionsText={app.project_descriptions_text}
+            />
           </div>
           {step === 1 && (
             <StepDecisionButtons
@@ -532,17 +543,13 @@ const AdminSelectionApplication = () => {
             <Button onClick={handleMentor} disabled={!mentorId || assignMentor.isPending}>
               {canActivateHold(app) ? "Activate HOLD candidate & assign mentor" : "Assign mentor & unlock Readiness"}
             </Button>
+            {app.readiness_unlocked_at && (
+              <Button variant="outline" asChild>
+                <Link to={`/admin/mentoring/${app.id}`}>Open mentor programme →</Link>
+              </Button>
+            )}
           </CardContent>
         </Card>
-      )}
-
-      {app.readiness_unlocked_at && (
-        <MentorProgramPanel
-          applicationId={app.id}
-          track={(app.track as Track | null) ?? (app.candidates as { track?: Track })?.track}
-          canEdit
-          showObservations
-        />
       )}
 
       {app.motivation_statement && (

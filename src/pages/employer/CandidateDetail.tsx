@@ -266,7 +266,7 @@ export default function EmployerCandidateDetail() {
               </p>
             </div>
             <Button variant="outline" size="sm" asChild>
-              <Link to="/employer/candidates?stage=selection">View in Selection</Link>
+              <Link to="/employer/selection">View in Selection</Link>
             </Button>
           </CardContent>
         </Card>

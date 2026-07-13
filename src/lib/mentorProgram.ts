@@ -19,6 +19,8 @@ export type MentorProgramMeeting = {
   phase: MentorMeetingPhase;
   status: MentorMeetingStatus;
   completed_at: string | null;
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type MentorMeetingObservation = {
@@ -140,6 +142,95 @@ export function computeNextMeetingUnlocks(
   }
 
   return updates;
+}
+
+export function getMeetingLockedReason(
+  meetingNumber: number,
+  meetings: MentorProgramMeeting[],
+  readinessAreasSubmitted: number
+): string {
+  const byNum = new Map(meetings.map((m) => [m.meeting_number, m]));
+  const isCompleted = (n: number) => byNum.get(n)?.status === "completed";
+
+  if (meetingNumber === 2) {
+    if (!isCompleted(1)) return "Complete Meeting 1 first";
+    if (readinessAreasSubmitted < 1) {
+      return "Unlocks when the candidate completes at least one Readiness area";
+    }
+  } else if (meetingNumber > 1) {
+    const prev = byNum.get(meetingNumber - 1);
+    if (prev && prev.status !== "completed") {
+      return `Complete Meeting ${meetingNumber - 1} first`;
+    }
+  }
+  return "Complete the previous meeting first";
+}
+
+/** Meeting available but not completed for 7+ days — admin flag. */
+export function isMentorMeetingOverdue(
+  meeting: MentorProgramMeeting,
+  overdueDays = 7
+): boolean {
+  if (meeting.status !== "available") return false;
+  const started = new Date(meeting.updated_at ?? meeting.created_at).getTime();
+  return Date.now() - started > overdueDays * 24 * 60 * 60 * 1000;
+}
+
+export async function refreshMeetingUnlocks(
+  applicationId: string,
+  track: Track | null | undefined
+) {
+  const { data: meetings, error: mErr } = await supabase
+    .from("mentor_program_meetings")
+    .select("*")
+    .eq("application_id", applicationId);
+  if (mErr) throw mErr;
+
+  const { data: app } = await supabase
+    .from("applications")
+    .select("candidate_id")
+    .eq("id", applicationId)
+    .single();
+
+  let readinessAreas = 0;
+  if (app?.candidate_id) {
+    const { data: attempts } = await supabase
+      .from("readiness_attempts")
+      .select("status, readiness_tests(area)")
+      .eq("candidate_id", app.candidate_id);
+    readinessAreas = countReadinessAreasSubmitted(attempts ?? []);
+  }
+
+  const updates = computeNextMeetingUnlocks(
+    (meetings ?? []) as MentorProgramMeeting[],
+    track,
+    readinessAreas
+  );
+
+  const now = new Date().toISOString();
+  for (const u of updates) {
+    await supabase
+      .from("mentor_program_meetings")
+      .update({ status: u.status, updated_at: now })
+      .eq("id", u.id);
+  }
+}
+
+/** Re-evaluate unlocks after candidate submits a Readiness test area. */
+export async function refreshMentorMeetingUnlocksForCandidate(candidateId: string) {
+  const { data: apps, error } = await supabase
+    .from("applications")
+    .select("id, track, candidates(track)")
+    .eq("candidate_id", candidateId)
+    .not("readiness_unlocked_at", "is", null);
+  if (error) throw error;
+
+  for (const app of apps ?? []) {
+    const track =
+      (app.track as Track | null) ??
+      ((app.candidates as { track?: Track } | null)?.track ?? "entry");
+    await refreshMeetingUnlocks(app.id, track);
+  }
 }
 
 export function isMentorAssignmentOverdue(boardDecidedAt: string | null | undefined) {

@@ -52,8 +52,8 @@ const emptyForm: JobForm = {
   engineering_discipline: "",
   discipline_other: "",
   positions_count: "1",
-  experience_level: "",
-  target_track: "",
+  experience_level: "0-12 months",
+  target_track: "entry",
   core_skills: "",
   desired_start_window: "",
 };
@@ -163,6 +163,9 @@ function JobRoleFormFields({
               ))}
             </SelectContent>
           </Select>
+          <p className="text-xs text-muted-foreground">
+            0–12 months experience → Entry track (default). 1+ year → Fast track.
+          </p>
         </div>
       </div>
       <div className="space-y-2">

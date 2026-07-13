@@ -12,7 +12,7 @@ export async function notifyAdminsNewCompanyIntake(
   const inserts = admins.map((admin) => ({
     user_id: admin.id,
     title: "New company registration",
-    body: `${companyName} (${contactEmail}) submitted their registration and is awaiting verification. Review in Admin → Employers.`,
+    body: `${companyName} (${contactEmail}) submitted their registration and is awaiting verification. Review in Admin → Companies.`,
     type: "company_intake_received",
     metadata: { companyId, companyName, contactEmail },
   }));

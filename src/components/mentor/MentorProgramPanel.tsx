@@ -13,13 +13,14 @@ import {
   useMentorProgramMeetings,
   useMentorSignalNote,
   useMentorActivationNote,
+  useReadinessAreasForApplication,
   useSaveMentorObservation,
   useSaveMentorSignalNote,
   useSaveMentorActivationNote,
   refreshMeetingUnlocks,
 } from "@/hooks/useMentorProgram";
-import type { MentorMeetingObservation } from "@/lib/mentorProgram";
-import { mentorMeetingCountForTrack } from "@/lib/mentorProgram";
+import { getMeetingLockedReason, isMentorMeetingOverdue } from "@/lib/mentorProgram";
+import type { MentorMeetingObservation, MentorProgramMeeting } from "@/lib/mentorProgram";
 import type { Track } from "@/lib/track";
 import MentorMeetingDots from "@/components/mentor/MentorMeetingDots";
 
@@ -27,7 +28,10 @@ type Props = {
   applicationId: string;
   track?: Track | null;
   canEdit?: boolean;
+  /** Admin sees individual meeting observations; company/mentor do not. */
   showObservations?: boolean;
+  /** Mentor/admin fill signal & activation notes; company reads via MentorCompanyNotesPanel. */
+  canEditSummaryNotes?: boolean;
 };
 
 function normalizeObservation(
@@ -42,10 +46,12 @@ export default function MentorProgramPanel({
   track,
   canEdit = true,
   showObservations = true,
+  canEditSummaryNotes = true,
 }: Props) {
   const { toast } = useToast();
   const { data: themes } = useMentorMeetingThemes();
   const { data: meetings, isLoading, refetch } = useMentorProgramMeetings(applicationId);
+  const { data: readinessAreas = 0 } = useReadinessAreasForApplication(applicationId);
   const { data: signalNote } = useMentorSignalNote(applicationId);
   const { data: activationNote } = useMentorActivationNote(applicationId);
   const saveObservation = useSaveMentorObservation();
@@ -79,7 +85,7 @@ export default function MentorProgramPanel({
   useEffect(() => {
     if (!applicationId || !track) return;
     refreshMeetingUnlocks(applicationId, track).then(() => refetch());
-  }, [applicationId, track, refetch]);
+  }, [applicationId, track, readinessAreas, refetch]);
 
   useEffect(() => {
     if (!signalNote) return;
@@ -112,7 +118,11 @@ export default function MentorProgramPanel({
   const meetingList = meetings ?? [];
   const meeting3Done = meetingList.find((m) => m.meeting_number === 3)?.status === "completed";
   const meeting6Done = meetingList.find((m) => m.meeting_number === 6)?.status === "completed";
-  const totalDots = mentorMeetingCountForTrack(track);
+  const readinessMeetings = meetingList.filter((m) => m.phase === "readiness" && m.status !== "not_applicable");
+  const activationMeetings = meetingList.filter((m) => m.phase === "activation" && m.status !== "not_applicable");
+
+  const lockedReason = (meetingNumber: number) =>
+    getMeetingLockedReason(meetingNumber, meetingList, readinessAreas);
 
   const openMeetingForm = (n: number) => {
     const m = meetingList.find((x) => x.meeting_number === n);
@@ -123,6 +133,134 @@ export default function MentorProgramPanel({
     setObservations(obs?.key_observations ?? "");
     setConcerns(obs?.concerns ?? "");
     setAddonTopics(obs?.addon_topics ?? "");
+  };
+
+  const renderMeetingCard = (
+    m: MentorProgramMeeting & {
+      mentor_meeting_observations?: MentorMeetingObservation[] | MentorMeetingObservation | null;
+    }
+  ) => {
+    const theme = themeByNumber.get(m.meeting_number);
+    const obs = normalizeObservation(m.mentor_meeting_observations);
+    const locked = m.status === "locked";
+    const done = m.status === "completed";
+    const overdue = isMentorMeetingOverdue(m);
+    return (
+      <div key={m.id} className="rounded-lg border p-4 space-y-3">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div>
+            <p className="font-medium text-sm">
+              Meeting {m.meeting_number}: {theme?.title ?? `Level ${m.meeting_number}`}
+            </p>
+            {theme?.theme_body && (
+              <div className="mt-2 rounded-md bg-muted/50 p-2">
+                <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Session agenda</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{theme.theme_body}</p>
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col items-end gap-1">
+            <Badge
+              variant={done ? "default" : locked ? "secondary" : "outline"}
+              className={done ? "bg-success text-success-foreground" : undefined}
+            >
+              {done ? "Completed" : locked ? "Locked" : "Available"}
+            </Badge>
+            {overdue && showObservations && (
+              <Badge variant="destructive" className="text-[10px]">Overdue</Badge>
+            )}
+          </div>
+        </div>
+
+        {showObservations && done && obs && (
+          <div className="text-xs text-muted-foreground bg-muted/40 rounded p-3 space-y-1">
+            <p>
+              {obs.meeting_date} · {obs.duration_minutes} min
+            </p>
+            <p className="whitespace-pre-wrap text-foreground">{obs.key_observations}</p>
+            {obs.addon_topics && <p>Add-on topics: {obs.addon_topics}</p>}
+            {obs.concerns && <p>Concerns: {obs.concerns}</p>}
+          </div>
+        )}
+
+        {canEdit && !locked && (
+          <Button
+            size="sm"
+            variant={done ? "outline" : "default"}
+            onClick={() => openMeetingForm(m.meeting_number)}
+          >
+            {done ? "Edit observation" : "Complete meeting"}
+          </Button>
+        )}
+
+        {canEdit && locked && (
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            <Lock className="h-3 w-3" /> {lockedReason(m.meeting_number)}
+          </p>
+        )}
+
+        {activeMeeting === m.meeting_number && canEdit && (
+          <div className="border-t pt-4 space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label>Date</Label>
+                <Input
+                  type="date"
+                  value={meetingDate}
+                  onChange={(e) => setMeetingDate(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Duration (minutes)</Label>
+                <Input
+                  type="number"
+                  min={15}
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label>Key observations</Label>
+              <Textarea
+                rows={4}
+                value={observations}
+                onChange={(e) => setObservations(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Any concerns?</Label>
+              <Textarea
+                rows={2}
+                value={concerns}
+                onChange={(e) => setConcerns(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Add-on topics (optional)</Label>
+              <Textarea
+                rows={2}
+                value={addonTopics}
+                onChange={(e) => setAddonTopics(e.target.value)}
+                placeholder="Extra topics you covered beyond the standard session theme..."
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                onClick={() => submitObservation(m.meeting_number)}
+                disabled={saveObservation.isPending}
+              >
+                Save observation
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setActiveMeeting(null)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
   };
 
   const submitObservation = async (meetingNumber: number) => {
@@ -178,129 +316,33 @@ export default function MentorProgramPanel({
     <div className="space-y-6">
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Mentor programme — {totalDots} meetings</CardTitle>
+          <CardTitle className="text-lg">
+            Mentor programme — {track === "fast" ? "3 meetings" : "3+3 meetings"}
+          </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Complete meetings in order. Observation form is the same for each meeting.
+            {track === "fast"
+              ? "Phase 1 — 3 Readiness meetings in order. Same observation form for each meeting."
+              : "Phase 1 (Readiness) + Phase 2 (Activation, Entry track). Same observation form for all meetings."}
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
           <MentorMeetingDots meetings={meetingList} track={track} />
-          <div className="space-y-3">
-            {meetingList
-              .filter((m) => m.status !== "not_applicable")
-              .map((m) => {
-                const theme = themeByNumber.get(m.meeting_number);
-                const obs = normalizeObservation(m.mentor_meeting_observations);
-                const locked = m.status === "locked";
-                const done = m.status === "completed";
-                return (
-                  <div key={m.id} className="rounded-lg border p-4 space-y-3">
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <div>
-                        <p className="font-medium text-sm">
-                          Meeting {m.meeting_number}: {theme?.title ?? `Level ${m.meeting_number}`}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">{theme?.theme_body}</p>
-                      </div>
-                      <Badge
-                        variant={done ? "default" : locked ? "secondary" : "outline"}
-                        className={done ? "bg-success text-success-foreground" : undefined}
-                      >
-                        {done ? "Completed" : locked ? "Locked" : "Available"}
-                      </Badge>
-                    </div>
-
-                    {showObservations && done && obs && (
-                      <div className="text-xs text-muted-foreground bg-muted/40 rounded p-3 space-y-1">
-                        <p>
-                          {obs.meeting_date} · {obs.duration_minutes} min
-                        </p>
-                        <p className="whitespace-pre-wrap text-foreground">{obs.key_observations}</p>
-                        {obs.addon_topics && <p>Add-on topics: {obs.addon_topics}</p>}
-                        {obs.concerns && <p>Concerns: {obs.concerns}</p>}
-                      </div>
-                    )}
-
-                    {canEdit && !locked && (
-                      <Button
-                        size="sm"
-                        variant={done ? "outline" : "default"}
-                        onClick={() => openMeetingForm(m.meeting_number)}
-                      >
-                        {done ? "Edit observation" : "Complete meeting"}
-                      </Button>
-                    )}
-
-                    {canEdit && locked && (
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Lock className="h-3 w-3" /> Complete the previous meeting first
-                      </p>
-                    )}
-
-                    {activeMeeting === m.meeting_number && canEdit && (
-                      <div className="border-t pt-4 space-y-3">
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-1">
-                            <Label>Date</Label>
-                            <Input
-                              type="date"
-                              value={meetingDate}
-                              onChange={(e) => setMeetingDate(e.target.value)}
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <Label>Duration (minutes)</Label>
-                            <Input
-                              type="number"
-                              min={15}
-                              value={duration}
-                              onChange={(e) => setDuration(e.target.value)}
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-1">
-                          <Label>Key observations</Label>
-                          <Textarea
-                            rows={4}
-                            value={observations}
-                            onChange={(e) => setObservations(e.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label>Any concerns?</Label>
-                          <Textarea
-                            rows={2}
-                            value={concerns}
-                            onChange={(e) => setConcerns(e.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label>Add-on topics (optional)</Label>
-                          <Textarea
-                            rows={2}
-                            value={addonTopics}
-                            onChange={(e) => setAddonTopics(e.target.value)}
-                            placeholder="Extra topics you covered beyond the standard session theme..."
-                          />
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            onClick={() => submitObservation(m.meeting_number)}
-                            disabled={saveObservation.isPending}
-                          >
-                            Save observation
-                          </Button>
-                          <Button size="sm" variant="ghost" onClick={() => setActiveMeeting(null)}>
-                            Cancel
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-          </div>
+          {readinessMeetings.length > 0 && (
+            <div className="space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Readiness phase (Meetings 1–3)
+              </p>
+              {readinessMeetings.map(renderMeetingCard)}
+            </div>
+          )}
+          {activationMeetings.length > 0 && (
+            <div className="space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Activation phase (Meetings 4–6)
+              </p>
+              {activationMeetings.map(renderMeetingCard)}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -313,7 +355,7 @@ export default function MentorProgramPanel({
             </p>
           </CardHeader>
           <CardContent className="space-y-3">
-            {canEdit && meeting3Done ? (
+            {canEditSummaryNotes && meeting3Done ? (
               <>
                 {(
                   [
@@ -400,7 +442,7 @@ export default function MentorProgramPanel({
             <p className="text-sm text-muted-foreground">Feeds into the final Go/No-Go decision.</p>
           </CardHeader>
           <CardContent className="space-y-3">
-            {canEdit && meeting6Done ? (
+            {canEditSummaryNotes && meeting6Done ? (
               <>
                 {(
                   [

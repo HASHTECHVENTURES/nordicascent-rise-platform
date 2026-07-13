@@ -4,9 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle, Circle, GraduationCap } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  PROFILE_REQUIREMENTS,
   isJobHuntProfileReady,
-  isProfileFieldComplete,
 } from "@/lib/profileCompleteness";
 import { isUniversitySelected, isPreparationComplete } from "@/lib/candidateJourney";
 import { isRegistrationDetailsComplete } from "@/lib/candidateRegistration";
@@ -21,12 +19,6 @@ export default function PreparationStageCard() {
   const prepDone = isPreparationComplete(profile, candidate);
   const onWaitlist = isOnUniversityWaitlist(candidate);
 
-  const profilePct = Math.round(
-    (PROFILE_REQUIREMENTS.filter((req) => isProfileFieldComplete(req.key, profile, candidate)).length /
-      PROFILE_REQUIREMENTS.length) *
-      100
-  );
-
   return (
     <div className="space-y-4">
       <div className="space-y-3">
@@ -39,10 +31,12 @@ export default function PreparationStageCard() {
             )}
             <div>
               <p className="font-medium text-sm">1. Profile</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{profilePct}% complete</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {profileReady ? "Complete" : "Managed on nordicascent.com"}
+              </p>
             </div>
           </div>
-          {!profileReady && (
+          {!profileReady && onWaitlist && (
             <Button size="sm" asChild>
               <Link to="/candidate/profile">Complete</Link>
             </Button>

@@ -4,13 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Plus, UserCircle, ClipboardList } from "lucide-react";
+import { Loader2, Plus, UserCircle, ChevronRight } from "lucide-react";
 import { useCompanyMentors, useCreateCompanyMentor } from "@/hooks/useData";
+import { useEmployerMentoringApplications } from "@/hooks/useSelection";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { resolveProfile } from "@/lib/resolveProfile";
+import { TRACK_META, type Track } from "@/lib/track";
+import { mentorMeetingCountForTrack } from "@/lib/mentorProgram";
 
 const EmployerMentoring = () => {
   const { data: mentors, isLoading: mentorsLoading } = useCompanyMentors();
+  const { data: mentoringApps, isLoading: appsLoading } = useEmployerMentoringApplications();
   const createMentor = useCreateCompanyMentor();
   const { toast } = useToast();
   const [mentorName, setMentorName] = useState("");
@@ -51,25 +56,49 @@ const EmployerMentoring = () => {
       <div>
         <h1 className="text-2xl font-medium">Mentoring</h1>
         <p className="text-muted-foreground">
-          Standard 3+3 mentor programme — six fixed sessions per candidate. Mentors complete observations
-          in Selection; they can add optional topics to each session but cannot create custom meetings.
+          Standard 3+3 programme — six fixed sessions per candidate (Entry track) or three (Fast track).
+          Complete mentor observations here. Optional add-on topics allowed — no custom meetings.
         </p>
       </div>
 
-      <Card className="border-primary/20 bg-primary/5">
-        <CardContent className="pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <p className="font-medium">Complete mentor meetings in Selection</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Open a candidate&apos;s application to record the six standard sessions, signal note, and activation note.
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Active mentor programmes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {appsLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : (mentoringApps ?? []).length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No active programmes yet. Assign a mentor in Selection to start the 3+3 meetings.
             </p>
-          </div>
-          <Button asChild className="shrink-0 gap-2">
-            <Link to="/employer/candidates">
-              <ClipboardList className="h-4 w-4" />
-              Go to candidates
-            </Link>
-          </Button>
+          ) : (
+            <div className="space-y-2">
+              {(mentoringApps ?? []).map((app) => {
+                const profile = resolveProfile(app.candidates?.profiles);
+                const track =
+                  (app.track as Track | null) ??
+                  ((app.candidates as { track?: Track } | null)?.track ?? "entry");
+                return (
+                  <Link
+                    key={app.id}
+                    to={`/employer/mentoring/${app.id}`}
+                    className="flex items-center justify-between gap-3 p-3 rounded-lg border hover:bg-muted/50"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">{profile?.full_name ?? "Candidate"}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {app.jobs?.title} · {mentorMeetingCountForTrack(track)} meetings
+                      </p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -4,6 +4,7 @@ import type { Track } from "@/lib/track";
 export const DEGREE_TYPES = ["BSc", "MSc", "PhD", "BE", "BTech", "Diploma", "Other"] as const;
 
 export const CANDIDATE_EXPERIENCE_OPTIONS: { value: string; label: string; track: Track }[] = [
+  { value: "final-year-student", label: "Final year student", track: "entry" },
   { value: "0-12 months", label: "0 – 12 months", track: "entry" },
   { value: "1-3 years", label: "1 – 3 years", track: "fast" },
   { value: "3-5 years", label: "3 – 5 years", track: "fast" },
@@ -30,6 +31,7 @@ export function normalizeRegistrationExperience(experience: string | null | unde
   if (/fresher|graduate|intern|no experience|0/.test(text.toLowerCase()) || /month/i.test(text)) {
     return "0-12 months";
   }
+  if (/final\s*year|student/i.test(text)) return "final-year-student";
   if (/5\+|5\s*\+|6\+/.test(text)) return "5+ years";
   const years = text.match(/(\d+)/);
   if (years) {

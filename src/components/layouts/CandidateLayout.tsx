@@ -56,6 +56,7 @@ const CandidateLayout = () => {
   const visibleStandaloneNav = waitlistLocked
     ? standaloneNav.filter((item) => item.href === CANDIDATE_PROFILE_PATH)
     : standaloneNav.filter((item) => {
+        if (item.href === CANDIDATE_PROFILE_PATH) return false;
         if (item.href === "/candidate/jobs" || item.href === "/candidate/applications") {
           return jobsOpen;
         }

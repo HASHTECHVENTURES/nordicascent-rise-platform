@@ -58,9 +58,14 @@ import EmployerCandidateDetail from "./pages/employer/CandidateDetail";
 import EmployerMessages from "./pages/employer/Messages";
 import EmployerAnalytics from "./pages/employer/Analytics";
 import EmployerMentoring from "./pages/employer/Mentoring";
+import EmployerMentoringApplication from "./pages/employer/MentoringApplication";
 import EmployerSelectionApplication from "./pages/employer/SelectionApplication";
+import EmployerSelection from "./pages/employer/Selection";
 import EmployerInternship from "./pages/employer/Internship";
 import EmployerActivation from "./pages/employer/Activation";
+import EmployerActivationApplication from "./pages/employer/ActivationApplication";
+import EmployerRelocation from "./pages/employer/Relocation";
+import EmployerRelocationApplication from "./pages/employer/RelocationApplication";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -83,11 +88,15 @@ import AdminInsights from "./pages/admin/Insights";
 import AdminStageTasks from "./pages/admin/StageTasks";
 import AdminReadiness from "./pages/admin/Readiness";
 import AdminMentoring from "./pages/admin/Mentoring";
+import AdminMentoringApplication from "./pages/admin/MentoringApplication";
 import AdminUniversities from "./pages/admin/Universities";
 import AdminRelocation from "./pages/admin/Relocation";
+import AdminRelocationApplication from "./pages/admin/RelocationApplication";
 import AdminOnboarding from "./pages/admin/Onboarding";
 import AdminSelection from "./pages/admin/Selection";
 import AdminSelectionApplication from "./pages/admin/SelectionApplication";
+import AdminActivation from "./pages/admin/Activation";
+import AdminActivationApplication from "./pages/admin/ActivationApplication";
 
 import NotFound from "./pages/NotFound";
 
@@ -152,6 +161,8 @@ const App = () => (
                 <Route path="/employer/dashboard" element={<EmployerDashboard />} />
                 <Route path="/employer/tasks" element={<EmployerTasks />} />
                 <Route path="/employer/candidates" element={<EmployerCandidates />} />
+                <Route path="/employer/selection" element={<EmployerSelection />} />
+                <Route path="/employer/selection/:applicationId" element={<EmployerSelectionApplication />} />
                 <Route path="/employer/candidates/:candidateId/selection/:applicationId" element={<EmployerSelectionApplication />} />
                 <Route path="/employer/candidates/:candidateId" element={<EmployerCandidateDetail />} />
                 <Route path="/employer/jobs" element={<EmployerJobPostings />} />
@@ -159,7 +170,11 @@ const App = () => (
                 <Route path="/employer/company" element={<EmployerCompanyProfile />} />
                 <Route path="/employer/internship" element={<EmployerInternship />} />
                 <Route path="/employer/activation" element={<EmployerActivation />} />
+                <Route path="/employer/activation/:applicationId" element={<EmployerActivationApplication />} />
+                <Route path="/employer/relocation" element={<EmployerRelocation />} />
+                <Route path="/employer/relocation/:applicationId" element={<EmployerRelocationApplication />} />
                 <Route path="/employer/mentoring" element={<EmployerMentoring />} />
+                <Route path="/employer/mentoring/:applicationId" element={<EmployerMentoringApplication />} />
                 <Route path="/employer/messages" element={<EmployerMessages />} />
                 <Route path="/employer/analytics" element={<EmployerAnalytics />} />
               </Route>
@@ -188,8 +203,12 @@ const App = () => (
                 <Route path="/admin/stage-tasks" element={<AdminStageTasks />} />
                 <Route path="/admin/readiness" element={<AdminReadiness />} />
                 <Route path="/admin/mentoring" element={<AdminMentoring />} />
+                <Route path="/admin/mentoring/:applicationId" element={<AdminMentoringApplication />} />
+                <Route path="/admin/activation" element={<AdminActivation />} />
+                <Route path="/admin/activation/:applicationId" element={<AdminActivationApplication />} />
                 <Route path="/admin/universities" element={<AdminUniversities />} />
                 <Route path="/admin/relocation" element={<AdminRelocation />} />
+                <Route path="/admin/relocation/:applicationId" element={<AdminRelocationApplication />} />
                 <Route path="/admin/onboarding" element={<AdminOnboarding />} />
                 <Route path="/admin/selection/:applicationId" element={<AdminSelectionApplication />} />
                 <Route path="/admin/selection" element={<AdminSelection />} />

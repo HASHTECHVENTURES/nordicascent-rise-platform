@@ -4,7 +4,7 @@ import {
   ClipboardCheck,
   Heart,
   ClipboardList,
-  Briefcase,
+  Rocket,
   MapPin,
   Building2,
 } from "lucide-react";
@@ -48,11 +48,11 @@ export const ADMIN_JOURNEY_STEPS: AdminJourneyStep[] = [
     match: (p) => p.startsWith("/admin/mentoring"),
   },
   {
-    id: "roles",
-    label: "Job Roles",
-    href: "/admin/jobs",
-    icon: Briefcase,
-    match: (p) => p.startsWith("/admin/jobs"),
+    id: "activation",
+    label: "Activation",
+    href: "/admin/activation",
+    icon: Rocket,
+    match: (p) => p.startsWith("/admin/activation"),
   },
   {
     id: "relocation",

@@ -15,6 +15,8 @@ import {
   BarChart3,
   AlertTriangle,
   ClipboardCheck,
+  UserCheck,
+  MapPin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -27,12 +29,14 @@ const navigation = [
   { name: "Pipeline Overview", href: "/employer/dashboard", icon: LayoutDashboard },
   { name: "Tasks", href: "/employer/tasks", icon: ClipboardList },
   { name: "Candidates", href: "/employer/candidates", icon: Users },
-  { name: "Activation", href: "/employer/activation", icon: ClipboardCheck },
+  { name: "Selection", href: "/employer/selection", icon: UserCheck },
   { name: "Job Roles", href: "/employer/jobs", icon: Briefcase },
-  { name: "Company Profile", href: "/employer/company", icon: Building2 },
   { name: "Mentoring", href: "/employer/mentoring", icon: Heart },
+  { name: "Activation", href: "/employer/activation", icon: ClipboardCheck },
+  { name: "Relocation", href: "/employer/relocation", icon: MapPin },
   { name: "Messages", href: "/employer/messages", icon: MessageSquare },
   { name: "Analytics", href: "/employer/analytics", icon: BarChart3 },
+  { name: "Company Profile", href: "/employer/company", icon: Building2 },
 ];
 
 const EmployerLayout = () => {
@@ -99,7 +103,9 @@ const EmployerLayout = () => {
 
           <nav className="flex-1 p-4 space-y-1">
             {navigation.map((item) => {
-              const isActive = location.pathname === item.href;
+              const isActive =
+                location.pathname === item.href ||
+                (item.href !== "/employer/dashboard" && location.pathname.startsWith(`${item.href}/`));
               return (
                 <Link
                   key={item.name}

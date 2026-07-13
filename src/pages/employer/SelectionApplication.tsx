@@ -17,8 +17,8 @@ import {
 import { useCompanyMentors } from "@/hooks/useData";
 import { employerBoardSummary, getSelectionStepFromStatus, selectionStatusLabel } from "@/lib/selectionModule";
 import EmployerReadinessSummary from "@/components/employer/EmployerReadinessSummary";
-import MentorProgramPanel from "@/components/mentor/MentorProgramPanel";
 import { isMentorAssignmentOverdue } from "@/lib/mentorProgram";
+import MentorCompanyNotesPanel from "@/components/mentor/MentorCompanyNotesPanel";
 import type { Track } from "@/lib/track";
 
 const EmployerSelectionApplication = () => {
@@ -132,7 +132,7 @@ const EmployerSelectionApplication = () => {
     <div className="space-y-6 max-w-3xl">
       <div className="flex items-start gap-4">
         <Button variant="ghost" size="icon" asChild>
-          <Link to="/employer/candidates">
+          <Link to="/employer/selection">
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
@@ -260,21 +260,21 @@ const EmployerSelectionApplication = () => {
             <Button onClick={handleAssignMentor} disabled={!mentorId || assignMentor.isPending}>
               Assign mentor & unlock Readiness
             </Button>
+            {app.readiness_unlocked_at && (
+              <Button variant="outline" asChild>
+                <Link to={`/employer/mentoring/${app.id}`}>Open mentor programme →</Link>
+              </Button>
+            )}
           </CardContent>
         </Card>
       )}
 
-      {app.readiness_unlocked_at && (
-        <MentorProgramPanel
-          applicationId={app.id}
-          track={appTrack}
-          canEdit
-          showObservations={false}
-        />
-      )}
-
       {app.readiness_unlocked_at && app.candidate_id && (
         <EmployerReadinessSummary candidateId={app.candidate_id} />
+      )}
+
+      {app.readiness_unlocked_at && (
+        <MentorCompanyNotesPanel applicationId={app.id} track={appTrack} />
       )}
 
       {step < 3 && (

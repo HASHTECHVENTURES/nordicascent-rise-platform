@@ -23,6 +23,7 @@ import {
   Heart,
   MapPin,
   ClipboardList,
+  Rocket,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,6 +38,7 @@ const journeyNav: NavItem[] = [
   { name: "Selection", href: "/admin/selection", icon: ClipboardList },
   { name: "Readiness", href: "/admin/readiness", icon: ClipboardCheck },
   { name: "Mentoring", href: "/admin/mentoring", icon: Heart },
+  { name: "Activation", href: "/admin/activation", icon: Rocket },
   { name: "Relocation", href: "/admin/relocation", icon: MapPin },
   { name: "Onboarding", href: "/admin/onboarding", icon: Building2 },
 ];

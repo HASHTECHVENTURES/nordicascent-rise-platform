@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { GraduationCap, ClipboardCheck, Heart, Briefcase, Loader2 } from "lucide-react";
+import { GraduationCap, ClipboardCheck, Heart, Rocket, Loader2 } from "lucide-react";
 import { useAdminJourneyStats } from "@/hooks/useData";
 
 const AdminDashboard = () => {
@@ -37,11 +37,11 @@ const AdminDashboard = () => {
       icon: Heart,
     },
     {
-      title: "Job Roles",
+      title: "Activation",
       count: stats?.jobsUnlocked ?? 0,
       label: "candidates in activation",
-      href: "/admin/jobs",
-      icon: Briefcase,
+      href: "/admin/activation",
+      icon: Rocket,
     },
   ];
 

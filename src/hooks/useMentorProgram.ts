@@ -3,15 +3,17 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyApplications } from "@/hooks/useData";
 import {
-  computeNextMeetingUnlocks,
   countReadinessAreasSubmitted,
   initializeMentorMeetings,
+  refreshMeetingUnlocks,
+  refreshMentorMeetingUnlocksForCandidate,
   type MentorActivationNote,
   type MentorMeetingObservation,
   type MentorMeetingTheme,
   type MentorProgramMeeting,
   type MentorSignalNote,
 } from "@/lib/mentorProgram";
+import { syncMentorCheckpointFromMeeting } from "@/lib/activationModule";
 import type { Track } from "@/lib/track";
 
 const MEETINGS_SELECT = `
@@ -112,41 +114,26 @@ export function useAssignedMentorForApplication(applicationId: string | undefine
   });
 }
 
-async function refreshMeetingUnlocks(applicationId: string, track: Track | null | undefined) {
-  const { data: meetings, error: mErr } = await supabase
-    .from("mentor_program_meetings")
-    .select("*")
-    .eq("application_id", applicationId);
-  if (mErr) throw mErr;
-
-  const { data: app } = await supabase
-    .from("applications")
-    .select("candidate_id")
-    .eq("id", applicationId)
-    .single();
-
-  let readinessAreas = 0;
-  if (app?.candidate_id) {
-    const { data: attempts } = await supabase
-      .from("readiness_attempts")
-      .select("status, readiness_tests(area)")
-      .eq("candidate_id", app.candidate_id);
-    readinessAreas = countReadinessAreasSubmitted(attempts ?? []);
-  }
-
-  const updates = computeNextMeetingUnlocks(
-    (meetings ?? []) as MentorProgramMeeting[],
-    track,
-    readinessAreas
-  );
-
-  for (const u of updates) {
-    await supabase
-      .from("mentor_program_meetings")
-      .update({ status: u.status, updated_at: new Date().toISOString() })
-      .eq("id", u.id);
-  }
+export function useReadinessAreasForApplication(applicationId: string | undefined) {
+  return useQuery({
+    queryKey: ["readiness-areas-for-app", applicationId],
+    enabled: Boolean(applicationId),
+    queryFn: async () => {
+      const { data: app } = await supabase
+        .from("applications")
+        .select("candidate_id")
+        .eq("id", applicationId!)
+        .single();
+      if (!app?.candidate_id) return 0;
+      const { data: attempts } = await supabase
+        .from("readiness_attempts")
+        .select("status, readiness_tests(area)")
+        .eq("candidate_id", app.candidate_id);
+      return countReadinessAreasSubmitted(attempts ?? []);
+    },
+  });
 }
+
 
 export function useSaveMentorObservation() {
   const qc = useQueryClient();
@@ -156,6 +143,7 @@ export function useSaveMentorObservation() {
       meetingId,
       applicationId,
       track,
+      meeting_number,
       meeting_date,
       duration_minutes,
       key_observations,
@@ -195,9 +183,12 @@ export function useSaveMentorObservation() {
       if (meetErr) throw meetErr;
 
       await refreshMeetingUnlocks(applicationId, track);
+      await syncMentorCheckpointFromMeeting(applicationId, meeting_number);
     },
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ["mentor-program-meetings", vars.applicationId] });
+      qc.invalidateQueries({ queryKey: ["internship-checkpoints", vars.applicationId] });
+      qc.invalidateQueries({ queryKey: ["activation-record", vars.applicationId] });
     },
   });
 }
@@ -272,7 +263,11 @@ export function useSaveMentorActivationNote() {
   });
 }
 
-export { initializeMentorMeetings, refreshMeetingUnlocks };
+export {
+  initializeMentorMeetings,
+  refreshMeetingUnlocks,
+  refreshMentorMeetingUnlocksForCandidate,
+};
 
 export function useMyMentorProgramContext() {
   const { data: applications } = useMyApplications();
