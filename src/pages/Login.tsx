@@ -62,6 +62,7 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
   const [email, setEmail] = useState(fixedRole === "internal" ? HARDCODED_ADMIN_EMAIL : "");
   const [password, setPassword] = useState(fixedRole === "internal" ? HARDCODED_ADMIN_PASSWORD : "");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   // Restore role so refresh / redirect back from protected route doesn't lose context
   useEffect(() => {
@@ -108,6 +109,11 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
 
     if (authMode === "signup" && password !== confirmPassword) {
       toast({ title: "Passwords don't match", variant: "destructive" });
+      return;
+    }
+
+    if (authMode === "signup" && !acceptedTerms) {
+      toast({ title: "Please accept the Terms of Service", variant: "destructive" });
       return;
     }
 
@@ -369,7 +375,11 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
 
                   {authMode === "signup" && (
                     <div className="flex items-start space-x-2">
-                      <Checkbox id="terms" required />
+                      <Checkbox
+                        id="terms"
+                        checked={acceptedTerms}
+                        onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
+                      />
                       <Label htmlFor="terms" className="text-sm font-normal leading-tight">
                         I agree to the <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link> and{" "}
                         <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>

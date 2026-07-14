@@ -328,40 +328,11 @@ const CandidateProfile = () => {
   };
 
   const onWaitlist = isOnUniversityWaitlist(candidate);
-  const profileInputHidden = !isWaitlistProfileOnly(candidate);
   const missingPreview = getMissingStep1Fields(form, {
     phoneNormalized: form.country === DEFAULT_COUNTRY ? normalizeIndiaPhone(form.phone) : form.phone.trim(),
     hasCv: Boolean(candidate?.cv_url),
     hasAvatar: Boolean(avatarUrl || profile?.avatar_url),
   });
-
-  if (profileInputHidden) {
-    return (
-      <div className="space-y-6 max-w-3xl">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Your profile</h1>
-          <p className="text-muted-foreground">
-            Profile details are managed on the Nordic Ascent website. Use My Journey to continue your programme.
-          </p>
-        </div>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Profile summary</CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <p><span className="text-muted-foreground">Name:</span> {profile?.full_name ?? "—"}</p>
-            <p><span className="text-muted-foreground">Email:</span> {profile?.email ?? "—"}</p>
-            <p><span className="text-muted-foreground">Title:</span> {candidate?.title ?? "—"}</p>
-            <p><span className="text-muted-foreground">Location:</span> {formatCandidateLocation(candidate) || "—"}</p>
-            <p><span className="text-muted-foreground">Experience:</span> {candidate?.experience ?? "—"}</p>
-            <p><span className="text-muted-foreground">Track:</span> {candidate?.track ? TRACK_META[candidate.track].label : "—"}</p>
-            <p className="md:col-span-2"><span className="text-muted-foreground">Skills:</span> {(candidate?.skills ?? []).join(", ") || "—"}</p>
-          </CardContent>
-        </Card>
-        <Button onClick={() => navigate("/candidate/dashboard")}>Back to My Journey</Button>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6 max-w-3xl">

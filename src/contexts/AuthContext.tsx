@@ -168,6 +168,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       if (error) throw error;
 
+      // Supabase returns a user with empty identities when the email is already registered
+      // (to avoid account enumeration). Treat that as a clear duplicate-signup error.
+      if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+        throw new Error("This email is already registered. Please sign in instead.");
+      }
+
       if (!data.session) {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
         if (signInError) throw signInError;
