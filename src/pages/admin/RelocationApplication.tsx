@@ -3,10 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { useAdminSelectionApplication } from "@/hooks/useSelection";
-import RelocationCheckpointsPanel from "@/components/relocation/RelocationCheckpointsPanel";
+import RelocationStepsPanel from "@/components/relocation/RelocationStepsPanel";
 import { useActivationRecord } from "@/hooks/useActivation";
 import { selectionStatusLabel } from "@/lib/selectionModule";
 import { resolveProfile } from "@/lib/resolveProfile";
+import { rollupStatusLabel, type RelocationRollupStatus } from "@/lib/relocationModule";
 
 export default function AdminRelocationApplication() {
   const { applicationId } = useParams<{ applicationId: string }>();
@@ -33,6 +34,11 @@ export default function AdminRelocationApplication() {
   }
 
   const profile = resolveProfile(app.candidates?.profiles);
+  const candidate = app.candidates as {
+    id?: string;
+    family_relocating?: boolean;
+    family_member_count?: number | null;
+  } | null;
 
   return (
     <div className="space-y-8 max-w-3xl">
@@ -45,17 +51,25 @@ export default function AdminRelocationApplication() {
         <div>
           <h1 className="text-2xl font-medium">{profile?.full_name ?? "Candidate"}</h1>
           <p className="text-sm text-muted-foreground">{app.jobs?.title}</p>
-          <Badge variant="outline" className="mt-2">
-            {selectionStatusLabel(app.status)}
-          </Badge>
+          <div className="flex flex-wrap gap-2 mt-2">
+            <Badge variant="outline">{selectionStatusLabel(app.status)}</Badge>
+            {activationRecord?.relocation_status && (
+              <Badge variant="secondary">
+                {rollupStatusLabel(activationRecord.relocation_status as RelocationRollupStatus)}
+              </Badge>
+            )}
+          </div>
         </div>
       </div>
 
-      <RelocationCheckpointsPanel
+      <RelocationStepsPanel
         applicationId={app.id}
         applicationStatus={app.status}
-        canConfirmCompany={!activationRecord?.relocation_completed_at}
-        canConfirmCandidate={!activationRecord?.relocation_completed_at}
+        candidateId={candidate?.id ?? app.candidate_id}
+        familyRelocating={Boolean(candidate?.family_relocating)}
+        familyMemberCount={candidate?.family_member_count ?? null}
+        role="admin"
+        canEdit={!activationRecord?.relocation_completed_at}
       />
     </div>
   );

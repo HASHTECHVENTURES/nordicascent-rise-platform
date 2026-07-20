@@ -2,13 +2,12 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, ChevronRight } from "lucide-react";
-import { useEmployerRelocationApplications } from "@/hooks/useRelocation";
-import { useRelocationCheckpoints } from "@/hooks/useRelocation";
+import { useEmployerRelocationApplications, useRelocationSteps } from "@/hooks/useRelocation";
 import { useActivationRecord } from "@/hooks/useActivation";
 import { useMyCompany } from "@/hooks/useData";
 import { resolveProfile } from "@/lib/resolveProfile";
 import { TRACK_META, type Track } from "@/lib/track";
-import { relocationCheckpointProgress } from "@/lib/relocationModule";
+import { relocationStepProgress } from "@/lib/relocationModule";
 import type { SelectionApplication } from "@/lib/selectionModule";
 
 function RelocationAppRow({ app }: { app: SelectionApplication }) {
@@ -16,9 +15,9 @@ function RelocationAppRow({ app }: { app: SelectionApplication }) {
   const track =
     (app.track as Track | null) ??
     ((app.candidates as { track?: Track } | null)?.track ?? "entry");
-  const { data: checkpoints } = useRelocationCheckpoints(app.id);
+  const { data: steps } = useRelocationSteps(app.id);
   const { data: record } = useActivationRecord(app.id);
-  const progress = relocationCheckpointProgress(checkpoints ?? []);
+  const progress = relocationStepProgress(steps ?? [], false);
 
   return (
     <Link
@@ -32,8 +31,8 @@ function RelocationAppRow({ app }: { app: SelectionApplication }) {
         </p>
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        {record?.relocation_completed_at ? (
-          <Badge className="bg-success text-success-foreground text-xs">Complete</Badge>
+        {record?.relocation_completed_at || record?.relocation_status === "arrived" ? (
+          <Badge className="bg-success text-success-foreground text-xs">Arrived</Badge>
         ) : (
           <Badge variant="outline" className="text-xs">
             {progress.done}/{progress.total}
@@ -65,14 +64,14 @@ export default function EmployerRelocation() {
       <div>
         <h1 className="text-2xl font-medium">Relocation</h1>
         <p className="text-muted-foreground">
-          Module 5 at {companyName} — track visa, housing, travel, and settling-in checkpoints.
+          Module 5 at {companyName} — high-level relocation progress and planned arrival.
         </p>
       </div>
 
       <Card className="border-primary/20 bg-primary/5">
         <CardContent className="pt-6 text-sm text-muted-foreground">
-          Candidates unlock relocation after pre-arrival employment. Confirm your relocation support
-          at checkpoint #6 when support has been provided.
+          Relocation starts at Final Clearance and runs in parallel with pre-arrival employment.
+          Employer toolkit visibility opens at final prep (step 9).
         </CardContent>
       </Card>
 
@@ -83,7 +82,7 @@ export default function EmployerRelocation() {
         <CardContent>
           {list.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No candidates in relocation yet. They appear here after pre-arrival is complete.
+              No candidates in relocation yet. They appear here after Final Clearance is Clear.
             </p>
           ) : (
             <div className="space-y-2">

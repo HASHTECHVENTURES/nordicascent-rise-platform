@@ -21,6 +21,7 @@ import {
   submitInternshipEvaluation,
   submitFinalClearanceDecision,
   syncAllMentorCheckpoints,
+  updateActivationCms,
   type ActivationRecord,
   type FinalClearanceDecision,
   type InternshipCheckpoint,
@@ -32,17 +33,34 @@ import {
 } from "@/lib/activationModule";
 
 export function useActivationRecord(applicationId: string | undefined) {
+  const { profile } = useAuth();
   return useQuery({
-    queryKey: ["activation-record", applicationId],
+    queryKey: ["activation-record", applicationId, profile?.role],
     enabled: Boolean(applicationId),
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("activation_records")
-        .select("*")
-        .eq("application_id", applicationId!)
-        .maybeSingle();
-      if (error) throw error;
-      return data as ActivationRecord | null;
+      // Mask followup_status / at_risk_* for non-admin (RLS-hard via RPC)
+      const { data, error } = await supabase.rpc("get_activation_record_for_viewer", {
+        p_application_id: applicationId!,
+      });
+      if (error) {
+        // Fallback for environments without the hardening RPC yet
+        const { data: row, error: fallbackErr } = await supabase
+          .from("activation_records")
+          .select("*")
+          .eq("application_id", applicationId!)
+          .maybeSingle();
+        if (fallbackErr) throw fallbackErr;
+        if (profile?.role !== "admin" && row) {
+          const masked = { ...(row as ActivationRecord) };
+          masked.followup_status = null;
+          masked.at_risk_retention = false;
+          masked.at_risk_retention_at = null;
+          return masked;
+        }
+        return row as ActivationRecord | null;
+      }
+      if (!data) return null;
+      return data as ActivationRecord;
     },
   });
 }
@@ -337,6 +355,16 @@ export function useActivationCms() {
   });
 }
 
+export function useUpdateActivationCms() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: updateActivationCms,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["activation-cms"] });
+    },
+  });
+}
+
 export function useInPersonVisit(applicationId: string | undefined) {
   return useQuery({
     queryKey: ["in-person-visit", applicationId],
@@ -436,7 +464,7 @@ export function useEmployerActivationApplications() {
         .select(`${ADMIN_SELECTION_SELECT}, jobs!inner(company_id), candidates!inner(jobs_unlocked)`)
         .eq("jobs.company_id", employer.company_id)
         .eq("candidates.jobs_unlocked", true)
-        .in("status", ["accepted", "mentor_assigned", "readiness_active", "readiness_complete", "internship", "go_no_go", "pre_arrival"])
+        .in("status", ["accepted", "mentor_assigned", "readiness_active", "readiness_complete", "internship", "go_no_go", "pre_arrival", "relocation"])
         .order("applied_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as SelectionApplication[];
@@ -476,7 +504,7 @@ export function useMyActivationContext() {
         .from("applications")
         .select("id, track, jobs(title, companies(name))")
         .eq("candidate_id", candidate.id)
-        .in("status", ["accepted", "mentor_assigned", "readiness_active", "readiness_complete", "internship", "go_no_go", "pre_arrival"])
+        .in("status", ["accepted", "mentor_assigned", "readiness_active", "readiness_complete", "internship", "go_no_go", "pre_arrival", "relocation"])
         .order("applied_at", { ascending: false })
         .limit(1)
         .maybeSingle();

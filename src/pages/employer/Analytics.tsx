@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Briefcase, Clock, Target, Loader2 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useEmployerApplications, useEmployerJobs } from "@/hooks/useData";
-import { PIPELINE_STAGES } from "@/lib/pipeline";
+import { PIPELINE_STAGES, normalizePipelineStageId } from "@/lib/pipeline";
 
 const EmployerAnalytics = () => {
   const { data: applications, isLoading: aLoading } = useEmployerApplications();
@@ -13,7 +13,7 @@ const EmployerAnalytics = () => {
     const map: Record<string, number> = {};
     PIPELINE_STAGES.forEach((s) => { map[s.id] = 0; });
     (applications ?? []).forEach((app) => {
-      const stage = app.stage_id ?? "preparation";
+      const stage = normalizePipelineStageId(app.stage_id);
       map[stage] = (map[stage] ?? 0) + 1;
     });
     return PIPELINE_STAGES.map((s) => ({ stage: s.name, count: map[s.id] ?? 0 }));

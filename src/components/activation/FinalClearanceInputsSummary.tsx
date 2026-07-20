@@ -11,7 +11,10 @@ import {
 import { useMentorProgramMeetings } from "@/hooks/useMentorProgram";
 import { allInternshipCheckpointsComplete, internshipCheckpointProgress } from "@/lib/activationModule";
 import type { Track } from "@/lib/track";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, XCircle, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { openStoredDocument } from "@/lib/documentAccess";
+import { useToast } from "@/hooks/use-toast";
 
 type Props = {
   application: SelectionApplication;
@@ -28,6 +31,7 @@ function ScoreRow({ label, value }: { label: string; value: string | number | nu
 }
 
 export default function FinalClearanceInputsSummary({ application, track }: Props) {
+  const { toast } = useToast();
   const applicationId = application.id;
   const isEntry = track === "entry";
   const { data: checkpoints = [] } = useInternshipCheckpoints(isEntry ? applicationId : undefined);
@@ -37,6 +41,7 @@ export default function FinalClearanceInputsSummary({ application, track }: Prop
   const board = employerBoardSummary(application);
   const cpProgress = internshipCheckpointProgress(checkpoints);
   const allCpDone = allInternshipCheckpointsComplete(checkpoints);
+  const offeeReportPath = (application as { offee_report_path?: string | null }).offee_report_path;
 
   return (
     <div className="space-y-4">
@@ -47,6 +52,30 @@ export default function FinalClearanceInputsSummary({ application, track }: Prop
         <CardContent className="text-sm space-y-1">
           <ScoreRow label="Offee technical" value={application.offee_technical_score} />
           <ScoreRow label="Offee open-mindedness" value={application.offee_open_mindedness_score} />
+          {offeeReportPath && (
+            <div className="pt-1">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-1"
+                onClick={async () => {
+                  try {
+                    await openStoredDocument(offeeReportPath);
+                  } catch (err) {
+                    toast({
+                      title: "Could not open Offee report",
+                      description: err instanceof Error ? err.message : "Try again",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+              >
+                <FileText className="h-3.5 w-3.5" />
+                View full Offee report
+              </Button>
+            </div>
+          )}
           <ScoreRow label="Technical assessment" value={board.technical_score} />
           <ScoreRow label="Cognitive / communication" value={board.cognitive_score} />
           <ScoreRow label="Motivation" value={board.motivation_score} />

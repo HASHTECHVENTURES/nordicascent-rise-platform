@@ -11,7 +11,7 @@ import { useMemo, useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { applicationStatusVariant, employerApplicationStatusLabel } from "@/lib/applicationJourney";
 import { TRACK_META, type Track } from "@/lib/track";
-import { PIPELINE_STAGES } from "@/lib/pipeline";
+import { PIPELINE_STAGES, normalizePipelineStageId } from "@/lib/pipeline";
 import { useEmployerApplications } from "@/hooks/useData";
 import { resolveProfile } from "@/lib/resolveProfile";
 
@@ -25,8 +25,9 @@ const EmployerCandidates = () => {
 
   useEffect(() => {
     const stage = searchParams.get("stage");
-    if (stage && PIPELINE_STAGES.some((s) => s.id === stage)) {
-      setActiveStage(stage);
+    const normalized = stage ? normalizePipelineStageId(stage) : null;
+    if (normalized && PIPELINE_STAGES.some((s) => s.id === normalized)) {
+      setActiveStage(normalized);
     }
   }, [searchParams]);
 
@@ -34,7 +35,7 @@ const EmployerCandidates = () => {
     const map: Record<string, typeof applications> = {};
     PIPELINE_STAGES.forEach((s) => { map[s.id] = []; });
     (applications ?? []).forEach((app) => {
-      const stage = app.stage_id ?? "preparation";
+      const stage = normalizePipelineStageId(app.stage_id);
       if (!map[stage]) map[stage] = [];
       map[stage].push(app);
     });

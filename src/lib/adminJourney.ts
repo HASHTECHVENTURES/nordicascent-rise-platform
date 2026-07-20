@@ -1,12 +1,12 @@
-import type { LucideIcon } from "lucide-react";
 import {
   GraduationCap,
   ClipboardCheck,
-  Heart,
   ClipboardList,
   Rocket,
   MapPin,
   Building2,
+  HeartHandshake,
+  type LucideIcon,
 } from "lucide-react";
 
 export type AdminJourneyStep = {
@@ -17,7 +17,7 @@ export type AdminJourneyStep = {
   match: (pathname: string) => boolean;
 };
 
-/** Admin workflow mirrors candidate journey: Universities → Selection → Readiness → … */
+/** Admin workflow mirrors candidate journey: Universities → Selection → Readiness → Activation … */
 export const ADMIN_JOURNEY_STEPS: AdminJourneyStep[] = [
   {
     id: "universities",
@@ -38,14 +38,7 @@ export const ADMIN_JOURNEY_STEPS: AdminJourneyStep[] = [
     label: "Readiness",
     href: "/admin/readiness",
     icon: ClipboardCheck,
-    match: (p) => p.startsWith("/admin/readiness"),
-  },
-  {
-    id: "mentoring",
-    label: "Mentoring",
-    href: "/admin/mentoring",
-    icon: Heart,
-    match: (p) => p.startsWith("/admin/mentoring"),
+    match: (p) => p.startsWith("/admin/readiness") || p.startsWith("/admin/mentoring"),
   },
   {
     id: "activation",
@@ -68,13 +61,19 @@ export const ADMIN_JOURNEY_STEPS: AdminJourneyStep[] = [
     icon: Building2,
     match: (p) => p.startsWith("/admin/onboarding"),
   },
+  {
+    id: "followup",
+    label: "Follow-up",
+    href: "/admin/followup",
+    icon: HeartHandshake,
+    match: (p) => p.startsWith("/admin/followup"),
+  },
 ];
 
 export type AdminCandidateJourneyStage =
   | "preparation"
   | "selection"
   | "readiness"
-  | "mentoring"
   | "activation";
 
 export function adminJourneyStageLabel(stage: AdminCandidateJourneyStage) {
@@ -85,8 +84,6 @@ export function adminJourneyStageLabel(stage: AdminCandidateJourneyStage) {
       return "Selection";
     case "readiness":
       return "Readiness";
-    case "mentoring":
-      return "Mentoring";
     case "activation":
       return "Activation";
   }
@@ -101,7 +98,6 @@ export function inferCandidateJourneyStage(input: {
   const { universityId, jobsUnlocked, testsSubmitted, testsTotal } = input;
   if (!universityId) return "preparation";
   if (jobsUnlocked) return "activation";
-  if (testsTotal > 0 && testsSubmitted >= testsTotal) return "mentoring";
-  if (testsSubmitted > 0) return "readiness";
+  if (testsSubmitted > 0 || (testsTotal > 0 && testsSubmitted >= testsTotal)) return "readiness";
   return "selection";
 }

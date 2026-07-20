@@ -7,7 +7,6 @@ import { useMyApplications, useMyStageProgress } from "@/hooks/useData";
 import { allTestsSubmitted } from "@/lib/readiness";
 import {
   canAccessJobs,
-  canAccessMentoring,
   canAccessReadiness,
   computeEarlyJourneySteps,
   isJobsUnlocked,
@@ -31,8 +30,6 @@ function isStepAccessible(
       return canAccessJobs(profile, candidate, readinessSubmitted);
     case "readiness":
       return canAccessReadiness(profile, candidate, applications);
-    case "mentoring":
-      return canAccessMentoring(profile, candidate, readinessSubmitted, applications);
     case "activation":
     case "relocation":
     case "onboarding":

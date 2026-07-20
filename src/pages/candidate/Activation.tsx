@@ -1,16 +1,20 @@
 import { Loader2 } from "lucide-react";
 import { useTrack } from "@/lib/track";
 import InternshipCheckpointsPanel from "@/components/activation/InternshipCheckpointsPanel";
+import InternshipCompletionDiploma from "@/components/activation/InternshipCompletionDiploma";
 import PreInternshipGatePanel from "@/components/activation/PreInternshipGatePanel";
 import PreArrivalCheckpointsPanel from "@/components/activation/PreArrivalCheckpointsPanel";
 import CandidateVisitNotice from "@/components/activation/CandidateVisitNotice";
+import MentorAssignedBanner from "@/components/mentor/MentorAssignedBanner";
 import { useMyActivationContext, useActivationRecord } from "@/hooks/useActivation";
+import { useMyMentorProgramContext } from "@/hooks/useMentorProgram";
 
 export default function CandidateActivation() {
   const [track] = useTrack();
   const isEntry = track === "entry";
   const { data: ctx, isLoading } = useMyActivationContext();
   const { data: activationRecord } = useActivationRecord(ctx?.applicationId);
+  const mentorCtx = useMyMentorProgramContext();
   const preArrivalUnlocked = activationRecord?.status === "cleared";
 
   return (
@@ -19,7 +23,7 @@ export default function CandidateActivation() {
         <h1 className="text-2xl font-medium">Activation</h1>
         <p className="text-muted-foreground mt-1">
           {isEntry
-            ? "Your internship progress, then pre-arrival employment."
+            ? "Internship and Pre Arrival Employment — mentor meetings 4–6 run in parallel."
             : "Pre-arrival and employment activation before you start full-time."}
         </p>
         {ctx?.companyName && ctx?.jobTitle && (
@@ -33,6 +37,15 @@ export default function CandidateActivation() {
         <div className="flex justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
+      )}
+
+      {mentorCtx.mentor && (
+        <MentorAssignedBanner
+          mentor={mentorCtx.mentor}
+          company={mentorCtx.company}
+          meetings={mentorCtx.meetings}
+          track={mentorCtx.track}
+        />
       )}
 
       {isEntry && ctx?.applicationId && (
@@ -49,6 +62,12 @@ export default function CandidateActivation() {
             showStatus={false}
             showEvaluation={false}
           />
+          <InternshipCompletionDiploma
+            applicationId={ctx.applicationId}
+            companyName={ctx.companyName}
+            jobTitle={ctx.jobTitle}
+            canDownload
+          />
         </>
       )}
 
@@ -58,9 +77,7 @@ export default function CandidateActivation() {
         </p>
       )}
 
-      {ctx?.applicationId && (
-        <CandidateVisitNotice applicationId={ctx.applicationId} />
-      )}
+      {ctx?.applicationId && <CandidateVisitNotice applicationId={ctx.applicationId} />}
 
       {ctx?.applicationId && (
         <PreArrivalCheckpointsPanel

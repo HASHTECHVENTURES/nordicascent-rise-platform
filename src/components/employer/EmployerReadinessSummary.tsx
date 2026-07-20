@@ -20,21 +20,21 @@ function signalBadge(signal: string | null) {
   return <Badge className={cls}>{label}</Badge>;
 }
 
-function goNoGoLabel(evaluation: {
+function clearanceInputLabel(evaluation: {
   red_flag: boolean;
   cultural_signal: string | null;
   technical_signal: string | null;
   approved_for_activation: boolean;
 }) {
-  if (evaluation.red_flag) return { label: "No-Go", variant: "destructive" as const };
+  if (evaluation.red_flag) return { label: "Hold — red flag", variant: "destructive" as const };
   if (!evaluation.cultural_signal || !evaluation.technical_signal) {
     return { label: "Awaiting admin review", variant: "secondary" as const };
   }
   const weak =
     evaluation.cultural_signal === "weak" || evaluation.technical_signal === "weak";
-  if (weak) return { label: "No-Go", variant: "destructive" as const };
+  if (weak) return { label: "Hold — weak signals", variant: "destructive" as const };
   if (evaluation.approved_for_activation) {
-    return { label: "Go — approved for activation", variant: "default" as const };
+    return { label: "Approved for activation", variant: "default" as const };
   }
   return { label: "Review complete — pending approval", variant: "outline" as const };
 }
@@ -64,7 +64,7 @@ export default function EmployerReadinessSummary({ candidateId }: Props) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Readiness — Go / No-Go</CardTitle>
+          <CardTitle className="text-lg">Readiness — Final Clearance input</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
@@ -75,12 +75,12 @@ export default function EmployerReadinessSummary({ candidateId }: Props) {
     );
   }
 
-  const decision = goNoGoLabel(evaluation);
+  const decision = clearanceInputLabel(evaluation);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Readiness — Go / No-Go</CardTitle>
+        <CardTitle className="text-lg">Readiness — Final Clearance input</CardTitle>
         <p className="text-sm text-muted-foreground">
           Curated signals from the Readiness programme. Test answers and internal notes are not
           shown.

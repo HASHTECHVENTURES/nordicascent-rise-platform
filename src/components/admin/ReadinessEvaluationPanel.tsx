@@ -249,7 +249,7 @@ export default function ReadinessEvaluationPanel({ candidateId }: Props) {
             disabled={redFlag}
           />
           <Label htmlFor="approved-activation">
-            Approve for activation (Go) — visible to company on Go/No-Go summary
+            Approve for activation — visible to company on Final Clearance summary
           </Label>
         </div>
 

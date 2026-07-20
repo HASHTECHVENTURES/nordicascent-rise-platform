@@ -56,15 +56,14 @@ export function canAccessReadiness(
   return hasReadinessUnlocked(applications);
 }
 
+/** Mentoring runs parallel with Readiness once unlocked (Module 3B) — not after all tests. */
 export function canAccessMentoring(
   profile: Profile | null,
   candidate: Candidate | null | undefined,
-  readinessTestsSubmitted: boolean,
+  _readinessTestsSubmitted: boolean,
   applications?: ApplicationAccessRow[]
 ) {
-  return (
-    canAccessReadiness(profile, candidate, applications) && readinessTestsSubmitted
-  );
+  return canAccessReadiness(profile, candidate, applications);
 }
 
 export function isJobsUnlocked(candidate: Candidate | null | undefined) {
@@ -155,10 +154,6 @@ export function computeEarlyJourneySteps(
         if (!readinessUnlocked) return "upcoming";
         if (readinessTestsSubmitted) return "done";
         return "current";
-      case "mentoring":
-        if (!readinessUnlocked || !readinessTestsSubmitted) return "upcoming";
-        if (isJobsUnlocked(candidate)) return "done";
-        return "current";
       case "activation":
       case "relocation":
       case "onboarding":
@@ -187,16 +182,9 @@ export function computeEarlyJourneySteps(
     {
       id: "readiness",
       label: "Readiness",
-      description: "Timed Q&A tests (after selection)",
+      description: "Timed Q&A tests + mentor meetings 1–3",
       state: stepState("readiness"),
       href: "/candidate/readiness",
-    },
-    {
-      id: "mentoring",
-      label: "Mentoring",
-      description: "Connect with your mentor",
-      state: stepState("mentoring"),
-      href: "/candidate/mentoring",
     },
   ];
 
@@ -206,7 +194,7 @@ export function computeEarlyJourneySteps(
       label: "Activation",
       description:
         track === "entry"
-          ? "Internship, then pre-arrival employment"
+          ? "Internship and Pre Arrival Employment"
           : "Pre-arrival and employment activation",
       state: stepState("activation"),
       href: "/candidate/activation",
@@ -254,7 +242,6 @@ export function getEffectiveJourneyStage(
   if (!hasBeenSelected(applications)) return "selection";
   if (!hasReadinessUnlocked(applications)) return "selection";
   if (!readinessTestsSubmitted) return "readiness";
-  if (!isJobsUnlocked(candidate)) return "mentoring";
   return "activation";
 }
 

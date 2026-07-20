@@ -66,6 +66,10 @@ import EmployerActivation from "./pages/employer/Activation";
 import EmployerActivationApplication from "./pages/employer/ActivationApplication";
 import EmployerRelocation from "./pages/employer/Relocation";
 import EmployerRelocationApplication from "./pages/employer/RelocationApplication";
+import EmployerOnboarding from "./pages/employer/Onboarding";
+import EmployerOnboardingApplication from "./pages/employer/OnboardingApplication";
+import EmployerFollowup from "./pages/employer/Followup";
+import EmployerFollowupApplication from "./pages/employer/FollowupApplication";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -93,6 +97,9 @@ import AdminUniversities from "./pages/admin/Universities";
 import AdminRelocation from "./pages/admin/Relocation";
 import AdminRelocationApplication from "./pages/admin/RelocationApplication";
 import AdminOnboarding from "./pages/admin/Onboarding";
+import AdminOnboardingApplication from "./pages/admin/OnboardingApplication";
+import AdminFollowup from "./pages/admin/Followup";
+import AdminFollowupApplication from "./pages/admin/FollowupApplication";
 import AdminSelection from "./pages/admin/Selection";
 import AdminSelectionApplication from "./pages/admin/SelectionApplication";
 import AdminActivation from "./pages/admin/Activation";
@@ -173,6 +180,10 @@ const App = () => (
                 <Route path="/employer/activation/:applicationId" element={<EmployerActivationApplication />} />
                 <Route path="/employer/relocation" element={<EmployerRelocation />} />
                 <Route path="/employer/relocation/:applicationId" element={<EmployerRelocationApplication />} />
+                <Route path="/employer/onboarding" element={<EmployerOnboarding />} />
+                <Route path="/employer/onboarding/:applicationId" element={<EmployerOnboardingApplication />} />
+                <Route path="/employer/followup" element={<EmployerFollowup />} />
+                <Route path="/employer/followup/:applicationId" element={<EmployerFollowupApplication />} />
                 <Route path="/employer/mentoring" element={<EmployerMentoring />} />
                 <Route path="/employer/mentoring/:applicationId" element={<EmployerMentoringApplication />} />
                 <Route path="/employer/messages" element={<EmployerMessages />} />
@@ -210,6 +221,9 @@ const App = () => (
                 <Route path="/admin/relocation" element={<AdminRelocation />} />
                 <Route path="/admin/relocation/:applicationId" element={<AdminRelocationApplication />} />
                 <Route path="/admin/onboarding" element={<AdminOnboarding />} />
+                <Route path="/admin/onboarding/:applicationId" element={<AdminOnboardingApplication />} />
+                <Route path="/admin/followup" element={<AdminFollowup />} />
+                <Route path="/admin/followup/:applicationId" element={<AdminFollowupApplication />} />
                 <Route path="/admin/selection/:applicationId" element={<AdminSelectionApplication />} />
                 <Route path="/admin/selection" element={<AdminSelection />} />
                 <Route path="/admin/security" element={<AdminSecurity />} />

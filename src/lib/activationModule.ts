@@ -3,7 +3,8 @@ import {
   APPLICATION_JOURNEY_STATUSES,
   syncPrimaryApplicationStatus,
 } from "@/lib/applicationStatusFlow";
-import { initializeRelocationCheckpoints } from "@/lib/relocationModule";
+import { initializeRelocationSteps } from "@/lib/relocationModule";
+import type { Track } from "@/lib/track";
 
 export type ActivationStatus =
   | "ready_for_activation"
@@ -44,6 +45,33 @@ export type ActivationRecord = {
   internship_start_date: string | null;
   pre_arrival_completed_at: string | null;
   relocation_completed_at: string | null;
+  final_clearance_date: string | null;
+  planned_arrival_date: string | null;
+  relocation_status:
+    | "relocation_active"
+    | "relocation_at_risk"
+    | "relocation_blocked"
+    | "arrived"
+    | null;
+  arrival_date: string | null;
+  onboarding_status:
+    | "onboarding_active"
+    | "onboarding_flag"
+    | "onboarding_complete"
+    | null;
+  onboarding_completed_at: string | null;
+  followup_status:
+    | "followup_active"
+    | "followup_watch"
+    | "followup_flag"
+    | "followup_complete"
+    | "at_risk_retention"
+    | null;
+  at_risk_retention: boolean;
+  at_risk_retention_at: string | null;
+  followup_completed_at: string | null;
+  internship_completion_issued_at: string | null;
+  internship_completion_doc_path: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -81,34 +109,23 @@ export async function acknowledgePreInternshipPresentation(input: {
   applicationId: string;
   profileId: string;
 }) {
-  const now = new Date().toISOString();
-  const { error } = await supabase
-    .from("activation_records")
-    .update({
-      presentation_acknowledged_at: now,
-      presentation_acknowledged_by: input.profileId,
-      updated_at: now,
-    })
-    .eq("application_id", input.applicationId);
+  // SECURITY DEFINER RPC — candidates cannot UPDATE activation_records via RLS
+  const { error } = await supabase.rpc("acknowledge_pre_internship_presentation", {
+    p_application_id: input.applicationId,
+  });
   if (error) throw error;
-  await refreshInternshipCheckpointUnlocks(input.applicationId);
 }
 
 export async function acceptPreInternship(input: {
   applicationId: string;
   internship_start_date?: string | null;
 }) {
-  const now = new Date().toISOString();
-  const { error } = await supabase
-    .from("activation_records")
-    .update({
-      candidate_accepted_at: now,
-      internship_start_date: input.internship_start_date ?? null,
-      updated_at: now,
-    })
-    .eq("application_id", input.applicationId);
+  // SECURITY DEFINER RPC — candidates cannot UPDATE activation_records via RLS
+  const { error } = await supabase.rpc("accept_pre_internship", {
+    p_application_id: input.applicationId,
+    p_internship_start_date: input.internship_start_date || null,
+  });
   if (error) throw error;
-  await refreshInternshipCheckpointUnlocks(input.applicationId);
 }
 
 export async function unlockAcademicInternship(input: {
@@ -281,6 +298,17 @@ export async function initializeActivationForApplication(
 
   await refreshInternshipCheckpointUnlocks(applicationId);
   await syncAllMentorCheckpoints(applicationId);
+
+  const { data: app } = await supabase
+    .from("applications")
+    .select("track, candidates(track)")
+    .eq("id", applicationId)
+    .maybeSingle();
+  const track =
+    (app?.track as Track | null) ??
+    ((app?.candidates as { track?: Track } | null)?.track ?? "entry");
+  const { refreshMeetingUnlocks } = await import("@/lib/mentorProgram");
+  await refreshMeetingUnlocks(applicationId, track);
 }
 
 export async function refreshInternshipCheckpointUnlocks(applicationId: string) {
@@ -468,6 +496,7 @@ export async function submitFinalClearanceDecision(input: {
   candidateId: string;
   candidateProfileId: string;
   jobTitle: string;
+  companyName?: string | null;
   decision: "clear" | "hold";
   decision_maker_name: string;
   decision_date: string;
@@ -476,6 +505,10 @@ export async function submitFinalClearanceDecision(input: {
   track: "entry" | "fast";
 }) {
   const now = new Date().toISOString();
+  const cms = await fetchActivationCms();
+  const companyName = input.companyName?.trim() || "your company";
+  const vars = { companyName, jobTitle: input.jobTitle };
+
   const { error: decisionErr } = await supabase.from("final_clearance_decisions").upsert(
     {
       application_id: input.applicationId,
@@ -499,9 +532,12 @@ export async function submitFinalClearanceDecision(input: {
   if (recErr) throw recErr;
 
   if (input.decision === "clear") {
+    const clearanceDate = input.decision_date || now.slice(0, 10);
+
+    // Module 5 starts at Final Clearance; Pre-Arrival (M4) runs in parallel
     await syncPrimaryApplicationStatus(
       input.candidateId,
-      APPLICATION_JOURNEY_STATUSES.PRE_ARRIVAL
+      APPLICATION_JOURNEY_STATUSES.RELOCATION
     );
 
     const { data: progress } = await supabase
@@ -534,15 +570,33 @@ export async function submitFinalClearanceDecision(input: {
       });
     }
 
+    const relocationRow = progress?.find((p) => p.stage_id === "relocation");
+    if (relocationRow) {
+      await supabase
+        .from("candidate_stage_progress")
+        .update({ status: "active", started_at: now })
+        .eq("id", relocationRow.id);
+    } else {
+      await supabase.from("candidate_stage_progress").insert({
+        candidate_id: input.candidateId,
+        stage_id: "relocation",
+        status: "active",
+        started_at: now,
+      });
+    }
+
     await supabase.from("notifications").insert({
       user_id: input.candidateProfileId,
       title: "You're moving forward",
-      body: `Final clearance is complete for ${input.jobTitle}. Pre-arrival employment steps are next.`,
+      body: interpolateActivationCms(cms.clearance_cleared, vars),
       type: "clearance_cleared",
       metadata: { applicationId: input.applicationId, jobTitle: input.jobTitle },
     });
 
     await initializePreArrivalCheckpoints(input.applicationId);
+    await initializeRelocationSteps(input.applicationId, {
+      finalClearanceDate: clearanceDate,
+    });
   } else {
     await supabase
       .from("candidates")
@@ -552,7 +606,7 @@ export async function submitFinalClearanceDecision(input: {
     await supabase.from("notifications").insert({
       user_id: input.candidateProfileId,
       title: "Process update",
-      body: `After careful review, we will not be proceeding with the next step for ${input.jobTitle} at this time.`,
+      body: interpolateActivationCms(cms.clearance_hold, vars),
       type: "clearance_hold",
       metadata: { applicationId: input.applicationId, jobTitle: input.jobTitle },
     });
@@ -726,7 +780,14 @@ export async function maybeCompletePreArrivalEmployment(applicationId: string) {
     .select("id, status, candidate_id, jobs(title, companies(name)), candidates(profile_id)")
     .eq("id", applicationId)
     .maybeSingle();
-  if (!app || app.status !== APPLICATION_JOURNEY_STATUSES.PRE_ARRIVAL) return;
+  // Relocation may already be active (started at Final Clearance in parallel)
+  if (
+    !app ||
+    (app.status !== APPLICATION_JOURNEY_STATUSES.PRE_ARRIVAL &&
+      app.status !== APPLICATION_JOURNEY_STATUSES.RELOCATION)
+  ) {
+    return;
+  }
 
   const candidateId = app.candidate_id as string;
   const profileId = (app.candidates as { profile_id?: string } | null)?.profile_id;
@@ -752,14 +813,19 @@ export async function maybeCompletePreArrivalEmployment(applicationId: string) {
       .eq("id", activationRow.id);
   }
 
-  await syncPrimaryApplicationStatus(candidateId, APPLICATION_JOURNEY_STATUSES.RELOCATION);
+  // Keep / ensure relocation status (already set at Clear in the parallel model)
+  if (app.status === APPLICATION_JOURNEY_STATUSES.PRE_ARRIVAL) {
+    await syncPrimaryApplicationStatus(candidateId, APPLICATION_JOURNEY_STATUSES.RELOCATION);
+  }
 
   const relocationRow = progress?.find((p) => p.stage_id === "relocation");
   if (relocationRow) {
-    await supabase
-      .from("candidate_stage_progress")
-      .update({ status: "active", started_at: now })
-      .eq("id", relocationRow.id);
+    if (relocationRow.status !== "active" && relocationRow.status !== "completed") {
+      await supabase
+        .from("candidate_stage_progress")
+        .update({ status: "active", started_at: now })
+        .eq("id", relocationRow.id);
+    }
   } else {
     await supabase.from("candidate_stage_progress").insert({
       candidate_id: candidateId,
@@ -769,13 +835,11 @@ export async function maybeCompletePreArrivalEmployment(applicationId: string) {
     });
   }
 
-  await initializeRelocationCheckpoints(applicationId);
-
   if (profileId) {
     await supabase.from("notifications").insert({
       user_id: profileId,
       title: "Pre-arrival complete",
-      body: `All pre-arrival employment steps are done${companyName ? ` for ${companyName}` : ""}. Relocation is next.`,
+      body: `All pre-arrival employment steps are done${companyName ? ` for ${companyName}` : ""}. Relocation coordination continues.`,
       type: "pre_arrival_complete",
       metadata: { applicationId, jobTitle, companyName },
     });
@@ -786,6 +850,10 @@ export type ActivationCms = {
   clearance_screen_note: string;
   visit_confirmed: string;
   pre_internship_presentation: string;
+  clearance_cleared: string;
+  clearance_hold: string;
+  clearance_company_cleared: string;
+  clearance_company_hold: string;
 };
 
 export const DEFAULT_ACTIVATION_CMS: ActivationCms = {
@@ -796,6 +864,14 @@ export const DEFAULT_ACTIVATION_CMS: ActivationCms = {
   pre_internship_presentation: `Your internship is about to begin. Review the programme expectations below, then confirm your acceptance to unlock internship checkpoints.
 
 You will work remotely with your company mentor through the internship phase, with Nordic Ascent support throughout.`,
+  clearance_cleared:
+    "Congratulations — you've been cleared to move forward. You've completed your internship and come through every stage of the process. {companyName} is ready to take the next step with you toward employment in Norway. We'll be in touch shortly about relocation and onboarding.",
+  clearance_hold:
+    "Thank you for everything you've put into this process. This opportunity will not move forward to employment. That does not take away from what you achieved — your completed internship, and its documentation, remain yours to keep and build on. Decisions at this stage depend on many factors, and we're grateful for your effort. We wish you every success ahead.",
+  clearance_company_cleared:
+    "Clearance recorded. Pre-arrival employment and relocation coordination are now unlocked for this candidate.",
+  clearance_company_hold:
+    "Hold recorded. The candidate has been moved to alumni. Their internship completion document remains available.",
 };
 
 export function interpolateActivationCms(template: string, vars: Record<string, string>) {
@@ -814,7 +890,32 @@ export async function fetchActivationCms(): Promise<ActivationCms> {
     visit_confirmed: cms.visit_confirmed ?? DEFAULT_ACTIVATION_CMS.visit_confirmed,
     pre_internship_presentation:
       cms.pre_internship_presentation ?? DEFAULT_ACTIVATION_CMS.pre_internship_presentation,
+    clearance_cleared: cms.clearance_cleared ?? DEFAULT_ACTIVATION_CMS.clearance_cleared,
+    clearance_hold: cms.clearance_hold ?? DEFAULT_ACTIVATION_CMS.clearance_hold,
+    clearance_company_cleared:
+      cms.clearance_company_cleared ?? DEFAULT_ACTIVATION_CMS.clearance_company_cleared,
+    clearance_company_hold:
+      cms.clearance_company_hold ?? DEFAULT_ACTIVATION_CMS.clearance_company_hold,
   };
+}
+
+export async function updateActivationCms(cms: ActivationCms) {
+  const { data: row, error: readErr } = await supabase
+    .from("platform_settings")
+    .select("settings")
+    .eq("id", "default")
+    .maybeSingle();
+  if (readErr) throw readErr;
+  const settings = (row?.settings as Record<string, unknown> | null) ?? {};
+  const next = {
+    ...settings,
+    activationCms: cms,
+  };
+  const { error } = await supabase
+    .from("platform_settings")
+    .update({ settings: next, updated_at: new Date().toISOString() })
+    .eq("id", "default");
+  if (error) throw error;
 }
 
 export type InPersonVisit = {
@@ -842,13 +943,34 @@ export type AcademicWorkflowStep = {
 };
 
 export const ACADEMIC_WORKFLOW_STEP_DEFS = [
-  { step_number: 1, title: "University notified of internship placement" },
-  { step_number: 2, title: "Academic supervisor identified" },
-  { step_number: 3, title: "Internship learning agreement drafted" },
-  { step_number: 4, title: "University reviews learning agreement" },
-  { step_number: 5, title: "Credit requirements confirmed" },
-  { step_number: 6, title: "Mid-internship academic check-in" },
-  { step_number: 7, title: "Final university sign-off" },
+  {
+    step_number: 1,
+    title: "University + company approve internship project; supervisor assigned",
+  },
+  {
+    step_number: 2,
+    title: "Learning Agreement signed (objectives, hours, credit)",
+  },
+  {
+    step_number: 3,
+    title: "Student logs hours, weekly journal, and deliverables",
+  },
+  {
+    step_number: 4,
+    title: "University supervisor monitors (parallel to mentor)",
+  },
+  {
+    step_number: 5,
+    title: "Student submits final report and presentation",
+  },
+  {
+    step_number: 6,
+    title: "Company academic evaluation sent to university (learning only)",
+  },
+  {
+    step_number: 7,
+    title: "University awards credit and certificate",
+  },
 ];
 
 export function canShowInPersonVisitPanel(input: {
@@ -905,6 +1027,8 @@ export async function completeAcademicWorkflowStep(input: {
   await supabase.rpc("sync_academic_unlock_from_workflow", {
     p_application_id: input.applicationId,
   });
+  // Step 7 may unlock internship_complete when all cps done
+  await refreshInternshipCheckpointUnlocks(input.applicationId);
 }
 
 export async function saveInPersonVisitDraft(input: {

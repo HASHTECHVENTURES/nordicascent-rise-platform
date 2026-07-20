@@ -1,20 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { ArrowRight, Building2, CheckCircle, Loader2 } from "lucide-react";
-import {
-  useStageTasks,
-  useMyTaskProgress,
-  useMyStageProgress,
-  useAdvanceStageIfReady,
-} from "@/hooks/useData";
-import { useAuth } from "@/contexts/AuthContext";
-import { computeStageReadiness } from "@/lib/profileCompleteness";
-import { PIPELINE_STAGES } from "@/lib/pipeline";
-import { getNextStageInTrack, useTrack } from "@/lib/track";
+import { ArrowRight, Building2, Loader2 } from "lucide-react";
+import { useStageTasks } from "@/hooks/useData";
+import { useMyOnboardingContext } from "@/hooks/useModuleOnboarding";
+import OnboardingTrackerPanel from "@/components/onboarding/OnboardingTrackerPanel";
 import { stageTaskPath } from "@/lib/stageRoutes";
 
 const HERO_IMAGE =
@@ -49,35 +41,15 @@ function SafeImage({
 }
 
 export default function OnboardingStageContent() {
-  const [track] = useTrack();
-  const { loading: authLoading } = useAuth();
   const stageId = "onboarding";
-  const { data: tasks, isLoading, isError, refetch } = useStageTasks(stageId);
-  const { data: progress } = useMyTaskProgress();
-  const { data: stageProgress } = useMyStageProgress();
-  const advanceStage = useAdvanceStageIfReady();
-  const syncedRef = useRef(false);
+  const { data: ctx, isLoading: ctxLoading } = useMyOnboardingContext();
+  const { data: tasks, isLoading: tasksLoading } = useStageTasks(stageId);
 
   const taskList = tasks ?? [];
-  const completedIds = new Set(progress?.map((p) => p.task_id) ?? []);
-  const completedCount = taskList.filter((t) => completedIds.has(t.id)).length;
-  const readiness = computeStageReadiness(completedCount, taskList.length);
-  const stageTasksDone = taskList.length > 0 && readiness === 100;
-  const stageStatus = stageProgress?.find((s) => s.stage_id === stageId)?.status ?? "not_started";
-  const nextStageId = getNextStageInTrack(stageId, track);
-  const nextStageMeta = nextStageId ? PIPELINE_STAGES.find((s) => s.id === nextStageId) : null;
+  const onboardingDone =
+    Boolean(ctx?.onboardingCompletedAt) || ctx?.onboardingStatus === "onboarding_complete";
 
-  useEffect(() => {
-    syncedRef.current = false;
-  }, [stageId]);
-
-  useEffect(() => {
-    if (!stageTasksDone || stageStatus === "completed" || syncedRef.current) return;
-    syncedRef.current = true;
-    advanceStage.mutate(stageId);
-  }, [stageId, stageTasksDone, stageStatus, advanceStage]);
-
-  if (authLoading || isLoading) {
+  if (ctxLoading) {
     return (
       <div className="flex justify-center py-20">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -85,23 +57,8 @@ export default function OnboardingStageContent() {
     );
   }
 
-  if (isError) {
-    return (
-      <Card>
-        <CardContent className="py-10 text-center space-y-3">
-          <p className="text-sm text-muted-foreground">
-            Could not load onboarding tasks. Please refresh or try again.
-          </p>
-          <Button size="sm" variant="outline" onClick={() => refetch()}>
-            Retry
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="relative overflow-hidden rounded-2xl border bg-card">
         <SafeImage
           src={taskList[0]?.image_url ?? HERO_IMAGE}
@@ -112,97 +69,89 @@ export default function OnboardingStageContent() {
         <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
           <div className="flex items-center gap-2 mb-2">
             <Building2 className="h-5 w-5" />
-            <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/20">Onboarding</Badge>
+            <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/20">
+              Onboarding
+            </Badge>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-medium">Welcome to your new workplace</h1>
+          <h1 className="text-2xl sm:text-3xl font-medium">Your first weeks in Norway</h1>
           <p className="text-white/85 text-sm mt-1 max-w-xl">
-            Physical arrival and workplace integration — your first weeks in the Nordics.
+            From arrival through workplace integration — Nordic Ascent coordinates; you confirm the
+            practical checklist.
           </p>
+          {ctx?.companyName && ctx?.jobTitle && (
+            <p className="text-white/75 text-sm mt-2">
+              {ctx.companyName} · {ctx.jobTitle}
+            </p>
+          )}
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-muted-foreground">
-          {completedCount} of {taskList.length} tasks completed
-        </p>
-        {stageTasksDone || stageStatus === "completed" ? (
-          <Badge className="bg-success text-success-foreground">Completed</Badge>
-        ) : stageStatus === "active" ? (
-          <Badge className="bg-primary text-primary-foreground">In progress</Badge>
-        ) : (
-          <Badge variant="secondary">Not started</Badge>
-        )}
-      </div>
-
-      <Progress value={readiness} className="h-2" />
-
-      {taskList.length === 0 ? (
+      {ctx?.applicationId ? (
+        <OnboardingTrackerPanel
+          applicationId={ctx.applicationId}
+          applicationStatus={ctx.applicationStatus}
+          familyRelocating={ctx.familyRelocating}
+          role="candidate"
+          canEdit={!onboardingDone}
+          embedded
+        />
+      ) : (
         <Card>
-          <CardContent className="py-10 text-center text-sm text-muted-foreground">
-            Onboarding tasks are being prepared. Check back soon or contact Nordic Ascent in Messages.
+          <CardContent className="py-8 text-sm text-muted-foreground text-center">
+            Onboarding opens once your arrival is confirmed in Relocation.
           </CardContent>
         </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {taskList.map((task) => {
-            const done = completedIds.has(task.id);
-            return (
-              <Card
-                key={task.id}
-                className={`overflow-hidden transition-shadow hover:shadow-md ${
-                  done ? "border-success/30 bg-success/5" : ""
-                }`}
-              >
-                <div className="relative h-40 w-full overflow-hidden">
-                  <SafeImage
-                    src={task.image_url}
-                    alt={task.title}
-                    className="h-full w-full object-cover"
-                    fallbackClassName="bg-gradient-to-br from-muted to-muted-foreground/20"
-                  />
-                  {done && (
-                    <div className="absolute top-3 right-3 rounded-full bg-success text-success-foreground p-1.5">
-                      <CheckCircle className="h-4 w-4" />
-                    </div>
-                  )}
-                </div>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base font-medium leading-snug">{task.title}</CardTitle>
-                  {task.description && (
-                    <p className="text-sm text-muted-foreground font-normal">{task.description}</p>
-                  )}
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <Button size="sm" variant={done ? "outline" : "default"} asChild className="gap-1">
-                    <Link to={stageTaskPath(stageId, task.id)}>
-                      {done ? "Review task" : "Open task"}
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
       )}
 
-      {stageTasksDone && nextStageMeta && (
+      {onboardingDone && (
         <Card className="border-success/30 bg-success/5">
           <CardContent className="pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <p className="font-medium">Onboarding complete</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Continue to {nextStageMeta.name} for your next steps.
+                Continue to Follow-up for ongoing support.
               </p>
             </div>
             <Button asChild className="shrink-0">
-              <Link to={nextStageMeta.href}>
-                Continue to {nextStageMeta.name}
+              <Link to="/candidate/followup">
+                Continue to Follow-up
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </CardContent>
         </Card>
+      )}
+
+      {taskList.length > 0 && (
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-lg font-medium">Onboarding guides</h2>
+            <p className="text-sm text-muted-foreground">Optional reference material.</p>
+          </div>
+          {tasksLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {taskList.map((task) => (
+                <Card key={task.id} className="overflow-hidden">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base font-medium">{task.title}</CardTitle>
+                    {task.description && (
+                      <p className="text-sm text-muted-foreground font-normal">{task.description}</p>
+                    )}
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <Button size="sm" variant="outline" asChild>
+                      <Link to={stageTaskPath(stageId, task.id)}>Read guide</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

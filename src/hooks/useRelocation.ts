@@ -4,75 +4,150 @@ import { useAuth } from "@/contexts/AuthContext";
 import { ADMIN_SELECTION_SELECT } from "@/hooks/useSelection";
 import type { SelectionApplication } from "@/lib/selectionModule";
 import {
-  confirmRelocationCheckpoint,
-  initializeRelocationCheckpoints,
-  refreshRelocationCheckpointUnlocks,
-  type RelocationCheckpoint,
+  fetchRelocationCms,
+  initializeRelocationSteps,
+  refreshRelocationTimeline,
+  updateFamilyRelocating,
+  updatePlannedArrivalDate,
+  updateRelocationCms,
+  updateRelocationStep,
+  uploadRelocationDocument,
+  type RelocationCms,
+  type RelocationStep,
+  type RelocationStepState,
 } from "@/lib/relocationModule";
 
-export function useRelocationCheckpoints(applicationId: string | undefined) {
+export function useRelocationSteps(applicationId: string | undefined) {
   return useQuery({
-    queryKey: ["relocation-checkpoints", applicationId],
+    queryKey: ["relocation-steps", applicationId],
     enabled: Boolean(applicationId),
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("relocation_checkpoints")
+        .from("relocation_steps")
         .select("*")
         .eq("application_id", applicationId!)
-        .order("checkpoint_number");
+        .order("step_number");
       if (error) throw error;
-      return (data ?? []) as RelocationCheckpoint[];
+      return (data ?? []) as RelocationStep[];
     },
   });
 }
+
+/** @deprecated alias */
+export const useRelocationCheckpoints = useRelocationSteps;
 
 export function useEnsureRelocationInitialized(applicationId: string | undefined) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (opts?: { finalClearanceDate?: string | null }) => {
       if (!applicationId) return;
-      await initializeRelocationCheckpoints(applicationId);
+      await initializeRelocationSteps(applicationId, opts);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["relocation-checkpoints", applicationId] });
+      qc.invalidateQueries({ queryKey: ["relocation-steps", applicationId] });
+      qc.invalidateQueries({ queryKey: ["activation-record", applicationId] });
     },
   });
 }
 
-export function useRefreshRelocationCheckpoints(applicationId: string | undefined) {
+export function useRefreshRelocationTimeline(applicationId: string | undefined) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async () => {
       if (!applicationId) return;
-      await refreshRelocationCheckpointUnlocks(applicationId);
+      await refreshRelocationTimeline(applicationId);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["relocation-checkpoints", applicationId] });
+      qc.invalidateQueries({ queryKey: ["relocation-steps", applicationId] });
+      qc.invalidateQueries({ queryKey: ["activation-record", applicationId] });
     },
   });
 }
 
-export function useConfirmRelocationCheckpoint() {
+export function useUpdateRelocationStep() {
   const qc = useQueryClient();
   const { profile } = useAuth();
   return useMutation({
     mutationFn: async (input: {
-      checkpointId: string;
+      stepId: string;
       applicationId: string;
-      event_date: string;
-      notes?: string;
+      state: RelocationStepState;
+      event_date?: string | null;
+      notes?: string | null;
+      address?: string | null;
+      contact_name?: string | null;
+      upload_path?: string | null;
+      file?: File | null;
+      stepNumber?: number;
     }) => {
-      await confirmRelocationCheckpoint({
-        ...input,
-        confirmed_by: profile?.id ?? null,
+      let upload_path = input.upload_path;
+      if (input.file && input.stepNumber) {
+        upload_path = await uploadRelocationDocument(
+          input.applicationId,
+          input.stepNumber,
+          input.file
+        );
+      }
+      await updateRelocationStep({
+        stepId: input.stepId,
+        applicationId: input.applicationId,
+        state: input.state,
+        event_date: input.event_date,
+        notes: input.notes,
+        address: input.address,
+        contact_name: input.contact_name,
+        upload_path,
+        updated_by: profile?.id ?? null,
       });
     },
     onSuccess: (_, vars) => {
-      qc.invalidateQueries({ queryKey: ["relocation-checkpoints", vars.applicationId] });
+      qc.invalidateQueries({ queryKey: ["relocation-steps", vars.applicationId] });
       qc.invalidateQueries({ queryKey: ["activation-record", vars.applicationId] });
       qc.invalidateQueries({ queryKey: ["my-relocation-context"] });
       qc.invalidateQueries({ queryKey: ["employer-relocation-applications"] });
       qc.invalidateQueries({ queryKey: ["admin-relocation-applications"] });
+    },
+  });
+}
+
+export function useUpdatePlannedArrival() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: updatePlannedArrivalDate,
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ["activation-record", vars.applicationId] });
+      qc.invalidateQueries({ queryKey: ["relocation-steps", vars.applicationId] });
+    },
+  });
+}
+
+export function useUpdateFamilyRelocating() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: updateFamilyRelocating,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-relocation-context"] });
+      qc.invalidateQueries({ queryKey: ["admin-relocation-applications"] });
+      qc.invalidateQueries({ queryKey: ["admin-selection-application"] });
+      qc.invalidateQueries({ queryKey: ["relocation-steps"] });
+      qc.invalidateQueries({ queryKey: ["employer-relocation-applications"] });
+    },
+  });
+}
+
+export function useRelocationCms() {
+  return useQuery({
+    queryKey: ["relocation-cms"],
+    queryFn: fetchRelocationCms,
+  });
+}
+
+export function useUpdateRelocationCms() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (cms: RelocationCms) => updateRelocationCms(cms),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["relocation-cms"] });
     },
   });
 }
@@ -85,7 +160,7 @@ export function useMyRelocationContext() {
     queryFn: async () => {
       const { data: candidate } = await supabase
         .from("candidates")
-        .select("id, jobs_unlocked, track")
+        .select("id, jobs_unlocked, track, family_relocating, family_member_count")
         .eq("profile_id", profile!.id)
         .maybeSingle();
       if (!candidate?.jobs_unlocked) return null;
@@ -103,7 +178,9 @@ export function useMyRelocationContext() {
 
       const { data: activation } = await supabase
         .from("activation_records")
-        .select("pre_arrival_completed_at, relocation_completed_at")
+        .select(
+          "pre_arrival_completed_at, relocation_completed_at, final_clearance_date, planned_arrival_date, relocation_status"
+        )
         .eq("application_id", app.id)
         .maybeSingle();
 
@@ -115,6 +192,11 @@ export function useMyRelocationContext() {
         companyName: (app.jobs as { companies?: { name?: string } | null } | null)?.companies?.name,
         preArrivalCompletedAt: activation?.pre_arrival_completed_at as string | null,
         relocationCompletedAt: activation?.relocation_completed_at as string | null,
+        finalClearanceDate: activation?.final_clearance_date as string | null,
+        plannedArrivalDate: activation?.planned_arrival_date as string | null,
+        relocationStatus: activation?.relocation_status as string | null,
+        familyRelocating: Boolean(candidate.family_relocating),
+        familyMemberCount: candidate.family_member_count as number | null,
       };
     },
   });
@@ -137,10 +219,23 @@ export function useEmployerRelocationApplications() {
         .from("applications")
         .select(`${ADMIN_SELECTION_SELECT}, jobs!inner(company_id)`)
         .eq("jobs.company_id", employer.company_id)
-        .in("status", ["relocation", "onboarding"])
+        .in("status", ["relocation", "onboarding", "pre_arrival"])
         .order("applied_at", { ascending: false });
       if (error) throw error;
-      return (data ?? []) as SelectionApplication[];
+      // Only those with clearance / relocation started
+      const apps = (data ?? []) as SelectionApplication[];
+      const withRelocation: SelectionApplication[] = [];
+      for (const app of apps) {
+        const { data: rec } = await supabase
+          .from("activation_records")
+          .select("final_clearance_date")
+          .eq("application_id", app.id)
+          .maybeSingle();
+        if (rec?.final_clearance_date || app.status === "relocation" || app.status === "onboarding") {
+          withRelocation.push(app);
+        }
+      }
+      return withRelocation;
     },
   });
 }
@@ -152,12 +247,24 @@ export function useAdminRelocationApplications() {
       const { data, error } = await supabase
         .from("applications")
         .select(ADMIN_SELECTION_SELECT)
-        .in("status", ["relocation", "onboarding"])
+        .in("status", ["relocation", "onboarding", "pre_arrival"])
         .order("applied_at", { ascending: false });
       if (error) throw error;
-      return (data ?? []) as SelectionApplication[];
+      const apps = (data ?? []) as SelectionApplication[];
+      const withRelocation: SelectionApplication[] = [];
+      for (const app of apps) {
+        const { data: rec } = await supabase
+          .from("activation_records")
+          .select("final_clearance_date")
+          .eq("application_id", app.id)
+          .maybeSingle();
+        if (rec?.final_clearance_date || app.status === "relocation" || app.status === "onboarding") {
+          withRelocation.push(app);
+        }
+      }
+      return withRelocation;
     },
   });
 }
 
-export { initializeRelocationCheckpoints };
+export { initializeRelocationSteps, initializeRelocationSteps as initializeRelocationCheckpoints };

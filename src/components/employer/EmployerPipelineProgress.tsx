@@ -4,10 +4,12 @@ import {
   ClipboardList,
   Users,
   Briefcase,
+  UserCheck,
   Building2,
-  Heart,
   MessageSquare,
   BarChart3,
+  ClipboardCheck,
+  MapPin,
 } from "lucide-react";
 
 const employerStages = [
@@ -15,10 +17,12 @@ const employerStages = [
   { id: 2, name: "Tasks", href: "/employer/tasks", icon: ClipboardList },
   { id: 3, name: "Candidates", href: "/employer/candidates", icon: Users },
   { id: 4, name: "Job Roles", href: "/employer/jobs", icon: Briefcase },
-  { id: 5, name: "Company", href: "/employer/company", icon: Building2 },
-  { id: 6, name: "Mentoring", href: "/employer/mentoring", icon: Heart },
-  { id: 7, name: "Messages", href: "/employer/messages", icon: MessageSquare },
-  { id: 8, name: "Analytics", href: "/employer/analytics", icon: BarChart3 },
+  { id: 5, name: "Selection", href: "/employer/selection", icon: UserCheck },
+  { id: 6, name: "Activation", href: "/employer/activation", icon: ClipboardCheck },
+  { id: 7, name: "Relocation", href: "/employer/relocation", icon: MapPin },
+  { id: 8, name: "Company", href: "/employer/company", icon: Building2 },
+  { id: 9, name: "Messages", href: "/employer/messages", icon: MessageSquare },
+  { id: 10, name: "Analytics", href: "/employer/analytics", icon: BarChart3 },
 ];
 
 const EmployerPipelineProgress = () => {
@@ -28,7 +32,8 @@ const EmployerPipelineProgress = () => {
     <div className="bg-card border-b px-6 py-4 relative z-20">
       <div className="flex items-center justify-between overflow-x-auto">
         {employerStages.map((stage, index) => {
-          const isCurrentPage = location.pathname === stage.href;
+          const isCurrentPage =
+            location.pathname === stage.href || location.pathname.startsWith(`${stage.href}/`);
           return (
             <div key={stage.id} className="flex items-center">
               <Link

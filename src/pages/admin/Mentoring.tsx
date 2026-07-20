@@ -7,18 +7,20 @@ import { resolveProfile } from "@/lib/resolveProfile";
 import { TRACK_META, type Track } from "@/lib/track";
 import { mentorMeetingCountForTrack } from "@/lib/mentorProgram";
 
-export default function AdminMentoring() {
+export default function AdminMentoring({ embedded = false }: { embedded?: boolean }) {
   const { data: applications, isLoading } = useAdminMentoringApplications();
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-medium">Mentoring</h1>
-        <p className="text-muted-foreground">
-          Standard 3+3 programme — Entry track: 3 readiness + 3 activation meetings. Fast track: 3 meetings.
-          Complete observations here. Optional add-on topics per session — custom meetings are not used.
-        </p>
-      </div>
+      {!embedded && (
+        <div>
+          <h1 className="text-2xl font-medium">Mentoring</h1>
+          <p className="text-muted-foreground">
+            Standard 3+3 programme — parallel with Readiness (1–3) and Activation (4–6).
+            Complete observations here. Optional add-on topics per session — custom meetings are not used.
+          </p>
+        </div>
+      )}
 
       <Card>
         <CardContent className="pt-6 space-y-3 text-sm text-muted-foreground">

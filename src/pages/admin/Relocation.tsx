@@ -3,11 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, ChevronRight } from "lucide-react";
 import AdminStageTasks from "./StageTasks";
-import { useAdminRelocationApplications } from "@/hooks/useRelocation";
-import { useRelocationCheckpoints } from "@/hooks/useRelocation";
+import { useAdminRelocationApplications, useRelocationSteps } from "@/hooks/useRelocation";
 import { useActivationRecord } from "@/hooks/useActivation";
 import { resolveProfile } from "@/lib/resolveProfile";
-import { relocationCheckpointProgress } from "@/lib/relocationModule";
+import {
+  relocationStepProgress,
+  rollupStatusLabel,
+  type RelocationRollupStatus,
+} from "@/lib/relocationModule";
 import type { SelectionApplication } from "@/lib/selectionModule";
 import type { Track } from "@/lib/track";
 import { TRACK_META } from "@/lib/track";
@@ -17,9 +20,12 @@ function RelocationAppRow({ app }: { app: SelectionApplication }) {
   const track =
     (app.track as Track | null) ??
     ((app.candidates as { track?: Track } | null)?.track ?? "entry");
-  const { data: checkpoints } = useRelocationCheckpoints(app.id);
+  const familyRelocating = Boolean(
+    (app.candidates as { family_relocating?: boolean } | null)?.family_relocating
+  );
+  const { data: steps } = useRelocationSteps(app.id);
   const { data: record } = useActivationRecord(app.id);
-  const progress = relocationCheckpointProgress(checkpoints ?? []);
+  const progress = relocationStepProgress(steps ?? [], familyRelocating);
 
   return (
     <Link
@@ -33,12 +39,19 @@ function RelocationAppRow({ app }: { app: SelectionApplication }) {
         </p>
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        {record?.relocation_completed_at ? (
-          <Badge className="bg-success text-success-foreground text-xs">Complete</Badge>
+        {record?.relocation_completed_at || record?.relocation_status === "arrived" ? (
+          <Badge className="bg-success text-success-foreground text-xs">Arrived</Badge>
         ) : (
-          <Badge variant="outline" className="text-xs">
-            {progress.done}/{progress.total}
-          </Badge>
+          <>
+            <Badge variant="outline" className="text-xs">
+              {progress.done}/{progress.total}
+            </Badge>
+            {record?.relocation_status && (
+              <Badge variant="secondary" className="text-xs">
+                {rollupStatusLabel(record.relocation_status as RelocationRollupStatus)}
+              </Badge>
+            )}
+          </>
         )}
         <ChevronRight className="h-4 w-4 text-muted-foreground" />
       </div>
@@ -56,14 +69,14 @@ export default function AdminRelocation() {
       <div>
         <h1 className="text-2xl font-medium">Relocation</h1>
         <p className="text-muted-foreground">
-          Module 5 — track visa, housing, travel, and settling-in checkpoints per candidate.
+          Module 5 — parallel coordination tracker from Final Clearance to arrival.
         </p>
       </div>
 
       <Card className="border-primary/20 bg-primary/5">
         <CardContent className="pt-6 text-sm text-muted-foreground">
-          Candidates unlock relocation after pre-arrival employment is complete. Six sequential
-          checkpoints gate progress to onboarding.
+          Relocation starts when Final Clearance is Clear and runs alongside Pre-Arrival. Ten
+          coordination steps track partner work; step 10 (arrival) opens Module 6 onboarding.
         </CardContent>
       </Card>
 
@@ -78,7 +91,7 @@ export default function AdminRelocation() {
             </div>
           ) : list.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No candidates in relocation yet. They appear here after pre-arrival is complete.
+              No candidates in relocation yet. They appear here after Final Clearance is Clear.
             </p>
           ) : (
             <div className="space-y-2">

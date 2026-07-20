@@ -8,8 +8,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, ArrowLeft, Download } from "lucide-react";
+import { Loader2, ArrowLeft, Download, FileText, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
+import { openStoredDocument } from "@/lib/documentAccess";
 import StepDecisionButtons from "@/components/selection/StepDecisionButtons";
 import {
   useAdminSelectionApplication,
@@ -58,6 +60,8 @@ const AdminSelectionApplication = () => {
   const [offeeOpen, setOffeeOpen] = useState("");
   const [offeeDate, setOffeeDate] = useState("");
   const [offeeNotes, setOffeeNotes] = useState("");
+  const [offeeReportPath, setOffeeReportPath] = useState<string | null>(null);
+  const [offeeUploading, setOffeeUploading] = useState(false);
   const [techDigitalDate, setTechDigitalDate] = useState("");
   const [techDigitalNotes, setTechDigitalNotes] = useState("");
   const [techF2fDate, setTechF2fDate] = useState("");
@@ -83,6 +87,7 @@ const AdminSelectionApplication = () => {
     setOffeeOpen(app.offee_open_mindedness_score != null ? String(app.offee_open_mindedness_score) : "");
     setOffeeDate(app.offee_assessed_at ?? "");
     setOffeeNotes(app.offee_notes ?? "");
+    setOffeeReportPath(app.offee_report_path ?? null);
     setTechDigitalDate(app.technical_digital_date ?? "");
     setTechDigitalNotes(app.technical_digital_notes ?? "");
     setTechF2fDate(app.technical_f2f_date ?? "");
@@ -119,6 +124,7 @@ const AdminSelectionApplication = () => {
           offee_open_mindedness_score: offeeOpen ? Number(offeeOpen) : null,
           offee_assessed_at: offeeDate || null,
           offee_notes: offeeNotes.trim() || null,
+          offee_report_path: offeeReportPath,
         };
       }
       if (step === 3) {
@@ -255,8 +261,16 @@ const AdminSelectionApplication = () => {
 
       {/* Step 1 — Eligibility */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Step 1 — Eligibility</CardTitle>
+        <CardHeader className="flex flex-row items-start justify-between gap-3">
+          <div>
+            <CardTitle className="text-lg">Step 1 — Eligibility</CardTitle>
+            <p className="text-xs text-muted-foreground mt-1">
+              Review auto-checks and documents. Open the full profile for skills, experience, and CV detail.
+            </p>
+          </div>
+          <Button variant="outline" size="sm" asChild>
+            <Link to={`/admin/candidates/${app.candidate_id}`}>Open candidate profile</Link>
+          </Button>
         </CardHeader>
         <CardContent className="space-y-4">
           {checks && (
@@ -329,6 +343,91 @@ const AdminSelectionApplication = () => {
               <Label>Assessment date</Label>
               <Input type="date" value={offeeDate} onChange={(e) => setOffeeDate(e.target.value)} />
             </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Full Offee test report (PDF)</Label>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-1"
+                disabled={offeeUploading}
+                onClick={() => document.getElementById("offee-report-input")?.click()}
+              >
+                {offeeUploading ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Upload className="h-3.5 w-3.5" />
+                )}
+                {offeeReportPath ? "Replace report" : "Upload report"}
+              </Button>
+              <input
+                id="offee-report-input"
+                type="file"
+                accept="application/pdf,.pdf"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = "";
+                  if (!file || !app) return;
+                  if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+                    toast({ title: "PDF required", variant: "destructive" });
+                    return;
+                  }
+                  setOffeeUploading(true);
+                  try {
+                    const path = `offee-reports/${app.id}/${Date.now()}-${file.name.replace(/[^\w.\-]+/g, "_")}`;
+                    const { error: upErr } = await supabase.storage
+                      .from("documents")
+                      .upload(path, file, { contentType: "application/pdf", upsert: false });
+                    if (upErr) throw upErr;
+                    const { error: dbErr } = await supabase
+                      .from("applications")
+                      .update({ offee_report_path: path, updated_at: new Date().toISOString() })
+                      .eq("id", app.id);
+                    if (dbErr) throw dbErr;
+                    setOffeeReportPath(path);
+                    toast({ title: "Offee report uploaded" });
+                  } catch (err) {
+                    toast({
+                      title: "Upload failed",
+                      description: err instanceof Error ? err.message : "Try again",
+                      variant: "destructive",
+                    });
+                  } finally {
+                    setOffeeUploading(false);
+                  }
+                }}
+              />
+              {offeeReportPath && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="gap-1"
+                  onClick={async () => {
+                    try {
+                      await openStoredDocument(offeeReportPath);
+                    } catch (err) {
+                      toast({
+                        title: "Could not open report",
+                        description: err instanceof Error ? err.message : "Try again",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                  View report
+                </Button>
+              )}
+            </div>
+            {!offeeReportPath && (
+              <p className="text-xs text-muted-foreground">
+                Upload the full Offee score document. Key scores above stay visible on Final Clearance.
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label>Notes (admin only)</Label>

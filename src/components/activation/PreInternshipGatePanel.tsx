@@ -26,6 +26,7 @@ type Props = {
   companyName?: string | null;
   jobTitle?: string | null;
   canAdmin?: boolean;
+  canEmployer?: boolean;
   canCandidate?: boolean;
 };
 
@@ -34,6 +35,7 @@ export default function PreInternshipGatePanel({
   companyName,
   jobTitle,
   canAdmin = false,
+  canEmployer = false,
   canCandidate = false,
 }: Props) {
   const { toast } = useToast();
@@ -218,6 +220,7 @@ export default function PreInternshipGatePanel({
               applicationId={applicationId}
               creditRequired={record.university_credit_required}
               canAdmin={canAdmin}
+              canEdit={canAdmin || canEmployer}
             />
             {canAdmin && !record.academic_unlocked_at && (
               <Button
@@ -228,7 +231,7 @@ export default function PreInternshipGatePanel({
                 onClick={async () => {
                   try {
                     await unlockAcademic.mutateAsync({ applicationId });
-                    toast({ title: "Academic lock overridden" });
+                    toast({ title: "Emergency unlock applied" });
                   } catch (err) {
                     toast({
                       title: "Could not unlock",
@@ -241,9 +244,14 @@ export default function PreInternshipGatePanel({
                 {unlockAcademic.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  "Override — unlock without workflow"
+                  "Emergency override — unlock without step 1"
                 )}
               </Button>
+            )}
+            {canAdmin && !record.academic_unlocked_at && (
+              <p className="text-xs text-muted-foreground">
+                Prefer completing step 1. Override only if the university process is blocked.
+              </p>
             )}
             {record.academic_unlocked_at && (
               <p className="text-xs text-muted-foreground flex items-center gap-1">
@@ -252,9 +260,15 @@ export default function PreInternshipGatePanel({
                 {new Date(record.academic_unlocked_at).toLocaleDateString()}
               </p>
             )}
-            {!canAdmin && !record.academic_unlocked_at && (
+            {!canAdmin && !canEmployer && !record.academic_unlocked_at && (
               <p className="text-xs text-muted-foreground">
-                Waiting for admin to complete the university academic workflow.
+                Waiting for academic step 1 (project approval + supervisor). That unlocks internship
+                start. Hiring decisions are never shared with the university.
+              </p>
+            )}
+            {(canAdmin || canEmployer) && !record.academic_unlocked_at && !canAdmin && (
+              <p className="text-xs text-muted-foreground">
+                Complete academic step 1 with the university to unlock internship start.
               </p>
             )}
           </div>

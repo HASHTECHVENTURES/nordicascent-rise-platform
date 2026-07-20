@@ -104,7 +104,8 @@ export function countReadinessAreasSubmitted(
 export function computeNextMeetingUnlocks(
   meetings: MentorProgramMeeting[],
   track: Track | null | undefined,
-  readinessAreasSubmitted: number
+  readinessAreasSubmitted: number,
+  activationUnlocked = false
 ): { id: string; status: MentorMeetingStatus }[] {
   const byNum = new Map(meetings.map((m) => [m.meeting_number, m]));
   const updates: { id: string; status: MentorMeetingStatus }[] = [];
@@ -122,11 +123,12 @@ export function computeNextMeetingUnlocks(
     } else if (m.meeting_number === 3) {
       shouldBeAvailable = isCompleted(2);
     } else if (m.meeting_number === 4) {
-      shouldBeAvailable = track === "entry" && isCompleted(3);
+      shouldBeAvailable =
+        track === "entry" && isCompleted(3) && activationUnlocked;
     } else if (m.meeting_number === 5) {
-      shouldBeAvailable = track === "entry" && isCompleted(4);
+      shouldBeAvailable = track === "entry" && isCompleted(4) && activationUnlocked;
     } else if (m.meeting_number === 6) {
-      shouldBeAvailable = track === "entry" && isCompleted(5);
+      shouldBeAvailable = track === "entry" && isCompleted(5) && activationUnlocked;
     }
 
     if (m.meeting_number > 3 && track === "fast") {
@@ -147,10 +149,17 @@ export function computeNextMeetingUnlocks(
 export function getMeetingLockedReason(
   meetingNumber: number,
   meetings: MentorProgramMeeting[],
-  readinessAreasSubmitted: number
+  readinessAreasSubmitted: number,
+  activationUnlocked = false
 ): string {
   const byNum = new Map(meetings.map((m) => [m.meeting_number, m]));
   const isCompleted = (n: number) => byNum.get(n)?.status === "completed";
+
+  if (meetingNumber >= 4) {
+    if (!activationUnlocked) {
+      return "Unlocks when the candidate is accepted into Activation";
+    }
+  }
 
   if (meetingNumber === 2) {
     if (!isCompleted(1)) return "Complete Meeting 1 first";
@@ -201,10 +210,18 @@ export async function refreshMeetingUnlocks(
     readinessAreas = countReadinessAreasSubmitted(attempts ?? []);
   }
 
+  const { data: activation } = await supabase
+    .from("activation_records")
+    .select("application_id")
+    .eq("application_id", applicationId)
+    .maybeSingle();
+  const activationUnlocked = Boolean(activation?.application_id);
+
   const updates = computeNextMeetingUnlocks(
     (meetings ?? []) as MentorProgramMeeting[],
     track,
-    readinessAreas
+    readinessAreas,
+    activationUnlocked
   );
 
   const now = new Date().toISOString();

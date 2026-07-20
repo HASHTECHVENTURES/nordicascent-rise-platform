@@ -41,12 +41,13 @@ export default function AdminActivation() {
 
       <Card className="border-primary/20 bg-primary/5">
         <CardContent className="pt-6 text-sm text-muted-foreground">
-          Mentor programme (3+3) is in{" "}
-          <Link to="/admin/mentoring" className="text-primary font-medium hover:underline">
-            Mentoring
-          </Link>
-          . After readiness + mentoring, unlock activation below. Entry track candidates get 7
-          internship checkpoints (M4–M6 auto-sync from mentoring).
+          Mentoring runs parallel inside{" "}
+          <Link to="/admin/readiness" className="text-primary font-medium hover:underline">
+            Readiness
+          </Link>{" "}
+          (meetings 1–3) and Activation (meetings 4–6). After readiness is complete, unlock
+          activation below. Entry track candidates get 7 internship checkpoints (M4–M6 auto-sync
+          from mentoring).
         </CardContent>
       </Card>
 

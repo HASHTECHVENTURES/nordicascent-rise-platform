@@ -1,42 +1,16 @@
-import { Link } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useMyReadinessAttempts, useReadinessTests } from "@/hooks/useReadiness";
 import { useMyApplications } from "@/hooks/useData";
-import { allTestsSubmitted } from "@/lib/readiness";
 import { canAccessMentoring } from "@/lib/candidateJourney";
+import { isJobsUnlocked } from "@/lib/candidateJourney";
 import { Loader2 } from "lucide-react";
-import MentorAssignedBanner from "@/components/mentor/MentorAssignedBanner";
-import { useMyMentorProgramContext } from "@/hooks/useMentorProgram";
 
-const CandidateMentoring = () => {
+/** Mentoring is parallel inside Readiness / Activation — keep route as a soft redirect. */
+export default function CandidateMentoring() {
   const { profile, candidate } = useAuth();
-  const { data: tests } = useReadinessTests();
-  const { data: attempts } = useMyReadinessAttempts();
-  const { data: applications } = useMyApplications();
-  const mentorCtx = useMyMentorProgramContext();
+  const { data: applications, isLoading } = useMyApplications();
 
-  const submitted = tests && attempts ? allTestsSubmitted(tests, attempts) : false;
-  const mentoringOpen = canAccessMentoring(profile, candidate, submitted, applications ?? []);
-
-  if (!mentoringOpen) {
-    return (
-      <div className="space-y-6 max-w-lg">
-        <h1 className="text-2xl font-medium">Mentoring</h1>
-        <Card>
-          <CardContent className="pt-6 space-y-3">
-            <p className="text-sm text-muted-foreground">Complete Readiness first.</p>
-            <Button size="sm" asChild>
-              <Link to="/candidate/readiness">Go to Readiness</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (mentorCtx.isLoading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center py-20">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -44,33 +18,14 @@ const CandidateMentoring = () => {
     );
   }
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-medium">Mentoring</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Your company mentor follows a standard 3+3 programme. You see progress only — not mentor notes.
-        </p>
-      </div>
+  const mentoringOpen = canAccessMentoring(profile, candidate, false, applications ?? []);
+  if (!mentoringOpen) {
+    return <Navigate to="/candidate/readiness" replace />;
+  }
 
-      {mentorCtx.mentor ? (
-        <MentorAssignedBanner
-          mentor={mentorCtx.mentor}
-          company={mentorCtx.company}
-          meetings={mentorCtx.meetings}
-          track={mentorCtx.track}
-        />
-      ) : (
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">
-              Your mentor will appear here once assigned.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
-};
+  if (isJobsUnlocked(candidate)) {
+    return <Navigate to="/candidate/activation" replace />;
+  }
 
-export default CandidateMentoring;
+  return <Navigate to="/candidate/readiness" replace />;
+}

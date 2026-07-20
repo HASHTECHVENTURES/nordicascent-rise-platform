@@ -3,15 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { useEmployerSelectionApplication } from "@/hooks/useSelection";
-import RelocationCheckpointsPanel from "@/components/relocation/RelocationCheckpointsPanel";
-import { useActivationRecord } from "@/hooks/useActivation";
+import RelocationStepsPanel from "@/components/relocation/RelocationStepsPanel";
 import { selectionStatusLabel } from "@/lib/selectionModule";
 import { resolveProfile } from "@/lib/resolveProfile";
 
 export default function EmployerRelocationApplication() {
   const { applicationId } = useParams<{ applicationId: string }>();
-  const { data: app, isLoading, isError, error } = useEmployerSelectionApplication(applicationId);
-  const { data: activationRecord } = useActivationRecord(applicationId);
+  const { data: app, isLoading, isError } = useEmployerSelectionApplication(applicationId);
 
   if (isLoading) {
     return (
@@ -51,10 +49,12 @@ export default function EmployerRelocationApplication() {
         </div>
       </div>
 
-      <RelocationCheckpointsPanel
+      <RelocationStepsPanel
         applicationId={app.id}
         applicationStatus={app.status}
-        canConfirmCompany={!activationRecord?.relocation_completed_at}
+        role="company"
+        canEdit={false}
+        familyRelocating={false}
       />
     </div>
   );

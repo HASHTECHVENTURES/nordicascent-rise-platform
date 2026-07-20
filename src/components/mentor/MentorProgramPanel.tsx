@@ -23,6 +23,7 @@ import { getMeetingLockedReason, isMentorMeetingOverdue } from "@/lib/mentorProg
 import type { MentorMeetingObservation, MentorProgramMeeting } from "@/lib/mentorProgram";
 import type { Track } from "@/lib/track";
 import MentorMeetingDots from "@/components/mentor/MentorMeetingDots";
+import { useActivationRecord } from "@/hooks/useActivation";
 
 type Props = {
   applicationId: string;
@@ -52,6 +53,8 @@ export default function MentorProgramPanel({
   const { data: themes } = useMentorMeetingThemes();
   const { data: meetings, isLoading, refetch } = useMentorProgramMeetings(applicationId);
   const { data: readinessAreas = 0 } = useReadinessAreasForApplication(applicationId);
+  const { data: activationRecord } = useActivationRecord(applicationId);
+  const activationUnlocked = Boolean(activationRecord);
   const { data: signalNote } = useMentorSignalNote(applicationId);
   const { data: activationNote } = useMentorActivationNote(applicationId);
   const saveObservation = useSaveMentorObservation();
@@ -122,7 +125,7 @@ export default function MentorProgramPanel({
   const activationMeetings = meetingList.filter((m) => m.phase === "activation" && m.status !== "not_applicable");
 
   const lockedReason = (meetingNumber: number) =>
-    getMeetingLockedReason(meetingNumber, meetingList, readinessAreas);
+    getMeetingLockedReason(meetingNumber, meetingList, readinessAreas, activationUnlocked);
 
   const openMeetingForm = (n: number) => {
     const m = meetingList.find((x) => x.meeting_number === n);
@@ -439,7 +442,7 @@ export default function MentorProgramPanel({
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Activation note (after Meeting 6)</CardTitle>
-            <p className="text-sm text-muted-foreground">Feeds into the final Go/No-Go decision.</p>
+            <p className="text-sm text-muted-foreground">Feeds into the Final Clearance check.</p>
           </CardHeader>
           <CardContent className="space-y-3">
             {canEditSummaryNotes && meeting6Done ? (

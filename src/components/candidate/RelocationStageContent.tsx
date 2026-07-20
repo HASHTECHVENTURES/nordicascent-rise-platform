@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Loader2, MapPin } from "lucide-react";
 import { useStageTasks } from "@/hooks/useData";
 import { useMyRelocationContext } from "@/hooks/useRelocation";
-import RelocationCheckpointsPanel from "@/components/relocation/RelocationCheckpointsPanel";
+import RelocationStepsPanel from "@/components/relocation/RelocationStepsPanel";
 import { stageTaskPath } from "@/lib/stageRoutes";
 
 const HERO_IMAGE =
@@ -46,7 +46,7 @@ export default function RelocationStageContent() {
   const { data: tasks, isLoading: tasksLoading, isError, refetch } = useStageTasks(stageId);
 
   const taskList = tasks ?? [];
-  const relocationDone = Boolean(ctx?.relocationCompletedAt);
+  const relocationDone = Boolean(ctx?.relocationCompletedAt) || ctx?.relocationStatus === "arrived";
 
   if (ctxLoading) {
     return (
@@ -74,8 +74,8 @@ export default function RelocationStageContent() {
           </div>
           <h1 className="text-2xl sm:text-3xl font-medium">Your move to the Nordics</h1>
           <p className="text-white/85 text-sm mt-1 max-w-xl">
-            Complete relocation checkpoints, then use the guides below for visa, housing, and
-            settling in.
+            Nordic Ascent coordinates your relocation with partners. Follow progress below and use
+            the guides for practical next steps.
           </p>
           {ctx?.companyName && ctx?.jobTitle && (
             <p className="text-white/75 text-sm mt-2">
@@ -85,17 +85,19 @@ export default function RelocationStageContent() {
         </div>
       </div>
 
-      {ctx?.applicationId ? (
-        <RelocationCheckpointsPanel
+      {ctx?.applicationId && ctx.finalClearanceDate ? (
+        <RelocationStepsPanel
           applicationId={ctx.applicationId}
           applicationStatus={ctx.applicationStatus}
-          canConfirmCandidate={!relocationDone}
+          familyRelocating={ctx.familyRelocating}
+          familyMemberCount={ctx.familyMemberCount}
+          role="candidate"
           embedded
         />
       ) : (
         <Card>
           <CardContent className="py-8 text-sm text-muted-foreground text-center">
-            Relocation checkpoints appear once pre-arrival employment is complete.
+            Relocation progress appears once Final Clearance is Clear.
           </CardContent>
         </Card>
       )}
@@ -104,8 +106,10 @@ export default function RelocationStageContent() {
         <Card className="border-success/30 bg-success/5">
           <CardContent className="pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <p className="font-medium">Relocation complete</p>
-              <p className="text-sm text-muted-foreground mt-1">Continue to Onboarding for your next steps.</p>
+              <p className="font-medium">You have arrived</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Continue to Onboarding for your next steps.
+              </p>
             </div>
             <Button asChild className="shrink-0">
               <Link to="/candidate/onboarding">
@@ -121,7 +125,7 @@ export default function RelocationStageContent() {
         <div>
           <h2 className="text-lg font-medium">Relocation guides</h2>
           <p className="text-sm text-muted-foreground">
-            Reference material from Nordic Ascent — checkpoints above track your official progress.
+            Reference material from Nordic Ascent — progress above tracks official coordination.
           </p>
         </div>
 

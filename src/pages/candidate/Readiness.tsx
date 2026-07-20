@@ -27,24 +27,18 @@ export default function CandidateReadiness() {
     tests && tests.length > 0 && attempts ? allTestsSubmitted(tests, attempts) : false;
 
   useEffect(() => {
-    if (loading || applicationsLoading) return;
     if (ready) {
-      if (submitted && candidate?.jobs_unlocked) {
-        navigate("/candidate/mentoring", { replace: true });
-        return;
-      }
       if (candidate?.id && !hasSeenReadinessIntro(candidate.id)) {
         navigate("/candidate/readiness/intro", { replace: true });
       }
       return;
     }
+    if (loading || applicationsLoading) return;
     if (isPreparationComplete(profile, candidate)) {
       navigate("/candidate/jobs", { replace: true });
     }
   }, [
     ready,
-    submitted,
-    candidate?.jobs_unlocked,
     candidate?.id,
     profile,
     candidate,
@@ -58,14 +52,6 @@ export default function CandidateReadiness() {
     applicationsLoading ||
     (!ready && isPreparationComplete(profile, candidate))
   ) {
-    return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (ready && submitted) {
     return (
       <div className="flex justify-center py-20">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -125,7 +111,12 @@ export default function CandidateReadiness() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-medium">Readiness</h1>
+      <div>
+        <h1 className="text-2xl font-medium">Readiness</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Complete the timed tests. Mentor meetings 1–3 run in parallel.
+        </p>
+      </div>
       {mentorCtx.mentor && (
         <MentorAssignedBanner
           mentor={mentorCtx.mentor}
@@ -134,7 +125,22 @@ export default function CandidateReadiness() {
           track={mentorCtx.track}
         />
       )}
-      <ReadinessModuleHub hideHeader />
+      {submitted ? (
+        <Card>
+          <CardContent className="pt-6 space-y-3">
+            <p className="text-sm text-muted-foreground">
+              All Readiness tests are submitted. Continue mentor meetings here, then move to Activation when unlocked.
+            </p>
+            {candidate?.jobs_unlocked && (
+              <Button size="sm" asChild>
+                <Link to="/candidate/activation">Go to Activation</Link>
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <ReadinessModuleHub hideHeader />
+      )}
     </div>
   );
 }

@@ -24,7 +24,7 @@ export const ADMIN_SELECTION_SELECT = `
   jobs(id, title, positions_count, target_track, company_id, core_skills, engineering_discipline, experience_level, requirements, companies(id, name)),
   candidates(
     id, profile_id, full_name, track, university_id, university_waitlist_name,
-    gpa_or_standing, field_of_study, cv_url,
+    gpa_or_standing, field_of_study, cv_url, family_relocating, family_member_count,
     profiles(full_name, email, phone, avatar_url)
   )
 `;

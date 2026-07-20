@@ -47,6 +47,7 @@ export default function FinalClearancePanel({
   const candidateId = application.candidate_id;
   const profile = resolveProfile(application.candidates?.profiles);
   const jobTitle = application.jobs?.title ?? "this role";
+  const companyName = application.jobs?.companies?.name ?? null;
 
   const { data: record } = useActivationRecord(applicationId);
   const { data: existing } = useFinalClearanceDecision(applicationId);
@@ -100,6 +101,7 @@ export default function FinalClearancePanel({
         candidateId,
         candidateProfileId: profileId,
         jobTitle,
+        companyName,
         track,
         decision,
         decision_maker_name: decisionMaker,
@@ -110,8 +112,8 @@ export default function FinalClearancePanel({
         title: decision === "clear" ? "Candidate cleared" : "Decision recorded",
         description:
           decision === "clear"
-            ? "Pre-arrival employment is now unlocked."
-            : "The candidate has been notified.",
+            ? cms?.clearance_company_cleared
+            : cms?.clearance_company_hold,
       });
       setDecision("");
     } catch (err) {

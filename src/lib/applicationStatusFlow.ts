@@ -42,7 +42,7 @@ export function applicationJourneyStatusLabel(status: string) {
     case APPLICATION_JOURNEY_STATUSES.INTERNSHIP:
       return "Internship";
     case APPLICATION_JOURNEY_STATUSES.GO_NO_GO:
-      return "Go / No-Go";
+      return "Final Clearance";
     case APPLICATION_JOURNEY_STATUSES.PRE_ARRIVAL:
       return "Pre-arrival";
     case APPLICATION_JOURNEY_STATUSES.RELOCATION:

@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, Briefcase, Clock, CheckCircle, Loader2, Plus, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { PIPELINE_STAGES } from "@/lib/pipeline";
+import { PIPELINE_STAGES, normalizePipelineStageId } from "@/lib/pipeline";
 import { useEmployerApplications, useEmployerJobs, useEmployerTasks } from "@/hooks/useData";
 
 const EmployerDashboard = () => {
@@ -15,7 +15,7 @@ const EmployerDashboard = () => {
     const map: Record<string, number> = {};
     PIPELINE_STAGES.forEach((s) => { map[s.id] = 0; });
     (applications ?? []).forEach((app) => {
-      const stage = app.stage_id ?? "preparation";
+      const stage = normalizePipelineStageId(app.stage_id);
       map[stage] = (map[stage] ?? 0) + 1;
     });
     return map;

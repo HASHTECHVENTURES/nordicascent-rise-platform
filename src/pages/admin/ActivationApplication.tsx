@@ -4,10 +4,13 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { useAdminSelectionApplication } from "@/hooks/useSelection";
 import InternshipCheckpointsPanel from "@/components/activation/InternshipCheckpointsPanel";
+import InternshipCompletionDiploma from "@/components/activation/InternshipCompletionDiploma";
 import PreInternshipGatePanel from "@/components/activation/PreInternshipGatePanel";
 import PreArrivalCheckpointsPanel from "@/components/activation/PreArrivalCheckpointsPanel";
 import InPersonVisitPanel from "@/components/activation/InPersonVisitPanel";
 import FinalClearancePanel from "@/components/activation/FinalClearancePanel";
+import MentorProgramPanel from "@/components/mentor/MentorProgramPanel";
+import MentorCompanyNotesPanel from "@/components/mentor/MentorCompanyNotesPanel";
 import { useActivationRecord } from "@/hooks/useActivation";
 import type { Track } from "@/lib/track";
 import { selectionStatusLabel } from "@/lib/selectionModule";
@@ -72,8 +75,24 @@ export default function AdminActivationApplication() {
             canAdmin
           />
           <InternshipCheckpointsPanel applicationId={app.id} canEdit showStatus />
+          <InternshipCompletionDiploma
+            applicationId={app.id}
+            candidateName={profile?.full_name}
+            companyName={app.jobs?.companies?.name}
+            jobTitle={app.jobs?.title}
+            canDownload
+          />
         </>
       )}
+
+      <div className="space-y-2">
+        <h2 className="text-lg font-medium">Mentor programme (parallel)</h2>
+        <p className="text-sm text-muted-foreground">
+          Meetings 1–3 during Readiness; meetings 4–6 unlock with Activation (Entry track).
+        </p>
+        <MentorProgramPanel applicationId={app.id} track={track} canEdit showObservations />
+        <MentorCompanyNotesPanel applicationId={app.id} track={track} />
+      </div>
 
       <InPersonVisitPanel
         applicationId={app.id}

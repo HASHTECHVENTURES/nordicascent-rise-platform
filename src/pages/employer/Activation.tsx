@@ -83,7 +83,7 @@ export default function EmployerActivation() {
         <CardContent>
           {list.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No candidates in activation yet. Admin unlocks activation after Readiness and mentoring.
+              No candidates in activation yet. Admin unlocks activation after Readiness.
             </p>
           ) : (
             <div className="space-y-2">

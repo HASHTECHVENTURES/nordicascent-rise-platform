@@ -66,7 +66,7 @@ export default function MentorCompanyNotesPanel({ applicationId, track }: Props)
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Activation note (after Meeting 6)</CardTitle>
-            <p className="text-sm text-muted-foreground">Feeds into the final Go/No-Go decision.</p>
+            <p className="text-sm text-muted-foreground">Feeds into the Final Clearance check.</p>
           </CardHeader>
           <CardContent className="text-sm space-y-2">
             {activationNote ? (

@@ -1,84 +1,210 @@
 import { supabase } from "@/lib/supabase";
-import {
-  APPLICATION_JOURNEY_STATUSES,
-  syncPrimaryApplicationStatus,
-} from "@/lib/applicationStatusFlow";
+import { APPLICATION_JOURNEY_STATUSES } from "@/lib/applicationStatusFlow";
 
-export type RelocationCheckpointStatus = "locked" | "available" | "completed";
+export type RelocationStepState = "on_track" | "at_risk" | "blocked" | "done";
+export type RelocationOwnerLayer =
+  | "nordic_ascent"
+  | "relocation_partner"
+  | "language_partner"
+  | "real_estate"
+  | "none";
 
-export type RelocationCheckpoint = {
+export type RelocationRollupStatus =
+  | "relocation_active"
+  | "relocation_at_risk"
+  | "relocation_blocked"
+  | "arrived";
+
+export type RelocationStep = {
   id: string;
   application_id: string;
-  checkpoint_number: number;
+  step_number: number;
   title: string;
-  who_confirms: "company" | "candidate";
-  status: RelocationCheckpointStatus;
+  owner_layer: RelocationOwnerLayer;
+  state: RelocationStepState;
   event_date: string | null;
   notes: string | null;
-  confirmed_by: string | null;
+  upload_path: string | null;
+  address: string | null;
+  contact_name: string | null;
+  target_due_date: string | null;
   completed_at: string | null;
+  updated_by: string | null;
   created_at?: string;
   updated_at?: string;
 };
 
-export const RELOCATION_CHECKPOINT_DEFS = [
+export const RELOCATION_STEP_DEFS = [
   {
-    checkpoint_number: 1,
-    title: "Visa & documentation complete",
-    who_confirms: "candidate" as const,
-    hint: "Work permit approved and any visa steps finished.",
+    step_number: 1,
+    title: "Contract signed, process initiated",
+    owner_layer: "nordic_ascent" as const,
+    hint: "Employment contract signed; relocation coordination started.",
+    allowsUpload: true,
+    uploadLabel: "Signed contract",
   },
   {
-    checkpoint_number: 2,
-    title: "Housing secured",
-    who_confirms: "candidate" as const,
-    hint: "Temporary or permanent accommodation booked.",
+    step_number: 2,
+    title: "Visa / immigration",
+    owner_layer: "relocation_partner" as const,
+    hint: "Work permit and visa steps with the relocation partner.",
+  },
+  {
+    step_number: 3,
+    title: "Norwegian A1 begins",
+    owner_layer: "language_partner" as const,
+    hint: "Language course starts within two weeks of clearance.",
+  },
+  {
+    step_number: 4,
+    title: "Pre-arrival preparation",
+    owner_layer: "relocation_partner" as const,
+    hint: "Partner-led prep running in parallel with visa and A1.",
+  },
+  {
+    step_number: 5,
+    title: "Housing",
+    owner_layer: "real_estate" as const,
+    hint: "Accommodation arranged 4–8 weeks before arrival.",
+    addressField: true,
+  },
+  {
+    step_number: 6,
+    title: "Admin setup (D-number, tax, bank)",
+    owner_layer: "relocation_partner" as const,
+    hint: "Administrative setup around arrival.",
+  },
+  {
+    step_number: 7,
+    title: "Family support",
+    owner_layer: "nordic_ascent" as const,
+    hint: "Family relocation support — only when family is relocating.",
+    familyOnly: true,
     notesRequired: true,
-    notesLabel: "Address / housing details",
+    notesLabel: "Family support needs",
   },
   {
-    checkpoint_number: 3,
-    title: "Travel booked",
-    who_confirms: "candidate" as const,
-    hint: "Flights or travel to the Nordics arranged.",
+    step_number: 8,
+    title: "Buddy (INDONORD)",
+    owner_layer: "nordic_ascent" as const,
+    hint: "Local buddy match 2–3 weeks before arrival.",
+    contactField: true,
+    contactLabel: "Buddy name / contact",
   },
   {
-    checkpoint_number: 4,
+    step_number: 9,
+    title: "Final prep + employer toolkit",
+    owner_layer: "nordic_ascent" as const,
+    hint: "Arrival guide and employer onboarding toolkit 1–2 weeks before.",
+    toolkitVisible: true,
+  },
+  {
+    step_number: 10,
     title: "Arrival confirmed",
-    who_confirms: "candidate" as const,
-    hint: "Confirm your arrival date in the Nordics.",
+    owner_layer: "none" as const,
+    hint: "Confirm arrival day — opens Module 6 onboarding.",
   },
-  {
-    checkpoint_number: 5,
-    title: "Settling-in essentials",
-    who_confirms: "candidate" as const,
-    hint: "Bank account, SIM, and local registration as needed.",
-    notesRequired: true,
-    notesLabel: "What you completed (bank, SIM, registration…)",
-  },
-  {
-    checkpoint_number: 6,
-    title: "Employer relocation support confirmed",
-    who_confirms: "company" as const,
-    hint: "Company confirms relocation support was provided (housing leads, travel, welcome pack, etc.).",
-  },
-];
+] as const;
 
-export function relocationCheckpointProgress(checkpoints: RelocationCheckpoint[]) {
-  const done = checkpoints.filter((c) => c.status === "completed").length;
-  return { done, total: 6, percent: Math.round((done / 6) * 100) };
+export type RelocationCms = {
+  step_1: string;
+  step_2: string;
+  step_3: string;
+  step_4: string;
+  step_5: string;
+  step_6: string;
+  step_7: string;
+  step_8: string;
+  step_9: string;
+  step_10: string;
+};
+
+export const DEFAULT_RELOCATION_CMS: RelocationCms = {
+  step_1: "Your employment contract is signed and relocation coordination has started.",
+  step_2: "Your visa and immigration process is underway with our relocation partner.",
+  step_3: "Your Norwegian A1 language course is starting.",
+  step_4: "Pre-arrival preparation is in progress with the relocation partner.",
+  step_5: "Housing arrangements are being made for your arrival.",
+  step_6: "Administrative setup (D-number, tax, bank) is being prepared.",
+  step_7: "Family support is being coordinated for your accompanying family members.",
+  step_8: "You will be connected with a local buddy through INDONORD.",
+  step_9: "Final arrival guide and employer onboarding toolkit are being prepared.",
+  step_10: "Confirm your arrival in Norway — onboarding starts next.",
+};
+
+export function ownerLayerLabel(layer: RelocationOwnerLayer): string {
+  switch (layer) {
+    case "nordic_ascent":
+      return "Nordic Ascent";
+    case "relocation_partner":
+      return "Relocation partner";
+    case "language_partner":
+      return "Language partner";
+    case "real_estate":
+      return "Real estate";
+    default:
+      return "—";
+  }
 }
 
-export function allRelocationCheckpointsComplete(checkpoints: RelocationCheckpoint[]) {
-  return checkpoints.length === 6 && checkpoints.every((c) => c.status === "completed");
+/** Candidate-facing: never show at_risk / blocked labels */
+export function candidateStepStatusLabel(state: RelocationStepState): string {
+  if (state === "done") return "Complete";
+  return "In progress";
+}
+
+export function coordinatorStepStatusLabel(state: RelocationStepState): string {
+  switch (state) {
+    case "done":
+      return "Done";
+    case "at_risk":
+      return "At risk";
+    case "blocked":
+      return "Blocked";
+    default:
+      return "On track";
+  }
+}
+
+export function rollupStatusLabel(status: RelocationRollupStatus | null | undefined): string {
+  switch (status) {
+    case "arrived":
+      return "Arrived";
+    case "relocation_blocked":
+      return "Blocked";
+    case "relocation_at_risk":
+      return "At risk";
+    case "relocation_active":
+      return "Active";
+    default:
+      return "Not started";
+  }
+}
+
+export function deriveRelocationStatus(steps: RelocationStep[]): RelocationRollupStatus {
+  if (steps.some((s) => s.step_number === 10 && s.state === "done")) return "arrived";
+  if (steps.some((s) => s.state === "blocked" && s.step_number !== 7)) return "relocation_blocked";
+  if (steps.some((s) => s.state === "at_risk")) return "relocation_at_risk";
+  return "relocation_active";
+}
+
+export function relocationStepProgress(
+  steps: RelocationStep[],
+  familyRelocating: boolean
+) {
+  const visible = steps.filter((s) => familyRelocating || s.step_number !== 7);
+  const done = visible.filter((s) => s.state === "done").length;
+  const total = visible.length || (familyRelocating ? 10 : 9);
+  return { done, total, percent: total ? Math.round((done / total) * 100) : 0 };
 }
 
 export function isRelocationUnlocked(input: {
-  preArrivalCompletedAt: string | null | undefined;
+  finalClearanceDate: string | null | undefined;
   applicationStatus: string | null | undefined;
 }) {
-  if (!input.preArrivalCompletedAt) return false;
+  if (!input.finalClearanceDate) return false;
   return (
+    input.applicationStatus === APPLICATION_JOURNEY_STATUSES.PRE_ARRIVAL ||
     input.applicationStatus === APPLICATION_JOURNEY_STATUSES.RELOCATION ||
     input.applicationStatus === APPLICATION_JOURNEY_STATUSES.ONBOARDING ||
     input.applicationStatus === APPLICATION_JOURNEY_STATUSES.FOLLOWUP ||
@@ -86,138 +212,195 @@ export function isRelocationUnlocked(input: {
   );
 }
 
-export function getRelocationLockedReason(
-  checkpoint: RelocationCheckpoint,
-  checkpoints: RelocationCheckpoint[],
-  unlocked: boolean
-): string | null {
-  if (!unlocked) return "Unlocks after pre-arrival employment is complete";
-  if (checkpoint.status !== "locked") return null;
-  const prev = checkpoints.find((c) => c.checkpoint_number === checkpoint.checkpoint_number - 1);
-  if (prev && prev.status !== "completed") {
-    return `Complete checkpoint ${checkpoint.checkpoint_number - 1} first`;
-  }
-  return "Not yet available";
-}
+export async function initializeRelocationSteps(
+  applicationId: string,
+  opts?: { finalClearanceDate?: string | null; plannedArrivalDate?: string | null }
+) {
+  const clearance = opts?.finalClearanceDate ?? new Date().toISOString().slice(0, 10);
+  const arrival = opts?.plannedArrivalDate ?? null;
 
-export async function initializeRelocationCheckpoints(applicationId: string) {
-  const rows = RELOCATION_CHECKPOINT_DEFS.map((d) => ({
+  const rows = RELOCATION_STEP_DEFS.map((d) => ({
     application_id: applicationId,
-    checkpoint_number: d.checkpoint_number,
+    step_number: d.step_number,
     title: d.title,
-    who_confirms: d.who_confirms,
-    status: d.checkpoint_number === 1 ? "available" : "locked",
+    owner_layer: d.owner_layer,
+    state: "on_track" as const,
+    target_due_date: computeTargetDueDate(d.step_number, clearance, arrival),
   }));
 
-  const { error } = await supabase.from("relocation_checkpoints").upsert(rows, {
-    onConflict: "application_id,checkpoint_number",
+  const { error } = await supabase.from("relocation_steps").upsert(rows, {
+    onConflict: "application_id,step_number",
     ignoreDuplicates: true,
   });
   if (error) throw error;
-  await refreshRelocationCheckpointUnlocks(applicationId);
+
+  await supabase
+    .from("activation_records")
+    .update({
+      final_clearance_date: clearance,
+      planned_arrival_date: arrival,
+      relocation_status: "relocation_active",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("application_id", applicationId);
+
+  await refreshRelocationTimeline(applicationId);
 }
 
-export async function refreshRelocationCheckpointUnlocks(applicationId: string) {
-  const { error } = await supabase.rpc("refresh_relocation_checkpoint_unlocks", {
+function addDays(isoDate: string, days: number): string {
+  const d = new Date(`${isoDate}T12:00:00`);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+export function computeTargetDueDate(
+  stepNumber: number,
+  clearance: string | null,
+  arrival: string | null
+): string | null {
+  if (stepNumber === 1) return clearance;
+  if (!clearance && [2, 3, 4].includes(stepNumber)) return null;
+  if (stepNumber === 2 || stepNumber === 4) return clearance ? addDays(clearance, 21) : null;
+  if (stepNumber === 3) return clearance ? addDays(clearance, 14) : null;
+  if (!arrival) return null;
+  if (stepNumber === 5) return addDays(arrival, -28);
+  if (stepNumber === 6 || stepNumber === 10) return arrival;
+  if (stepNumber === 8) return addDays(arrival, -21);
+  if (stepNumber === 9) return addDays(arrival, -14);
+  return null;
+}
+
+export async function refreshRelocationTimeline(applicationId: string) {
+  const { error } = await supabase.rpc("refresh_relocation_timeline", {
     p_application_id: applicationId,
   });
   if (error) throw error;
 }
 
-export async function confirmRelocationCheckpoint(input: {
-  checkpointId: string;
+export async function updatePlannedArrivalDate(input: {
   applicationId: string;
-  event_date: string;
-  notes?: string;
-  confirmed_by?: string | null;
+  plannedArrivalDate: string | null;
+}) {
+  const { error } = await supabase
+    .from("activation_records")
+    .update({
+      planned_arrival_date: input.plannedArrivalDate,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("application_id", input.applicationId);
+  if (error) throw error;
+  await refreshRelocationTimeline(input.applicationId);
+}
+
+export async function updateFamilyRelocating(input: {
+  candidateId: string;
+  familyRelocating: boolean;
+  familyMemberCount?: number | null;
+  applicationId?: string;
+}) {
+  const { error } = await supabase
+    .from("candidates")
+    .update({
+      family_relocating: input.familyRelocating,
+      family_member_count: input.familyRelocating
+        ? (input.familyMemberCount ?? null)
+        : null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", input.candidateId);
+  if (error) throw error;
+  if (input.applicationId) {
+    await refreshRelocationTimeline(input.applicationId);
+  }
+}
+
+export async function updateRelocationStep(input: {
+  stepId: string;
+  applicationId: string;
+  state: RelocationStepState;
+  event_date?: string | null;
+  notes?: string | null;
+  address?: string | null;
+  contact_name?: string | null;
+  upload_path?: string | null;
+  updated_by?: string | null;
 }) {
   const now = new Date().toISOString();
-  const { error } = await supabase
-    .from("relocation_checkpoints")
-    .update({
-      status: "completed",
-      event_date: input.event_date,
-      notes: input.notes?.trim() || null,
-      confirmed_by: input.confirmed_by ?? null,
-      completed_at: now,
-      updated_at: now,
-    })
-    .eq("id", input.checkpointId);
-
-  if (error) throw error;
-  await refreshRelocationCheckpointUnlocks(input.applicationId);
-
-  const { data: completed, error: completeErr } = await supabase.rpc(
-    "complete_relocation_if_ready",
-    { p_application_id: input.applicationId }
-  );
-  if (completeErr) throw completeErr;
-  if (completed) return;
-}
-
-export async function maybeCompleteRelocation(applicationId: string) {
-  const { data: record } = await supabase
-    .from("activation_records")
-    .select("relocation_completed_at, pre_arrival_completed_at")
-    .eq("application_id", applicationId)
-    .maybeSingle();
-  if (!record?.pre_arrival_completed_at || record.relocation_completed_at) return;
-
-  const { data: app } = await supabase
-    .from("applications")
-    .select("id, status, candidate_id, jobs(title, companies(name)), candidates(profile_id)")
-    .eq("id", applicationId)
-    .maybeSingle();
-  if (!app || app.status !== APPLICATION_JOURNEY_STATUSES.RELOCATION) return;
-
-  const candidateId = app.candidate_id as string;
-  const profileId = (app.candidates as { profile_id?: string } | null)?.profile_id;
-  const jobTitle = (app.jobs as { title?: string } | null)?.title ?? "your role";
-  const companyName = (app.jobs as { companies?: { name?: string } | null } | null)?.companies?.name;
-  const now = new Date().toISOString();
-
-  await supabase
-    .from("activation_records")
-    .update({ relocation_completed_at: now, updated_at: now })
-    .eq("application_id", applicationId);
-
-  const { data: progress } = await supabase
-    .from("candidate_stage_progress")
-    .select("id, stage_id, status")
-    .eq("candidate_id", candidateId);
-
-  const relocationRow = progress?.find((p) => p.stage_id === "relocation");
-  if (relocationRow && relocationRow.status !== "completed") {
-    await supabase
-      .from("candidate_stage_progress")
-      .update({ status: "completed", completed_at: now })
-      .eq("id", relocationRow.id);
-  }
-
-  await syncPrimaryApplicationStatus(candidateId, APPLICATION_JOURNEY_STATUSES.ONBOARDING);
-
-  const onboardingRow = progress?.find((p) => p.stage_id === "onboarding");
-  if (onboardingRow) {
-    await supabase
-      .from("candidate_stage_progress")
-      .update({ status: "active", started_at: now })
-      .eq("id", onboardingRow.id);
+  const patch: Record<string, unknown> = {
+    state: input.state,
+    event_date: input.event_date ?? null,
+    notes: input.notes?.trim() || null,
+    updated_by: input.updated_by ?? null,
+    updated_at: now,
+  };
+  if (input.address !== undefined) patch.address = input.address?.trim() || null;
+  if (input.contact_name !== undefined) patch.contact_name = input.contact_name?.trim() || null;
+  if (input.upload_path !== undefined) patch.upload_path = input.upload_path;
+  if (input.state === "done") {
+    patch.completed_at = now;
   } else {
-    await supabase.from("candidate_stage_progress").insert({
-      candidate_id: candidateId,
-      stage_id: "onboarding",
-      status: "active",
-      started_at: now,
-    });
+    patch.completed_at = null;
   }
 
-  if (profileId) {
-    await supabase.from("notifications").insert({
-      user_id: profileId,
-      title: "Relocation complete",
-      body: `All relocation steps are done${companyName ? ` for ${companyName}` : ""}. Onboarding is next.`,
-      type: "relocation_complete",
-      metadata: { applicationId, jobTitle, companyName },
-    });
+  const { error } = await supabase.from("relocation_steps").update(patch).eq("id", input.stepId);
+  if (error) throw error;
+
+  await refreshRelocationTimeline(input.applicationId);
+
+  if (input.state === "done") {
+    const { data: step } = await supabase
+      .from("relocation_steps")
+      .select("step_number")
+      .eq("id", input.stepId)
+      .maybeSingle();
+    if (step?.step_number === 10) {
+      const { error: arriveErr } = await supabase.rpc("complete_relocation_on_arrival", {
+        p_application_id: input.applicationId,
+      });
+      if (arriveErr) throw arriveErr;
+    }
   }
 }
+
+export async function uploadRelocationDocument(
+  applicationId: string,
+  stepNumber: number,
+  file: File
+) {
+  const ext = file.name.split(".").pop() || "pdf";
+  const path = `relocation/${applicationId}/step-${stepNumber}-${Date.now()}.${ext}`;
+  const { error } = await supabase.storage.from("documents").upload(path, file, {
+    contentType: file.type || "application/pdf",
+    upsert: false,
+  });
+  if (error) throw error;
+  return path;
+}
+
+export async function fetchRelocationCms(): Promise<RelocationCms> {
+  const { data, error } = await supabase.rpc("get_relocation_cms");
+  if (error) throw error;
+  const cms = (data ?? {}) as Partial<RelocationCms>;
+  return { ...DEFAULT_RELOCATION_CMS, ...cms };
+}
+
+export async function updateRelocationCms(cms: RelocationCms) {
+  const { data: row, error: readErr } = await supabase
+    .from("platform_settings")
+    .select("settings")
+    .eq("id", "default")
+    .maybeSingle();
+  if (readErr) throw readErr;
+  const settings = (row?.settings as Record<string, unknown> | null) ?? {};
+  const { error } = await supabase
+    .from("platform_settings")
+    .update({
+      settings: { ...settings, relocationCms: cms },
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", "default");
+  if (error) throw error;
+}
+
+/** @deprecated use initializeRelocationSteps */
+export const initializeRelocationCheckpoints = initializeRelocationSteps;

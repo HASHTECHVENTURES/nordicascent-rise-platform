@@ -113,7 +113,7 @@ export function applicationStatusNextStep(status: string, selectionStep?: number
       case "internship":
         return "Your internship stage is in progress.";
       case "go_no_go":
-        return "Go / No-Go review is in progress.";
+        return "Final Clearance review is in progress.";
       case "pre_arrival":
         return "Pre-arrival preparation is in progress.";
       case "relocation":

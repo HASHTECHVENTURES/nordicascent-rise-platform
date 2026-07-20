@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { GraduationCap, ClipboardCheck, Heart, Rocket, Loader2 } from "lucide-react";
+import { GraduationCap, ClipboardCheck, Rocket, Loader2 } from "lucide-react";
 import { useAdminJourneyStats } from "@/hooks/useData";
 
 const AdminDashboard = () => {
@@ -24,17 +24,10 @@ const AdminDashboard = () => {
     },
     {
       title: "Readiness",
-      count: stats?.readinessNeedsReview ?? 0,
-      label: "need review",
+      count: (stats?.readinessNeedsReview ?? 0) + (stats?.mentoringPipeline ?? 0),
+      label: "reviews + mentor programme",
       href: "/admin/readiness",
       icon: ClipboardCheck,
-    },
-    {
-      title: "Mentoring",
-      count: stats?.mentoringPipeline ?? 0,
-      label: "ready · activation locked",
-      href: "/admin/mentoring",
-      icon: Heart,
     },
     {
       title: "Activation",
@@ -50,7 +43,7 @@ const AdminDashboard = () => {
       <div>
         <h1 className="text-2xl font-medium">Dashboard</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Universities → Selection → Readiness → Mentoring → Activation
+          Universities → Selection → Readiness (with mentoring) → Activation
         </p>
       </div>
 

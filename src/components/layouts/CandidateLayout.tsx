@@ -7,12 +7,11 @@ import {
   ChevronLeft,
   ChevronRight,
   Bell,
-  Heart,
-  Home,
   AlertTriangle,
   User,
   Briefcase,
   ClipboardList,
+  Home,
 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -25,7 +24,6 @@ import { useSyncEligibleTasks } from "@/hooks/useSyncEligibleTasks";
 import { useCandidateOnboardingRedirect } from "@/hooks/useCandidateOnboarding";
 import { useWaitlistProfileLock } from "@/hooks/useWaitlistProfileLock";
 import { useJobsAccessLock } from "@/hooks/useJobsAccessLock";
-import { useMentoringAccessLock } from "@/hooks/useMentoringAccessLock";
 import { CANDIDATE_PROFILE_PATH } from "@/lib/candidateAccess";
 
 // No sub-items needed; My Journey is a direct link
@@ -35,7 +33,6 @@ const standaloneNav = [
   { name: "My Profile", href: "/candidate/profile", icon: User, tooltip: "Complete your profile, upload CV, and add skills" },
   { name: "Job Roles", href: "/candidate/jobs", icon: Briefcase, tooltip: "Browse open job roles — apply to multiple positions" },
   { name: "My Applications", href: "/candidate/applications", icon: ClipboardList, tooltip: "Track status of every job role you applied to" },
-  { name: "Mentoring", href: "/candidate/mentoring", icon: Heart, tooltip: "Connect with your dedicated company mentor" },
   { name: "Messages", href: "/candidate/messages", icon: MessageSquare, tooltip: "Communication with employers and Nordic Ascent team" },
   { name: "Support", href: "/candidate/support", icon: AlertTriangle, tooltip: "Open a support ticket with Nordic Ascent" },
 ];
@@ -46,7 +43,6 @@ const CandidateLayout = () => {
   const [track] = useTrack();
   const { data: notifications } = useNotifications();
   const { jobsOpen } = useJobsAccessLock();
-  const { mentoringOpen } = useMentoringAccessLock();
   const markAllRead = useMarkAllNotificationsRead();
   const unreadIssues = notifications?.filter((n) => !n.read_at).length ?? 0;
   useSyncEligibleTasks();
@@ -59,9 +55,6 @@ const CandidateLayout = () => {
         if (item.href === CANDIDATE_PROFILE_PATH) return false;
         if (item.href === "/candidate/jobs" || item.href === "/candidate/applications") {
           return jobsOpen;
-        }
-        if (item.href === "/candidate/mentoring") {
-          return mentoringOpen;
         }
         return true;
       });

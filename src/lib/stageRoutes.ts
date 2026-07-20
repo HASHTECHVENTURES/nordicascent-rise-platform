@@ -21,7 +21,6 @@ export const STAGES_WITH_TASK_PAGES = [
   "activation",
   "relocation",
   "onboarding",
-  "followup",
 ] as const;
 
 export function stageListPath(stageId: string) {

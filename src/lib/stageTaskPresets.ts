@@ -263,37 +263,6 @@ Set clear expectations with your manager.
 Mark complete after your first-month goal review.`,
     },
   ],
-  followup: [
-    {
-      title: "30-day check-in",
-      description: "Complete first month review",
-      task_type: "task",
-      content_body: `30-day check-in
-
-Share how your first month went.
-
-• Short survey from Nordic Ascent (via Messages)
-• Optional call with your mentor
-• Raise any relocation or workplace issues
-
-Mark complete after your check-in call or survey.`,
-    },
-    {
-      title: "Long-term support plan",
-      description: "Review ongoing support options",
-      task_type: "task",
-      content_body: `Long-term support plan
-
-Nordic Ascent stays available after onboarding.
-
-Review
-• Mentoring options for the next 6 months
-• Community events and networking
-• How to reach support if issues arise
-
-Mark complete once you have reviewed your support plan.`,
-    },
-  ],
 };
 
 export const READINESS_TASK_PRESETS = STAGE_TASK_PRESETS.readiness;
