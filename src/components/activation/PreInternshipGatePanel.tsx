@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,11 +15,14 @@ import {
   useActivationCms,
 } from "@/hooks/useActivation";
 import {
+  DEFAULT_ACTIVATION_CMS,
   isPreInternshipGateComplete,
+  normalizeActivationCmsText,
   preInternshipGateBlockers,
 } from "@/lib/activationModule";
 import AcademicWorkflowPanel from "@/components/activation/AcademicWorkflowPanel";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 type Props = {
   applicationId: string;
@@ -46,6 +49,21 @@ export default function PreInternshipGatePanel({
   const setCredit = useSetUniversityCreditRequired();
   const { data: cms } = useActivationCms();
   const [startDate, setStartDate] = useState("");
+  const acceptSectionRef = useRef<HTMLDivElement>(null);
+  const [highlightAccept, setHighlightAccept] = useState(false);
+
+  const presentationText = normalizeActivationCmsText(
+    cms?.pre_internship_presentation || DEFAULT_ACTIVATION_CMS.pre_internship_presentation
+  );
+
+  useEffect(() => {
+    if (!record?.presentation_acknowledged_at || record.candidate_accepted_at) {
+      setHighlightAccept(false);
+      return;
+    }
+    setHighlightAccept(true);
+    acceptSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [record?.presentation_acknowledged_at, record?.candidate_accepted_at]);
 
   if (isLoading) {
     return (
@@ -59,6 +77,29 @@ export default function PreInternshipGatePanel({
 
   const complete = isPreInternshipGateComplete(record);
   const blockers = preInternshipGateBlockers(record);
+  const canAcknowledge = canCandidate || canAdmin;
+  const acknowledged = Boolean(record.presentation_acknowledged_at);
+  const accepted = Boolean(record.candidate_accepted_at);
+
+  const runAcknowledge = async () => {
+    try {
+      await acknowledge.mutateAsync({ applicationId });
+      toast({
+        title: "Presentation acknowledged",
+        description: "Next: accept the internship below to unlock checkpoints.",
+      });
+      setHighlightAccept(true);
+      requestAnimationFrame(() => {
+        acceptSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    } catch (err) {
+      toast({
+        title: "Could not save",
+        description: err instanceof Error ? err.message : "Try again",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <Card>
@@ -78,8 +119,9 @@ export default function PreInternshipGatePanel({
           )}
         </div>
         <p className="text-sm text-muted-foreground">
-          Presentation, acceptance, and academic approval (if credit required) must be done before
-          checkpoint #1 unlocks.
+          Two steps unlock internship checkpoints: (1) acknowledge the presentation, then (2)
+          accept the internship
+          {record.university_credit_required ? ", plus academic approval if credit is required" : ""}.
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -111,10 +153,13 @@ export default function PreInternshipGatePanel({
         )}
 
         <div className="rounded-lg border p-4 space-y-3 bg-muted/30">
-          <p className="text-sm font-medium">Platform presentation</p>
-          <p className="text-sm text-muted-foreground whitespace-pre-line">
-            {cms?.pre_internship_presentation ?? ""}
-          </p>
+          <div className="flex items-center gap-2">
+            <Badge variant={acknowledged ? "default" : "outline"} className="text-[10px]">
+              Step 1
+            </Badge>
+            <p className="text-sm font-medium">Platform presentation</p>
+          </div>
+          <p className="text-sm text-muted-foreground whitespace-pre-line">{presentationText}</p>
           {(companyName || jobTitle) && (
             <p className="text-sm">
               Your internship at{" "}
@@ -131,28 +176,14 @@ export default function PreInternshipGatePanel({
               ) : null}
             </p>
           )}
-          {record.presentation_acknowledged_at ? (
+          {acknowledged ? (
             <p className="text-xs text-muted-foreground flex items-center gap-1">
               <CheckCircle2 className="h-3.5 w-3.5 text-success" />
-              Acknowledged {new Date(record.presentation_acknowledged_at).toLocaleDateString()}
+              Acknowledged {new Date(record.presentation_acknowledged_at!).toLocaleDateString()}
+              {!accepted ? " — continue with Step 2 below" : ""}
             </p>
-          ) : canCandidate ? (
-            <Button
-              size="sm"
-              disabled={acknowledge.isPending}
-              onClick={async () => {
-                try {
-                  await acknowledge.mutateAsync({ applicationId });
-                  toast({ title: "Presentation acknowledged" });
-                } catch (err) {
-                  toast({
-                    title: "Could not save",
-                    description: err instanceof Error ? err.message : "Try again",
-                    variant: "destructive",
-                  });
-                }
-              }}
-            >
+          ) : canAcknowledge ? (
+            <Button size="sm" disabled={acknowledge.isPending} onClick={runAcknowledge}>
               {acknowledge.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "I have read this"}
             </Button>
           ) : (
@@ -160,12 +191,27 @@ export default function PreInternshipGatePanel({
           )}
         </div>
 
-        <div className="rounded-lg border p-4 space-y-3">
-          <p className="text-sm font-medium">Candidate acceptance</p>
-          {record.candidate_accepted_at ? (
+        <div
+          ref={acceptSectionRef}
+          className={cn(
+            "rounded-lg border p-4 space-y-3 transition-shadow",
+            highlightAccept && !accepted && "ring-2 ring-primary shadow-sm"
+          )}
+        >
+          <div className="flex items-center gap-2">
+            <Badge variant={accepted ? "default" : acknowledged ? "outline" : "secondary"} className="text-[10px]">
+              Step 2
+            </Badge>
+            <p className="text-sm font-medium">Accept internship</p>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            This is the step that unlocks internship checkpoints. Acknowledging the presentation alone
+            is not enough.
+          </p>
+          {accepted ? (
             <p className="text-xs text-muted-foreground flex items-center gap-1">
               <CheckCircle2 className="h-3.5 w-3.5 text-success" />
-              Accepted {new Date(record.candidate_accepted_at).toLocaleDateString()}
+              Accepted {new Date(record.candidate_accepted_at!).toLocaleDateString()}
             </p>
           ) : canCandidate ? (
             <div className="space-y-3">
@@ -176,18 +222,23 @@ export default function PreInternshipGatePanel({
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
+                  disabled={!acknowledged}
                 />
               </div>
               <Button
                 size="sm"
-                disabled={accept.isPending || !record.presentation_acknowledged_at}
+                disabled={accept.isPending || !acknowledged}
                 onClick={async () => {
                   try {
                     await accept.mutateAsync({
                       applicationId,
                       internship_start_date: startDate || null,
                     });
-                    toast({ title: "Internship accepted" });
+                    setHighlightAccept(false);
+                    toast({
+                      title: "Internship accepted",
+                      description: "Checkpoint #1 is now unlocked.",
+                    });
                   } catch (err) {
                     toast({
                       title: "Could not save",
@@ -203,19 +254,29 @@ export default function PreInternshipGatePanel({
                   "Accept internship"
                 )}
               </Button>
-              {!record.presentation_acknowledged_at && (
+              {!acknowledged && (
                 <p className="text-xs text-muted-foreground">
-                  Acknowledge the presentation first.
+                  Complete Step 1 first — click “I have read this” above.
                 </p>
               )}
             </div>
           ) : (
-            <p className="text-xs text-muted-foreground">Waiting for candidate acceptance</p>
+            <p className="text-xs text-muted-foreground">
+              {acknowledged
+                ? "Waiting for the candidate to log in and click Accept internship."
+                : "Waiting for candidate acceptance (candidate login required for this step)."}
+            </p>
           )}
         </div>
 
         {record.university_credit_required && (
           <div className="rounded-lg border p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-[10px]">
+                Step 3
+              </Badge>
+              <p className="text-sm font-medium">Academic approval</p>
+            </div>
             <AcademicWorkflowPanel
               applicationId={applicationId}
               creditRequired={record.university_credit_required}

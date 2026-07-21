@@ -347,7 +347,16 @@ export function getCheckpointLockedReason(
     activationRecord &&
     !isPreInternshipGateComplete(activationRecord)
   ) {
-    return "Complete the pre-internship gate first (presentation, acceptance, academic approval if required)";
+    if (!activationRecord.presentation_acknowledged_at) {
+      return "Complete Step 1 above: click “I have read this” on the platform presentation";
+    }
+    if (!activationRecord.candidate_accepted_at) {
+      return "Complete Step 2 above: click “Accept internship” — acknowledging alone does not unlock checkpoints";
+    }
+    if (activationRecord.university_credit_required && !activationRecord.academic_unlocked_at) {
+      return "Academic approval is still required before checkpoint #1 unlocks";
+    }
+    return "Complete the pre-internship gate above first";
   }
   if (checkpoint.who_confirms === "system") {
     const meetingNum = MENTOR_MEETING_FOR_CHECKPOINT[checkpoint.checkpoint_number];
@@ -880,22 +889,37 @@ export function interpolateActivationCms(template: string, vars: Record<string, 
   }, template);
 }
 
+/** CMS textareas sometimes persist literal `\n` instead of real newlines. */
+export function normalizeActivationCmsText(text: string) {
+  return text.replace(/\\n/g, "\n");
+}
+
 export async function fetchActivationCms(): Promise<ActivationCms> {
   const { data, error } = await supabase.rpc("get_activation_cms");
   if (error) throw error;
   const cms = (data ?? {}) as Partial<ActivationCms>;
   return {
-    clearance_screen_note:
-      cms.clearance_screen_note ?? DEFAULT_ACTIVATION_CMS.clearance_screen_note,
-    visit_confirmed: cms.visit_confirmed ?? DEFAULT_ACTIVATION_CMS.visit_confirmed,
-    pre_internship_presentation:
-      cms.pre_internship_presentation ?? DEFAULT_ACTIVATION_CMS.pre_internship_presentation,
-    clearance_cleared: cms.clearance_cleared ?? DEFAULT_ACTIVATION_CMS.clearance_cleared,
-    clearance_hold: cms.clearance_hold ?? DEFAULT_ACTIVATION_CMS.clearance_hold,
-    clearance_company_cleared:
-      cms.clearance_company_cleared ?? DEFAULT_ACTIVATION_CMS.clearance_company_cleared,
-    clearance_company_hold:
-      cms.clearance_company_hold ?? DEFAULT_ACTIVATION_CMS.clearance_company_hold,
+    clearance_screen_note: normalizeActivationCmsText(
+      cms.clearance_screen_note ?? DEFAULT_ACTIVATION_CMS.clearance_screen_note
+    ),
+    visit_confirmed: normalizeActivationCmsText(
+      cms.visit_confirmed ?? DEFAULT_ACTIVATION_CMS.visit_confirmed
+    ),
+    pre_internship_presentation: normalizeActivationCmsText(
+      cms.pre_internship_presentation ?? DEFAULT_ACTIVATION_CMS.pre_internship_presentation
+    ),
+    clearance_cleared: normalizeActivationCmsText(
+      cms.clearance_cleared ?? DEFAULT_ACTIVATION_CMS.clearance_cleared
+    ),
+    clearance_hold: normalizeActivationCmsText(
+      cms.clearance_hold ?? DEFAULT_ACTIVATION_CMS.clearance_hold
+    ),
+    clearance_company_cleared: normalizeActivationCmsText(
+      cms.clearance_company_cleared ?? DEFAULT_ACTIVATION_CMS.clearance_company_cleared
+    ),
+    clearance_company_hold: normalizeActivationCmsText(
+      cms.clearance_company_hold ?? DEFAULT_ACTIVATION_CMS.clearance_company_hold
+    ),
   };
 }
 

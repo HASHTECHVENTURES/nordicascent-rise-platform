@@ -300,6 +300,24 @@ export function useAcknowledgePreInternshipPresentation() {
         profileId: profile!.id,
       });
     },
+    onMutate: async (vars) => {
+      await qc.cancelQueries({ queryKey: ["activation-record", vars.applicationId] });
+      const key = ["activation-record", vars.applicationId, profile?.role] as const;
+      const previous = qc.getQueryData<ActivationRecord | null>(key);
+      if (previous) {
+        qc.setQueryData<ActivationRecord>(key, {
+          ...previous,
+          presentation_acknowledged_at: previous.presentation_acknowledged_at ?? new Date().toISOString(),
+          presentation_acknowledged_by: previous.presentation_acknowledged_by ?? profile?.id ?? null,
+        });
+      }
+      return { previous, key };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previous !== undefined) {
+        qc.setQueryData(ctx.key, ctx.previous);
+      }
+    },
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ["activation-record", vars.applicationId] });
       qc.invalidateQueries({ queryKey: ["internship-checkpoints", vars.applicationId] });
