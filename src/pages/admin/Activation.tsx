@@ -114,7 +114,19 @@ export default function AdminActivation() {
                           </Button>
                         )}
                         <Button size="sm" variant="outline" asChild>
-                          <Link to={`/admin/candidates/${row.id}`}>View</Link>
+                          <Link
+                            to={(() => {
+                              const activationApp = unlockedApps.find(
+                                (a) => (a.candidates as { id?: string } | null)?.id === row.id
+                              );
+                              if (row.jobsUnlocked && activationApp) {
+                                return `/admin/activation/${activationApp.id}`;
+                              }
+                              return `/admin/candidates/${row.id}`;
+                            })()}
+                          >
+                            {row.jobsUnlocked ? "Open activation" : "View"}
+                          </Link>
                         </Button>
                       </TableCell>
                     </TableRow>

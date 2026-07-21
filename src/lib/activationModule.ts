@@ -380,22 +380,13 @@ export async function confirmInternshipCheckpoint(input: {
   notes?: string;
   confirmed_by?: string | null;
 }) {
-  const now = new Date().toISOString();
-  const { error } = await supabase
-    .from("internship_checkpoints")
-    .update({
-      status: "completed",
-      event_date: input.event_date,
-      notes: input.notes?.trim() || null,
-      confirmed_by: input.confirmed_by ?? null,
-      completed_at: now,
-      updated_at: now,
-    })
-    .eq("id", input.checkpointId)
-    .eq("who_confirms", "company");
-
+  const { error } = await supabase.rpc("confirm_internship_checkpoint", {
+    p_checkpoint_id: input.checkpointId,
+    p_application_id: input.applicationId,
+    p_event_date: input.event_date,
+    p_notes: input.notes?.trim() || null,
+  });
   if (error) throw error;
-  await refreshInternshipCheckpointUnlocks(input.applicationId);
 }
 
 export async function submitInternshipEvaluation(input: {

@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
-import { ADMIN_SELECTION_SELECT } from "@/hooks/useSelection";
 import type { SelectionApplication } from "@/lib/selectionModule";
 import {
   confirmInternshipCheckpoint,
@@ -472,25 +471,56 @@ export function useCompleteAcademicWorkflowStep() {
   });
 }
 
+/** Employer activation list — use !inner embeds (do not stack on ADMIN_SELECTION_SELECT). */
+const EMPLOYER_ACTIVATION_SELECT = `
+  *,
+  jobs!inner(id, title, positions_count, target_track, company_id, core_skills, engineering_discipline, experience_level, requirements, companies(id, name)),
+  candidates!inner(
+    id, profile_id, full_name, track, university_id, university_waitlist_name,
+    gpa_or_standing, field_of_study, cv_url, family_relocating, family_member_count, jobs_unlocked,
+    profiles(full_name, email, phone, avatar_url)
+  )
+`;
+
+const ADMIN_ACTIVATION_SELECT = `
+  *,
+  jobs(id, title, positions_count, target_track, company_id, core_skills, engineering_discipline, experience_level, requirements, companies(id, name)),
+  candidates!inner(
+    id, profile_id, full_name, track, university_id, university_waitlist_name,
+    gpa_or_standing, field_of_study, cv_url, family_relocating, family_member_count, jobs_unlocked,
+    profiles(full_name, email, phone, avatar_url)
+  )
+`;
+
 export function useEmployerActivationApplications() {
   const { profile } = useAuth();
   return useQuery({
     queryKey: ["employer-activation-applications", profile?.id],
     enabled: profile?.role === "employer",
     queryFn: async () => {
-      const { data: employer } = await supabase
+      const { data: employer, error: employerError } = await supabase
         .from("employers")
         .select("company_id")
         .eq("profile_id", profile!.id)
-        .single();
-      if (!employer) return [];
+        .maybeSingle();
+      if (employerError) throw employerError;
+      if (!employer?.company_id) return [];
 
       const { data, error } = await supabase
         .from("applications")
-        .select(`${ADMIN_SELECTION_SELECT}, jobs!inner(company_id), candidates!inner(jobs_unlocked)`)
+        .select(EMPLOYER_ACTIVATION_SELECT)
         .eq("jobs.company_id", employer.company_id)
         .eq("candidates.jobs_unlocked", true)
-        .in("status", ["accepted", "mentor_assigned", "readiness_active", "readiness_complete", "internship", "go_no_go", "pre_arrival", "relocation"])
+        .in("status", [
+          "accepted",
+          "mentor_assigned",
+          "readiness_active",
+          "readiness_complete",
+          "internship",
+          "go_no_go",
+          "pre_arrival",
+          "relocation",
+        ])
         .order("applied_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as SelectionApplication[];
@@ -504,8 +534,18 @@ export function useAdminActivationApplications() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("applications")
-        .select(`${ADMIN_SELECTION_SELECT}, candidates!inner(jobs_unlocked)`)
+        .select(ADMIN_ACTIVATION_SELECT)
         .eq("candidates.jobs_unlocked", true)
+        .in("status", [
+          "accepted",
+          "mentor_assigned",
+          "readiness_active",
+          "readiness_complete",
+          "internship",
+          "go_no_go",
+          "pre_arrival",
+          "relocation",
+        ])
         .order("applied_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as SelectionApplication[];
