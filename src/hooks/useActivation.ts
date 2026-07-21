@@ -100,7 +100,11 @@ export function useSyncInternshipCheckpoints(applicationId: string | undefined) 
   return useMutation({
     mutationFn: async () => {
       if (!applicationId) return;
-      await syncAllMentorCheckpoints(applicationId);
+      try {
+        await syncAllMentorCheckpoints(applicationId);
+      } catch {
+        // Mentor sync must not block gate-based unlock refresh
+      }
       await refreshInternshipCheckpointUnlocks(applicationId);
     },
     onSuccess: () => {
@@ -328,7 +332,11 @@ export function useAcknowledgePreInternshipPresentation() {
 export function useAcceptPreInternship() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: acceptPreInternship,
+    mutationFn: async (input: Parameters<typeof acceptPreInternship>[0]) => {
+      await acceptPreInternship(input);
+      // Explicit second pass so UI never stays locked if accept raced init
+      await refreshInternshipCheckpointUnlocks(input.applicationId);
+    },
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ["activation-record", vars.applicationId] });
       qc.invalidateQueries({ queryKey: ["internship-checkpoints", vars.applicationId] });

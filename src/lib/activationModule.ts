@@ -287,7 +287,8 @@ export async function initializeActivationForApplication(
     title: d.title,
     who_confirms: d.who_confirms,
     auto_source: d.auto_source,
-    status: d.checkpoint_number === 1 ? "available" : "locked",
+    // Always start locked — refresh_internship_checkpoint_unlocks opens CP1 after the gate
+    status: "locked",
   }));
 
   const { error: cpErr } = await supabase.from("internship_checkpoints").upsert(rows, {

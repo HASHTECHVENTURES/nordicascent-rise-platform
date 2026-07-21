@@ -20,6 +20,7 @@ import {
   INTERNSHIP_CHECKPOINT_DEFS,
   getCheckpointLockedReason,
   internshipCheckpointProgress,
+  isPreInternshipGateComplete,
 } from "@/lib/activationModule";
 import { useToast } from "@/hooks/use-toast";
 
@@ -54,6 +55,8 @@ export default function InternshipCheckpointsPanel({
 
   const list = checkpoints ?? [];
   const progress = internshipCheckpointProgress(list);
+  const gateComplete = isPreInternshipGateComplete(record);
+  const cp1 = list.find((c) => c.checkpoint_number === 1);
 
   useEffect(() => {
     if (!applicationId || cpLoading) return;
@@ -67,6 +70,15 @@ export default function InternshipCheckpointsPanel({
     syncCheckpoints.mutate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [applicationId, list.length]);
+
+  // Self-heal: gate done but CP1 still locked → force unlock refresh
+  useEffect(() => {
+    if (!applicationId || !gateComplete || !cp1) return;
+    if (cp1.status === "locked" && !syncCheckpoints.isPending) {
+      syncCheckpoints.mutate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [applicationId, gateComplete, cp1?.status]);
 
   if (recordLoading || cpLoading || ensureInit.isPending) {
     return (
@@ -95,6 +107,22 @@ export default function InternshipCheckpointsPanel({
           {progress.done}/{progress.total} complete
         </Badge>
       </div>
+
+      {gateComplete && cp1?.status === "available" && (
+        <p className="text-sm rounded-lg border border-success/30 bg-success/5 px-3 py-2 text-foreground">
+          Pre-internship gate complete — checkpoint #1 is unlocked
+          {canEdit
+            ? ". Confirm it below to continue the sequence."
+            : ". Your company confirms company checkpoints; mentor meetings auto-complete theirs."}
+        </p>
+      )}
+
+      {!gateComplete && (
+        <p className="text-sm rounded-lg border px-3 py-2 text-muted-foreground">
+          Complete the pre-internship gate above (acknowledge presentation + accept internship)
+          to unlock checkpoint #1.
+        </p>
+      )}
 
       {phases.map((phase) => {
         const phaseCheckpoints = list.filter((c) => c.phase === phase);
@@ -176,6 +204,12 @@ export default function InternshipCheckpointsPanel({
 
                     {locked && lockedReason && (
                       <p className="text-xs text-muted-foreground">{lockedReason}</p>
+                    )}
+
+                    {!done && !locked && cp.who_confirms === "company" && !canEdit && (
+                      <p className="text-xs text-muted-foreground">
+                        Unlocked — waiting for your company to confirm this checkpoint.
+                      </p>
                     )}
 
                     {!done && !locked && cp.who_confirms === "company" && canEdit && !isEval && (
