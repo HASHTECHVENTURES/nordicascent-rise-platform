@@ -221,6 +221,11 @@ export function useSubmitFinalClearance() {
       qc.invalidateQueries({ queryKey: ["admin-activation-applications"] });
       qc.invalidateQueries({ queryKey: ["my-activation-context"] });
       qc.invalidateQueries({ queryKey: ["pre-arrival-checkpoints", vars.applicationId] });
+      qc.invalidateQueries({ queryKey: ["relocation-steps", vars.applicationId] });
+      qc.invalidateQueries({ queryKey: ["my-relocation-context"] });
+      qc.invalidateQueries({ queryKey: ["employer-relocation-applications"] });
+      qc.invalidateQueries({ queryKey: ["admin-relocation-applications"] });
+      qc.invalidateQueries({ queryKey: ["my-stage-progress"] });
     },
   });
 }

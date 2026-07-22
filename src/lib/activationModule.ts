@@ -1,8 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import {
-  APPLICATION_JOURNEY_STATUSES,
-  syncPrimaryApplicationStatus,
-} from "@/lib/applicationStatusFlow";
+import { APPLICATION_JOURNEY_STATUSES } from "@/lib/applicationStatusFlow";
 import { initializeRelocationSteps } from "@/lib/relocationModule";
 import type { Track } from "@/lib/track";
 
@@ -535,56 +532,11 @@ export async function submitFinalClearanceDecision(input: {
   if (input.decision === "clear") {
     const clearanceDate = input.decision_date || now.slice(0, 10);
 
-    // Module 5 starts at Final Clearance; Pre-Arrival (M4) runs in parallel
-    await syncPrimaryApplicationStatus(
-      input.candidateId,
-      APPLICATION_JOURNEY_STATUSES.RELOCATION
-    );
-
-    const { data: progress } = await supabase
-      .from("candidate_stage_progress")
-      .select("id, stage_id, status")
-      .eq("candidate_id", input.candidateId);
-
-    for (const stageId of input.track === "entry" ? ["internship"] : []) {
-      const row = progress?.find((p) => p.stage_id === stageId);
-      if (row && row.status !== "completed") {
-        await supabase
-          .from("candidate_stage_progress")
-          .update({ status: "completed", completed_at: now })
-          .eq("id", row.id);
-      }
-    }
-
-    const activationRow = progress?.find((p) => p.stage_id === "activation");
-    if (activationRow) {
-      await supabase
-        .from("candidate_stage_progress")
-        .update({ status: "active", started_at: now })
-        .eq("id", activationRow.id);
-    } else {
-      await supabase.from("candidate_stage_progress").insert({
-        candidate_id: input.candidateId,
-        stage_id: "activation",
-        status: "active",
-        started_at: now,
-      });
-    }
-
-    const relocationRow = progress?.find((p) => p.stage_id === "relocation");
-    if (relocationRow) {
-      await supabase
-        .from("candidate_stage_progress")
-        .update({ status: "active", started_at: now })
-        .eq("id", relocationRow.id);
-    } else {
-      await supabase.from("candidate_stage_progress").insert({
-        candidate_id: input.candidateId,
-        stage_id: "relocation",
-        status: "active",
-        started_at: now,
-      });
-    }
+    // Seed relocation + stage progress via SECURITY DEFINER (employer cannot
+    // update candidate_stage_progress under RLS; client upserts were stalling).
+    await initializeRelocationSteps(input.applicationId, {
+      finalClearanceDate: clearanceDate,
+    });
 
     await supabase.from("notifications").insert({
       user_id: input.candidateProfileId,
@@ -595,9 +547,6 @@ export async function submitFinalClearanceDecision(input: {
     });
 
     await initializePreArrivalCheckpoints(input.applicationId);
-    await initializeRelocationSteps(input.applicationId, {
-      finalClearanceDate: clearanceDate,
-    });
   } else {
     await supabase
       .from("candidates")
@@ -790,7 +739,6 @@ export async function maybeCompletePreArrivalEmployment(applicationId: string) {
     return;
   }
 
-  const candidateId = app.candidate_id as string;
   const profileId = (app.candidates as { profile_id?: string } | null)?.profile_id;
   const jobTitle = (app.jobs as { title?: string } | null)?.title ?? "your role";
   const companyName = (app.jobs as { companies?: { name?: string } | null } | null)?.companies?.name;
@@ -801,40 +749,17 @@ export async function maybeCompletePreArrivalEmployment(applicationId: string) {
     .update({ pre_arrival_completed_at: now, updated_at: now })
     .eq("application_id", applicationId);
 
-  const { data: progress } = await supabase
-    .from("candidate_stage_progress")
-    .select("id, stage_id, status")
-    .eq("candidate_id", candidateId);
+  // SECURITY DEFINER: completes activation stage + activates relocation (employer RLS blocks direct updates)
+  const clearanceDate =
+    (await supabase
+      .from("activation_records")
+      .select("final_clearance_date")
+      .eq("application_id", applicationId)
+      .maybeSingle()).data?.final_clearance_date ?? now.slice(0, 10);
 
-  const activationRow = progress?.find((p) => p.stage_id === "activation");
-  if (activationRow && activationRow.status !== "completed") {
-    await supabase
-      .from("candidate_stage_progress")
-      .update({ status: "completed", completed_at: now })
-      .eq("id", activationRow.id);
-  }
-
-  // Keep / ensure relocation status (already set at Clear in the parallel model)
-  if (app.status === APPLICATION_JOURNEY_STATUSES.PRE_ARRIVAL) {
-    await syncPrimaryApplicationStatus(candidateId, APPLICATION_JOURNEY_STATUSES.RELOCATION);
-  }
-
-  const relocationRow = progress?.find((p) => p.stage_id === "relocation");
-  if (relocationRow) {
-    if (relocationRow.status !== "active" && relocationRow.status !== "completed") {
-      await supabase
-        .from("candidate_stage_progress")
-        .update({ status: "active", started_at: now })
-        .eq("id", relocationRow.id);
-    }
-  } else {
-    await supabase.from("candidate_stage_progress").insert({
-      candidate_id: candidateId,
-      stage_id: "relocation",
-      status: "active",
-      started_at: now,
-    });
-  }
+  await initializeRelocationSteps(applicationId, {
+    finalClearanceDate: clearanceDate,
+  });
 
   if (profileId) {
     await supabase.from("notifications").insert({

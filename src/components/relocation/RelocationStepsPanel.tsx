@@ -245,6 +245,7 @@ export default function RelocationStepsPanel({
   const unlocked = isRelocationUnlocked({
     finalClearanceDate: activationRecord?.final_clearance_date,
     applicationStatus: applicationStatus ?? null,
+    activationStatus: activationRecord?.status,
   });
   const relocationDone = Boolean(activationRecord?.relocation_completed_at);
   const rollup = (activationRecord?.relocation_status ?? null) as RelocationRollupStatus | null;
@@ -261,10 +262,20 @@ export default function RelocationStepsPanel({
 
   useEffect(() => {
     if (!applicationId || !unlocked || stepsLoading) return;
-    if (list.length === 0 && !ensureInit.isPending && activationRecord?.final_clearance_date) {
-      ensureInit.mutate({ finalClearanceDate: activationRecord.final_clearance_date });
+    if (list.length === 0 && !ensureInit.isPending) {
+      ensureInit.mutate({
+        finalClearanceDate:
+          activationRecord?.final_clearance_date ?? new Date().toISOString().slice(0, 10),
+      });
     }
-  }, [applicationId, unlocked, list.length, stepsLoading, ensureInit, activationRecord?.final_clearance_date]);
+  }, [
+    applicationId,
+    unlocked,
+    list.length,
+    stepsLoading,
+    ensureInit,
+    activationRecord?.final_clearance_date,
+  ]);
 
   useEffect(() => {
     if (!applicationId || !unlocked || list.length === 0) return;

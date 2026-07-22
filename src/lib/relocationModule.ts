@@ -201,15 +201,18 @@ export function relocationStepProgress(
 export function isRelocationUnlocked(input: {
   finalClearanceDate: string | null | undefined;
   applicationStatus: string | null | undefined;
+  activationStatus?: string | null | undefined;
 }) {
-  if (!input.finalClearanceDate) return false;
-  return (
+  const statusOk =
     input.applicationStatus === APPLICATION_JOURNEY_STATUSES.PRE_ARRIVAL ||
     input.applicationStatus === APPLICATION_JOURNEY_STATUSES.RELOCATION ||
     input.applicationStatus === APPLICATION_JOURNEY_STATUSES.ONBOARDING ||
     input.applicationStatus === APPLICATION_JOURNEY_STATUSES.FOLLOWUP ||
-    input.applicationStatus === APPLICATION_JOURNEY_STATUSES.JOURNEY_COMPLETE
-  );
+    input.applicationStatus === APPLICATION_JOURNEY_STATUSES.JOURNEY_COMPLETE;
+
+  if (statusOk) return true;
+  if (input.activationStatus === "cleared" && input.finalClearanceDate) return true;
+  return false;
 }
 
 export async function initializeRelocationSteps(
@@ -217,34 +220,24 @@ export async function initializeRelocationSteps(
   opts?: { finalClearanceDate?: string | null; plannedArrivalDate?: string | null }
 ) {
   const clearance = opts?.finalClearanceDate ?? new Date().toISOString().slice(0, 10);
-  const arrival = opts?.plannedArrivalDate ?? null;
 
-  const rows = RELOCATION_STEP_DEFS.map((d) => ({
-    application_id: applicationId,
-    step_number: d.step_number,
-    title: d.title,
-    owner_layer: d.owner_layer,
-    state: "on_track" as const,
-    target_due_date: computeTargetDueDate(d.step_number, clearance, arrival),
-  }));
-
-  const { error } = await supabase.from("relocation_steps").upsert(rows, {
-    onConflict: "application_id,step_number",
-    ignoreDuplicates: true,
+  const { error } = await supabase.rpc("initialize_relocation_after_clearance", {
+    p_application_id: applicationId,
+    p_clearance_date: clearance,
   });
   if (error) throw error;
 
-  await supabase
-    .from("activation_records")
-    .update({
-      final_clearance_date: clearance,
-      planned_arrival_date: arrival,
-      relocation_status: "relocation_active",
-      updated_at: new Date().toISOString(),
-    })
-    .eq("application_id", applicationId);
-
-  await refreshRelocationTimeline(applicationId);
+  if (opts?.plannedArrivalDate) {
+    const { error: arrivalErr } = await supabase
+      .from("activation_records")
+      .update({
+        planned_arrival_date: opts.plannedArrivalDate,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("application_id", applicationId);
+    if (arrivalErr) throw arrivalErr;
+    await refreshRelocationTimeline(applicationId);
+  }
 }
 
 function addDays(isoDate: string, days: number): string {

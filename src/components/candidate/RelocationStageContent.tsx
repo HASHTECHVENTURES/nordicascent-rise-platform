@@ -85,7 +85,13 @@ export default function RelocationStageContent() {
         </div>
       </div>
 
-      {ctx?.applicationId && ctx.finalClearanceDate ? (
+      {ctx?.applicationId &&
+      (ctx.finalClearanceDate ||
+        ctx.applicationStatus === "relocation" ||
+        ctx.applicationStatus === "pre_arrival" ||
+        ctx.applicationStatus === "onboarding" ||
+        ctx.applicationStatus === "followup" ||
+        ctx.applicationStatus === "journey_complete") ? (
         <RelocationStepsPanel
           applicationId={ctx.applicationId}
           applicationStatus={ctx.applicationStatus}
