@@ -532,6 +532,30 @@ export async function refreshFollowupQuestionnaires(applicationId: string) {
   if (error) throw error;
 }
 
+export async function adminSetQuestionnaireOpensAt(input: {
+  questionnaireId: string;
+  opensAt: string;
+  forceOpen?: boolean;
+}) {
+  const { error } = await supabase.rpc("admin_set_followup_questionnaire_opens_at", {
+    p_questionnaire_id: input.questionnaireId,
+    p_opens_at: input.opensAt,
+    p_force_open: input.forceOpen ?? false,
+  });
+  if (error) throw error;
+}
+
+export async function adminOpenQuestionnairesNow(input: {
+  applicationId: string;
+  monthNumber?: 3 | 6 | null;
+}) {
+  const { error } = await supabase.rpc("admin_open_followup_questionnaires_now", {
+    p_application_id: input.applicationId,
+    p_month_number: input.monthNumber ?? null,
+  });
+  if (error) throw error;
+}
+
 export async function syncFollowupStatus(applicationId: string) {
   const { error } = await supabase.rpc("sync_followup_status", {
     p_application_id: applicationId,

@@ -110,6 +110,50 @@ The candidates who do best here are not the ones with the most polished answers.
 
 The scenarios describe real workplace situations. If you have work experience, draw on it. If you do not, answer based on how you think you would handle the situation. There are no wrong answers, only honest and dishonest ones.`;
 
+export type ReadinessCms = {
+  pre_test_note: string;
+  timer_hard_note: string;
+  timer_soft_note: string;
+};
+
+export const DEFAULT_READINESS_CMS: ReadinessCms = {
+  pre_test_note: READINESS_PRE_TEST_NOTE,
+  timer_hard_note:
+    "Level 3 tests have a fixed 60-minute time limit. The timer starts when you click Next and the test opens.",
+  timer_soft_note:
+    "This level has no fixed time limit. Take the time you need to answer thoughtfully.",
+};
+
+export async function fetchReadinessCms(): Promise<ReadinessCms> {
+  const { data, error } = await supabase
+    .from("platform_settings")
+    .select("settings")
+    .eq("id", "default")
+    .maybeSingle();
+  if (error) throw error;
+  const settings = (data?.settings as Record<string, unknown> | null) ?? {};
+  const stored = (settings.readinessCms as Partial<ReadinessCms> | undefined) ?? {};
+  return { ...DEFAULT_READINESS_CMS, ...stored };
+}
+
+export async function updateReadinessCms(cms: ReadinessCms) {
+  const { data: row, error: readErr } = await supabase
+    .from("platform_settings")
+    .select("settings")
+    .eq("id", "default")
+    .maybeSingle();
+  if (readErr) throw readErr;
+  const settings = (row?.settings as Record<string, unknown> | null) ?? {};
+  const { error } = await supabase
+    .from("platform_settings")
+    .update({
+      settings: { ...settings, readinessCms: cms },
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", "default");
+  if (error) throw error;
+}
+
 export function getAttemptExpiresAtMs(
   attempt: { expires_at: string | null; started_at: string },
   timerMinutes: number,

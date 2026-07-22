@@ -6,14 +6,15 @@ import { ArrowRight, BookOpen, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyApplications } from "@/hooks/useData";
 import { canAccessReadiness } from "@/lib/candidateJourney";
-import { READINESS_PRE_TEST_NOTE } from "@/lib/readiness";
 import { markReadinessIntroSeen } from "@/lib/readinessIntro";
 import { syncPrimaryApplicationStatus, APPLICATION_JOURNEY_STATUSES } from "@/lib/applicationStatusFlow";
+import { useReadinessCms } from "@/hooks/useReadiness";
 
 export default function CandidateReadinessIntro() {
   const navigate = useNavigate();
   const { profile, candidate, loading } = useAuth();
   const { data: applications, isLoading: applicationsLoading } = useMyApplications();
+  const { data: cms, isLoading: cmsLoading } = useReadinessCms();
   const ready = canAccessReadiness(profile, candidate, applications ?? []);
 
   useEffect(() => {
@@ -23,7 +24,7 @@ export default function CandidateReadinessIntro() {
     }
   }, [loading, applicationsLoading, ready, candidate?.id, navigate]);
 
-  if (loading || applicationsLoading || !ready || !candidate?.id) {
+  if (loading || applicationsLoading || cmsLoading || !ready || !candidate?.id || !cms) {
     return (
       <div className="flex justify-center py-20">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -57,14 +58,14 @@ export default function CandidateReadinessIntro() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-sm leading-relaxed text-muted-foreground space-y-4 whitespace-pre-wrap">
-            {READINESS_PRE_TEST_NOTE.split("\n\n").map((paragraph) => (
+            {cms.pre_test_note.split("\n\n").map((paragraph) => (
               <p key={paragraph.slice(0, 48)}>{paragraph}</p>
             ))}
           </div>
-          <p className="text-sm text-muted-foreground border-t pt-4">
-            Level 1 and 2 have no fixed time limit. Level 3 has a <strong>60-minute</strong> hard
-            limit and must be completed in one session.
+          <p className="text-sm text-muted-foreground border-t pt-4 whitespace-pre-wrap">
+            {cms.timer_soft_note}
           </p>
+          <p className="text-sm text-muted-foreground whitespace-pre-wrap">{cms.timer_hard_note}</p>
         </CardContent>
       </Card>
 

@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen } from "lucide-react";
-import { READINESS_PRE_TEST_NOTE, getReadinessLevelSubtitle } from "@/lib/readiness";
+import { ArrowRight, BookOpen, Loader2 } from "lucide-react";
+import { getReadinessLevelSubtitle, hasStrictTimer } from "@/lib/readiness";
 import type { ReadinessTest } from "@/hooks/useReadiness";
-import { hasStrictTimer } from "@/lib/readiness";
+import { useReadinessCms } from "@/hooks/useReadiness";
 
 type Props = {
   test: ReadinessTest;
@@ -14,6 +14,15 @@ type Props = {
 
 export default function ReadinessTestIntro({ test, onNext, starting }: Props) {
   const strictTimer = hasStrictTimer(test);
+  const { data: cms, isLoading } = useReadinessCms();
+
+  if (isLoading || !cms) {
+    return (
+      <div className="flex justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -40,20 +49,17 @@ export default function ReadinessTestIntro({ test, onNext, starting }: Props) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-sm leading-relaxed text-muted-foreground space-y-4 whitespace-pre-wrap">
-            {READINESS_PRE_TEST_NOTE.split("\n\n").map((paragraph) => (
+            {cms.pre_test_note.split("\n\n").map((paragraph) => (
               <p key={paragraph.slice(0, 40)}>{paragraph}</p>
             ))}
           </div>
-          {strictTimer && (
-            <p className="text-sm font-medium text-foreground border-t pt-4">
-              Level 3 tests have a fixed <strong>60-minute</strong> time limit. The timer starts when
-              you click Next and the test opens.
+          {strictTimer ? (
+            <p className="text-sm font-medium text-foreground border-t pt-4 whitespace-pre-wrap">
+              {cms.timer_hard_note}
             </p>
-          )}
-          {!strictTimer && (
-            <p className="text-sm text-muted-foreground border-t pt-4">
-              This level has <strong>no fixed time limit</strong>. Take the time you need to answer
-              thoughtfully.
+          ) : (
+            <p className="text-sm text-muted-foreground border-t pt-4 whitespace-pre-wrap">
+              {cms.timer_soft_note}
             </p>
           )}
         </CardContent>

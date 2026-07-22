@@ -22,6 +22,8 @@ import {
   type FollowupQuestionnaireCms,
   type FollowupTopicsCms,
 } from "@/lib/followupModule";
+import { useReadinessCms, useUpdateReadinessCms } from "@/hooks/useReadiness";
+import { DEFAULT_READINESS_CMS, type ReadinessCms } from "@/lib/readiness";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -47,6 +49,8 @@ const AdminSettings = () => {
   const updateOnboardCms = useUpdateOnboardingCms();
   const { data: followupCms, isLoading: followupCmsLoading } = useFollowupCms();
   const updateFollowupCmsMut = useUpdateFollowupCms();
+  const { data: readinessCms, isLoading: readinessCmsLoading } = useReadinessCms();
+  const updateReadinessCmsMut = useUpdateReadinessCms();
   const { toast } = useToast();
   const [form, setForm] = useState<PlatformSettingsData | null>(null);
   const [cmsForm, setCmsForm] = useState<ActivationCms | null>(null);
@@ -54,6 +58,7 @@ const AdminSettings = () => {
   const [onboardCmsForm, setOnboardCmsForm] = useState<OnboardingCms | null>(null);
   const [followupTopicsForm, setFollowupTopicsForm] = useState<FollowupTopicsCms | null>(null);
   const [followupQForm, setFollowupQForm] = useState<FollowupQuestionnaireCms | null>(null);
+  const [readinessCmsForm, setReadinessCmsForm] = useState<ReadinessCms | null>(null);
 
   useEffect(() => {
     if (settings) setForm(settings);
@@ -77,6 +82,10 @@ const AdminSettings = () => {
       setFollowupQForm(followupCms.questionnaires);
     }
   }, [followupCms]);
+
+  useEffect(() => {
+    if (readinessCms) setReadinessCmsForm(readinessCms);
+  }, [readinessCms]);
 
   const handleSave = async () => {
     if (!form) return;
@@ -151,18 +160,34 @@ const AdminSettings = () => {
     }
   };
 
+  const handleSaveReadinessCms = async () => {
+    if (!readinessCmsForm) return;
+    try {
+      await updateReadinessCmsMut.mutateAsync(readinessCmsForm);
+      toast({ title: "Readiness CMS saved" });
+    } catch (err) {
+      toast({
+        title: "CMS save failed",
+        description: err instanceof Error ? err.message : "Try again",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (
     isLoading ||
     cmsLoading ||
     relocCmsLoading ||
     onboardCmsLoading ||
     followupCmsLoading ||
+    readinessCmsLoading ||
     !form ||
     !cmsForm ||
     !relocCmsForm ||
     !onboardCmsForm ||
     !followupTopicsForm ||
-    !followupQForm
+    !followupQForm ||
+    !readinessCmsForm
   ) {
     return (
       <div className="flex justify-center py-20">
@@ -186,6 +211,7 @@ const AdminSettings = () => {
           <TabsTrigger value="relocation">Relocation CMS</TabsTrigger>
           <TabsTrigger value="onboarding">Onboarding CMS</TabsTrigger>
           <TabsTrigger value="followup">Follow-up CMS</TabsTrigger>
+          <TabsTrigger value="readiness">Readiness CMS</TabsTrigger>
           <TabsTrigger value="data">Data</TabsTrigger>
         </TabsList>
 
@@ -617,6 +643,72 @@ const AdminSettings = () => {
                   <Save className="w-4 h-4 mr-2" />
                 )}
                 Save Follow-up CMS
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="readiness">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Readiness CMS
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Candidate intro copy shown before readiness tests. Edit test questions under{" "}
+                <span className="font-medium text-foreground">Readiness → Content</span>.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {(
+                [
+                  ["pre_test_note", "Pre-test note"],
+                  ["timer_soft_note", "No time-limit note"],
+                  ["timer_hard_note", "Hard time-limit note"],
+                ] as const
+              ).map(([key, label]) => (
+                <div key={key} className="space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <Label htmlFor={`rd-${key}`}>{label}</Label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="text-xs"
+                      onClick={() =>
+                        setReadinessCmsForm({
+                          ...readinessCmsForm,
+                          [key]: DEFAULT_READINESS_CMS[key],
+                        })
+                      }
+                    >
+                      Reset default
+                    </Button>
+                  </div>
+                  <Textarea
+                    id={`rd-${key}`}
+                    rows={key === "pre_test_note" ? 12 : 3}
+                    value={readinessCmsForm[key]}
+                    onChange={(e) =>
+                      setReadinessCmsForm({
+                        ...readinessCmsForm,
+                        [key]: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+              ))}
+              <Button
+                onClick={handleSaveReadinessCms}
+                disabled={updateReadinessCmsMut.isPending}
+              >
+                {updateReadinessCmsMut.isPending ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4 mr-2" />
+                )}
+                Save Readiness CMS
               </Button>
             </CardContent>
           </Card>

@@ -6,7 +6,7 @@ import {
   APPLICATION_JOURNEY_STATUSES,
   syncPrimaryApplicationStatus,
 } from "@/lib/applicationStatusFlow";
-import { seedReadinessModuleIfEmpty, allTestsSubmitted } from "@/lib/readiness";
+import { seedReadinessModuleIfEmpty, allTestsSubmitted, fetchReadinessCms, updateReadinessCms } from "@/lib/readiness";
 import { refreshMentorMeetingUnlocksForCandidate } from "@/lib/mentorProgram";
 
 export type ReadinessTest = {
@@ -506,6 +506,21 @@ export function useReseedReadinessModule() {
       qc.invalidateQueries({ queryKey: ["readiness-question-counts"] });
       qc.invalidateQueries({ queryKey: ["admin-readiness-overview"] });
     },
+  });
+}
+
+export function useReadinessCms() {
+  return useQuery({
+    queryKey: ["readiness-cms"],
+    queryFn: fetchReadinessCms,
+  });
+}
+
+export function useUpdateReadinessCms() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: updateReadinessCms,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["readiness-cms"] }),
   });
 }
 

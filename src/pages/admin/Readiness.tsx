@@ -18,7 +18,8 @@ export default function AdminReadiness() {
         <div>
           <h1 className="text-2xl font-medium">Readiness</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Module 3 — tests plus mentor meetings 1–3 (parallel).
+            Module 3 — tests plus mentor meetings 1–3 (parallel). Edit intro copy in{" "}
+            Settings → Readiness CMS; edit questions under Content.
           </p>
         </div>
         {(tests?.length ?? 0) === 0 && (

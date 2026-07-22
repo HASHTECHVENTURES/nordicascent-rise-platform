@@ -25,6 +25,8 @@ import {
   useCreateAddonRequest,
   useLogAdhocSupport,
   useSetAtRiskRetention,
+  useAdminSetQuestionnaireOpensAt,
+  useAdminOpenQuestionnairesNow,
 } from "@/hooks/useFollowup";
 import { useActivationRecord } from "@/hooks/useActivation";
 import MeetingLogForm from "@/components/followup/MeetingLogForm";
@@ -69,6 +71,9 @@ export default function FollowupTrackerPanel({
   const createAddon = useCreateAddonRequest();
   const logAdhoc = useLogAdhocSupport();
   const setRisk = useSetAtRiskRetention();
+  const setOpensAt = useAdminSetQuestionnaireOpensAt();
+  const openNow = useAdminOpenQuestionnairesNow();
+  const [draftOpensAt, setDraftOpensAt] = useState<Record<string, string>>({});
 
   const [addonKey, setAddonKey] = useState<FollowupAddonRequest["addon_key"]>("extended_followup");
   const [addonNotes, setAddonNotes] = useState("");
@@ -178,6 +183,52 @@ export default function FollowupTrackerPanel({
         </div>
       )}
 
+      {role === "admin" && !done && (
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-dashed p-3">
+          <p className="text-sm text-muted-foreground flex-1 min-w-[200px]">
+            Questionnaires open 1 week before the 3- and 6-month touchpoints. Open early for testing.
+          </p>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={openNow.isPending}
+            onClick={async () => {
+              try {
+                await openNow.mutateAsync({ applicationId, monthNumber: 3 });
+                toast({ title: "3-month questionnaires opened" });
+              } catch (err) {
+                toast({
+                  title: "Could not open",
+                  description: err instanceof Error ? err.message : "Try again",
+                  variant: "destructive",
+                });
+              }
+            }}
+          >
+            Open 3-month now
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={openNow.isPending}
+            onClick={async () => {
+              try {
+                await openNow.mutateAsync({ applicationId, monthNumber: 6 });
+                toast({ title: "6-month questionnaires opened" });
+              } catch (err) {
+                toast({
+                  title: "Could not open",
+                  description: err instanceof Error ? err.message : "Try again",
+                  variant: "destructive",
+                });
+              }
+            }}
+          >
+            Open 6-month now
+          </Button>
+        </div>
+      )}
+
       <div className="space-y-4">
         {list.map((tp) => {
           const partySummaries = (summaries ?? []).filter((s) => s.touchpoint_id === tp.id);
@@ -265,9 +316,84 @@ export default function FollowupTrackerPanel({
                     .map((q) => (
                       <div key={q.id} className="rounded-md border p-3 space-y-2">
                         {role === "admin" && (
-                          <p className="text-xs text-muted-foreground capitalize">
-                            {q.party} · {q.status}
-                          </p>
+                          <div className="flex flex-wrap items-end gap-2">
+                            <p className="text-xs text-muted-foreground capitalize flex-1">
+                              {q.party} · {q.status}
+                              {q.opens_at ? ` · opens ${q.opens_at}` : ""}
+                            </p>
+                            {q.status !== "submitted" && canEdit && (
+                              <>
+                                <div className="space-y-1">
+                                  <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                                    Open date
+                                  </Label>
+                                  <Input
+                                    type="date"
+                                    className="h-8 w-[150px]"
+                                    value={draftOpensAt[q.id] ?? q.opens_at ?? ""}
+                                    onChange={(e) =>
+                                      setDraftOpensAt((prev) => ({
+                                        ...prev,
+                                        [q.id]: e.target.value,
+                                      }))
+                                    }
+                                  />
+                                </div>
+                                <Button
+                                  size="sm"
+                                  variant="secondary"
+                                  disabled={
+                                    setOpensAt.isPending ||
+                                    !(draftOpensAt[q.id] ?? q.opens_at)
+                                  }
+                                  onClick={async () => {
+                                    const date = draftOpensAt[q.id] ?? q.opens_at;
+                                    if (!date) return;
+                                    try {
+                                      await setOpensAt.mutateAsync({
+                                        questionnaireId: q.id,
+                                        opensAt: date,
+                                        forceOpen: false,
+                                      });
+                                      toast({ title: "Open date saved" });
+                                    } catch (err) {
+                                      toast({
+                                        title: "Could not save date",
+                                        description:
+                                          err instanceof Error ? err.message : "Try again",
+                                        variant: "destructive",
+                                      });
+                                    }
+                                  }}
+                                >
+                                  Save date
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  disabled={setOpensAt.isPending || openNow.isPending}
+                                  onClick={async () => {
+                                    try {
+                                      await setOpensAt.mutateAsync({
+                                        questionnaireId: q.id,
+                                        opensAt: new Date().toISOString().slice(0, 10),
+                                        forceOpen: true,
+                                      });
+                                      toast({ title: "Questionnaire opened" });
+                                    } catch (err) {
+                                      toast({
+                                        title: "Could not open",
+                                        description:
+                                          err instanceof Error ? err.message : "Try again",
+                                        variant: "destructive",
+                                      });
+                                    }
+                                  }}
+                                >
+                                  Open now
+                                </Button>
+                              </>
+                            )}
+                          </div>
                         )}
                         <QuestionnaireForm
                           questionnaire={q}

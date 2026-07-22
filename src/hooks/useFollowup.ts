@@ -14,6 +14,8 @@ import {
   submitQuestionnaire,
   updateFollowupCms,
   upsertMeetingLog,
+  adminSetQuestionnaireOpensAt,
+  adminOpenQuestionnairesNow,
   type FollowupAddonRequest,
   type FollowupAnswer,
   type FollowupMeetingLog,
@@ -212,6 +214,25 @@ export function useSetAtRiskRetention() {
   return useMutation({
     mutationFn: ({ applicationId, value }: { applicationId: string; value: boolean }) =>
       setAtRiskRetention(applicationId, value),
+    onSuccess: (_, vars) => invalidate(qc, vars.applicationId),
+  });
+}
+
+export function useAdminSetQuestionnaireOpensAt() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: adminSetQuestionnaireOpensAt,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["followup-questionnaires"] });
+      qc.invalidateQueries({ queryKey: ["followup-touchpoints"] });
+    },
+  });
+}
+
+export function useAdminOpenQuestionnairesNow() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: adminOpenQuestionnairesNow,
     onSuccess: (_, vars) => invalidate(qc, vars.applicationId),
   });
 }
