@@ -236,12 +236,18 @@ export function getEffectiveJourneyStage(
   profile: Profile | null,
   candidate: Candidate | null | undefined,
   readinessTestsSubmitted: boolean,
-  applications?: ApplicationAccessRow[]
+  applications?: ApplicationAccessRow[],
+  stageProgress?: StageProgressRow[]
 ): string {
   if (!isPreparationComplete(profile, candidate)) return "preparation";
   if (!hasBeenSelected(applications)) return "selection";
   if (!hasReadinessUnlocked(applications)) return "selection";
   if (!readinessTestsSubmitted) return "readiness";
+
+  const jobsUnlocked = isJobsUnlocked(candidate);
+  for (const id of ["followup", "onboarding", "relocation", "activation"] as const) {
+    if (tailStageState(id, stageProgress, jobsUnlocked) === "current") return id;
+  }
   return "activation";
 }
 

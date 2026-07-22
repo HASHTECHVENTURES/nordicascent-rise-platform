@@ -33,6 +33,7 @@ export default function CandidateReadinessIntro() {
 
   const handleNext = async () => {
     markReadinessIntroSeen(candidate.id);
+    // Only advances mentor_assigned / selected → readiness_active; never regresses later stages.
     await syncPrimaryApplicationStatus(candidate.id, APPLICATION_JOURNEY_STATUSES.READINESS_ACTIVE);
     navigate("/candidate/readiness", { replace: true });
   };

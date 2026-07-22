@@ -92,9 +92,34 @@ export async function getPrimaryJourneyApplicationId(candidateId: string): Promi
   return post?.id ?? null;
 }
 
+/** Higher = further along. Used to block accidental status regression. */
+export function journeyStatusRank(status: string): number {
+  const idx = JOURNEY_PRIORITY.indexOf(
+    status as (typeof JOURNEY_PRIORITY)[number]
+  );
+  if (idx >= 0) return JOURNEY_PRIORITY.length - idx;
+  if (isSelectionPipelineStatus(status)) return 0;
+  return -1;
+}
+
 export async function syncPrimaryApplicationStatus(candidateId: string, status: string) {
   const appId = await getPrimaryJourneyApplicationId(candidateId);
   if (!appId) return;
+
+  const { data: current } = await supabase
+    .from("applications")
+    .select("status")
+    .eq("id", appId)
+    .maybeSingle();
+
+  // Never move a candidate backwards (e.g. Readiness intro after Relocation).
+  if (
+    current?.status &&
+    journeyStatusRank(status) < journeyStatusRank(current.status)
+  ) {
+    return;
+  }
+
   await supabase
     .from("applications")
     .update({ status, updated_at: new Date().toISOString() })
