@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyReadinessAttempts, useReadinessTests } from "@/hooks/useReadiness";
-import { useMyApplications } from "@/hooks/useData";
+import { useMyApplications, useMyStageProgress } from "@/hooks/useData";
 import PreparationStageCard from "@/components/candidate/PreparationStageCard";
 import {
   computeEarlyJourneySteps,
   getEffectiveJourneyStage,
+  type StageProgressRow,
 } from "@/lib/candidateJourney";
 import { allTestsSubmitted } from "@/lib/readiness";
 
@@ -17,11 +18,28 @@ const CandidateDashboard = () => {
   const { data: tests, isLoading } = useReadinessTests();
   const { data: attempts } = useMyReadinessAttempts();
   const { data: applications } = useMyApplications();
+  const { data: stageProgressRaw } = useMyStageProgress();
 
   const submitted = tests && attempts ? allTestsSubmitted(tests, attempts) : false;
   const apps = applications ?? [];
-  const activeStageId = getEffectiveJourneyStage(profile, candidate, submitted, apps);
-  const steps = computeEarlyJourneySteps(profile, candidate, submitted, apps);
+  const stageProgress: StageProgressRow[] = (stageProgressRaw ?? []).map((p) => ({
+    stage_id: p.stage_id,
+    status: p.status,
+  }));
+  const activeStageId = getEffectiveJourneyStage(
+    profile,
+    candidate,
+    submitted,
+    apps,
+    stageProgress
+  );
+  const steps = computeEarlyJourneySteps(
+    profile,
+    candidate,
+    submitted,
+    apps,
+    stageProgress
+  );
   const currentStep = steps.find((s) => s.state === "current");
 
   if (isLoading) {
