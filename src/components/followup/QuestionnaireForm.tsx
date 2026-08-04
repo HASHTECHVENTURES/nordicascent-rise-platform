@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +9,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
 import {
   useFollowupAnswers,
@@ -44,6 +52,19 @@ export default function QuestionnaireForm({ questionnaire, applicationId, readOn
   const [answers, setAnswers] = useState<
     Record<string, { option_key?: string; score?: number; open_text?: string }>
   >({});
+  const [open, setOpen] = useState(false);
+
+  const allAnswered = useMemo(() => {
+    return defs.every((q) => {
+      if (q.optional) return true;
+      const a = answers[q.key];
+      if (q.type === "likert") {
+        if (!a?.option_key) return false;
+        return true;
+      }
+      return Boolean(a?.open_text?.trim());
+    });
+  }, [answers, defs]);
 
   if (questionnaire.status === "pending") {
     return (
@@ -87,39 +108,66 @@ export default function QuestionnaireForm({ questionnaire, applicationId, readOn
     );
   }
 
-  return (
-    <div className="space-y-4">
+  const formBody = (
+    <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
       {defs.map((q) => (
         <div key={q.key} className="space-y-1.5">
-          <Label className="text-sm leading-snug">{q.prompt}</Label>
+          <Label className="text-sm leading-snug">
+            {q.prompt}
+            {!q.optional && <span className="text-destructive"> *</span>}
+            {q.optional && (
+              <span className="text-muted-foreground font-normal"> (optional)</span>
+            )}
+          </Label>
           <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
             {q.dimension.replace(/_/g, " ")}
           </p>
           {q.type === "likert" && q.options ? (
-            <Select
-              value={answers[q.key]?.option_key ?? ""}
-              onValueChange={(key) => {
-                const opt = q.options!.find((o) => o.key === key);
-                setAnswers((prev) => ({
-                  ...prev,
-                  [q.key]: { option_key: key, score: opt?.score },
-                }));
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select…" />
-              </SelectTrigger>
-              <SelectContent>
-                {q.options.map((o) => (
-                  <SelectItem key={o.key} value={o.key}>
-                    {o.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <>
+              <Select
+                value={answers[q.key]?.option_key ?? ""}
+                onValueChange={(key) => {
+                  const opt = q.options!.find((o) => o.key === key);
+                  setAnswers((prev) => ({
+                    ...prev,
+                    [q.key]: {
+                      ...prev[q.key],
+                      option_key: key,
+                      score: opt?.score,
+                    },
+                  }));
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {q.options.map((o) => (
+                    <SelectItem key={o.key} value={o.key}>
+                      {o.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {q.openFollowUp && (
+                <Textarea
+                  rows={2}
+                  className="mt-1.5"
+                  placeholder="Optional comment…"
+                  value={answers[q.key]?.open_text ?? ""}
+                  onChange={(e) =>
+                    setAnswers((prev) => ({
+                      ...prev,
+                      [q.key]: { ...prev[q.key], open_text: e.target.value },
+                    }))
+                  }
+                />
+              )}
+            </>
           ) : (
             <Textarea
               rows={2}
+              required={!q.optional}
               value={answers[q.key]?.open_text ?? ""}
               onChange={(e) =>
                 setAnswers((prev) => ({
@@ -132,8 +180,17 @@ export default function QuestionnaireForm({ questionnaire, applicationId, readOn
         </div>
       ))}
       <Button
-        disabled={submit.isPending}
+        className="w-full"
+        disabled={submit.isPending || !allAnswered}
         onClick={async () => {
+          if (!allAnswered) {
+            toast({
+              title: "Answer all required questions",
+              description: "Every required question must be answered before you can submit.",
+              variant: "destructive",
+            });
+            return;
+          }
           try {
             await submit.mutateAsync({
               questionnaireId: questionnaire.id,
@@ -143,6 +200,7 @@ export default function QuestionnaireForm({ questionnaire, applicationId, readOn
               answers,
             });
             toast({ title: "Questionnaire submitted" });
+            setOpen(false);
           } catch (err) {
             toast({
               title: "Submit failed",
@@ -154,6 +212,33 @@ export default function QuestionnaireForm({ questionnaire, applicationId, readOn
       >
         {submit.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit questionnaire"}
       </Button>
+      {!allAnswered && (
+        <p className="text-xs text-muted-foreground text-center">
+          Answer every required question to enable submit.
+        </p>
+      )}
     </div>
+  );
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="default">
+          Open questionnaire
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-lg sm:max-w-xl">
+        <DialogHeader>
+          <DialogTitle>
+            {questionnaire.party === "candidate" ? "Candidate" : "Company"} questionnaire — month{" "}
+            {questionnaire.month_number}
+          </DialogTitle>
+          <DialogDescription>
+            All questions are required. You cannot submit until every answer is complete.
+          </DialogDescription>
+        </DialogHeader>
+        {formBody}
+      </DialogContent>
+    </Dialog>
   );
 }

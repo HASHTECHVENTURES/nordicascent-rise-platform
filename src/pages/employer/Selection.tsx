@@ -100,13 +100,17 @@ const EmployerSelection = () => {
           type="button"
           onClick={() => setStepFilter("all")}
           className={`flex flex-col items-center gap-1 p-3 rounded-lg border transition-all ${
-            stepFilter === "all" ? "border-primary bg-primary/5" : "border-border hover:border-primary/30"
+            stepFilter === "all"
+              ? "border-nordic-orange bg-nordic-orange/10"
+              : "border-border hover:border-nordic-orange/40 bg-muted/40"
           }`}
         >
           <span className="text-xl font-bold">
             {(applications ?? []).filter((a) => isSelectionPipelineStatus(a.status)).length}
           </span>
-          <span className="text-[10px] text-center text-muted-foreground leading-tight">All steps</span>
+          <span className={`text-[10px] text-center font-medium leading-tight ${
+            stepFilter === "all" ? "text-primary" : "text-muted-foreground"
+          }`}>Candidates</span>
         </button>
       </div>
 

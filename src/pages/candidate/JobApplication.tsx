@@ -87,6 +87,18 @@ export default function CandidateJobApplication() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!job || !jobId) return;
+    if (
+      candidate?.track &&
+      job.target_track &&
+      candidate.track !== job.target_track
+    ) {
+      toast({
+        title: "Track mismatch",
+        description: `As a ${candidate.track === "fast" ? "Fast Track" : "Entry Track"} candidate you can only apply to matching roles.`,
+        variant: "destructive",
+      });
+      return;
+    }
     const validation = validateJobApplication(track, form);
     if (!validation.ok) {
       toast({ title: "Incomplete application", description: validation.message, variant: "destructive" });

@@ -222,20 +222,24 @@ export function useEmployerRelocationApplications() {
         .in("status", ["relocation", "onboarding", "pre_arrival"])
         .order("applied_at", { ascending: false });
       if (error) throw error;
-      // Only those with clearance / relocation started
       const apps = (data ?? []) as SelectionApplication[];
-      const withRelocation: SelectionApplication[] = [];
-      for (const app of apps) {
-        const { data: rec } = await supabase
-          .from("activation_records")
-          .select("final_clearance_date")
-          .eq("application_id", app.id)
-          .maybeSingle();
-        if (rec?.final_clearance_date || app.status === "relocation" || app.status === "onboarding") {
-          withRelocation.push(app);
-        }
-      }
-      return withRelocation;
+      if (apps.length === 0) return [];
+
+      const ids = apps.map((a) => a.id);
+      const { data: records } = await supabase
+        .from("activation_records")
+        .select("application_id, final_clearance_date")
+        .in("application_id", ids);
+      const cleared = new Set(
+        (records ?? [])
+          .filter((r) => r.final_clearance_date)
+          .map((r) => r.application_id as string)
+      );
+
+      return apps.filter(
+        (app) =>
+          cleared.has(app.id) || app.status === "relocation" || app.status === "onboarding"
+      );
     },
   });
 }
@@ -251,18 +255,23 @@ export function useAdminRelocationApplications() {
         .order("applied_at", { ascending: false });
       if (error) throw error;
       const apps = (data ?? []) as SelectionApplication[];
-      const withRelocation: SelectionApplication[] = [];
-      for (const app of apps) {
-        const { data: rec } = await supabase
-          .from("activation_records")
-          .select("final_clearance_date")
-          .eq("application_id", app.id)
-          .maybeSingle();
-        if (rec?.final_clearance_date || app.status === "relocation" || app.status === "onboarding") {
-          withRelocation.push(app);
-        }
-      }
-      return withRelocation;
+      if (apps.length === 0) return [];
+
+      const ids = apps.map((a) => a.id);
+      const { data: records } = await supabase
+        .from("activation_records")
+        .select("application_id, final_clearance_date")
+        .in("application_id", ids);
+      const cleared = new Set(
+        (records ?? [])
+          .filter((r) => r.final_clearance_date)
+          .map((r) => r.application_id as string)
+      );
+
+      return apps.filter(
+        (app) =>
+          cleared.has(app.id) || app.status === "relocation" || app.status === "onboarding"
+      );
     },
   });
 }

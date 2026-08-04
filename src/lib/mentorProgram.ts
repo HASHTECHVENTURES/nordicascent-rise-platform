@@ -64,6 +64,32 @@ export function mentorMeetingCountForTrack(track: Track | null | undefined) {
   return track === "fast" ? MENTOR_MEETING_COUNT_FAST : MENTOR_MEETING_COUNT_ENTRY;
 }
 
+/** Split theme_body into agenda bullets (newline / bullet / semicolon separated). */
+export function agendaBulletsFromThemeBody(body: string | null | undefined): string[] {
+  if (!body?.trim()) return [];
+  const raw = body.trim();
+  const byLine = raw
+    .split(/\n+/)
+    .map((l) => l.replace(/^[\s•\-\*\d.)]+/, "").trim())
+    .filter(Boolean);
+  if (byLine.length > 1) return byLine;
+
+  const byBullet = raw
+    .split(/\s*[•|;]\s*/)
+    .map((l) => l.replace(/^[\s\-\*\d.)]+/, "").trim())
+    .filter(Boolean);
+  if (byBullet.length > 1) return byBullet;
+
+  // Sentence-ish split for legacy paragraph agendas
+  const bySentence = raw
+    .split(/(?<=[.!?])\s+(?=[A-Z])/)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 8);
+  if (bySentence.length > 1) return bySentence;
+
+  return [raw];
+}
+
 export async function initializeMentorMeetings(
   applicationId: string,
   track: Track | null | undefined

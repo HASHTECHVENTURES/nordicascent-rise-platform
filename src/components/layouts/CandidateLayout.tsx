@@ -12,6 +12,7 @@ import {
   Briefcase,
   ClipboardList,
   Home,
+  UsersRound,
 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,7 @@ import JourneyProgress from "@/components/candidate/JourneyProgress";
 import { PortalUserMenu, PortalUserSidebar } from "@/components/PortalUserMenu";
 import { TRACK_META, useTrack } from "@/lib/track";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNotifications, useMarkAllNotificationsRead } from "@/hooks/useData";
+import { useNotifications, useMarkAllNotificationsRead, useUnreadMessageCount } from "@/hooks/useData";
 import { useSyncEligibleTasks } from "@/hooks/useSyncEligibleTasks";
 import { useCandidateOnboardingRedirect } from "@/hooks/useCandidateOnboarding";
 import { useWaitlistProfileLock } from "@/hooks/useWaitlistProfileLock";
@@ -33,6 +34,7 @@ const standaloneNav = [
   { name: "My Profile", href: "/candidate/profile", icon: User, tooltip: "Complete your profile, upload CV, and add skills" },
   { name: "Job Roles", href: "/candidate/jobs", icon: Briefcase, tooltip: "Browse open job roles — apply to multiple positions" },
   { name: "My Applications", href: "/candidate/applications", icon: ClipboardList, tooltip: "Track status of every job role you applied to" },
+  { name: "Mentoring", href: "/candidate/mentoring", icon: UsersRound, tooltip: "Your mentor, meeting agendas, and programme progress" },
   { name: "Messages", href: "/candidate/messages", icon: MessageSquare, tooltip: "Communication with employers and Nordic Ascent team" },
   { name: "Support", href: "/candidate/support", icon: AlertTriangle, tooltip: "Open a support ticket with Nordic Ascent" },
 ];
@@ -45,6 +47,7 @@ const CandidateLayout = () => {
   const { jobsOpen } = useJobsAccessLock();
   const markAllRead = useMarkAllNotificationsRead();
   const unreadIssues = notifications?.filter((n) => !n.read_at).length ?? 0;
+  const unreadMessages = useUnreadMessageCount();
   useSyncEligibleTasks();
   useCandidateOnboardingRedirect();
   const waitlistLocked = useWaitlistProfileLock();
@@ -61,20 +64,31 @@ const CandidateLayout = () => {
 
   const renderNavItem = (item: { name: string; href: string; icon: React.ElementType; tooltip?: string }, indented = false) => {
     const isActive = location.pathname === item.href || location.pathname.startsWith(`${item.href}/`);
+    const showUnread = item.href === "/candidate/messages" && unreadMessages > 0;
     return (
       <Link
         key={item.name}
         to={item.href}
         className={cn(
-          "flex items-center gap-3 py-2 rounded transition-colors",
+          "flex items-center gap-3 py-2 rounded transition-colors relative",
           indented ? "pl-9 pr-3" : "px-3",
           isActive
             ? "bg-nordic-orange text-white"
             : "text-foreground/70 hover:bg-muted hover:text-foreground"
         )}
       >
-        <item.icon className={cn("flex-shrink-0", indented ? "h-4 w-4" : "h-5 w-5")} />
+        <span className="relative flex-shrink-0">
+          <item.icon className={cn(indented ? "h-4 w-4" : "h-5 w-5")} />
+          {showUnread && (
+            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-destructive ring-2 ring-white" />
+          )}
+        </span>
         {!collapsed && <span className={cn("font-medium", indented ? "text-xs" : "text-sm")}>{item.name}</span>}
+        {!collapsed && showUnread && (
+          <span className="ml-auto text-[10px] font-semibold bg-destructive text-destructive-foreground rounded-full min-w-[1.1rem] h-4 px-1 flex items-center justify-center">
+            {unreadMessages > 9 ? "9+" : unreadMessages}
+          </span>
+        )}
       </Link>
     );
   };

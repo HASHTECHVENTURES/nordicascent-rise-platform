@@ -6,6 +6,7 @@ import {
   MapPin,
   Building2,
   HeartHandshake,
+  UsersRound,
   type LucideIcon,
 } from "lucide-react";
 
@@ -17,7 +18,7 @@ export type AdminJourneyStep = {
   match: (pathname: string) => boolean;
 };
 
-/** Admin workflow mirrors candidate journey: Universities → Selection → Readiness → Activation … */
+/** Admin workflow: Universities → Selection → Readiness → Mentoring → Activation … */
 export const ADMIN_JOURNEY_STEPS: AdminJourneyStep[] = [
   {
     id: "universities",
@@ -38,7 +39,14 @@ export const ADMIN_JOURNEY_STEPS: AdminJourneyStep[] = [
     label: "Readiness",
     href: "/admin/readiness",
     icon: ClipboardCheck,
-    match: (p) => p.startsWith("/admin/readiness") || p.startsWith("/admin/mentoring"),
+    match: (p) => p.startsWith("/admin/readiness"),
+  },
+  {
+    id: "mentoring",
+    label: "Mentoring",
+    href: "/admin/mentoring",
+    icon: UsersRound,
+    match: (p) => p.startsWith("/admin/mentoring"),
   },
   {
     id: "activation",

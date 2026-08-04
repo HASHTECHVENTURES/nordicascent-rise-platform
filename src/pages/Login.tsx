@@ -212,15 +212,15 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
           </Link>
         </div>
         <div className="space-y-6">
-          <h1 className="text-4xl font-medium text-primary-foreground leading-tight">
-            {selectedRole 
-              ? `Welcome, ${roleConfig[selectedRole].title}` 
-              : "Engineering talent mobility"}
+          <h1 className="text-4xl font-medium text-primary-foreground leading-tight text-center">
+            {selectedRole
+              ? `Welcome, ${roleConfig[selectedRole].title}`
+              : "Engineering talent from India, hired to stay."}
           </h1>
-          <p className="text-xl text-primary-foreground/80">
-            {selectedRole 
-              ? roleConfig[selectedRole].description 
-              : "Connecting exceptional engineering talent from India—all disciplines—with Nordic companies."}
+          <p className="text-xl text-primary-foreground/80 text-center">
+            {selectedRole
+              ? roleConfig[selectedRole].description
+              : "Validated before arrival. Supported for six months after. Not placement — integration."}
           </p>
         </div>
         <div className="flex items-center gap-4 text-primary-foreground/60 text-sm">
@@ -265,7 +265,8 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
                 <CardDescription>Choose how you want to use Nordic Ascent</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {(Object.entries(roleConfig) as [Exclude<LoginRole, null>, typeof roleConfig.candidate][]).map(([key, config]) => {
+                {(["employer", "candidate"] as const).map((key) => {
+                  const config = roleConfig[key];
                   const Icon = config.icon;
                   return (
                     <button
@@ -287,6 +288,15 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
                     </button>
                   );
                 })}
+                <div className="pt-3 border-t border-border">
+                  <Link
+                    to="/admin/login"
+                    className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+                  >
+                    Team access
+                    <ChevronRight className="h-3 w-3" />
+                  </Link>
+                </div>
               </CardContent>
             </Card>
           ) : (

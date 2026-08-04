@@ -42,9 +42,18 @@ export default function CandidateJobs() {
 
   const openJobs = useMemo(() => {
     const list = jobs ?? [];
-    if (!search.trim()) return list;
+    const candidateTrack = candidate?.track;
+    const trackFiltered = candidateTrack
+      ? list.filter((job) => {
+          const jobTrack = job.target_track;
+          // Jobs without a track stay visible; otherwise must match candidate track
+          if (!jobTrack) return true;
+          return jobTrack === candidateTrack;
+        })
+      : list;
+    if (!search.trim()) return trackFiltered;
     const q = search.toLowerCase();
-    return list.filter((job) => {
+    return trackFiltered.filter((job) => {
       const company = job.companies as { name: string } | null;
       return (
         job.title.toLowerCase().includes(q) ||
@@ -52,7 +61,7 @@ export default function CandidateJobs() {
         (company?.name ?? "").toLowerCase().includes(q)
       );
     });
-  }, [jobs, search]);
+  }, [jobs, search, candidate?.track]);
 
   const handleApply = (jobId: string) => {
     setPendingJobApplication(jobId);
@@ -67,6 +76,19 @@ export default function CandidateJobs() {
         variant: "destructive",
       });
       navigate("/candidate/profile");
+      return;
+    }
+    const job = (jobs ?? []).find((j) => j.id === jobId);
+    if (
+      candidate?.track &&
+      job?.target_track &&
+      job.target_track !== candidate.track
+    ) {
+      toast({
+        title: "Track mismatch",
+        description: `As a ${candidate.track === "fast" ? "Fast Track" : "Entry Track"} candidate you can only apply to matching roles.`,
+        variant: "destructive",
+      });
       return;
     }
     if (appliedJobIds.has(jobId)) return;

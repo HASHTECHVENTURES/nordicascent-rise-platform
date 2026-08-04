@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { rejectHoldApplicationsForClosedJob } from "@/lib/jobCloseEffects";
 import { activateJobsAfterMentoringUnlock } from "@/lib/preparationProgress";
@@ -1235,6 +1236,15 @@ export function useConversationsWithDetails() {
       );
     },
   });
+}
+
+/** Total unread inbound messages across conversations (for nav badge). */
+export function useUnreadMessageCount() {
+  const { data: conversations } = useConversationsWithDetails();
+  return useMemo(
+    () => (conversations ?? []).reduce((sum, c) => sum + (c.unread ?? 0), 0),
+    [conversations]
+  );
 }
 
 // ─── Mentoring ──────────────────────────────────────────────────────────────

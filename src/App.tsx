@@ -15,7 +15,9 @@ import AdminLayout from "./components/layouts/AdminLayout";
 
 // Public Pages
 import Home from "./pages/Home";
-import Platform from "./pages/Platform";
+import Companies from "./pages/Companies";
+import Engineers from "./pages/Engineers";
+import HowItWorks from "./pages/HowItWorks";
 import About from "./pages/About";
 import Insight from "./pages/Insight";
 import JobDetail from "./pages/JobDetail";
@@ -121,7 +123,10 @@ const App = () => (
             {/* Public Routes */}
             <Route element={<PublicLayout />}>
               <Route path="/" element={<Home />} />
-              <Route path="/platform" element={<Platform />} />
+              <Route path="/companies" element={<Companies />} />
+              <Route path="/engineers" element={<Engineers />} />
+              <Route path="/how-it-works" element={<HowItWorks />} />
+              <Route path="/platform" element={<Navigate to="/how-it-works" replace />} />
               <Route path="/about" element={<About />} />
               <Route path="/insight" element={<Insight />} />
               <Route path="/insight/:id" element={<JobDetail />} />

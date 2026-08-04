@@ -170,16 +170,16 @@ function JobRoleFormFields({
       </div>
       <div className="space-y-2">
         <Label>Program track</Label>
-        <Select
-          value={form.target_track || undefined}
-          onValueChange={(value) => setForm({ ...form, target_track: value })}
-        >
-          <SelectTrigger><SelectValue placeholder="Entry or Fast track" /></SelectTrigger>
+        <Select value={form.target_track || undefined} disabled>
+          <SelectTrigger className="bg-muted/40"><SelectValue placeholder="Set by experience level" /></SelectTrigger>
           <SelectContent {...selectContentProps}>
             <SelectItem value="entry">{TRACK_META.entry.label}</SelectItem>
             <SelectItem value="fast">{TRACK_META.fast.label}</SelectItem>
           </SelectContent>
         </Select>
+        <p className="text-xs text-muted-foreground">
+          Locked from experience level — cannot be changed after it is set.
+        </p>
       </div>
       <div className="space-y-2">
         <Label>Role description & core technical skills</Label>
@@ -192,12 +192,12 @@ function JobRoleFormFields({
         />
       </div>
       <div className="space-y-2">
-        <Label>Desired start window</Label>
+        <Label>Desired start window (optional)</Label>
         <Select
           value={form.desired_start_window || undefined}
           onValueChange={(value) => setForm({ ...form, desired_start_window: value })}
         >
-          <SelectTrigger><SelectValue placeholder="Select window" /></SelectTrigger>
+          <SelectTrigger><SelectValue placeholder="Optional" /></SelectTrigger>
           <SelectContent {...selectContentProps}>
             {START_WINDOW_OPTIONS.map((o) => (
               <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
@@ -210,7 +210,7 @@ function JobRoleFormFields({
         <Input required value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
       </div>
       <div className="space-y-2">
-        <Label>Employment type</Label>
+        <Label>Employment type (optional)</Label>
         <Input value={form.job_type} onChange={(e) => setForm({ ...form, job_type: e.target.value })} />
       </div>
       <div className="space-y-2">

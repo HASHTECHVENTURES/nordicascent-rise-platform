@@ -83,7 +83,7 @@ export const JOB_DRAFT_REQUIREMENTS: { key: keyof CompanyJobDraft; label: string
   { key: "experience_level", label: "Experience level" },
   { key: "target_track", label: "Program track" },
   { key: "core_skills", label: "Core technical skills" },
-  { key: "desired_start_window", label: "Desired start window" },
+  // Desired start window is optional per client review
 ];
 
 function hasValue(value: string | null | undefined) {

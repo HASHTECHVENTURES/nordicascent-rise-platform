@@ -101,7 +101,7 @@ const EmployerCandidates = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-2">
+      <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5">
         {PIPELINE_STAGES.map((stage) => {
           const count = (byStage[stage.id] ?? []).length;
           const isActive = activeStage === stage.id;
@@ -109,13 +109,13 @@ const EmployerCandidates = () => {
             <button
               key={stage.id}
               onClick={() => setActiveStage(stage.id)}
-              className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 transition-all cursor-pointer ${
+              className={`flex flex-col items-center gap-1 px-1.5 py-2 rounded-lg border-2 transition-all cursor-pointer min-w-0 ${
                 isActive ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/30 bg-card"
               }`}
             >
-              <stage.icon className={`h-5 w-5 ${isActive ? "text-primary" : stage.color}`} />
-              <span className={`text-xl font-bold ${isActive ? "text-primary" : "text-foreground"}`}>{count}</span>
-              <span className={`text-[10px] font-medium text-center leading-tight ${isActive ? "text-primary" : "text-muted-foreground"}`}>{stage.name}</span>
+              <stage.icon className={`h-4 w-4 shrink-0 ${isActive ? "text-primary" : stage.color}`} />
+              <span className={`text-lg font-bold leading-none ${isActive ? "text-primary" : "text-foreground"}`}>{count}</span>
+              <span className={`text-[9px] font-medium text-center leading-tight px-0.5 ${isActive ? "text-primary" : "text-muted-foreground"}`}>{stage.name}</span>
             </button>
           );
         })}

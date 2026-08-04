@@ -19,7 +19,7 @@ import {
   useSaveMentorActivationNote,
   refreshMeetingUnlocks,
 } from "@/hooks/useMentorProgram";
-import { getMeetingLockedReason, isMentorMeetingOverdue } from "@/lib/mentorProgram";
+import { getMeetingLockedReason, isMentorMeetingOverdue, agendaBulletsFromThemeBody } from "@/lib/mentorProgram";
 import type { MentorMeetingObservation, MentorProgramMeeting } from "@/lib/mentorProgram";
 import type { Track } from "@/lib/track";
 import MentorMeetingDots from "@/components/mentor/MentorMeetingDots";
@@ -158,7 +158,11 @@ export default function MentorProgramPanel({
             {theme?.theme_body && (
               <div className="mt-2 rounded-md bg-muted/50 p-2">
                 <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Session agenda</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{theme.theme_body}</p>
+                <ul className="mt-1 list-disc pl-4 space-y-1 text-xs text-muted-foreground">
+                  {agendaBulletsFromThemeBody(theme.theme_body).map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
               </div>
             )}
           </div>

@@ -604,34 +604,29 @@ export const PRE_ARRIVAL_CHECKPOINT_DEFS = [
     notesRequired: true,
     notesLabel: "Task / project description",
   },
-  {
-    checkpoint_number: 4,
-    title: "A1 Norwegian course started",
-    who_confirms: "candidate" as const,
-    hint: "Candidate confirms they have started the A1 Norwegian course.",
-  },
-  {
-    checkpoint_number: 5,
-    title: "Employer onboarding toolkit received",
-    who_confirms: "company" as const,
-    hint: "Company confirms the candidate received onboarding materials.",
-  },
-  {
-    checkpoint_number: 6,
-    title: "Ongoing work confirmed",
-    who_confirms: "company" as const,
-    hint: "Recurring check-in — confirm ongoing remote work (repeat as needed).",
-    allowReconfirm: true,
-  },
 ];
 
 export function preArrivalCheckpointProgress(checkpoints: PreArrivalCheckpoint[]) {
-  const done = checkpoints.filter((c) => c.status === "completed").length;
-  return { done, total: 6, percent: Math.round((done / 6) * 100) };
+  const relevant = checkpoints.filter(
+    (c) =>
+      c.checkpoint_number <= 3 &&
+      !/A1 Norwegian/i.test(c.title) &&
+      !/onboarding toolkit/i.test(c.title) &&
+      !/Ongoing work/i.test(c.title)
+  );
+  const done = relevant.filter((c) => c.status === "completed").length;
+  return { done, total: 3, percent: Math.round((done / 3) * 100) };
 }
 
 export function allPreArrivalCheckpointsComplete(checkpoints: PreArrivalCheckpoint[]) {
-  return checkpoints.length === 6 && checkpoints.every((c) => c.status === "completed");
+  const relevant = checkpoints.filter(
+    (c) =>
+      c.checkpoint_number <= 3 &&
+      !/A1 Norwegian/i.test(c.title) &&
+      !/onboarding toolkit/i.test(c.title) &&
+      !/Ongoing work/i.test(c.title)
+  );
+  return relevant.length >= 3 && relevant.every((c) => c.status === "completed");
 }
 
 export async function initializePreArrivalCheckpoints(applicationId: string) {
@@ -708,10 +703,17 @@ export async function confirmPreArrivalCheckpoint(input: {
 
   const { data: allCps } = await supabase
     .from("pre_arrival_checkpoints")
-    .select("status")
+    .select("status, title, checkpoint_number")
     .eq("application_id", input.applicationId);
+  const relevant = (allCps ?? []).filter(
+    (c) =>
+      !/A1 Norwegian/i.test(c.title ?? "") &&
+      !/onboarding toolkit/i.test(c.title ?? "") &&
+      !/Ongoing work/i.test(c.title ?? "") &&
+      (c.checkpoint_number ?? 0) <= 3
+  );
   const allDone =
-    (allCps ?? []).length === 6 && (allCps ?? []).every((c) => c.status === "completed");
+    relevant.length >= 3 && relevant.every((c) => c.status === "completed");
   if (allDone) {
     await maybeCompletePreArrivalEmployment(input.applicationId);
   }

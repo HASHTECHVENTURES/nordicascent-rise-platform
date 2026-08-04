@@ -24,12 +24,13 @@ import {
   ClipboardList,
   Rocket,
   HeartHandshake,
+  UsersRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PortalUserMenu, PortalUserSidebar } from "@/components/PortalUserMenu";
 import AdminJourneyProgress from "@/components/admin/AdminJourneyProgress";
-import { useAdminCandidates, useAdminEmployers, useNotifications } from "@/hooks/useData";
+import { useAdminCandidates, useAdminEmployers, useNotifications, useUnreadMessageCount } from "@/hooks/useData";
 
 type NavItem = { name: string; href: string; icon: React.ElementType };
 
@@ -37,6 +38,7 @@ const journeyNav: NavItem[] = [
   { name: "Universities", href: "/admin/universities", icon: GraduationCap },
   { name: "Selection", href: "/admin/selection", icon: ClipboardList },
   { name: "Readiness", href: "/admin/readiness", icon: ClipboardCheck },
+  { name: "Mentoring", href: "/admin/mentoring", icon: UsersRound },
   { name: "Activation", href: "/admin/activation", icon: Rocket },
   { name: "Relocation", href: "/admin/relocation", icon: MapPin },
   { name: "Onboarding", href: "/admin/onboarding", icon: Building2 },
@@ -49,6 +51,7 @@ const peopleNav: NavItem[] = [
 ];
 
 const platformNav: NavItem[] = [
+  { name: "Mentoring", href: "/admin/mentoring", icon: UsersRound },
   { name: "Job Roles", href: "/admin/jobs", icon: Briefcase },
   { name: "Program Tasks", href: "/admin/stage-tasks", icon: ListChecks },
   { name: "Portal admins", href: "/admin/users", icon: Users },
@@ -76,6 +79,7 @@ const AdminLayout = () => {
   const { data: employers } = useAdminEmployers();
   const { data: notifications } = useNotifications();
   const unreadCount = notifications?.filter((n) => !n.read_at).length ?? 0;
+  const unreadMessages = useUnreadMessageCount();
 
   const searchResults = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -235,10 +239,20 @@ const AdminLayout = () => {
 
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="icon" className="relative" asChild>
-                <Link to="/admin/messages">
+                <Link to="/admin/messages" aria-label="Messages">
+                  <Mail className="h-5 w-5" />
+                  {unreadMessages > 0 && (
+                    <span className="absolute -top-1 -right-1 h-4 w-4 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">
+                      {unreadMessages > 9 ? "9+" : unreadMessages}
+                    </span>
+                  )}
+                </Link>
+              </Button>
+              <Button variant="ghost" size="icon" className="relative" asChild>
+                <Link to="/admin/notifications">
                   <Bell className="h-5 w-5" />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 h-4 w-4 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">
+                    <span className="absolute -top-1 -right-1 h-4 w-4 bg-warning text-warning-foreground text-xs rounded-full flex items-center justify-center">
                       {unreadCount}
                     </span>
                   )}

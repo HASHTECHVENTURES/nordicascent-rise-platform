@@ -40,7 +40,12 @@ export default function PreArrivalCheckpointsPanel({
   const refreshUnlocks = useRefreshPreArrivalCheckpoints(applicationId);
   const confirmCheckpoint = useConfirmPreArrivalCheckpoint();
 
-  const list = checkpoints ?? [];
+  const list = (checkpoints ?? []).filter(
+    (c) =>
+      !/A1 Norwegian/i.test(c.title) &&
+      !/onboarding toolkit/i.test(c.title) &&
+      !/Ongoing work/i.test(c.title)
+  );
   const progress = preArrivalCheckpointProgress(list);
   const clearanceCleared = record?.status === "cleared";
 

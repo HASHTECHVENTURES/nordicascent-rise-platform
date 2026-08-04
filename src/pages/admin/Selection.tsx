@@ -172,7 +172,7 @@ const AdminSelection = () => {
             <SelectValue placeholder="Filter step" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All steps</SelectItem>
+            <SelectItem value="all">Candidates</SelectItem>
             {SELECTION_STEPS.map((s) => (
               <SelectItem key={s.step} value={String(s.step)}>
                 Step {s.step}: {s.label}

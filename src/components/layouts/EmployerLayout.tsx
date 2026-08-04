@@ -13,16 +13,17 @@ import {
   ClipboardList,
   BarChart3,
   AlertTriangle,
-  ClipboardCheck,
   UserCheck,
   MapPin,
   Rocket,
   HeartHandshake,
+  ClipboardCheck,
+  UsersRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { PortalUserMenu, PortalUserSidebar } from "@/components/PortalUserMenu";
-import { useMyCompany, useNotifications, useMarkAllNotificationsRead } from "@/hooks/useData";
+import { useMyCompany, useNotifications, useMarkAllNotificationsRead, useUnreadMessageCount } from "@/hooks/useData";
 import { useEmployerOnboardingRedirect } from "@/hooks/useEmployerOnboarding";
 
 // Company journey navigation
@@ -32,6 +33,7 @@ const navigation = [
   { name: "Candidates", href: "/employer/candidates", icon: Users },
   { name: "Job Roles", href: "/employer/jobs", icon: Briefcase },
   { name: "Selection", href: "/employer/selection", icon: UserCheck },
+  { name: "Mentoring", href: "/employer/mentoring", icon: UsersRound },
   { name: "Activation", href: "/employer/activation", icon: ClipboardCheck },
   { name: "Relocation", href: "/employer/relocation", icon: MapPin },
   { name: "Onboarding", href: "/employer/onboarding", icon: Rocket },
@@ -50,6 +52,7 @@ const EmployerLayout = () => {
   const markAllRead = useMarkAllNotificationsRead();
   const companyName = (employerData?.companies as { name: string } | null)?.name ?? "Company";
   const unreadCount = notifications?.filter((n) => !n.read_at).length ?? 0;
+  const unreadMessages = useUnreadMessageCount();
   useEmployerOnboardingRedirect();
 
   const openNotification = (n: {
@@ -108,6 +111,7 @@ const EmployerLayout = () => {
               const isActive =
                 location.pathname === item.href ||
                 (item.href !== "/employer/dashboard" && location.pathname.startsWith(`${item.href}/`));
+              const showUnread = item.href === "/employer/messages" && unreadMessages > 0;
               return (
                 <Link
                   key={item.name}
@@ -119,8 +123,18 @@ const EmployerLayout = () => {
                       : "text-foreground/70 hover:bg-muted hover:text-foreground"
                   )}
                 >
-                  <item.icon className="h-5 w-5 flex-shrink-0" />
+                  <span className="relative flex-shrink-0">
+                    <item.icon className="h-5 w-5" />
+                    {showUnread && (
+                      <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-destructive ring-2 ring-white" />
+                    )}
+                  </span>
                   {!collapsed && <span className="text-sm font-medium">{item.name}</span>}
+                  {!collapsed && showUnread && (
+                    <span className="ml-auto text-[10px] font-semibold bg-destructive text-destructive-foreground rounded-full min-w-[1.1rem] h-4 px-1 flex items-center justify-center">
+                      {unreadMessages > 9 ? "9+" : unreadMessages}
+                    </span>
+                  )}
                 </Link>
               );
             })}

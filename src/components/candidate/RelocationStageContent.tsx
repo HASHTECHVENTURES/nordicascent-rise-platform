@@ -10,7 +10,7 @@ import RelocationStepsPanel from "@/components/relocation/RelocationStepsPanel";
 import { stageTaskPath } from "@/lib/stageRoutes";
 
 const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1513622470522-26c3c8a084bc?w=1600&auto=format&fit=crop";
+  "https://images.unsplash.com/photo-1531366936337-7c912a45b87e?w=1600&auto=format&fit=crop";
 const HERO_FALLBACK_CLASS =
   "bg-gradient-to-br from-slate-700 via-slate-600 to-primary/70";
 
