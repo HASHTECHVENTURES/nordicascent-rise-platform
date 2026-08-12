@@ -51,7 +51,6 @@ const peopleNav: NavItem[] = [
 ];
 
 const platformNav: NavItem[] = [
-  { name: "Mentoring", href: "/admin/mentoring", icon: UsersRound },
   { name: "Job Roles", href: "/admin/jobs", icon: Briefcase },
   { name: "Program Tasks", href: "/admin/stage-tasks", icon: ListChecks },
   { name: "Portal admins", href: "/admin/users", icon: Users },

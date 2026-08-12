@@ -26,18 +26,28 @@ import { PortalUserMenu, PortalUserSidebar } from "@/components/PortalUserMenu";
 import { useMyCompany, useNotifications, useMarkAllNotificationsRead, useUnreadMessageCount } from "@/hooks/useData";
 import { useEmployerOnboardingRedirect } from "@/hooks/useEmployerOnboarding";
 
-// Company journey navigation
-const navigation = [
+type NavItem = { name: string; href: string; icon: React.ElementType };
+
+const overviewNav: NavItem[] = [
   { name: "Pipeline Overview", href: "/employer/dashboard", icon: LayoutDashboard },
   { name: "Tasks", href: "/employer/tasks", icon: ClipboardList },
+];
+
+const hiringNav: NavItem[] = [
   { name: "Candidates", href: "/employer/candidates", icon: Users },
   { name: "Job Roles", href: "/employer/jobs", icon: Briefcase },
   { name: "Selection", href: "/employer/selection", icon: UserCheck },
+];
+
+const journeyNav: NavItem[] = [
   { name: "Mentoring", href: "/employer/mentoring", icon: UsersRound },
   { name: "Activation", href: "/employer/activation", icon: ClipboardCheck },
   { name: "Relocation", href: "/employer/relocation", icon: MapPin },
   { name: "Onboarding", href: "/employer/onboarding", icon: Rocket },
   { name: "Follow-up", href: "/employer/followup", icon: HeartHandshake },
+];
+
+const workspaceNav: NavItem[] = [
   { name: "Messages", href: "/employer/messages", icon: MessageSquare },
   { name: "Analytics", href: "/employer/analytics", icon: BarChart3 },
   { name: "Company Profile", href: "/employer/company", icon: Building2 },
@@ -65,9 +75,51 @@ const EmployerLayout = () => {
     }
   };
 
+  const renderNavItem = (item: NavItem) => {
+    const isActive =
+      location.pathname === item.href ||
+      (item.href !== "/employer/dashboard" && location.pathname.startsWith(`${item.href}/`));
+    const showUnread = item.href === "/employer/messages" && unreadMessages > 0;
+    return (
+      <Link
+        key={item.name}
+        to={item.href}
+        className={cn(
+          "flex items-center gap-3 px-3 py-2.5 rounded transition-colors",
+          isActive
+            ? "bg-nordic-orange text-white"
+            : "text-foreground/70 hover:bg-muted hover:text-foreground"
+        )}
+      >
+        <span className="relative flex-shrink-0">
+          <item.icon className="h-5 w-5" />
+          {showUnread && (
+            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-destructive ring-2 ring-white" />
+          )}
+        </span>
+        {!collapsed && <span className="text-sm font-medium">{item.name}</span>}
+        {!collapsed && showUnread && (
+          <span className="ml-auto text-[10px] font-semibold bg-destructive text-destructive-foreground rounded-full min-w-[1.1rem] h-4 px-1 flex items-center justify-center">
+            {unreadMessages > 9 ? "9+" : unreadMessages}
+          </span>
+        )}
+      </Link>
+    );
+  };
+
+  const renderSection = (label: string, items: NavItem[]) => (
+    <div className="space-y-1">
+      {!collapsed && (
+        <p className="px-3 pt-3 pb-1 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          {label}
+        </p>
+      )}
+      {items.map(renderNavItem)}
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Sidebar */}
       <aside
         className={cn(
           "fixed left-0 top-0 z-40 h-screen bg-white border-r border-border",
@@ -75,7 +127,6 @@ const EmployerLayout = () => {
         )}
       >
         <div className="flex h-full flex-col">
-          {/* Nav header – no logo; compact for normal back/forth navigation */}
           <div className="flex h-14 items-center justify-between px-4 border-b border-border">
             {!collapsed && (
               <Link to="/employer/dashboard" className="text-sm font-semibold text-foreground">
@@ -106,38 +157,11 @@ const EmployerLayout = () => {
             </Button>
           )}
 
-          <nav className="flex-1 p-4 space-y-1">
-            {navigation.map((item) => {
-              const isActive =
-                location.pathname === item.href ||
-                (item.href !== "/employer/dashboard" && location.pathname.startsWith(`${item.href}/`));
-              const showUnread = item.href === "/employer/messages" && unreadMessages > 0;
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded transition-colors",
-                    isActive
-                      ? "bg-nordic-orange text-white"
-                      : "text-foreground/70 hover:bg-muted hover:text-foreground"
-                  )}
-                >
-                  <span className="relative flex-shrink-0">
-                    <item.icon className="h-5 w-5" />
-                    {showUnread && (
-                      <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-destructive ring-2 ring-white" />
-                    )}
-                  </span>
-                  {!collapsed && <span className="text-sm font-medium">{item.name}</span>}
-                  {!collapsed && showUnread && (
-                    <span className="ml-auto text-[10px] font-semibold bg-destructive text-destructive-foreground rounded-full min-w-[1.1rem] h-4 px-1 flex items-center justify-center">
-                      {unreadMessages > 9 ? "9+" : unreadMessages}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
+          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+            {renderSection("Overview", overviewNav)}
+            {renderSection("Hiring", hiringNav)}
+            {renderSection("Candidate journey", journeyNav)}
+            {renderSection("Workspace", workspaceNav)}
           </nav>
 
           {!collapsed && (

@@ -2636,6 +2636,11 @@ export type AdminJourneyStats = {
   eligibilityPending: number;
   readinessNeedsReview: number;
   mentoringPipeline: number;
+  mentorAssignmentPending: number;
+  activationActive: number;
+  relocationActive: number;
+  onboardingActive: number;
+  followupActive: number;
   jobsUnlocked: number;
 };
 
@@ -2646,6 +2651,11 @@ export function useAdminJourneyStats() {
       const [
         { count: waitlistPending, error: wErr },
         { count: eligibilityPending, error: selErr },
+        { count: mentorAssignmentPending, error: mentorErr },
+        { count: activationActive, error: actErr },
+        { count: relocationActive, error: relErr },
+        { count: onboardingActive, error: onbErr },
+        { count: followupActive, error: folErr },
         { data: tests, error: tErr },
         { data: attempts, error: aErr },
         { data: candidates, error: cErr },
@@ -2659,6 +2669,27 @@ export function useAdminJourneyStats() {
           .from("applications")
           .select("id", { count: "exact", head: true })
           .in("status", ["application_complete", "eligibility_review"]),
+        supabase
+          .from("applications")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "selected_for_readiness")
+          .is("assigned_mentor_id", null),
+        supabase
+          .from("applications")
+          .select("id", { count: "exact", head: true })
+          .in("status", ["internship", "go_no_go", "pre_arrival"]),
+        supabase
+          .from("applications")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "relocation"),
+        supabase
+          .from("applications")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "onboarding"),
+        supabase
+          .from("applications")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "followup"),
         supabase.from("readiness_tests").select("id").eq("active", true),
         supabase.from("readiness_attempts").select("candidate_id, status"),
         supabase.from("candidates").select("id, jobs_unlocked, university_id"),
@@ -2666,6 +2697,11 @@ export function useAdminJourneyStats() {
       ]);
       if (wErr) throw wErr;
       if (selErr) throw selErr;
+      if (mentorErr) throw mentorErr;
+      if (actErr) throw actErr;
+      if (relErr) throw relErr;
+      if (onbErr) throw onbErr;
+      if (folErr) throw folErr;
       if (tErr) throw tErr;
       if (aErr) throw aErr;
       if (cErr) throw cErr;
@@ -2694,6 +2730,11 @@ export function useAdminJourneyStats() {
         eligibilityPending: eligibilityPending ?? 0,
         readinessNeedsReview,
         mentoringPipeline,
+        mentorAssignmentPending: mentorAssignmentPending ?? 0,
+        activationActive: activationActive ?? 0,
+        relocationActive: relocationActive ?? 0,
+        onboardingActive: onboardingActive ?? 0,
+        followupActive: followupActive ?? 0,
         jobsUnlocked,
       } satisfies AdminJourneyStats;
     },
