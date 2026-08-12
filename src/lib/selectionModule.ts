@@ -287,37 +287,35 @@ export function getCandidateTrackerStages(
   const failed =
     status === SELECTION_STATUSES.SELECTION_REJECTED || status === SELECTION_STATUSES.REJECTED;
 
+  /** Offee is its own early stage (not folded into a generic "Assessment"). */
+  const stages = [
+    { id: "eligibility", label: "Eligibility" },
+    { id: "offee", label: "Offee" },
+    { id: "technical", label: "Technical" },
+    { id: "motivation", label: "Motivation" },
+    { id: "decision", label: "Decision" },
+  ];
+
   const currentIndex = (() => {
     const step = getSelectionStepFromStatus(status, selectionStep);
     if (failed) {
-      if (step <= 1) return 1;
-      if (step <= 3) return 2;
-      if (step === 4) return 3;
-      return 4;
+      return Math.min(4, Math.max(0, step - 1));
     }
     if (status === SELECTION_STATUSES.SELECTED_FOR_READINESS) return 4;
     if (status === SELECTION_STATUSES.SELECTION_HOLD) return 4;
-    if (status === SELECTION_STATUSES.APPLICATION_COMPLETE) return 1;
-    if (step === 1) return 1;
-    if (step === 2 || step === 3) return 2;
-    if (step === 4) return 3;
-    if (step === 5) return 4;
-    return 0;
+    // Pass statuses advance the highlight to the next stage
+    if (status === SELECTION_STATUSES.ELIGIBILITY_PASS) return 1; // Offee next
+    if (status === SELECTION_STATUSES.OFFEE_PASS) return 2;
+    if (status === SELECTION_STATUSES.STEP3_PASS) return 3;
+    if (status === SELECTION_STATUSES.STEP4_PASS) return 4;
+    return Math.min(4, Math.max(0, step - 1));
   })();
-
-  const stages = [
-    { id: "application", label: "Application" },
-    { id: "review", label: "Review" },
-    { id: "assessment", label: "Assessment" },
-    { id: "interview", label: "Interview" },
-    { id: "decision", label: "Decision" },
-  ];
 
   return stages.map((s, i) => {
     let state: CandidateTrackerStage["state"] = "upcoming";
     if (failed) {
       state = i < currentIndex ? "done" : i === currentIndex ? "failed" : "upcoming";
-    } else if (status === SELECTION_STATUSES.SELECTED_FOR_READINESS && i === 4) {
+    } else if (status === SELECTION_STATUSES.SELECTED_FOR_READINESS) {
       state = "done";
     } else if (i < currentIndex) {
       state = "done";
@@ -338,19 +336,20 @@ export function candidateTrackerMessage(status: string, selectionStep?: number |
   if (status === SELECTION_STATUSES.SELECTION_HOLD) {
     return "Your application remains under review.";
   }
-  if (
-    status === SELECTION_STATUSES.ELIGIBILITY_PASS ||
-    status === SELECTION_STATUSES.OFFEE_REVIEW ||
-    status.startsWith("offee_") ||
-    status.startsWith("step3_")
-  ) {
-    if (status === SELECTION_STATUSES.OFFEE_PASS || status === SELECTION_STATUSES.STEP3_PASS) {
-      return "Assessment complete — we'll notify you about next steps.";
-    }
-    if (isReviewStatus(status)) {
-      return "Assessment in progress.";
-    }
-    return "Assessment in progress. Nordic Ascent will share Offee details with you.";
+  if (status === SELECTION_STATUSES.ELIGIBILITY_PASS) {
+    return "Eligibility complete. Next: Offee assessment — Nordic Ascent will share details with you.";
+  }
+  if (status === SELECTION_STATUSES.OFFEE_REVIEW || status === SELECTION_STATUSES.OFFEE_PASS) {
+    return status === SELECTION_STATUSES.OFFEE_PASS
+      ? "Offee complete — technical assessment is next."
+      : "Offee assessment in progress. Nordic Ascent will share timing and instructions.";
+  }
+  if (status.startsWith("step3_")) {
+    return status === SELECTION_STATUSES.STEP3_PASS
+      ? "Technical assessment complete — motivation session is next."
+      : isReviewStatus(status)
+        ? "Technical assessment in progress."
+        : "Technical assessment coming up.";
   }
   if (status.startsWith("step4_")) {
     return isReviewStatus(status)
@@ -358,7 +357,7 @@ export function candidateTrackerMessage(status: string, selectionStep?: number |
       : "Motivation session complete — the selection board will decide soon.";
   }
   if (status === SELECTION_STATUSES.APPLICATION_COMPLETE || status.startsWith("eligibility_")) {
-    return "We're reviewing your application. No action needed — we'll notify you when something changes.";
+    return "We're checking eligibility. After that, Offee assessment comes next — no action needed from you yet.";
   }
   return "We're reviewing your application. No action needed — we'll notify you when something changes.";
 }

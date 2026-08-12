@@ -229,7 +229,7 @@ export function getSelectionStepState(applications: ApplicationRow[]): Selection
         ? `You were accepted for ${job?.title ?? "a job role"} at ${company}.`
         : "Apply to a job role and wait for an employer to accept you.",
       done: matchedDone,
-      hint: matchedDone ? undefined : "Go to Job Roles → apply → wait for acceptance in My Applications.",
+      hint: matchedDone ? undefined : "Browse open roles below, apply, then track status in Your applications.",
     },
     {
       id: "screening",
@@ -237,7 +237,7 @@ export function getSelectionStepState(applications: ApplicationRow[]): Selection
       title: "Employer screening",
       description: screeningDone
         ? `The employer reviewed your application (${applicationStatusLabel(status)}).`
-        : "The company reviews your profile after you apply — watch My Applications and Messages.",
+        : "The company reviews your profile after you apply — watch Your applications and Messages.",
       done: screeningDone,
       hint: screeningDone
         ? undefined

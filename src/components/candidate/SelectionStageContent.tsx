@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Circle, ArrowRight, Briefcase, MessageSquare } from "lucide-react";
+import { CheckCircle, Circle, ArrowRight, MessageSquare } from "lucide-react";
 import { useMyApplications, useMyTaskProgress, useStageTasks, useCompleteTask } from "@/hooks/useData";
 import InterviewInviteCard from "@/components/candidate/InterviewInviteCard";
 import {
@@ -22,7 +22,7 @@ import { completeSelectionIfReady } from "@/lib/pipelineProgress";
 import { useQueryClient } from "@tanstack/react-query";
 
 /** Selection = you were accepted by a company. Tasks mirror your job application — not My Profile. */
-export default function SelectionStageContent() {
+export default function SelectionStageContent({ embedded = false }: { embedded?: boolean }) {
   const { candidate } = useAuth();
   const [track] = useTrack();
   const qc = useQueryClient();
@@ -70,10 +70,21 @@ export default function SelectionStageContent() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-medium text-foreground">Selection</h1>
-        <p className="text-muted-foreground mt-1">Screening and matching with your employer.</p>
-      </div>
+      {!embedded && (
+        <div>
+          <h1 className="text-2xl font-medium text-foreground">Selection</h1>
+          <p className="text-muted-foreground mt-1">Screening and matching with your employer.</p>
+        </div>
+      )}
+
+      {embedded && (
+        <div>
+          <h2 className="text-lg font-medium text-foreground">After acceptance</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Employer match complete — continue your journey from here.
+          </p>
+        </div>
+      )}
 
       {primary && job && (
         <Card className="border-primary/20 bg-primary/5">
@@ -85,10 +96,10 @@ export default function SelectionStageContent() {
               </Badge>
             </div>
             <Button variant="outline" size="sm" asChild>
-              <Link to="/candidate/applications">
-                My Applications
+              <a href="#applications">
+                Your applications
                 <ArrowRight className="ml-1 h-4 w-4" />
-              </Link>
+              </a>
             </Button>
           </CardContent>
         </Card>
@@ -147,12 +158,6 @@ export default function SelectionStageContent() {
           ))}
 
           <div className="flex flex-wrap gap-2 pt-2 border-t">
-            <Button size="sm" variant="outline" asChild>
-              <Link to="/candidate/applications">
-                <Briefcase className="h-4 w-4 mr-1" />
-                My Applications
-              </Link>
-            </Button>
             <Button size="sm" variant="outline" asChild>
               <Link to="/candidate/messages">
                 <MessageSquare className="h-4 w-4 mr-1" />

@@ -64,24 +64,14 @@ export default function ApplicationJourneyCard() {
 
         <div className="flex flex-wrap gap-2 pt-2 border-t">
           <Button size="sm" variant="outline" asChild>
-            <Link to="/candidate/jobs">Browse job roles</Link>
+            <Link to="/candidate/selection">Go to Selection</Link>
           </Button>
-          {apps.length > 0 && (
-            <Button size="sm" variant="outline" asChild>
-              <Link to="/candidate/applications">My Applications</Link>
-            </Button>
-          )}
           {unlocked && (
             <Button size="sm" asChild>
               <Link to="/candidate/selection">
                 Continue journey
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
-            </Button>
-          )}
-          {primary?.status === "rejected" && !unlocked && (
-            <Button size="sm" asChild>
-              <Link to="/candidate/jobs">Apply to another job role</Link>
             </Button>
           )}
         </div>

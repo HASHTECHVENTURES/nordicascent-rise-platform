@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,9 +13,14 @@ import {
   Bell,
 } from "lucide-react";
 import { useMyApplications, useMyStageProgress } from "@/hooks/useData";
+import { useJobsAccessLock } from "@/hooks/useJobsAccessLock";
 import InterviewInviteCard from "@/components/candidate/InterviewInviteCard";
 import SelectionProgressTracker from "@/components/selection/SelectionProgressTracker";
-import { isSelectionPipelineStatus } from "@/lib/selectionModule";
+import {
+  SELECTION_STATUSES,
+  candidateTrackerMessage,
+  isSelectionPipelineStatus,
+} from "@/lib/selectionModule";
 import {
   applicationStatusLabel,
   applicationStatusNextStep,
@@ -25,14 +30,32 @@ import {
 } from "@/lib/applicationJourney";
 import { stageListPath } from "@/lib/stageRoutes";
 
-export default function CandidateApplications() {
+type Props = {
+  /** When true, render as a Selection journey section (no standalone page chrome / no redirect). */
+  embedded?: boolean;
+};
+
+function isOffeeForwardStatus(status: string) {
+  return (
+    status === SELECTION_STATUSES.ELIGIBILITY_PASS ||
+    status === SELECTION_STATUSES.OFFEE_REVIEW ||
+    status === SELECTION_STATUSES.OFFEE_PASS
+  );
+}
+
+export default function CandidateApplications({ embedded = false }: Props) {
   const { data: applications, isLoading } = useMyApplications();
   const { data: stageProgress } = useMyStageProgress();
+  const { jobsOpen } = useJobsAccessLock();
   const apps = applications ?? [];
   const accepted = hasUnlockedPipeline(apps);
   const selectionDone = stageProgress?.some((s) => s.stage_id === "selection" && s.status === "completed");
   const continueHref = selectionDone ? stageListPath("internship") : stageListPath("selection");
   const continueLabel = selectionDone ? "Continue to Internship" : "Continue journey";
+
+  if (!embedded) {
+    return <Navigate to="/candidate/selection#applications" replace />;
+  }
 
   if (isLoading) {
     return (
@@ -43,20 +66,22 @@ export default function CandidateApplications() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-medium text-foreground">My Applications</h1>
-          <p className="text-muted-foreground">
-            Track every job role you applied to. Status updates appear here and in Notifications.
+          <h2 className="text-lg font-medium text-foreground">Your applications</h2>
+          <p className="text-sm text-muted-foreground">
+            Track selection steps for every role you applied to. Offee appears early in the path.
           </p>
         </div>
-        <Button variant="outline" asChild>
-          <Link to="/candidate/jobs">
-            <Briefcase className="h-4 w-4 mr-2" />
-            Browse more jobs
-          </Link>
-        </Button>
+        {jobsOpen && (
+          <Button variant="outline" size="sm" asChild>
+            <a href="#roles">
+              <Briefcase className="h-4 w-4 mr-2" />
+              Browse open roles
+            </a>
+          </Button>
+        )}
       </div>
 
       {accepted && (
@@ -66,14 +91,16 @@ export default function CandidateApplications() {
             <div>
               <p className="font-medium">You have an accepted application</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Your employer journey has started. Continue in My Journey.
+                Your employer journey has started. Continue in My Journey below.
               </p>
-              <Button size="sm" className="mt-3" asChild>
-                <Link to={continueHref}>
-                  {continueLabel}
-                  <ArrowRight className="ml-1 h-4 w-4" />
-                </Link>
-              </Button>
+              {!selectionDone && (
+                <Button size="sm" className="mt-3" asChild>
+                  <Link to={continueHref}>
+                    {continueLabel}
+                    <ArrowRight className="ml-1 h-4 w-4" />
+                  </Link>
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -84,9 +111,13 @@ export default function CandidateApplications() {
           <CardContent className="py-12 text-center space-y-4">
             <Briefcase className="h-10 w-10 text-muted-foreground mx-auto" />
             <p className="text-muted-foreground">No applications yet.</p>
-            <Button asChild>
-              <Link to="/candidate/jobs">Find open job roles</Link>
-            </Button>
+            {jobsOpen ? (
+              <Button asChild>
+                <a href="#roles">Find open job roles</a>
+              </Button>
+            ) : (
+              <p className="text-sm text-muted-foreground">Complete Preparation to unlock open roles.</p>
+            )}
           </CardContent>
         </Card>
       ) : (
@@ -94,6 +125,8 @@ export default function CandidateApplications() {
           {apps.map((app) => {
             const job = getApplicationJob(app);
             const company = job?.companies;
+            const showOffeeCallout =
+              isSelectionPipelineStatus(app.status) && isOffeeForwardStatus(app.status);
             return (
               <Card key={app.id}>
                 <CardHeader className="pb-3">
@@ -124,18 +157,31 @@ export default function CandidateApplications() {
                     <SelectionProgressTracker status={app.status} selectionStep={app.selection_step} />
                   )}
 
+                  {showOffeeCallout && (
+                    <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 text-sm">
+                      <p className="font-medium text-foreground">Offee</p>
+                      <p className="text-muted-foreground mt-1">
+                        {candidateTrackerMessage(app.status, app.selection_step)}
+                      </p>
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Clock className="h-3 w-3" />
                     Applied {new Date(app.applied_at).toLocaleString()}
                   </div>
 
-                  <div className="rounded-lg border bg-muted/30 p-4 text-sm">
-                    <p className="font-medium flex items-center gap-2 mb-1">
-                      <Bell className="h-4 w-4 text-primary" />
-                      What happens next
-                    </p>
-                    <p className="text-muted-foreground">{applicationStatusNextStep(app.status, app.selection_step)}</p>
-                  </div>
+                  {!showOffeeCallout && (
+                    <div className="rounded-lg border bg-muted/30 p-4 text-sm">
+                      <p className="font-medium flex items-center gap-2 mb-1">
+                        <Bell className="h-4 w-4 text-primary" />
+                        What happens next
+                      </p>
+                      <p className="text-muted-foreground">
+                        {applicationStatusNextStep(app.status, app.selection_step)}
+                      </p>
+                    </div>
+                  )}
 
                   {app.interview_meet_url && app.interview_scheduled_at && (
                     <InterviewInviteCard
@@ -153,9 +199,11 @@ export default function CandidateApplications() {
                         <Link to={`/candidate/jobs/${app.job_id}`}>View job</Link>
                       </Button>
                     )}
-                    <Button size="sm" variant="ghost" asChild>
-                      <Link to="/candidate/jobs">Apply to another job role</Link>
-                    </Button>
+                    {jobsOpen && (
+                      <Button size="sm" variant="ghost" asChild>
+                        <a href="#roles">Apply to another job role</a>
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>

@@ -44,18 +44,18 @@ export default function ApplicationSubmittedDialog({ open, onOpenChange, jobTitl
           </div>
           <div className="flex gap-3">
             <ArrowRight className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
-            <p>You can apply to other open job roles anytime — track everything in My Applications.</p>
+            <p>You can apply to other open job roles anytime — track everything in Selection.</p>
           </div>
         </div>
 
         <DialogFooter className="flex-col sm:flex-col gap-2">
           <Button className="w-full" asChild>
-            <Link to="/candidate/applications" onClick={() => onOpenChange(false)}>
-              My Applications
+            <Link to="/candidate/selection" onClick={() => onOpenChange(false)}>
+              View Selection
             </Link>
           </Button>
           <Button variant="outline" className="w-full" asChild>
-            <Link to="/candidate/jobs" onClick={() => onOpenChange(false)}>
+            <Link to="/candidate/selection#roles" onClick={() => onOpenChange(false)}>
               Browse more job roles
             </Link>
           </Button>

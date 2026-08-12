@@ -121,7 +121,7 @@ export default function StageTasksPanel({
                 Then {stageMeta?.name} and the rest of your journey will begin here.
               </p>
               <Button size="sm" asChild>
-                <Link to="/candidate/jobs">Go to Job Roles <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                <Link to="/candidate/selection">Go to Selection <ArrowRight className="ml-2 h-4 w-4" /></Link>
               </Button>
             </div>
           </CardContent>
@@ -280,26 +280,23 @@ export default function StageTasksPanel({
               <p className="font-medium">Preparation complete</p>
               <p className="text-sm text-muted-foreground mt-1">
                 {waitingOnEmployer
-                  ? "Your applications are with employers. Track updates in My Applications."
+                  ? "Your applications are with employers. Track updates in Selection."
                   : hasApplications
-                    ? "Apply to more job roles or check status in My Applications."
-                    : "Next step: apply to an open job."}
+                    ? "Apply to more job roles or check status in Selection."
+                    : "Next step: apply to an open job in Selection."}
               </p>
             </div>
             <div className="flex flex-wrap gap-2 shrink-0">
-              {!waitingOnEmployer && (
-                <Button asChild>
-                  <Link to="/candidate/jobs">
-                    {hasApplications ? "Browse more jobs" : "Apply to a job"}
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              )}
-              {hasApplications && (
-                <Button variant={waitingOnEmployer ? "default" : "outline"} asChild>
-                  <Link to="/candidate/applications">My Applications</Link>
-                </Button>
-              )}
+              <Button asChild>
+                <Link to="/candidate/selection">
+                  {waitingOnEmployer
+                    ? "View Selection"
+                    : hasApplications
+                      ? "Browse more jobs"
+                      : "Apply to a job"}
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
             </div>
           </CardContent>
         </Card>

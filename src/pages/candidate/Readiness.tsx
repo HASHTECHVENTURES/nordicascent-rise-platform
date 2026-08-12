@@ -35,7 +35,7 @@ export default function CandidateReadiness() {
     }
     if (loading || applicationsLoading) return;
     if (isPreparationComplete(profile, candidate)) {
-      navigate("/candidate/jobs", { replace: true });
+      navigate("/candidate/selection", { replace: true });
     }
   }, [
     ready,
@@ -75,16 +75,16 @@ export default function CandidateReadiness() {
                   Congratulations — you were selected. Readiness unlocks once your company assigns a mentor.
                 </p>
                 <Button size="sm" variant="outline" asChild>
-                  <Link to="/candidate/applications">View application status</Link>
+                  <Link to="/candidate/selection">View Selection</Link>
                 </Button>
               </>
             ) : inSelection ? (
               <>
                 <p className="text-sm text-muted-foreground">
-                  Readiness opens after you pass selection and a mentor is assigned. Track your application in My Applications.
+                  Readiness opens after you pass selection and a mentor is assigned. Track your application in Selection.
                 </p>
                 <Button size="sm" variant="outline" asChild>
-                  <Link to="/candidate/applications">My Applications</Link>
+                  <Link to="/candidate/selection">Selection</Link>
                 </Button>
               </>
             ) : (

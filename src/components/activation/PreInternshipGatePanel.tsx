@@ -2,8 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { CheckCircle2, Loader2, Lock } from "lucide-react";
 import {
@@ -48,7 +46,6 @@ export default function PreInternshipGatePanel({
   const unlockAcademic = useUnlockAcademicInternship();
   const setCredit = useSetUniversityCreditRequired();
   const { data: cms } = useActivationCms();
-  const [startDate, setStartDate] = useState("");
   const acceptSectionRef = useRef<HTMLDivElement>(null);
   const [highlightAccept, setHighlightAccept] = useState(false);
 
@@ -215,16 +212,6 @@ export default function PreInternshipGatePanel({
             </p>
           ) : canCandidate ? (
             <div className="space-y-3">
-              <div className="space-y-1.5 max-w-xs">
-                <Label htmlFor="internship-start">Expected start date (optional)</Label>
-                <Input
-                  id="internship-start"
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  disabled={!acknowledged}
-                />
-              </div>
               <Button
                 size="sm"
                 disabled={accept.isPending || !acknowledged}
@@ -232,7 +219,7 @@ export default function PreInternshipGatePanel({
                   try {
                     await accept.mutateAsync({
                       applicationId,
-                      internship_start_date: startDate || null,
+                      internship_start_date: null,
                     });
                     setHighlightAccept(false);
                     toast({

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +26,12 @@ import {
 } from "@/lib/jobPostingDisplay";
 import ProfileReadinessAlert from "@/components/candidate/ProfileReadinessAlert";
 
-export default function CandidateJobs() {
+type Props = {
+  /** When true, render as a Selection journey section. */
+  embedded?: boolean;
+};
+
+export default function CandidateJobs({ embedded = false }: Props) {
   const navigate = useNavigate();
   const { profile, candidate, session } = useAuth();
   const { data: jobs, isLoading: jobsLoading } = useOpenJobs();
@@ -62,6 +67,10 @@ export default function CandidateJobs() {
       );
     });
   }, [jobs, search, candidate?.track]);
+
+  if (!embedded) {
+    return <Navigate to="/candidate/selection#roles" replace />;
+  }
 
   const handleApply = (jobId: string) => {
     setPendingJobApplication(jobId);
@@ -106,9 +115,8 @@ export default function CandidateJobs() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-medium text-foreground">Job Roles</h1>
-        <p className="text-muted-foreground mt-1">Browse open positions and apply.</p>
-        <p className="text-muted-foreground">Open job roles you can apply to.</p>
+        <h2 className="text-lg font-medium text-foreground">Open job roles</h2>
+        <p className="text-sm text-muted-foreground mt-1">Browse open positions and apply from Selection.</p>
       </div>
 
       {!profileReady && <ProfileReadinessAlert compact />}

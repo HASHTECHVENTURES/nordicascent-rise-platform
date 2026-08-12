@@ -9,8 +9,6 @@ import {
   Bell,
   AlertTriangle,
   User,
-  Briefcase,
-  ClipboardList,
   Home,
   UsersRound,
 } from "lucide-react";
@@ -24,7 +22,6 @@ import { useNotifications, useMarkAllNotificationsRead, useUnreadMessageCount } 
 import { useSyncEligibleTasks } from "@/hooks/useSyncEligibleTasks";
 import { useCandidateOnboardingRedirect } from "@/hooks/useCandidateOnboarding";
 import { useWaitlistProfileLock } from "@/hooks/useWaitlistProfileLock";
-import { useJobsAccessLock } from "@/hooks/useJobsAccessLock";
 import { CANDIDATE_PROFILE_PATH } from "@/lib/candidateAccess";
 
 // No sub-items needed; My Journey is a direct link
@@ -32,8 +29,6 @@ import { CANDIDATE_PROFILE_PATH } from "@/lib/candidateAccess";
 // Standalone nav items
 const standaloneNav = [
   { name: "My Profile", href: "/candidate/profile", icon: User, tooltip: "Complete your profile, upload CV, and add skills" },
-  { name: "Job Roles", href: "/candidate/jobs", icon: Briefcase, tooltip: "Browse open job roles — apply to multiple positions" },
-  { name: "My Applications", href: "/candidate/applications", icon: ClipboardList, tooltip: "Track status of every job role you applied to" },
   { name: "Mentoring", href: "/candidate/mentoring", icon: UsersRound, tooltip: "Your mentor, meeting agendas, and programme progress" },
   { name: "Messages", href: "/candidate/messages", icon: MessageSquare, tooltip: "Communication with employers and Nordic Ascent team" },
   { name: "Support", href: "/candidate/support", icon: AlertTriangle, tooltip: "Open a support ticket with Nordic Ascent" },
@@ -44,7 +39,6 @@ const CandidateLayout = () => {
   const location = useLocation();
   const [track] = useTrack();
   const { data: notifications } = useNotifications();
-  const { jobsOpen } = useJobsAccessLock();
   const markAllRead = useMarkAllNotificationsRead();
   const unreadIssues = notifications?.filter((n) => !n.read_at).length ?? 0;
   const unreadMessages = useUnreadMessageCount();
@@ -54,13 +48,7 @@ const CandidateLayout = () => {
   const homePath = waitlistLocked ? CANDIDATE_PROFILE_PATH : "/candidate/dashboard";
   const visibleStandaloneNav = waitlistLocked
     ? standaloneNav.filter((item) => item.href === CANDIDATE_PROFILE_PATH)
-    : standaloneNav.filter((item) => {
-        if (item.href === CANDIDATE_PROFILE_PATH) return false;
-        if (item.href === "/candidate/jobs" || item.href === "/candidate/applications") {
-          return jobsOpen;
-        }
-        return true;
-      });
+    : standaloneNav.filter((item) => item.href !== CANDIDATE_PROFILE_PATH);
 
   const renderNavItem = (item: { name: string; href: string; icon: React.ElementType; tooltip?: string }, indented = false) => {
     const isActive = location.pathname === item.href || location.pathname.startsWith(`${item.href}/`);

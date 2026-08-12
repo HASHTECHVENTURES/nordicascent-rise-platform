@@ -32,7 +32,9 @@ export default function SelectionProgressTracker({ status, selectionStep, classN
             )}
           >
             <StageIcon state={stage.state} />
-            <span className="truncate">{stage.label}</span>
+            <span className={cn(stage.id === "offee" && stage.state === "current" && "text-primary")}>
+              {stage.label}
+            </span>
           </div>
           {i < stages.length - 1 && (
             <div className="hidden sm:block w-6 h-px bg-border mx-1 shrink-0" aria-hidden />

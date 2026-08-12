@@ -80,8 +80,8 @@ export default function PreparationStageCard() {
 
       {prepDone && (
         <Button className="w-full btn-professional" asChild>
-          <Link to="/candidate/jobs">
-            Browse job roles
+          <Link to="/candidate/selection">
+            Go to Selection
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>

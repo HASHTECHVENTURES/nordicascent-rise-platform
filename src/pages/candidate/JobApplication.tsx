@@ -138,7 +138,7 @@ export default function CandidateJobApplication() {
       <div className="text-center py-20 space-y-4">
         <p className="text-muted-foreground">This job is no longer available.</p>
         <Button asChild variant="outline">
-          <Link to="/candidate/jobs">Back to Job Roles</Link>
+          <Link to="/candidate/selection">Back to Selection</Link>
         </Button>
       </div>
     );
@@ -152,7 +152,7 @@ export default function CandidateJobApplication() {
         </Button>
         <p className="font-medium">You have already applied for this job role.</p>
         <Button asChild>
-          <Link to="/candidate/applications">View my applications</Link>
+          <Link to="/candidate/selection">View Selection</Link>
         </Button>
       </div>
     );
@@ -207,7 +207,7 @@ export default function CandidateJobApplication() {
         onOpenChange={(open) => {
           if (!open) {
             setSubmittedJob(null);
-            navigate("/candidate/applications");
+            navigate("/candidate/selection");
           }
         }}
         jobTitle={submittedJob ?? ""}

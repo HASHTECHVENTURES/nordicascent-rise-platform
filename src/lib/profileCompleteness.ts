@@ -177,9 +177,14 @@ export function hasCvUploaded(candidate: Candidate | null) {
 
 export function getTaskActionLink(taskTitle: string): string {
   const title = taskTitle.toLowerCase();
-  if (title.includes("apply") || title.includes("job")) return "/candidate/jobs";
-  if (title.includes("matching") || title.includes("employer") || title.includes("screening")) {
-    return "/candidate/applications";
+  if (
+    title.includes("apply") ||
+    title.includes("job") ||
+    title.includes("matching") ||
+    title.includes("employer") ||
+    title.includes("screening")
+  ) {
+    return "/candidate/selection";
   }
   return "/candidate/profile";
 }
@@ -190,9 +195,8 @@ export function getTaskActionLabel(taskTitle: string, done: boolean) {
   if (title.includes("profile")) return "Go to Profile";
   if (title.includes("document") || title.includes("upload")) return "Upload CV";
   if (title.includes("skills")) return "Add skills";
-  if (title.includes("apply") || title.includes("job") || title.includes("role")) return "Browse job roles";
-  if (title.includes("matching") || title.includes("employer")) return "My Applications";
-  if (title.includes("screening")) return "My Applications";
+  if (title.includes("apply") || title.includes("job") || title.includes("role")) return "Go to Selection";
+  if (title.includes("matching") || title.includes("employer") || title.includes("screening")) return "Go to Selection";
   return "View details";
 }
 

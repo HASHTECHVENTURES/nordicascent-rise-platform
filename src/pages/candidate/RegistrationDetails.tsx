@@ -81,7 +81,7 @@ export default function CandidateRegistrationDetails() {
     }
     if (isRegistrationDetailsComplete(candidate)) {
       const pendingApply = pendingJobApplyPath();
-      navigate(pendingApply ?? "/candidate/jobs", { replace: true });
+      navigate(pendingApply ?? "/candidate/selection", { replace: true });
     }
   }, [loading, candidate, navigate]);
 
@@ -135,7 +135,7 @@ export default function CandidateRegistrationDetails() {
         return;
       }
       toast({ title: "Registration complete", description: "You can now browse and apply for job roles." });
-      navigate("/candidate/jobs", { replace: true });
+      navigate("/candidate/selection", { replace: true });
     } catch (err) {
       toast({
         title: "Save failed",

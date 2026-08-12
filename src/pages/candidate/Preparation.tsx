@@ -12,7 +12,7 @@ export default function CandidatePreparation() {
 
   useEffect(() => {
     if (prepDone) {
-      navigate("/candidate/jobs", { replace: true });
+      navigate("/candidate/selection", { replace: true });
     }
   }, [prepDone, navigate]);
 
