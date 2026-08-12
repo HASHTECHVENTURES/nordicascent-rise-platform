@@ -157,11 +157,15 @@ export function useSaveMeetingSchedule() {
       applicationId,
       scheduled_at,
       meeting_url,
+      meetingNumber,
+      notifyCandidate = true,
     }: {
       meetingId: string;
       applicationId: string;
       scheduled_at: string | null;
       meeting_url: string | null;
+      meetingNumber?: number;
+      notifyCandidate?: boolean;
     }) => {
       const { error } = await supabase
         .from("mentor_program_meetings")
@@ -172,6 +176,49 @@ export function useSaveMeetingSchedule() {
         })
         .eq("id", meetingId);
       if (error) throw error;
+
+      if (notifyCandidate && scheduled_at) {
+        const { data: app } = await supabase
+          .from("applications")
+          .select(
+            `
+            jobs(title, companies(name)),
+            candidates(full_name, profiles(full_name, email))
+          `
+          )
+          .eq("id", applicationId)
+          .maybeSingle();
+
+        const cand = app?.candidates as {
+          full_name?: string | null;
+          profiles?:
+            | { full_name?: string | null; email?: string | null }
+            | { full_name?: string | null; email?: string | null }[]
+            | null;
+        } | null;
+        const profile = Array.isArray(cand?.profiles) ? cand?.profiles[0] : cand?.profiles;
+        const to = profile?.email?.trim();
+        if (to) {
+          const { buildMentorEmail } = await import("@/lib/mentorEmails");
+          const { sendTransactionalEmail } = await import("@/lib/sendTransactionalEmail");
+          const mail = buildMentorEmail("mentor_session_scheduled", {
+            mentorName: "Your mentor",
+            companyName: (app?.jobs as { companies?: { name?: string } | null } | null)?.companies
+              ?.name,
+            candidateName: cand?.full_name ?? profile?.full_name ?? undefined,
+            jobTitle: (app?.jobs as { title?: string } | null)?.title,
+            meetingNumber,
+            scheduledAt: new Date(scheduled_at).toLocaleString(),
+            meetingUrl: meeting_url?.trim() || undefined,
+          });
+          await sendTransactionalEmail({
+            to,
+            subject: mail.subject,
+            html: mail.html,
+            text: mail.text,
+          });
+        }
+      }
     },
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ["mentor-program-meetings", vars.applicationId] });
@@ -304,6 +351,73 @@ export function useSaveMentorActivationNote() {
     },
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ["mentor-activation-note", vars.applicationId] });
+    },
+  });
+}
+
+export function useUpdateMentorMeetingTheme() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: {
+      meeting_number: number;
+      title: string;
+      theme_body: string;
+    }) => {
+      const { error } = await supabase
+        .from("mentor_meeting_themes")
+        .update({
+          title: input.title.trim(),
+          theme_body: input.theme_body.trim(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("meeting_number", input.meeting_number);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["mentor-meeting-themes"] });
+    },
+  });
+}
+
+export function useAdminMentorOverdueFlags() {
+  return useQuery({
+    queryKey: ["admin-mentor-overdue-flags"],
+    queryFn: async () => {
+      const [{ data: apps, error: aErr }, { data: meetings, error: mErr }] = await Promise.all([
+        supabase
+          .from("applications")
+          .select("id, board_decided_at, assigned_mentor_id, readiness_unlocked_at")
+          .eq("status", "selected_for_readiness")
+          .is("assigned_mentor_id", null),
+        supabase
+          .from("mentor_program_meetings")
+          .select("id, application_id, meeting_number, status, available_at, created_at, updated_at")
+          .eq("status", "available"),
+      ]);
+      if (aErr) throw aErr;
+      if (mErr) throw mErr;
+
+      const { isMentorAssignmentOverdue, isMentorMeetingOverdue } = await import(
+        "@/lib/mentorProgram"
+      );
+
+      const assignmentOverdue = (apps ?? []).filter((a) =>
+        isMentorAssignmentOverdue(a.board_decided_at)
+      );
+
+      const meetingOverdue = (meetings ?? []).filter((m) =>
+        isMentorMeetingOverdue(m as import("@/lib/mentorProgram").MentorProgramMeeting)
+      );
+
+      return {
+        assignmentOverdueIds: new Set(assignmentOverdue.map((a) => a.id)),
+        meetingOverdueByApp: meetingOverdue.reduce<Record<string, number[]>>((acc, m) => {
+          const list = acc[m.application_id] ?? [];
+          list.push(m.meeting_number);
+          acc[m.application_id] = list;
+          return acc;
+        }, {}),
+      };
     },
   });
 }

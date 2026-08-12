@@ -442,6 +442,57 @@ export function useAssignMentorToApplication() {
           ((app?.candidates as { track?: Track } | null)?.track ?? "entry");
       }
       await initializeMentorMeetings(applicationId, resolvedTrack);
+
+      const [{ data: mentor }, { data: appCtx }] = await Promise.all([
+        supabase
+          .from("company_mentors")
+          .select("id, name, email, invite_sent_at")
+          .eq("id", mentorId)
+          .maybeSingle(),
+        supabase
+          .from("applications")
+          .select(
+            "jobs(title, companies(name)), candidates(full_name, profiles(full_name))"
+          )
+          .eq("id", applicationId)
+          .maybeSingle(),
+      ]);
+
+      if (mentor?.email) {
+        const companyName = (
+          appCtx?.jobs as { companies?: { name?: string } | null } | null
+        )?.companies?.name;
+        const jobTitle = (appCtx?.jobs as { title?: string } | null)?.title;
+        const cand = appCtx?.candidates as {
+          full_name?: string | null;
+          profiles?: { full_name?: string | null } | { full_name?: string | null }[] | null;
+        } | null;
+        const profileName = Array.isArray(cand?.profiles)
+          ? cand?.profiles[0]?.full_name
+          : cand?.profiles?.full_name;
+        const candidateName = cand?.full_name ?? profileName ?? undefined;
+
+        const { buildMentorEmail } = await import("@/lib/mentorEmails");
+        const { sendTransactionalEmail } = await import("@/lib/sendTransactionalEmail");
+        const mail = buildMentorEmail("mentor_invite", {
+          mentorName: mentor.name,
+          companyName,
+          candidateName,
+          jobTitle,
+        });
+        await sendTransactionalEmail({
+          to: mentor.email,
+          subject: mail.subject,
+          html: mail.html,
+          text: mail.text,
+        });
+        if (!mentor.invite_sent_at) {
+          await supabase
+            .from("company_mentors")
+            .update({ invite_sent_at: now })
+            .eq("id", mentor.id);
+        }
+      }
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-selection-applications"] });
@@ -451,6 +502,7 @@ export function useAssignMentorToApplication() {
       qc.invalidateQueries({ queryKey: ["my-applications"] });
       qc.invalidateQueries({ queryKey: ["mentor-program-meetings"] });
       qc.invalidateQueries({ queryKey: ["assigned-mentor"] });
+      qc.invalidateQueries({ queryKey: ["company-mentors"] });
     },
   });
 }

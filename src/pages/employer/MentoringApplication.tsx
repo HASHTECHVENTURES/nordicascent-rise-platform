@@ -70,7 +70,13 @@ export default function EmployerMentoringApplication() {
         </div>
       </div>
 
-      <MentorProgramPanel applicationId={app.id} track={track} canEdit showObservations={false} />
+      <MentorProgramPanel
+        applicationId={app.id}
+        track={track}
+        canEdit
+        showObservations
+        canEditSummaryNotes
+      />
     </div>
   );
 }

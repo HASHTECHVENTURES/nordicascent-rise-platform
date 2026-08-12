@@ -24,6 +24,7 @@ import {
 } from "@/lib/followupModule";
 import { useReadinessCms, useUpdateReadinessCms } from "@/hooks/useReadiness";
 import { DEFAULT_READINESS_CMS, type ReadinessCms } from "@/lib/readiness";
+import MentorCmsPanel from "@/components/admin/MentorCmsPanel";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -212,6 +213,7 @@ const AdminSettings = () => {
           <TabsTrigger value="onboarding">Onboarding CMS</TabsTrigger>
           <TabsTrigger value="followup">Follow-up CMS</TabsTrigger>
           <TabsTrigger value="readiness">Readiness CMS</TabsTrigger>
+          <TabsTrigger value="mentoring">Mentor CMS</TabsTrigger>
           <TabsTrigger value="data">Data</TabsTrigger>
         </TabsList>
 
@@ -712,6 +714,10 @@ const AdminSettings = () => {
               </Button>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="mentoring">
+          <MentorCmsPanel />
         </TabsContent>
 
         <TabsContent value="data">

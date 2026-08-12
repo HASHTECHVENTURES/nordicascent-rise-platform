@@ -42,7 +42,10 @@ const EmployerMentoring = () => {
         bio: mentorBio,
         expertise_tags: tags,
       });
-      toast({ title: "Mentor added" });
+      toast({
+        title: "Mentor added",
+        description: "An invite email was sent (when email integration is connected).",
+      });
       setMentorName("");
       setMentorRole("");
       setMentorEmail("");

@@ -2445,21 +2445,44 @@ export function useCreateCompanyMentor() {
     }) => {
       const { data: employer } = await supabase
         .from("employers")
-        .select("company_id")
+        .select("company_id, companies(name)")
         .eq("profile_id", profile!.id)
         .single();
       if (!employer?.company_id) throw new Error("Company not found");
-      const { error } = await supabase.from("company_mentors").insert({
-        company_id: employer.company_id,
-        name: mentor.name.trim(),
-        role_title: mentor.role_title?.trim() || null,
-        email: mentor.email.trim().toLowerCase(),
-        phone: mentor.phone?.trim() || null,
-        bio: mentor.bio?.trim() || null,
-        expertise_tags: mentor.expertise_tags?.length ? mentor.expertise_tags : [],
-        status: "active",
-      });
+      const { data: created, error } = await supabase
+        .from("company_mentors")
+        .insert({
+          company_id: employer.company_id,
+          name: mentor.name.trim(),
+          role_title: mentor.role_title?.trim() || null,
+          email: mentor.email.trim().toLowerCase(),
+          phone: mentor.phone?.trim() || null,
+          bio: mentor.bio?.trim() || null,
+          expertise_tags: mentor.expertise_tags?.length ? mentor.expertise_tags : [],
+          status: "active",
+          invited_by: profile?.id ?? null,
+          invite_sent_at: new Date().toISOString(),
+        })
+        .select("id, name, email")
+        .single();
       if (error) throw error;
+
+      const companyName =
+        (employer.companies as { name?: string } | null)?.name ?? undefined;
+      const { buildMentorEmail } = await import("@/lib/mentorEmails");
+      const { sendTransactionalEmail } = await import("@/lib/sendTransactionalEmail");
+      const mail = buildMentorEmail("mentor_invite", {
+        mentorName: created.name,
+        companyName,
+      });
+      await sendTransactionalEmail({
+        to: created.email,
+        subject: mail.subject,
+        html: mail.html,
+        text: mail.text,
+      });
+
+      return created;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["company-mentors"] });

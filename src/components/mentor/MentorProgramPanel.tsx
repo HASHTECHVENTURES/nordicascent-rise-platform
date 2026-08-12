@@ -21,7 +21,7 @@ import {
   refreshMeetingUnlocks,
 } from "@/hooks/useMentorProgram";
 import { getMeetingLockedReason, isMentorMeetingOverdue, agendaBulletsFromThemeBody } from "@/lib/mentorProgram";
-import type { MentorMeetingObservation, MentorProgramMeeting } from "@/lib/mentorProgram";
+import type { ActivationMentorGate, MentorMeetingObservation, MentorProgramMeeting } from "@/lib/mentorProgram";
 import type { Track } from "@/lib/track";
 import MentorMeetingDots from "@/components/mentor/MentorMeetingDots";
 import { useActivationRecord } from "@/hooks/useActivation";
@@ -29,8 +29,9 @@ import { useActivationRecord } from "@/hooks/useActivation";
 type Props = {
   applicationId: string;
   track?: Track | null;
+  /** Schedule sessions + fill observation forms (mentor / admin). */
   canEdit?: boolean;
-  /** Admin sees individual meeting observations; company/mentor do not. */
+  /** Admin sees individual meeting observations; company decision-makers do not. */
   showObservations?: boolean;
   /** Mentor/admin fill signal & activation notes; company reads via MentorCompanyNotesPanel. */
   canEditSummaryNotes?: boolean;
@@ -56,7 +57,10 @@ export default function MentorProgramPanel({
   const { data: readinessGate } = useReadinessMentorGateForApplication(applicationId);
   const gate = readinessGate ?? { level2BothSubmitted: false, allTestsSubmitted: false };
   const { data: activationRecord } = useActivationRecord(applicationId);
-  const activationUnlocked = Boolean(activationRecord);
+  const activationGate: ActivationMentorGate = {
+    activationUnlocked: Boolean(activationRecord),
+    internshipStartDate: activationRecord?.internship_start_date ?? null,
+  };
   const { data: signalNote } = useMentorSignalNote(applicationId);
   const { data: activationNote } = useMentorActivationNote(applicationId);
   const saveObservation = useSaveMentorObservation();
@@ -131,7 +135,7 @@ export default function MentorProgramPanel({
   const activationMeetings = meetingList.filter((m) => m.phase === "activation" && m.status !== "not_applicable");
 
   const lockedReason = (meetingNumber: number) =>
-    getMeetingLockedReason(meetingNumber, meetingList, gate, activationUnlocked);
+    getMeetingLockedReason(meetingNumber, meetingList, gate, activationGate);
 
   const openMeetingForm = (n: number) => {
     const m = meetingList.find((x) => x.meeting_number === n);
@@ -213,17 +217,19 @@ export default function MentorProgramPanel({
             >
               {m.scheduled_at ? "Edit schedule" : "Schedule session"}
             </Button>
-            <Button
-              size="sm"
-              variant={done ? "outline" : "default"}
-              onClick={() => openMeetingForm(m.meeting_number)}
-            >
-              {done ? "Edit observation" : "Complete meeting"}
-            </Button>
+            {showObservations && (
+              <Button
+                size="sm"
+                variant={done ? "outline" : "default"}
+                onClick={() => openMeetingForm(m.meeting_number)}
+              >
+                Complete meeting
+              </Button>
+            )}
           </div>
         )}
 
-        {canEdit && !locked && done && (
+        {canEdit && showObservations && !locked && done && (
           <Button
             size="sm"
             variant="outline"
@@ -266,6 +272,7 @@ export default function MentorProgramPanel({
                       applicationId,
                       scheduled_at: scheduleAt ? new Date(scheduleAt).toISOString() : null,
                       meeting_url: meetingUrl.trim() || null,
+                      meetingNumber: m.meeting_number,
                     });
                     toast({ title: "Session scheduled" });
                     setSchedulingMeeting(null);
@@ -301,7 +308,7 @@ export default function MentorProgramPanel({
           </p>
         )}
 
-        {activeMeeting === m.meeting_number && canEdit && (
+        {activeMeeting === m.meeting_number && canEdit && showObservations && (
           <div className="border-t pt-4 space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
