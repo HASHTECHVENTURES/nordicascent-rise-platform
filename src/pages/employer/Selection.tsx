@@ -55,35 +55,28 @@ const EmployerSelection = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-medium">Selection</h1>
-        <p className="text-muted-foreground">
-          Review applications in the Selection pipeline. Mentor assignment happens here; complete 3+3
-          observations in the Mentoring module.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-medium">Selection</h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            Review applications in the Selection pipeline. Mentor assignment happens here.
+          </p>
+        </div>
+        <Select value={selectedJobId ?? ""} onValueChange={setJobId}>
+          <SelectTrigger className="w-full sm:w-72">
+            <SelectValue placeholder="Select a job role" />
+          </SelectTrigger>
+          <SelectContent>
+            {(jobs ?? []).map((j) => (
+              <SelectItem key={j.id} value={j.id}>
+                {j.title}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Job role</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Select value={selectedJobId ?? ""} onValueChange={setJobId}>
-            <SelectTrigger className="max-w-md">
-              <SelectValue placeholder="Select a job role" />
-            </SelectTrigger>
-            <SelectContent>
-              {(jobs ?? []).map((j) => (
-                <SelectItem key={j.id} value={j.id}>
-                  {j.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-6 gap-2">
         {SELECTION_STEPS.map((s) => (
           <button
             key={s.step}
@@ -126,7 +119,10 @@ const EmployerSelection = () => {
             </div>
           ) : filteredApps.length === 0 ? (
             <p className="text-sm text-muted-foreground py-8 text-center">
-              No applications in Selection for this job role yet.
+              {((applications ?? []).filter((a) => isEmployerSelectionListStatus(a.status)).length === 0 &&
+              (applications ?? []).some((a) => !isEmployerSelectionListStatus(a.status)))
+                ? "Accepted candidates appear here once they enter the Selection pipeline."
+                : "No applications match this filter for the selected job role."}
             </p>
           ) : (
             <div className="space-y-2">

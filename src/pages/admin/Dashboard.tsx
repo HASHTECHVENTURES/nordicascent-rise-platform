@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { GraduationCap, ClipboardCheck, Rocket, Loader2 } from "lucide-react";
+import { GraduationCap, ClipboardCheck, Rocket, Loader2, UserCheck } from "lucide-react";
 import { useAdminJourneyStats } from "@/hooks/useData";
 
 const AdminDashboard = () => {
@@ -21,6 +21,13 @@ const AdminDashboard = () => {
       label: "waitlist pending",
       href: "/admin/universities",
       icon: GraduationCap,
+    },
+    {
+      title: "Selection",
+      count: stats?.eligibilityPending ?? 0,
+      label: "awaiting eligibility review",
+      href: "/admin/selection?step=1",
+      icon: UserCheck,
     },
     {
       title: "Readiness",

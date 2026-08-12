@@ -184,7 +184,7 @@ Mark complete when travel is booked.`,
       title: "Settling in guide",
       description: "Banking, SIM, and first-week essentials",
       task_type: "task",
-      image_url: "https://images.unsplash.com/photo-1531366936337-7c912a45b87e?w=1200&auto=format&fit=crop",
+      image_url: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&auto=format&fit=crop",
       content_body: `Settling in guide
 
 Your first week checklist after landing.

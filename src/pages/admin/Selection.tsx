@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, AlertTriangle, ChevronRight, Users } from "lucide-react";
+import { Loader2, AlertTriangle, ChevronRight, Users, ExternalLink } from "lucide-react";
 import {
   useAdminSelectionJobs,
   useAdminJobSelectionApplications,
@@ -40,8 +40,15 @@ function isBulkEligibleStep1(app: SelectionApplication) {
 
 const AdminSelection = () => {
   const { data: jobs, isLoading: jobsLoading } = useAdminSelectionJobs();
+  const [searchParams] = useSearchParams();
+  const initialStep = searchParams.get("step");
   const [jobId, setJobId] = useState<string>("");
-  const [stepFilter, setStepFilter] = useState<SelectionStepId | "all">("all");
+  const [stepFilter, setStepFilter] = useState<SelectionStepId | "all">(() => {
+    if (initialStep && /^[1-5]$/.test(initialStep)) {
+      return Number(initialStep) as SelectionStepId;
+    }
+    return "all";
+  });
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const bulkDecide = useBulkSelectionDecision();
   const { toast } = useToast();
@@ -326,6 +333,13 @@ const AdminSelection = () => {
                         <ChevronRight className="h-4 w-4 text-muted-foreground" />
                       </div>
                     </Link>
+                    {cand?.id && (
+                      <Button variant="ghost" size="sm" className="shrink-0" asChild>
+                        <Link to={`/admin/candidates/${cand.id}`} title="Open candidate profile">
+                          <ExternalLink className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                    )}
                   </div>
                 );
               })}

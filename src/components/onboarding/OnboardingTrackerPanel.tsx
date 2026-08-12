@@ -321,13 +321,15 @@ export default function OnboardingTrackerPanel({
     );
   }
 
-  if (recordLoading || stepsLoading || listLoading || ensureInit.isPending) {
+  if (recordLoading || stepsLoading || listLoading) {
     return (
       <div className="flex justify-center py-8">
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     );
   }
+
+  const initializing = list.length === 0 && ensureInit.isPending;
 
   const visibleItems = items.filter((i) => {
     if (i.family_only && !familyRelocating) return false;
@@ -350,7 +352,9 @@ export default function OnboardingTrackerPanel({
     <div className="flex flex-wrap items-center gap-3">
       <div>
         <h3 className="text-base font-medium">
-          {role === "candidate" ? "Your onboarding progress" : "Onboarding coordination (9 steps)"}
+          {role === "candidate"
+            ? "Your onboarding progress"
+            : `Onboarding coordination (${progress.total} steps)`}
         </h3>
         <p className="text-sm text-muted-foreground">
           {role === "candidate"
@@ -412,7 +416,13 @@ export default function OnboardingTrackerPanel({
       {contactCard}
 
       <div className="space-y-3">
-        {visibleSteps.map((step) => {
+        {initializing ? (
+          <div className="flex items-center gap-2 py-6 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+            Setting up onboarding steps…
+          </div>
+        ) : (
+          visibleSteps.map((step) => {
           const def = ONBOARDING_STEP_DEFS.find((d) => d.step_number === step.step_number);
           const cmsKey = `step_${step.step_number}` as keyof NonNullable<typeof cms>;
           const candidateCopy = cms?.[cmsKey];
@@ -526,7 +536,8 @@ export default function OnboardingTrackerPanel({
               )}
             </div>
           );
-        })}
+        })
+        )}
       </div>
 
       {role === "company" && (

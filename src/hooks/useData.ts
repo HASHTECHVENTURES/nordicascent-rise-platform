@@ -2633,6 +2633,7 @@ export function useUnlockCandidateJobs() {
 
 export type AdminJourneyStats = {
   waitlistPending: number;
+  eligibilityPending: number;
   readinessNeedsReview: number;
   mentoringPipeline: number;
   jobsUnlocked: number;
@@ -2644,6 +2645,7 @@ export function useAdminJourneyStats() {
     queryFn: async () => {
       const [
         { count: waitlistPending, error: wErr },
+        { count: eligibilityPending, error: selErr },
         { data: tests, error: tErr },
         { data: attempts, error: aErr },
         { data: candidates, error: cErr },
@@ -2653,12 +2655,17 @@ export function useAdminJourneyStats() {
           .from("university_waitlist")
           .select("id", { count: "exact", head: true })
           .eq("status", "pending"),
+        supabase
+          .from("applications")
+          .select("id", { count: "exact", head: true })
+          .in("status", ["application_complete", "eligibility_review"]),
         supabase.from("readiness_tests").select("id").eq("active", true),
         supabase.from("readiness_attempts").select("candidate_id, status"),
         supabase.from("candidates").select("id, jobs_unlocked, university_id"),
         supabase.from("readiness_evaluations").select("candidate_id, evaluated_at"),
       ]);
       if (wErr) throw wErr;
+      if (selErr) throw selErr;
       if (tErr) throw tErr;
       if (aErr) throw aErr;
       if (cErr) throw cErr;
@@ -2684,6 +2691,7 @@ export function useAdminJourneyStats() {
 
       return {
         waitlistPending: waitlistPending ?? 0,
+        eligibilityPending: eligibilityPending ?? 0,
         readinessNeedsReview,
         mentoringPipeline,
         jobsUnlocked,

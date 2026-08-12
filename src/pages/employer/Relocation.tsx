@@ -17,7 +17,7 @@ function RelocationAppRow({ app }: { app: SelectionApplication }) {
     ((app.candidates as { track?: Track } | null)?.track ?? "entry");
   const { data: steps } = useRelocationSteps(app.id);
   const { data: record } = useActivationRecord(app.id);
-  const progress = relocationStepProgress(steps ?? [], false);
+  const progress = relocationStepProgress(steps ?? [], record?.family_relocating ?? false);
 
   return (
     <Link
@@ -35,7 +35,7 @@ function RelocationAppRow({ app }: { app: SelectionApplication }) {
           <Badge className="bg-success text-success-foreground text-xs">Arrived</Badge>
         ) : (
           <Badge variant="outline" className="text-xs">
-            {progress.done}/{progress.total}
+            {progress.done}/{progress.total} steps
           </Badge>
         )}
         <ChevronRight className="h-4 w-4 text-muted-foreground" />

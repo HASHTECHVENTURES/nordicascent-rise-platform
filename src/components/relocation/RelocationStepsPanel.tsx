@@ -291,7 +291,7 @@ export default function RelocationStepsPanel({
     );
   }
 
-  if (recordLoading || stepsLoading || ensureInit.isPending) {
+  if (recordLoading || stepsLoading) {
     return (
       <div className="flex justify-center py-8">
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -299,13 +299,17 @@ export default function RelocationStepsPanel({
     );
   }
 
+  const initializing = list.length === 0 && ensureInit.isPending;
+
   const visibleSteps = list.filter((s) => familyRelocating || s.step_number !== 7);
 
   const header = (
     <div className="flex flex-wrap items-center gap-3">
       <div>
         <h3 className="text-base font-medium">
-          {role === "candidate" ? "Your relocation progress" : "Relocation coordination (10 steps)"}
+          {role === "candidate"
+            ? "Your relocation progress"
+            : `Relocation coordination (${progress.total} steps)`}
         </h3>
         <p className="text-sm text-muted-foreground">
           {role === "candidate"
@@ -459,7 +463,13 @@ export default function RelocationStepsPanel({
       {candidateMeta}
 
       <div className="space-y-3">
-        {visibleSteps.map((step) => {
+        {initializing ? (
+          <div className="flex items-center gap-2 py-6 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+            Setting up relocation steps…
+          </div>
+        ) : (
+          visibleSteps.map((step) => {
           const def = RELOCATION_STEP_DEFS.find((d) => d.step_number === step.step_number);
           const cmsKey = `step_${step.step_number}` as keyof NonNullable<typeof cms>;
           const candidateCopy = cms?.[cmsKey];
@@ -558,7 +568,8 @@ export default function RelocationStepsPanel({
               )}
             </div>
           );
-        })}
+        })
+        )}
       </div>
     </div>
   );

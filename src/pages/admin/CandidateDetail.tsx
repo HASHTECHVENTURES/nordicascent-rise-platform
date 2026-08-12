@@ -110,6 +110,19 @@ const AdminCandidateDetail = () => {
             <p><span className="text-muted-foreground">Status</span> <Badge>{candidate.status}</Badge></p>
             <p><span className="text-muted-foreground">Joined</span> {candidate.created_at.split("T")[0]}</p>
             <p><span className="text-muted-foreground">Readiness</span> {candidate.readiness_score}%</p>
+            {candidate.linkedin_url && (
+              <p>
+                <span className="text-muted-foreground">LinkedIn</span>{" "}
+                <a
+                  href={candidate.linkedin_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  View profile
+                </a>
+              </p>
+            )}
           </CardContent>
         </Card>
 
