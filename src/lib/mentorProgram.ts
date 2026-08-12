@@ -19,6 +19,8 @@ export type MentorProgramMeeting = {
   phase: MentorMeetingPhase;
   status: MentorMeetingStatus;
   completed_at: string | null;
+  scheduled_at?: string | null;
+  meeting_url?: string | null;
   created_at?: string;
   updated_at?: string;
 };
@@ -127,10 +129,36 @@ export function countReadinessAreasSubmitted(
   return areas.size;
 }
 
+export type ReadinessMentorGate = {
+  /** Both cultural & technical Readiness level-2 tests submitted. */
+  level2BothSubmitted: boolean;
+  /** All Readiness tests (both areas × 3 levels) submitted. */
+  allTestsSubmitted: boolean;
+};
+
+export function buildReadinessMentorGate(
+  attempts: { test_id: string; status: string }[],
+  tests: { id: string; area: string; level: number }[]
+): ReadinessMentorGate {
+  const isSubmitted = (testId: string) => {
+    const a = attempts.find((x) => x.test_id === testId);
+    return a?.status === "submitted" || a?.status === "expired";
+  };
+
+  const level2Tests = tests.filter((t) => t.level === 2);
+  const level2BothSubmitted =
+    level2Tests.length >= 2 && level2Tests.every((t) => isSubmitted(t.id));
+
+  const allTestsSubmitted =
+    tests.length > 0 && tests.every((t) => isSubmitted(t.id));
+
+  return { level2BothSubmitted, allTestsSubmitted };
+}
+
 export function computeNextMeetingUnlocks(
   meetings: MentorProgramMeeting[],
   track: Track | null | undefined,
-  readinessAreasSubmitted: number,
+  gate: ReadinessMentorGate,
   activationUnlocked = false
 ): { id: string; status: MentorMeetingStatus }[] {
   const byNum = new Map(meetings.map((m) => [m.meeting_number, m]));
@@ -143,11 +171,14 @@ export function computeNextMeetingUnlocks(
 
     let shouldBeAvailable = false;
     if (m.meeting_number === 1) {
+      // Pre-Readiness: opens before any Readiness tests
       shouldBeAvailable = true;
     } else if (m.meeting_number === 2) {
-      shouldBeAvailable = isCompleted(1) && readinessAreasSubmitted >= 1;
+      // After Readiness test 2 (both areas), before test 3 window
+      shouldBeAvailable = isCompleted(1) && gate.level2BothSubmitted;
     } else if (m.meeting_number === 3) {
-      shouldBeAvailable = isCompleted(2);
+      // After Readiness phase complete
+      shouldBeAvailable = isCompleted(2) && gate.allTestsSubmitted;
     } else if (m.meeting_number === 4) {
       shouldBeAvailable =
         track === "entry" && isCompleted(3) && activationUnlocked;
@@ -175,7 +206,7 @@ export function computeNextMeetingUnlocks(
 export function getMeetingLockedReason(
   meetingNumber: number,
   meetings: MentorProgramMeeting[],
-  readinessAreasSubmitted: number,
+  gate: ReadinessMentorGate,
   activationUnlocked = false
 ): string {
   const byNum = new Map(meetings.map((m) => [m.meeting_number, m]));
@@ -187,10 +218,19 @@ export function getMeetingLockedReason(
     }
   }
 
+  if (meetingNumber === 1) {
+    return "Available once your mentor is assigned";
+  }
+
   if (meetingNumber === 2) {
     if (!isCompleted(1)) return "Complete Meeting 1 first";
-    if (readinessAreasSubmitted < 1) {
-      return "Unlocks when the candidate completes at least one Readiness area";
+    if (!gate.level2BothSubmitted) {
+      return "Unlocks after Readiness test 2 (both technical and cultural)";
+    }
+  } else if (meetingNumber === 3) {
+    if (!isCompleted(2)) return "Complete Meeting 2 first";
+    if (!gate.allTestsSubmitted) {
+      return "Unlocks when all Readiness tests are complete";
     }
   } else if (meetingNumber > 1) {
     const prev = byNum.get(meetingNumber - 1);
@@ -198,7 +238,7 @@ export function getMeetingLockedReason(
       return `Complete Meeting ${meetingNumber - 1} first`;
     }
   }
-  return "Complete the previous meeting first";
+  return "Complete the previous step first";
 }
 
 /** Meeting available but not completed for 7+ days — admin flag. */
@@ -227,13 +267,19 @@ export async function refreshMeetingUnlocks(
     .eq("id", applicationId)
     .single();
 
-  let readinessAreas = 0;
+  let gate: ReadinessMentorGate = {
+    level2BothSubmitted: false,
+    allTestsSubmitted: false,
+  };
   if (app?.candidate_id) {
-    const { data: attempts } = await supabase
-      .from("readiness_attempts")
-      .select("status, readiness_tests(area)")
-      .eq("candidate_id", app.candidate_id);
-    readinessAreas = countReadinessAreasSubmitted(attempts ?? []);
+    const [{ data: attempts }, { data: tests }] = await Promise.all([
+      supabase
+        .from("readiness_attempts")
+        .select("test_id, status")
+        .eq("candidate_id", app.candidate_id),
+      supabase.from("readiness_tests").select("id, area, level").eq("active", true),
+    ]);
+    gate = buildReadinessMentorGate(attempts ?? [], tests ?? []);
   }
 
   const { data: activation } = await supabase
@@ -246,7 +292,7 @@ export async function refreshMeetingUnlocks(
   const updates = computeNextMeetingUnlocks(
     (meetings ?? []) as MentorProgramMeeting[],
     track,
-    readinessAreas,
+    gate,
     activationUnlocked
   );
 

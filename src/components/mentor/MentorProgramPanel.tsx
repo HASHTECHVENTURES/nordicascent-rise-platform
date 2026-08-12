@@ -13,10 +13,11 @@ import {
   useMentorProgramMeetings,
   useMentorSignalNote,
   useMentorActivationNote,
-  useReadinessAreasForApplication,
+  useReadinessMentorGateForApplication,
   useSaveMentorObservation,
   useSaveMentorSignalNote,
   useSaveMentorActivationNote,
+  useSaveMeetingSchedule,
   refreshMeetingUnlocks,
 } from "@/hooks/useMentorProgram";
 import { getMeetingLockedReason, isMentorMeetingOverdue, agendaBulletsFromThemeBody } from "@/lib/mentorProgram";
@@ -52,12 +53,14 @@ export default function MentorProgramPanel({
   const { toast } = useToast();
   const { data: themes } = useMentorMeetingThemes();
   const { data: meetings, isLoading, refetch } = useMentorProgramMeetings(applicationId);
-  const { data: readinessAreas = 0 } = useReadinessAreasForApplication(applicationId);
+  const { data: readinessGate } = useReadinessMentorGateForApplication(applicationId);
+  const gate = readinessGate ?? { level2BothSubmitted: false, allTestsSubmitted: false };
   const { data: activationRecord } = useActivationRecord(applicationId);
   const activationUnlocked = Boolean(activationRecord);
   const { data: signalNote } = useMentorSignalNote(applicationId);
   const { data: activationNote } = useMentorActivationNote(applicationId);
   const saveObservation = useSaveMentorObservation();
+  const saveSchedule = useSaveMeetingSchedule();
   const saveSignal = useSaveMentorSignalNote();
   const saveActivation = useSaveMentorActivationNote();
 
@@ -67,6 +70,9 @@ export default function MentorProgramPanel({
   const [observations, setObservations] = useState("");
   const [concerns, setConcerns] = useState("");
   const [addonTopics, setAddonTopics] = useState("");
+  const [scheduleAt, setScheduleAt] = useState("");
+  const [meetingUrl, setMeetingUrl] = useState("");
+  const [schedulingMeeting, setSchedulingMeeting] = useState<number | null>(null);
 
   const [signalForm, setSignalForm] = useState({
     communication_clarity: "",
@@ -88,7 +94,7 @@ export default function MentorProgramPanel({
   useEffect(() => {
     if (!applicationId || !track) return;
     refreshMeetingUnlocks(applicationId, track).then(() => refetch());
-  }, [applicationId, track, readinessAreas, refetch]);
+  }, [applicationId, track, gate.level2BothSubmitted, gate.allTestsSubmitted, refetch]);
 
   useEffect(() => {
     if (!signalNote) return;
@@ -125,7 +131,7 @@ export default function MentorProgramPanel({
   const activationMeetings = meetingList.filter((m) => m.phase === "activation" && m.status !== "not_applicable");
 
   const lockedReason = (meetingNumber: number) =>
-    getMeetingLockedReason(meetingNumber, meetingList, readinessAreas, activationUnlocked);
+    getMeetingLockedReason(meetingNumber, meetingList, gate, activationUnlocked);
 
   const openMeetingForm = (n: number) => {
     const m = meetingList.find((x) => x.meeting_number === n);
@@ -190,14 +196,103 @@ export default function MentorProgramPanel({
           </div>
         )}
 
-        {canEdit && !locked && (
+        {canEdit && !locked && !done && (
+          <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setSchedulingMeeting(m.meeting_number);
+                setScheduleAt(
+                  m.scheduled_at
+                    ? new Date(m.scheduled_at).toISOString().slice(0, 16)
+                    : ""
+                );
+                setMeetingUrl(m.meeting_url ?? "");
+              }}
+            >
+              {m.scheduled_at ? "Edit schedule" : "Schedule session"}
+            </Button>
+            <Button
+              size="sm"
+              variant={done ? "outline" : "default"}
+              onClick={() => openMeetingForm(m.meeting_number)}
+            >
+              {done ? "Edit observation" : "Complete meeting"}
+            </Button>
+          </div>
+        )}
+
+        {canEdit && !locked && done && (
           <Button
             size="sm"
-            variant={done ? "outline" : "default"}
+            variant="outline"
             onClick={() => openMeetingForm(m.meeting_number)}
           >
-            {done ? "Edit observation" : "Complete meeting"}
+            Edit observation
           </Button>
+        )}
+
+        {canEdit && schedulingMeeting === m.meeting_number && (
+          <div className="border-t pt-4 space-y-3">
+            <p className="text-xs font-medium text-muted-foreground">Session invite (visible to candidate)</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label>Date & time</Label>
+                <Input
+                  type="datetime-local"
+                  value={scheduleAt}
+                  onChange={(e) => setScheduleAt(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Join link</Label>
+                <Input
+                  type="url"
+                  placeholder="https://meet.google.com/..."
+                  value={meetingUrl}
+                  onChange={(e) => setMeetingUrl(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                disabled={saveSchedule.isPending}
+                onClick={async () => {
+                  try {
+                    await saveSchedule.mutateAsync({
+                      meetingId: m.id,
+                      applicationId,
+                      scheduled_at: scheduleAt ? new Date(scheduleAt).toISOString() : null,
+                      meeting_url: meetingUrl.trim() || null,
+                    });
+                    toast({ title: "Session scheduled" });
+                    setSchedulingMeeting(null);
+                    await refetch();
+                  } catch (err) {
+                    toast({
+                      title: "Could not save schedule",
+                      description: err instanceof Error ? err.message : "Try again",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+              >
+                Save schedule
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setSchedulingMeeting(null)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {m.scheduled_at && (
+          <p className="text-xs text-muted-foreground">
+            Scheduled {new Date(m.scheduled_at).toLocaleString()}
+            {m.meeting_url ? " · Join link set" : ""}
+          </p>
         )}
 
         {canEdit && locked && (

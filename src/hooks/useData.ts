@@ -2440,6 +2440,8 @@ export function useCreateCompanyMentor() {
       role_title?: string;
       email: string;
       phone?: string;
+      bio?: string;
+      expertise_tags?: string[];
     }) => {
       const { data: employer } = await supabase
         .from("employers")
@@ -2453,6 +2455,8 @@ export function useCreateCompanyMentor() {
         role_title: mentor.role_title?.trim() || null,
         email: mentor.email.trim().toLowerCase(),
         phone: mentor.phone?.trim() || null,
+        bio: mentor.bio?.trim() || null,
+        expertise_tags: mentor.expertise_tags?.length ? mentor.expertise_tags : [],
         status: "active",
       });
       if (error) throw error;

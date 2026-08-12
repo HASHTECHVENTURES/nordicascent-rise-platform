@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyApplications } from "@/hooks/useData";
 import {
-  countReadinessAreasSubmitted,
+  buildReadinessMentorGate,
   initializeMentorMeetings,
   refreshMeetingUnlocks,
   refreshMentorMeetingUnlocksForCandidate,
@@ -12,6 +12,7 @@ import {
   type MentorMeetingTheme,
   type MentorProgramMeeting,
   type MentorSignalNote,
+  type ReadinessMentorGate,
 } from "@/lib/mentorProgram";
 import { syncMentorCheckpointFromMeeting } from "@/lib/activationModule";
 import type { Track } from "@/lib/track";
@@ -102,7 +103,7 @@ export function useAssignedMentorForApplication(applicationId: string | undefine
           assigned_mentor_id,
           readiness_unlocked_at,
           track,
-          company_mentors (id, name, role_title, email, phone),
+          company_mentors (id, name, role_title, email, phone, bio, expertise_tags),
           jobs (title, companies (name))
         `
         )
@@ -114,22 +115,66 @@ export function useAssignedMentorForApplication(applicationId: string | undefine
   });
 }
 
-export function useReadinessAreasForApplication(applicationId: string | undefined) {
+export function useReadinessMentorGateForApplication(applicationId: string | undefined) {
   return useQuery({
-    queryKey: ["readiness-areas-for-app", applicationId],
+    queryKey: ["readiness-mentor-gate", applicationId],
     enabled: Boolean(applicationId),
-    queryFn: async () => {
+    queryFn: async (): Promise<ReadinessMentorGate> => {
       const { data: app } = await supabase
         .from("applications")
         .select("candidate_id")
         .eq("id", applicationId!)
         .single();
-      if (!app?.candidate_id) return 0;
-      const { data: attempts } = await supabase
-        .from("readiness_attempts")
-        .select("status, readiness_tests(area)")
-        .eq("candidate_id", app.candidate_id);
-      return countReadinessAreasSubmitted(attempts ?? []);
+      if (!app?.candidate_id) {
+        return { level2BothSubmitted: false, allTestsSubmitted: false };
+      }
+      const [{ data: attempts }, { data: tests }] = await Promise.all([
+        supabase
+          .from("readiness_attempts")
+          .select("test_id, status")
+          .eq("candidate_id", app.candidate_id),
+        supabase.from("readiness_tests").select("id, area, level").eq("active", true),
+      ]);
+      return buildReadinessMentorGate(attempts ?? [], tests ?? []);
+    },
+  });
+}
+
+/** @deprecated Use useReadinessMentorGateForApplication */
+export function useReadinessAreasForApplication(applicationId: string | undefined) {
+  const q = useReadinessMentorGateForApplication(applicationId);
+  return {
+    ...q,
+    data: q.data?.level2BothSubmitted ? 2 : q.data?.allTestsSubmitted ? 2 : 0,
+  };
+}
+
+export function useSaveMeetingSchedule() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      meetingId,
+      applicationId,
+      scheduled_at,
+      meeting_url,
+    }: {
+      meetingId: string;
+      applicationId: string;
+      scheduled_at: string | null;
+      meeting_url: string | null;
+    }) => {
+      const { error } = await supabase
+        .from("mentor_program_meetings")
+        .update({
+          scheduled_at,
+          meeting_url: meeting_url?.trim() || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", meetingId);
+      if (error) throw error;
+    },
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ["mentor-program-meetings", vars.applicationId] });
     },
   });
 }
@@ -285,7 +330,14 @@ export function useMyMentorProgramContext() {
     ((activeApp?.track as Track | null) ?? "entry");
 
   const mentor = assigned?.company_mentors as
-    | { name: string; role_title?: string | null }
+    | {
+        name: string;
+        role_title?: string | null;
+        email?: string | null;
+        phone?: string | null;
+        bio?: string | null;
+        expertise_tags?: string[] | null;
+      }
     | null
     | undefined;
 

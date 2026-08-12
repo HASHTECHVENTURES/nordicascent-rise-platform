@@ -22,22 +22,32 @@ const EmployerMentoring = () => {
   const [mentorRole, setMentorRole] = useState("");
   const [mentorEmail, setMentorEmail] = useState("");
   const [mentorPhone, setMentorPhone] = useState("");
+  const [mentorBio, setMentorBio] = useState("");
+  const [mentorTags, setMentorTags] = useState("");
 
   const handleCreateMentor = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!mentorName.trim() || !mentorEmail.trim()) return;
+    const tags = mentorTags
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
     try {
       await createMentor.mutateAsync({
         name: mentorName,
         role_title: mentorRole,
         email: mentorEmail,
         phone: mentorPhone,
+        bio: mentorBio,
+        expertise_tags: tags,
       });
       toast({ title: "Mentor added" });
       setMentorName("");
       setMentorRole("");
       setMentorEmail("");
       setMentorPhone("");
+      setMentorBio("");
+      setMentorTags("");
     } catch (err) {
       toast({ title: "Failed", description: err instanceof Error ? err.message : "Try again", variant: "destructive" });
     }
@@ -121,6 +131,22 @@ const EmployerMentoring = () => {
             <div className="space-y-2">
               <Label>Phone</Label>
               <Input value={mentorPhone} onChange={(e) => setMentorPhone(e.target.value)} />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label>Bio (optional)</Label>
+              <Input
+                value={mentorBio}
+                onChange={(e) => setMentorBio(e.target.value)}
+                placeholder="Short background shown to candidates"
+              />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label>Expertise tags (optional, comma-separated)</Label>
+              <Input
+                value={mentorTags}
+                onChange={(e) => setMentorTags(e.target.value)}
+                placeholder="Career Development, Cultural Integration, Leadership"
+              />
             </div>
             <Button type="submit" className="md:col-span-2 gap-2" disabled={createMentor.isPending}>
               <Plus className="h-4 w-4" />Add mentor

@@ -8,7 +8,7 @@ import { canAccessMentoring } from "@/lib/candidateJourney";
 
 const MENTORING_PATH = "/candidate/mentoring";
 
-/** Block mentoring until all readiness tests are submitted. */
+/** Mentoring opens when a mentor is assigned (parallel with Readiness). */
 export function useMentoringAccessLock() {
   const navigate = useNavigate();
   const location = useLocation();
