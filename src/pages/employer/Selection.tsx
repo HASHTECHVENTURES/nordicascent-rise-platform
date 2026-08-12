@@ -11,7 +11,6 @@ import {
   getSelectionStepFromStatus,
   isEmployerSelectionListStatus,
   isStepOverdue,
-  isSelectionPipelineStatus,
   selectionStatusLabel,
   type SelectionStepId,
 } from "@/lib/selectionModule";
