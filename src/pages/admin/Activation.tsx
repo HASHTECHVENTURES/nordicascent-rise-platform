@@ -3,12 +3,15 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, ChevronRight } from "lucide-react";
+import { Loader2, ChevronRight, AlertTriangle } from "lucide-react";
 import {
   useAdminMentoringPipeline,
   useUnlockCandidateJobs,
 } from "@/hooks/useData";
-import { useAdminActivationApplications } from "@/hooks/useActivation";
+import {
+  useAdminActivationApplications,
+  useAdminActivationOverdueFlags,
+} from "@/hooks/useActivation";
 import {
   Table,
   TableBody,
@@ -24,11 +27,16 @@ import type { Track } from "@/lib/track";
 export default function AdminActivation() {
   const { data: pipeline, isLoading: pipelineLoading } = useAdminMentoringPipeline();
   const { data: activationApps, isLoading: appsLoading } = useAdminActivationApplications();
+  const { data: overdueFlags } = useAdminActivationOverdueFlags();
   const unlockJobs = useUnlockCandidateJobs();
   const { toast } = useToast();
 
   const pipelineOptions = useMemo(() => pipeline ?? [], [pipeline]);
   const unlockedApps = activationApps ?? [];
+  const overdueByApp = overdueFlags?.overdueByApp ?? {};
+  const missingStartDateIds = overdueFlags?.missingStartDateIds ?? new Set<string>();
+  const overdueProgrammeCount = Object.keys(overdueByApp).length;
+  const missingStartCount = missingStartDateIds.size;
 
   return (
     <div className="space-y-6">
@@ -50,6 +58,31 @@ export default function AdminActivation() {
           from mentoring).
         </CardContent>
       </Card>
+
+      {(overdueProgrammeCount > 0 || missingStartCount > 0) && (
+        <Card className="border-destructive/30">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-destructive" />
+              Attention needed
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground space-y-1">
+            {overdueProgrammeCount > 0 && (
+              <p>
+                {overdueProgrammeCount} programme{overdueProgrammeCount > 1 ? "s" : ""} with company
+                checkpoint(s) available 14+ days (stalled).
+              </p>
+            )}
+            {missingStartCount > 0 && (
+              <p>
+                {missingStartCount} accepted internship{missingStartCount > 1 ? "s" : ""} missing
+                start date (mentor M4–M6 stay locked until set).
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
@@ -158,6 +191,8 @@ export default function AdminActivation() {
                 const track =
                   (app.track as Track | null) ??
                   ((app.candidates as { track?: Track } | null)?.track ?? "entry");
+                const overdueCps = overdueByApp[app.id] ?? [];
+                const missingStart = missingStartDateIds.has(app.id);
                 return (
                   <Link
                     key={app.id}
@@ -169,6 +204,20 @@ export default function AdminActivation() {
                       <p className="text-xs text-muted-foreground">
                         {app.jobs?.title} · {track === "entry" ? "Entry — 7 checkpoints" : "Fast track"}
                       </p>
+                      {(overdueCps.length > 0 || missingStart) && (
+                        <div className="flex flex-wrap gap-1.5 mt-1.5">
+                          {overdueCps.length > 0 && (
+                            <Badge variant="destructive" className="text-[10px]">
+                              CP {overdueCps.join(", ")} overdue
+                            </Badge>
+                          )}
+                          {missingStart && (
+                            <Badge variant="destructive" className="text-[10px]">
+                              Missing start date
+                            </Badge>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
                   </Link>

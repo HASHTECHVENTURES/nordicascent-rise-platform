@@ -2,12 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { CheckCircle2, Loader2, Lock } from "lucide-react";
 import {
   useActivationRecord,
   useAcknowledgePreInternshipPresentation,
   useAcceptPreInternship,
+  useSetInternshipStartDate,
   useUnlockAcademicInternship,
   useSetUniversityCreditRequired,
   useActivationCms,
@@ -43,11 +46,14 @@ export default function PreInternshipGatePanel({
   const { data: record, isLoading } = useActivationRecord(applicationId);
   const acknowledge = useAcknowledgePreInternshipPresentation();
   const accept = useAcceptPreInternship();
+  const setStartDate = useSetInternshipStartDate();
   const unlockAcademic = useUnlockAcademicInternship();
   const setCredit = useSetUniversityCreditRequired();
   const { data: cms } = useActivationCms();
   const acceptSectionRef = useRef<HTMLDivElement>(null);
   const [highlightAccept, setHighlightAccept] = useState(false);
+  const [startDate, setStartDateLocal] = useState("");
+  const [adminStartDate, setAdminStartDate] = useState("");
 
   const presentationText = normalizeActivationCmsText(
     cms?.pre_internship_presentation || DEFAULT_ACTIVATION_CMS.pre_internship_presentation
@@ -61,6 +67,13 @@ export default function PreInternshipGatePanel({
     setHighlightAccept(true);
     acceptSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [record?.presentation_acknowledged_at, record?.candidate_accepted_at]);
+
+  useEffect(() => {
+    if (record?.internship_start_date) {
+      setStartDateLocal(record.internship_start_date);
+      setAdminStartDate(record.internship_start_date);
+    }
+  }, [record?.internship_start_date]);
 
   if (isLoading) {
     return (
@@ -77,6 +90,8 @@ export default function PreInternshipGatePanel({
   const canAcknowledge = canCandidate || canAdmin;
   const acknowledged = Boolean(record.presentation_acknowledged_at);
   const accepted = Boolean(record.candidate_accepted_at);
+  const canEditCredit = canAdmin || canEmployer;
+  const canEditStartDate = canAdmin || canEmployer;
 
   const runAcknowledge = async () => {
     try {
@@ -122,12 +137,13 @@ export default function PreInternshipGatePanel({
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
-        {canAdmin && (
+        {canEditCredit && (
           <div className="flex items-center justify-between gap-4 rounded-lg border p-3">
             <div>
               <p className="text-sm font-medium">University credit required</p>
               <p className="text-xs text-muted-foreground">
-                When on, admin must unlock academic approval before internship starts.
+                When on, academic step 1 must complete before internship starts. University sees the
+                academic layer only — never Final Clearance or hiring evaluation.
               </p>
             </div>
             <Switch
@@ -203,28 +219,96 @@ export default function PreInternshipGatePanel({
           </div>
           <p className="text-xs text-muted-foreground">
             This is the step that unlocks internship checkpoints. Acknowledging the presentation alone
-            is not enough.
+            is not enough. Set a start date so mentor meetings 4–6 unlock on the correct week schedule.
           </p>
           {accepted ? (
-            <p className="text-xs text-muted-foreground flex items-center gap-1">
-              <CheckCircle2 className="h-3.5 w-3.5 text-success" />
-              Accepted {new Date(record.candidate_accepted_at!).toLocaleDateString()}
-            </p>
+            <div className="space-y-3">
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <CheckCircle2 className="h-3.5 w-3.5 text-success" />
+                Accepted {new Date(record.candidate_accepted_at!).toLocaleDateString()}
+                {record.internship_start_date
+                  ? ` · Start ${record.internship_start_date}`
+                  : " · Start date missing"}
+              </p>
+              {canEditStartDate && (
+                <div className="flex flex-wrap items-end gap-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="admin-start-date">Internship start date</Label>
+                    <Input
+                      id="admin-start-date"
+                      type="date"
+                      value={adminStartDate}
+                      onChange={(e) => setAdminStartDate(e.target.value)}
+                      className="w-[11rem]"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    disabled={!adminStartDate || setStartDate.isPending}
+                    onClick={async () => {
+                      try {
+                        await setStartDate.mutateAsync({
+                          applicationId,
+                          internship_start_date: adminStartDate,
+                        });
+                        toast({ title: "Start date saved" });
+                      } catch (err) {
+                        toast({
+                          title: "Could not save",
+                          description: err instanceof Error ? err.message : "Try again",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                  >
+                    {setStartDate.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      "Save start date"
+                    )}
+                  </Button>
+                </div>
+              )}
+            </div>
           ) : canCandidate ? (
             <div className="space-y-3">
+              <div className="space-y-1.5 max-w-xs">
+                <Label htmlFor="internship-start-date">Internship start date</Label>
+                <Input
+                  id="internship-start-date"
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDateLocal(e.target.value)}
+                  required
+                />
+              </div>
               <Button
                 size="sm"
-                disabled={accept.isPending || !acknowledged}
+                disabled={accept.isPending || !acknowledged || !startDate}
                 onClick={async () => {
+                  if (!startDate) {
+                    toast({
+                      title: "Start date required",
+                      description: "Choose when your internship begins.",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
                   try {
                     await accept.mutateAsync({
                       applicationId,
-                      internship_start_date: null,
+                      internship_start_date: startDate,
                     });
                     setHighlightAccept(false);
+                    const creditBlocks =
+                      record.university_credit_required && !record.academic_unlocked_at;
                     toast({
                       title: "Internship accepted",
-                      description: "Checkpoint #1 is now unlocked.",
+                      description: creditBlocks
+                        ? "Accepted. Checkpoints unlock after academic approval (step 1)."
+                        : "Checkpoint #1 is now unlocked.",
                     });
                   } catch (err) {
                     toast({
@@ -245,6 +329,9 @@ export default function PreInternshipGatePanel({
                 <p className="text-xs text-muted-foreground">
                   Complete Step 1 first — click “I have read this” above.
                 </p>
+              )}
+              {acknowledged && !startDate && (
+                <p className="text-xs text-muted-foreground">Choose a start date to accept.</p>
               )}
             </div>
           ) : (

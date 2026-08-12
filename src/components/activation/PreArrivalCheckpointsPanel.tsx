@@ -81,7 +81,7 @@ export default function PreArrivalCheckpointsPanel({
   const header = (
     <div className="flex flex-wrap items-center gap-3">
       <div>
-        <h3 className="text-base font-medium">Pre-arrival employment (6)</h3>
+        <h3 className="text-base font-medium">Pre-arrival employment (3)</h3>
         <p className="text-sm text-muted-foreground">
           Complete all checkpoints in order before the candidate starts full-time employment.
         </p>

@@ -182,7 +182,7 @@ export default function InPersonVisitPanel({
                   >
                     <div className="flex items-center gap-2">
                       <RadioGroupItem value="in_person" id="fmt-ip" />
-                      <Label htmlFor="fmt-ip">In person</Label>
+                      <Label htmlFor="fmt-ip">In person (India)</Label>
                     </div>
                     <div className="flex items-center gap-2">
                       <RadioGroupItem value="video" id="fmt-video" />

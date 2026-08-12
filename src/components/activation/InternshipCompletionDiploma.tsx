@@ -58,7 +58,13 @@ export default function InternshipCompletionDiploma({
   const { data: record } = useActivationRecord(applicationId);
   const issuedAt = record?.internship_completion_issued_at;
 
-  if (!issuedAt && record?.status !== "internship_complete" && record?.status !== "cleared" && record?.status !== "rejected_activation") {
+  if (
+    !issuedAt &&
+    record?.status !== "internship_complete" &&
+    record?.status !== "cleared" &&
+    record?.status !== "on_hold" &&
+    record?.status !== "rejected_activation"
+  ) {
     return null;
   }
 

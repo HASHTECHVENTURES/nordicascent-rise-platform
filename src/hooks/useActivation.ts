@@ -7,6 +7,7 @@ import {
   confirmPreArrivalCheckpoint,
   acknowledgePreInternshipPresentation,
   acceptPreInternship,
+  setInternshipStartDate,
   unlockAcademicInternship,
   setUniversityCreditRequired,
   fetchActivationCms,
@@ -21,6 +22,7 @@ import {
   submitFinalClearanceDecision,
   syncAllMentorCheckpoints,
   updateActivationCms,
+  isInternshipCheckpointOverdue,
   type ActivationRecord,
   type FinalClearanceDecision,
   type InternshipCheckpoint,
@@ -344,6 +346,18 @@ export function useAcceptPreInternship() {
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ["activation-record", vars.applicationId] });
       qc.invalidateQueries({ queryKey: ["internship-checkpoints", vars.applicationId] });
+      qc.invalidateQueries({ queryKey: ["mentor-program-meetings", vars.applicationId] });
+    },
+  });
+}
+
+export function useSetInternshipStartDate() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: setInternshipStartDate,
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ["activation-record", vars.applicationId] });
+      qc.invalidateQueries({ queryKey: ["mentor-program-meetings", vars.applicationId] });
     },
   });
 }
@@ -554,6 +568,52 @@ export function useAdminActivationApplications() {
         .order("applied_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as SelectionApplication[];
+    },
+  });
+}
+
+/** Admin flags: overdue company checkpoints + missing start date after accept. */
+export function useAdminActivationOverdueFlags() {
+  return useQuery({
+    queryKey: ["admin-activation-overdue-flags"],
+    queryFn: async () => {
+      const { data: records, error: recErr } = await supabase
+        .from("activation_records")
+        .select("application_id, status, internship_start_date, candidate_accepted_at")
+        .in("status", ["ready_for_activation", "internship_active", "internship_complete", "on_hold"]);
+      if (recErr) throw recErr;
+
+      const missingStartDateIds = new Set<string>();
+      for (const r of records ?? []) {
+        if (r.candidate_accepted_at && !r.internship_start_date) {
+          missingStartDateIds.add(r.application_id as string);
+        }
+      }
+
+      const { data: cps, error: cpErr } = await supabase
+        .from("internship_checkpoints")
+        .select("application_id, checkpoint_number, status, who_confirms, updated_at")
+        .eq("status", "available")
+        .eq("who_confirms", "company");
+      if (cpErr) throw cpErr;
+
+      const overdueByApp: Record<string, number[]> = {};
+      for (const cp of cps ?? []) {
+        if (
+          !isInternshipCheckpointOverdue({
+            status: cp.status as InternshipCheckpoint["status"],
+            who_confirms: cp.who_confirms as InternshipCheckpoint["who_confirms"],
+            updated_at: cp.updated_at as string | undefined,
+          })
+        ) {
+          continue;
+        }
+        const appId = cp.application_id as string;
+        if (!overdueByApp[appId]) overdueByApp[appId] = [];
+        overdueByApp[appId].push(cp.checkpoint_number as number);
+      }
+
+      return { overdueByApp, missingStartDateIds };
     },
   });
 }

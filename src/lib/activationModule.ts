@@ -125,6 +125,31 @@ export async function acceptPreInternship(input: {
   if (error) throw error;
 }
 
+/** Company/admin: set or correct internship start date (drives mentor M4–M6 week gates). */
+export async function setInternshipStartDate(input: {
+  applicationId: string;
+  internship_start_date: string;
+}) {
+  const date = input.internship_start_date.trim();
+  if (!date) throw new Error("Internship start date is required");
+  const now = new Date().toISOString();
+  const { error } = await supabase
+    .from("activation_records")
+    .update({ internship_start_date: date, updated_at: now })
+    .eq("application_id", input.applicationId);
+  if (error) throw error;
+  const { refreshMeetingUnlocks } = await import("@/lib/mentorProgram");
+  const { data: app } = await supabase
+    .from("applications")
+    .select("track, candidates(track)")
+    .eq("id", input.applicationId)
+    .maybeSingle();
+  const track =
+    (app?.track as Track | null) ??
+    ((app?.candidates as { track?: Track } | null)?.track ?? "entry");
+  await refreshMeetingUnlocks(input.applicationId, track);
+}
+
 export async function unlockAcademicInternship(input: {
   applicationId: string;
   profileId: string;
@@ -260,6 +285,18 @@ export function allInternshipCheckpointsComplete(checkpoints: InternshipCheckpoi
 export function internshipCheckpointProgress(checkpoints: InternshipCheckpoint[]) {
   const done = checkpoints.filter((c) => c.status === "completed").length;
   return { done, total: 7, percent: Math.round((done / 7) * 100) };
+}
+
+/** Company checkpoint available longer than this many days → admin overdue flag. */
+export const INTERNSHIP_CHECKPOINT_OVERDUE_DAYS = 14;
+
+export function isInternshipCheckpointOverdue(
+  cp: Pick<InternshipCheckpoint, "status" | "who_confirms" | "updated_at">,
+  overdueDays = INTERNSHIP_CHECKPOINT_OVERDUE_DAYS
+) {
+  if (cp.who_confirms !== "company" || cp.status !== "available" || !cp.updated_at) return false;
+  const ageMs = Date.now() - new Date(cp.updated_at).getTime();
+  return ageMs > overdueDays * 24 * 60 * 60 * 1000;
 }
 
 export async function initializeActivationForApplication(
@@ -522,7 +559,8 @@ export async function submitFinalClearanceDecision(input: {
   );
   if (decisionErr) throw decisionErr;
 
-  const activationStatus = input.decision === "clear" ? "cleared" : "rejected_activation";
+  // Hold → on_hold (red-flag pause); still alumni + no employment (Module 4 status table).
+  const activationStatus = input.decision === "clear" ? "cleared" : "on_hold";
   const { error: recErr } = await supabase
     .from("activation_records")
     .update({ status: activationStatus, updated_at: now })
