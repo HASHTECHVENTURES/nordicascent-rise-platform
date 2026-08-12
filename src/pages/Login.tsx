@@ -18,7 +18,7 @@ import {
   rememberPendingJobFromPath,
 } from "@/lib/pendingJobApplication";
 
-type LoginRole = "candidate" | "employer" | "internal" | null;
+type LoginRole = "candidate" | "employer" | "internal" | "mentor" | null;
 
 const ROLE_STORAGE_KEY = "na.login.selectedRole";
 
@@ -36,6 +36,13 @@ const roleConfig = {
     icon: Building2,
     redirectTo: "/employer/company",
     dbRole: "employer" as UserRole,
+  },
+  mentor: {
+    title: "Mentor",
+    description: "Company mentors guiding candidates",
+    icon: User,
+    redirectTo: "/mentor/dashboard",
+    dbRole: "mentor" as UserRole,
   },
   internal: {
     title: "Admin",
@@ -71,11 +78,11 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
       return;
     }
     const roleParam = searchParams.get("role");
-    if (roleParam === "candidate" || roleParam === "employer" || roleParam === "internal") {
+    if (roleParam === "candidate" || roleParam === "employer" || roleParam === "internal" || roleParam === "mentor") {
       setSelectedRole(roleParam);
     } else {
       const saved = sessionStorage.getItem(ROLE_STORAGE_KEY);
-      if (saved === "candidate" || saved === "employer" || saved === "internal") {
+      if (saved === "candidate" || saved === "employer" || saved === "internal" || saved === "mentor") {
         setSelectedRole(saved);
       }
     }
@@ -114,6 +121,15 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
 
     if (authMode === "signup" && !acceptedTerms) {
       toast({ title: "Please accept the Terms of Service", variant: "destructive" });
+      return;
+    }
+
+    if (authMode === "signup" && selectedRole === "mentor") {
+      toast({
+        title: "Mentor accounts are invite-only",
+        description: "Your company invites you by email with login credentials.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -159,7 +175,11 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
         toast({ title: "Welcome back!", description: `Logged in as ${config.title}` });
         navigate(
           safeRedirect ??
-            (selectedRole === "employer" ? "/employer/dashboard" : config.redirectTo)
+            (selectedRole === "employer"
+              ? "/employer/dashboard"
+              : selectedRole === "mentor"
+                ? "/mentor/dashboard"
+                : config.redirectTo)
         );
       } else {
         await signUp(email, password, {
@@ -265,14 +285,17 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
                 <CardDescription>Choose how you want to use Nordic Ascent</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {(["employer", "candidate"] as const).map((key) => {
+                {(["employer", "candidate", "mentor"] as const).map((key) => {
                   const config = roleConfig[key];
                   const Icon = config.icon;
                   return (
                     <button
                       key={key}
                       type="button"
-                      onClick={() => setSelectedRole(key)}
+                      onClick={() => {
+                        setSelectedRole(key);
+                        if (key === "mentor") setAuthMode("signin");
+                      }}
                       className="w-full p-4 rounded border border-border hover:border-primary bg-card hover:bg-muted/50 group flex items-center justify-between text-left"
                     >
                       <div className="flex items-center gap-4">
@@ -313,11 +336,19 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
                   <span className="font-medium text-muted-foreground">{roleConfig[selectedRole].title}</span>
                 </div>
                 <CardTitle className="text-2xl font-medium">
-                  {selectedRole === "internal" ? "Admin sign in" : "Welcome back"}
+                  {selectedRole === "internal"
+                    ? "Admin sign in"
+                    : selectedRole === "mentor"
+                      ? "Mentor sign in"
+                      : "Welcome back"}
                 </CardTitle>
                 {selectedRole === "internal" ? (
                   <CardDescription>
                     Use your Nordic Ascent admin credentials.
+                  </CardDescription>
+                ) : selectedRole === "mentor" ? (
+                  <CardDescription>
+                    Use the invite credentials your company emailed you.
                   </CardDescription>
                 ) : (
                   <Tabs value={authMode} onValueChange={(v) => setAuthMode(v as "signin" | "signup")} className="w-full">

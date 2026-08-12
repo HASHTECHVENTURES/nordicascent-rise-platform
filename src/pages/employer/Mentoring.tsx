@@ -34,7 +34,7 @@ const EmployerMentoring = () => {
       .map((t) => t.trim())
       .filter(Boolean);
     try {
-      await createMentor.mutateAsync({
+      const result = await createMentor.mutateAsync({
         name: mentorName,
         role_title: mentorRole,
         email: mentorEmail,
@@ -42,9 +42,14 @@ const EmployerMentoring = () => {
         bio: mentorBio,
         expertise_tags: tags,
       });
+      const invite = result?.invite;
       toast({
-        title: "Mentor added",
-        description: "An invite email was sent (when email integration is connected).",
+        title: invite?.emailSent ? "Mentor invited" : "Mentor added",
+        description: invite?.emailSent
+          ? "Login credentials were emailed to the mentor."
+          : invite?.temporaryPassword
+            ? `Share login once: ${mentorEmail} / ${invite.temporaryPassword} (email not sent — set RESEND_API_KEY).`
+            : invite?.emailReason ?? "Account created. Ask them to sign in at /login?role=mentor.",
       });
       setMentorName("");
       setMentorRole("");

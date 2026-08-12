@@ -2461,28 +2461,14 @@ export function useCreateCompanyMentor() {
           expertise_tags: mentor.expertise_tags?.length ? mentor.expertise_tags : [],
           status: "active",
           invited_by: profile?.id ?? null,
-          invite_sent_at: new Date().toISOString(),
         })
         .select("id, name, email")
         .single();
       if (error) throw error;
 
-      const companyName =
-        (employer.companies as { name?: string } | null)?.name ?? undefined;
-      const { buildMentorEmail } = await import("@/lib/mentorEmails");
-      const { sendTransactionalEmail } = await import("@/lib/sendTransactionalEmail");
-      const mail = buildMentorEmail("mentor_invite", {
-        mentorName: created.name,
-        companyName,
-      });
-      await sendTransactionalEmail({
-        to: created.email,
-        subject: mail.subject,
-        html: mail.html,
-        text: mail.text,
-      });
-
-      return created;
+      const { inviteMentorAccount } = await import("@/hooks/useMentorPortal");
+      const invite = await inviteMentorAccount({ mentorId: created.id });
+      return { created, invite };
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["company-mentors"] });

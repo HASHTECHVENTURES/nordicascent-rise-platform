@@ -12,6 +12,7 @@ import { PublicLayout } from "./components/layouts/PublicLayout";
 import CandidateLayout from "./components/layouts/CandidateLayout";
 import EmployerLayout from "./components/layouts/EmployerLayout";
 import AdminLayout from "./components/layouts/AdminLayout";
+import MentorLayout from "./components/layouts/MentorLayout";
 
 // Public Pages
 import Home from "./pages/Home";
@@ -48,6 +49,10 @@ import CandidateJobs from "./pages/candidate/Jobs";
 import CandidateJobDetail from "./pages/candidate/JobDetail";
 import CandidateJobApplication from "./pages/candidate/JobApplication";
 import CandidateApplications from "./pages/candidate/Applications";
+
+import MentorDashboard from "./pages/mentor/Dashboard";
+import MentorCandidates from "./pages/mentor/Candidates";
+import MentorCandidateDetail from "./pages/mentor/CandidateDetail";
 
 // Employer Pages
 import EmployerDashboard from "./pages/employer/Dashboard";
@@ -193,6 +198,16 @@ const App = () => (
                 <Route path="/employer/mentoring/:applicationId" element={<EmployerMentoringApplication />} />
                 <Route path="/employer/messages" element={<EmployerMessages />} />
                 <Route path="/employer/analytics" element={<EmployerAnalytics />} />
+              </Route>
+            </Route>
+
+            {/* Mentor Portal */}
+            <Route element={<ProtectedRoute allowedRoles={["mentor"]} />}>
+              <Route element={<MentorLayout />}>
+                <Route path="/mentor" element={<Navigate to="/mentor/dashboard" replace />} />
+                <Route path="/mentor/dashboard" element={<MentorDashboard />} />
+                <Route path="/mentor/candidates" element={<MentorCandidates />} />
+                <Route path="/mentor/candidates/:applicationId" element={<MentorCandidateDetail />} />
               </Route>
             </Route>
 
