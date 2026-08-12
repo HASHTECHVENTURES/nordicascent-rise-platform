@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { GraduationCap, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { GraduationCap, Loader2, Pencil, Plus, Trash2, UserPlus } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import {
   useAdminUniversities,
@@ -24,6 +24,7 @@ import {
   useSaveUniversity,
   useToggleUniversityAccessible,
 } from "@/hooks/useData";
+import { useInviteUniversityStaff } from "@/hooks/useUniversityPortal";
 import { useToast } from "@/hooks/use-toast";
 import { INSTITUTION_TYPE_LABELS, type InstitutionType } from "@/lib/universities";
 import {
@@ -62,6 +63,11 @@ export default function AdminUniversities() {
   const [form, setForm] = useState<UniversityForm>(emptyForm());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<UniversityForm>(emptyForm());
+  const [inviteUniId, setInviteUniId] = useState<string | null>(null);
+  const [inviteUniName, setInviteUniName] = useState("");
+  const [inviteName, setInviteName] = useState("");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const inviteStaff = useInviteUniversityStaff();
 
   const list = universities ?? [];
   const pendingWaitlist = (waitlist ?? []).filter((w) => w.status === "pending");
@@ -248,6 +254,20 @@ export default function AdminUniversities() {
                     </Button>
                     <Button
                       type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setInviteUniId(uni.id);
+                        setInviteUniName(uni.name);
+                        setInviteName("");
+                        setInviteEmail("");
+                      }}
+                      title="Invite university staff"
+                    >
+                      <UserPlus className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
                       variant="ghost"
                       size="sm"
                       className="text-destructive hover:text-destructive"
@@ -316,6 +336,84 @@ export default function AdminUniversities() {
                   </Button>
                   <Button type="submit" disabled={saveUniversity.isPending}>
                     Save changes
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog
+            open={Boolean(inviteUniId)}
+            onOpenChange={(open) => {
+              if (!open) setInviteUniId(null);
+            }}
+          >
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Invite university staff</DialogTitle>
+              </DialogHeader>
+              <p className="text-sm text-muted-foreground">
+                Creates an invite-only login for {inviteUniName}. Staff can manage academic credit
+                steps only — not Final Clearance or hiring evaluation.
+              </p>
+              <form
+                className="grid gap-4 pt-2"
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (!inviteUniId) return;
+                  try {
+                    const result = await inviteStaff.mutateAsync({
+                      universityId: inviteUniId,
+                      name: inviteName.trim(),
+                      email: inviteEmail.trim(),
+                    });
+                    toast({
+                      title: "Invite created",
+                      description: result.emailSent
+                        ? `Login email sent to ${inviteEmail}`
+                        : result.temporaryPassword
+                          ? `Email not sent (${result.emailReason ?? "Resend not configured"}). Temp password: ${result.temporaryPassword}`
+                          : "Staff account linked.",
+                    });
+                    setInviteUniId(null);
+                  } catch (err) {
+                    toast({
+                      title: "Invite failed",
+                      description: err instanceof Error ? err.message : "Try again",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="invite-name">Full name</Label>
+                  <Input
+                    id="invite-name"
+                    required
+                    value={inviteName}
+                    onChange={(e) => setInviteName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="invite-email">Work email</Label>
+                  <Input
+                    id="invite-email"
+                    type="email"
+                    required
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                  />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="outline" onClick={() => setInviteUniId(null)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={inviteStaff.isPending}>
+                    {inviteStaff.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      "Send invite"
+                    )}
                   </Button>
                 </div>
               </form>

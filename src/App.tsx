@@ -13,6 +13,7 @@ import CandidateLayout from "./components/layouts/CandidateLayout";
 import EmployerLayout from "./components/layouts/EmployerLayout";
 import AdminLayout from "./components/layouts/AdminLayout";
 import MentorLayout from "./components/layouts/MentorLayout";
+import UniversityLayout from "./components/layouts/UniversityLayout";
 
 // Public Pages
 import Home from "./pages/Home";
@@ -53,6 +54,9 @@ import CandidateApplications from "./pages/candidate/Applications";
 import MentorDashboard from "./pages/mentor/Dashboard";
 import MentorCandidates from "./pages/mentor/Candidates";
 import MentorCandidateDetail from "./pages/mentor/CandidateDetail";
+import UniversityDashboard from "./pages/university/Dashboard";
+import UniversityStudents from "./pages/university/Students";
+import UniversityStudentDetail from "./pages/university/StudentDetail";
 
 // Employer Pages
 import EmployerDashboard from "./pages/employer/Dashboard";
@@ -208,6 +212,16 @@ const App = () => (
                 <Route path="/mentor/dashboard" element={<MentorDashboard />} />
                 <Route path="/mentor/candidates" element={<MentorCandidates />} />
                 <Route path="/mentor/candidates/:applicationId" element={<MentorCandidateDetail />} />
+              </Route>
+            </Route>
+
+            {/* University Portal — academic credit only */}
+            <Route element={<ProtectedRoute allowedRoles={["university"]} />}>
+              <Route element={<UniversityLayout />}>
+                <Route path="/university" element={<Navigate to="/university/dashboard" replace />} />
+                <Route path="/university/dashboard" element={<UniversityDashboard />} />
+                <Route path="/university/students" element={<UniversityStudents />} />
+                <Route path="/university/students/:applicationId" element={<UniversityStudentDetail />} />
               </Route>
             </Route>
 

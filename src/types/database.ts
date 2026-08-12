@@ -3,7 +3,8 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
-      profiles: { Row: { id: string; role: 'candidate' | 'employer' | 'admin' | 'mentor'; full_name: string | null; email: string | null; avatar_url: string | null; phone: string | null; account_status: string; created_at: string; updated_at: string } };
+      profiles: { Row: { id: string; role: 'candidate' | 'employer' | 'admin' | 'mentor' | 'university'; full_name: string | null; email: string | null; avatar_url: string | null; phone: string | null; account_status: string; created_at: string; updated_at: string } };
+      university_staff: { Row: { id: string; university_id: string; profile_id: string | null; name: string; email: string; status: string; invite_sent_at: string | null; invited_by: string | null; created_at: string; updated_at: string } };
       candidates: { Row: { id: string; profile_id: string; full_name: string | null; avatar_url: string | null; title: string | null; location: string | null; country: string | null; state: string | null; city: string | null; skills: string[] | null; experience: string | null; education: string | null; field_of_study: string | null; degree_type: string | null; linkedin_url: string | null; gpa_or_standing: string | null; nordics_motivation: string | null; expected_graduation_date: string | null; graduation_year: string | null; current_employer: string | null; current_role_title: string | null; university_id: string | null; university_waitlist_name: string | null; track: 'entry' | 'fast'; status: string; pool_category: 'active' | 'waitlist' | 'network' | 'alumni'; readiness_score: number; jobs_unlocked: boolean; bio: string | null; cv_url: string | null; created_at: string; updated_at: string } };
       companies: { Row: { id: string; name: string; logo_url: string | null; industry: string | null; location: string | null; size: string | null; description: string | null; website: string | null; status: string; country: string | null; org_number: string | null; postal_code: string | null; contact_name: string | null; contact_role: string | null; contact_email: string | null; contact_phone: string | null; hired_international_before: boolean | null; international_hiring_challenge: string | null; workplace_language: string | null; relocation_support: string | null; heard_about: string | null; registration_notes: string | null; gdpr_consent: boolean | null; intake_submitted_at: string | null; created_at: string; updated_at: string } };
       employers: { Row: { id: string; profile_id: string; company_id: string; title: string | null; created_at: string } };
@@ -36,7 +37,7 @@ export type Database = {
       readiness_evaluations: { Row: { id: string; candidate_id: string; cultural_signal: 'strong' | 'acceptable' | 'weak' | null; technical_signal: 'strong' | 'acceptable' | 'weak' | null; red_flag: boolean; red_flag_note: string | null; evaluator_notes: string | null; evaluated_by: string | null; evaluated_at: string | null; approved_for_activation: boolean; created_at: string; updated_at: string } };
     };
     Enums: {
-      user_role: 'candidate' | 'employer' | 'admin' | 'mentor';
+      user_role: 'candidate' | 'employer' | 'admin' | 'mentor' | 'university';
       track_type: 'entry' | 'fast';
       stage_status: 'not_started' | 'active' | 'completed';
       job_status: 'draft' | 'open' | 'closed';

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, User, Building2, Shield, ChevronRight } from "lucide-react";
+import { ArrowLeft, User, Building2, Shield, ChevronRight, GraduationCap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePublicConfig } from "@/hooks/useData";
@@ -18,7 +18,7 @@ import {
   rememberPendingJobFromPath,
 } from "@/lib/pendingJobApplication";
 
-type LoginRole = "candidate" | "employer" | "internal" | "mentor" | null;
+type LoginRole = "candidate" | "employer" | "internal" | "mentor" | "university" | null;
 
 const ROLE_STORAGE_KEY = "na.login.selectedRole";
 
@@ -43,6 +43,13 @@ const roleConfig = {
     icon: User,
     redirectTo: "/mentor/dashboard",
     dbRole: "mentor" as UserRole,
+  },
+  university: {
+    title: "University",
+    description: "Academic credit and internship approval",
+    icon: GraduationCap,
+    redirectTo: "/university/dashboard",
+    dbRole: "university" as UserRole,
   },
   internal: {
     title: "Admin",
@@ -78,11 +85,23 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
       return;
     }
     const roleParam = searchParams.get("role");
-    if (roleParam === "candidate" || roleParam === "employer" || roleParam === "internal" || roleParam === "mentor") {
+    if (
+      roleParam === "candidate" ||
+      roleParam === "employer" ||
+      roleParam === "internal" ||
+      roleParam === "mentor" ||
+      roleParam === "university"
+    ) {
       setSelectedRole(roleParam);
     } else {
       const saved = sessionStorage.getItem(ROLE_STORAGE_KEY);
-      if (saved === "candidate" || saved === "employer" || saved === "internal" || saved === "mentor") {
+      if (
+        saved === "candidate" ||
+        saved === "employer" ||
+        saved === "internal" ||
+        saved === "mentor" ||
+        saved === "university"
+      ) {
         setSelectedRole(saved);
       }
     }
@@ -128,6 +147,15 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
       toast({
         title: "Mentor accounts are invite-only",
         description: "Your company invites you by email with login credentials.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (authMode === "signup" && selectedRole === "university") {
+      toast({
+        title: "University accounts are invite-only",
+        description: "Nordic Ascent admin invites university staff by email.",
         variant: "destructive",
       });
       return;
@@ -179,7 +207,9 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
               ? "/employer/dashboard"
               : selectedRole === "mentor"
                 ? "/mentor/dashboard"
-                : config.redirectTo)
+                : selectedRole === "university"
+                  ? "/university/dashboard"
+                  : config.redirectTo)
         );
       } else {
         await signUp(email, password, {
@@ -285,7 +315,7 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
                 <CardDescription>Choose how you want to use Nordic Ascent</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {(["employer", "candidate", "mentor"] as const).map((key) => {
+                {(["employer", "candidate", "mentor", "university"] as const).map((key) => {
                   const config = roleConfig[key];
                   const Icon = config.icon;
                   return (
@@ -294,7 +324,7 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
                       type="button"
                       onClick={() => {
                         setSelectedRole(key);
-                        if (key === "mentor") setAuthMode("signin");
+                        if (key === "mentor" || key === "university") setAuthMode("signin");
                       }}
                       className="w-full p-4 rounded border border-border hover:border-primary bg-card hover:bg-muted/50 group flex items-center justify-between text-left"
                     >
@@ -340,11 +370,18 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
                     ? "Admin sign in"
                     : selectedRole === "mentor"
                       ? "Mentor sign in"
-                      : "Welcome back"}
+                      : selectedRole === "university"
+                        ? "University sign in"
+                        : "Welcome back"}
                 </CardTitle>
                 {selectedRole === "internal" ? (
                   <CardDescription>
                     Use your Nordic Ascent admin credentials.
+                  </CardDescription>
+                ) : selectedRole === "university" ? (
+                  <CardDescription>
+                    Invite-only access for academic credit workflow. Use the credentials from your
+                    Nordic Ascent invite email.
                   </CardDescription>
                 ) : selectedRole === "mentor" ? (
                   <CardDescription>
@@ -439,7 +476,9 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
                   </Button>
                 </form>
 
-                {selectedRole !== "internal" && (
+                {selectedRole !== "internal" &&
+                  selectedRole !== "mentor" &&
+                  selectedRole !== "university" && (
                   <p className="text-center text-sm text-muted-foreground mt-6">
                     {authMode === "signin" ? (
                       <>Don&apos;t have an account? <button type="button" onClick={() => setAuthMode("signup")} className="text-primary hover:underline">Sign up</button></>

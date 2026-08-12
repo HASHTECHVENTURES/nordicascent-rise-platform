@@ -9,6 +9,7 @@ const roleDashboard: Record<UserRole, string> = {
   employer: "/employer/dashboard",
   admin: "/admin/dashboard",
   mentor: "/mentor/dashboard",
+  university: "/university/dashboard",
 };
 
 export function ProtectedRoute({
@@ -41,6 +42,8 @@ export function ProtectedRoute({
         loginTarget = buildLoginPathWithRedirect(returnPath, { role: "employer" });
       } else if (allowedRoles.length === 1 && allowedRoles[0] === "mentor") {
         loginTarget = `/login?role=mentor&redirect=${encodeURIComponent(returnPath)}`;
+      } else if (allowedRoles.length === 1 && allowedRoles[0] === "university") {
+        loginTarget = `/login?role=university&redirect=${encodeURIComponent(returnPath)}`;
       } else {
         loginTarget = buildLoginPathWithRedirect(returnPath);
       }
