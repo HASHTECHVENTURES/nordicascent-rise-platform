@@ -24,7 +24,8 @@ import {
 import { useEmployerApplicantCandidate, useUpdateApplication, useSendInterviewInvite } from "@/hooks/useData";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
-import { applicationStatusVariant, employerApplicationStatusLabel } from "@/lib/applicationJourney";
+import { applicationStatusVariant, employerApplicationStatusLabel, isEmployerPreAcceptWorkflow, isEmployerSelectionHandoff } from "@/lib/applicationJourney";
+import { selectionStatusLabel } from "@/lib/selectionModule";
 import { resolveProfile } from "@/lib/resolveProfile";
 import { getSupabaseErrorMessage } from "@/lib/supabaseError";
 import { cn } from "@/lib/utils";
@@ -212,6 +213,9 @@ export default function EmployerCandidateDetail() {
   const name = candidate.full_name ?? profile?.full_name ?? "Candidate";
   const avatarUrl = candidate.avatar_url ?? profile?.avatar_url ?? undefined;
   const isFinal = status === "accepted" || status === "rejected";
+  const appStatus = app?.status ?? status;
+  const inSelectionHandoff = app && isEmployerSelectionHandoff(appStatus);
+  const showPreAcceptWorkflow = app && isEmployerPreAcceptWorkflow(appStatus);
   const reviewDone = ["reviewing", "interview", "offer", "accepted"].includes(status);
   const interviewDone = !!app?.interview_meet_url;
 
@@ -236,10 +240,10 @@ export default function EmployerCandidateDetail() {
         </div>
         <div className="flex items-center gap-2 shrink-0 sm:ml-auto">
           {app && (
-            <Badge variant={applicationStatusVariant(status)} className="text-sm px-3 py-1">
-              {status === "interview" && !app.interview_meet_url
+            <Badge variant={applicationStatusVariant(appStatus)} className="text-sm px-3 py-1">
+              {appStatus === "interview" && !app.interview_meet_url
                 ? "Under review"
-                : employerApplicationStatusLabel(status)}
+                : employerApplicationStatusLabel(appStatus)}
             </Badge>
           )}
           <Button
@@ -252,6 +256,22 @@ export default function EmployerCandidateDetail() {
           </Button>
         </div>
       </div>
+
+      {inSelectionHandoff && app && appStatus !== "accepted" && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="pt-6 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+            <div>
+              <p className="font-medium">In Selection pipeline</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Status: {selectionStatusLabel(appStatus)}. Complete technical, motivation, and board steps in Selection.
+              </p>
+            </div>
+            <Button variant="outline" size="sm" asChild>
+              <Link to={`/employer/selection/${app.id}`}>Open in Selection</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {status === "accepted" && app && (
         <Card className="border-success/30 bg-success/5">
@@ -266,7 +286,7 @@ export default function EmployerCandidateDetail() {
               </p>
             </div>
             <Button variant="outline" size="sm" asChild>
-              <Link to="/employer/selection">View in Selection</Link>
+              <Link to={`/employer/selection/${app.id}`}>View in Selection</Link>
             </Button>
           </CardContent>
         </Card>
@@ -283,7 +303,7 @@ export default function EmployerCandidateDetail() {
         </Card>
       )}
 
-      {app && !isFinal && (
+      {app && showPreAcceptWorkflow && (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">What to do next</CardTitle>
@@ -414,6 +434,19 @@ export default function EmployerCandidateDetail() {
             <p><span className="text-muted-foreground">Location </span>{candidate.location ?? "—"}</p>
             <p><span className="text-muted-foreground">Experience </span>{candidate.experience ?? "—"}</p>
             <p><span className="text-muted-foreground">Education </span>{candidate.education ?? "—"}</p>
+            {candidate.linkedin_url && (
+              <p>
+                <span className="text-muted-foreground">LinkedIn </span>
+                <a
+                  href={candidate.linkedin_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  View profile
+                </a>
+              </p>
+            )}
             <div className="flex flex-wrap gap-1 pt-2">
               {(candidate.skills ?? []).map((s) => <Badge key={s} variant="secondary">{s}</Badge>)}
             </div>

@@ -684,22 +684,16 @@ export async function confirmPreArrivalCheckpoint(input: {
   attachment_path?: string | null;
   confirmed_by?: string | null;
 }) {
-  const now = new Date().toISOString();
-  const { error } = await supabase
-    .from("pre_arrival_checkpoints")
-    .update({
-      status: "completed",
-      event_date: input.event_date,
-      notes: input.notes?.trim() || null,
-      ...(input.attachment_path !== undefined ? { attachment_path: input.attachment_path } : {}),
-      confirmed_by: input.confirmed_by ?? null,
-      completed_at: now,
-      updated_at: now,
-    })
-    .eq("id", input.checkpointId);
+  const { error } = await supabase.rpc("confirm_pre_arrival_checkpoint", {
+    p_checkpoint_id: input.checkpointId,
+    p_application_id: input.applicationId,
+    p_event_date: input.event_date,
+    p_notes: input.notes ?? null,
+    p_attachment_path: input.attachment_path ?? null,
+    p_confirmed_by: input.confirmed_by ?? null,
+  });
 
   if (error) throw error;
-  await refreshPreArrivalCheckpointUnlocks(input.applicationId);
 
   const { data: allCps } = await supabase
     .from("pre_arrival_checkpoints")

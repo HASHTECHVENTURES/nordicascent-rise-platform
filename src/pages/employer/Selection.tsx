@@ -9,6 +9,7 @@ import { useEmployerSelectionApplications } from "@/hooks/useSelection";
 import {
   SELECTION_STEPS,
   getSelectionStepFromStatus,
+  isEmployerSelectionListStatus,
   isStepOverdue,
   isSelectionPipelineStatus,
   selectionStatusLabel,
@@ -27,7 +28,7 @@ const EmployerSelection = () => {
   const { data: applications, isLoading: appsLoading } = useEmployerSelectionApplications(selectedJobId);
 
   const filteredApps = useMemo(() => {
-    const inPipeline = (applications ?? []).filter((a) => isSelectionPipelineStatus(a.status));
+    const inPipeline = (applications ?? []).filter((a) => isEmployerSelectionListStatus(a.status));
     if (stepFilter === "all") return inPipeline;
     return inPipeline.filter(
       (a) => getSelectionStepFromStatus(a.status, a.selection_step) === stepFilter
@@ -35,7 +36,7 @@ const EmployerSelection = () => {
   }, [applications, stepFilter]);
 
   const funnelCounts = useMemo(() => {
-    const inPipeline = (applications ?? []).filter((a) => isSelectionPipelineStatus(a.status));
+    const inPipeline = (applications ?? []).filter((a) => isEmployerSelectionListStatus(a.status));
     const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     inPipeline.forEach((a) => {
       const step = getSelectionStepFromStatus(a.status, a.selection_step);
@@ -106,7 +107,7 @@ const EmployerSelection = () => {
           }`}
         >
           <span className="text-xl font-bold">
-            {(applications ?? []).filter((a) => isSelectionPipelineStatus(a.status)).length}
+            {(applications ?? []).filter((a) => isEmployerSelectionListStatus(a.status)).length}
           </span>
           <span className={`text-[10px] text-center font-medium leading-tight ${
             stepFilter === "all" ? "text-primary" : "text-muted-foreground"

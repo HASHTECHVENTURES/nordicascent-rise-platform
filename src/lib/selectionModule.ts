@@ -114,6 +114,11 @@ export function isSelectionPipelineStatus(status: string) {
   );
 }
 
+/** Employer Selection list: pipeline apps plus employer-accepted (before admin moves status). */
+export function isEmployerSelectionListStatus(status: string) {
+  return status === "accepted" || isSelectionPipelineStatus(status);
+}
+
 /**
  * Active selection step for admin/employer actions.
  * Uses `selection_step` when present — pass statuses (e.g. eligibility_pass) alone

@@ -176,6 +176,16 @@ export function applicationStatusVariant(status: string): "default" | "secondary
   }
 }
 
+/** Employer pre-accept workflow (review → interview → accept/decline). */
+export function isEmployerPreAcceptWorkflow(status: string) {
+  return ["applied", "reviewing", "interview", "offer"].includes(status);
+}
+
+/** Employer should use Selection module instead of pre-accept workflow. */
+export function isEmployerSelectionHandoff(status: string) {
+  return status === "accepted" || isSelectionPipelineStatus(status);
+}
+
 /** Shorter labels for employer-facing UI */
 export function employerApplicationStatusLabel(status: string) {
   switch (status) {
@@ -192,7 +202,10 @@ export function employerApplicationStatusLabel(status: string) {
     case "rejected":
       return "Declined";
     default:
-      return "New application";
+      if (isSelectionPipelineStatus(status)) {
+        return selectionStatusLabel(status);
+      }
+      return status.replace(/_/g, " ");
   }
 }
 
