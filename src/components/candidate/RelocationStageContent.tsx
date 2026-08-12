@@ -8,6 +8,7 @@ import { useStageTasks } from "@/hooks/useData";
 import { useMyRelocationContext } from "@/hooks/useRelocation";
 import RelocationStepsPanel from "@/components/relocation/RelocationStepsPanel";
 import { stageTaskPath } from "@/lib/stageRoutes";
+import { PageSpinner } from "@/components/ui/PageSpinner";
 
 const HERO_IMAGE =
   "https://images.unsplash.com/photo-1513622470522-26c7827a0b40?w=1600&auto=format&fit=crop";
@@ -49,11 +50,7 @@ export default function RelocationStageContent() {
   const relocationDone = Boolean(ctx?.relocationCompletedAt) || ctx?.relocationStatus === "arrived";
 
   if (ctxLoading) {
-    return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <PageSpinner />;
   }
 
   return (

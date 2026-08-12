@@ -14,6 +14,7 @@ import { TRACK_META, type Track } from "@/lib/track";
 import { PIPELINE_STAGES, normalizePipelineStageId } from "@/lib/pipeline";
 import { useEmployerApplications } from "@/hooks/useData";
 import { resolveProfile } from "@/lib/resolveProfile";
+import { PageSpinner } from "@/components/ui/PageSpinner";
 
 const EmployerCandidates = () => {
   const navigate = useNavigate();
@@ -66,11 +67,7 @@ const EmployerCandidates = () => {
   const activeStageInfo = PIPELINE_STAGES.find((s) => s.id === activeStage);
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <PageSpinner />;
   }
 
   return (

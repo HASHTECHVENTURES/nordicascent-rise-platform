@@ -1,17 +1,14 @@
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { GraduationCap, ClipboardCheck, Rocket, Loader2, UserCheck } from "lucide-react";
+import { PageSpinner } from "@/components/ui/PageSpinner";
+import { GraduationCap, ClipboardCheck, Rocket, UserCheck } from "lucide-react";
 import { useAdminJourneyStats } from "@/hooks/useData";
 
 const AdminDashboard = () => {
   const { data: stats, isLoading } = useAdminJourneyStats();
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <PageSpinner />;
   }
 
   const cards = [

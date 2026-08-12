@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -37,6 +38,12 @@ type Props = {
   readOnly?: boolean;
 };
 
+function statusLabel(status: FollowupQuestionnaire["status"]) {
+  if (status === "submitted") return "Submitted";
+  if (status === "open") return "Open";
+  return "Pending";
+}
+
 export default function QuestionnaireForm({ questionnaire, applicationId, readOnly }: Props) {
   const { toast } = useToast();
   const submit = useSubmitFollowupQuestionnaire();
@@ -54,32 +61,43 @@ export default function QuestionnaireForm({ questionnaire, applicationId, readOn
   >({});
   const [open, setOpen] = useState(false);
 
-  const allAnswered = useMemo(() => {
-    return defs.every((q) => {
-      if (q.optional) return true;
+  const requiredCount = defs.filter((q) => !q.optional).length;
+  const answeredRequiredCount = useMemo(() => {
+    return defs.filter((q) => {
+      if (q.optional) return false;
       const a = answers[q.key];
-      if (q.type === "likert") {
-        if (!a?.option_key) return false;
-        return true;
-      }
+      if (q.type === "likert") return Boolean(a?.option_key);
       return Boolean(a?.open_text?.trim());
-    });
+    }).length;
   }, [answers, defs]);
+
+  const allAnswered = requiredCount > 0 && answeredRequiredCount >= requiredCount;
+
+  useEffect(() => {
+    if (!open) return;
+    setAnswers({});
+  }, [open, questionnaire.id]);
 
   if (questionnaire.status === "pending") {
     return (
-      <p className="text-sm text-muted-foreground">
-        Opens {questionnaire.opens_at ? `on ${questionnaire.opens_at}` : "soon"} (one week before
-        the touchpoint).
-      </p>
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge variant="secondary">Pending</Badge>
+        <p className="text-sm text-muted-foreground">
+          Opens {questionnaire.opens_at ? `on ${questionnaire.opens_at}` : "soon"} (one week before
+          the touchpoint).
+        </p>
+      </div>
     );
   }
 
   if (questionnaire.status === "submitted") {
     return (
       <div className="space-y-2">
+        <Badge className="bg-success text-success-foreground">Submitted</Badge>
         <p className="text-sm text-muted-foreground">
-          Submitted{questionnaire.submitted_at ? ` on ${questionnaire.submitted_at.slice(0, 10)}` : ""}.
+          {questionnaire.submitted_at
+            ? `Submitted on ${questionnaire.submitted_at.slice(0, 10)}.`
+            : "Submitted."}
         </p>
         {readOnly &&
           (savedAnswers ?? []).map((a) => {
@@ -101,84 +119,100 @@ export default function QuestionnaireForm({ questionnaire, applicationId, readOn
 
   if (readOnly) {
     return (
-      <p className="text-sm text-muted-foreground">
-        Open — awaiting {questionnaire.party} submission
-        {questionnaire.opens_at ? ` (opened ${questionnaire.opens_at})` : ""}.
-      </p>
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge variant="outline">Open</Badge>
+        <p className="text-sm text-muted-foreground">
+          Awaiting {questionnaire.party} submission
+          {questionnaire.opens_at ? ` (opened ${questionnaire.opens_at})` : ""}.
+        </p>
+      </div>
     );
   }
 
   const formBody = (
     <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-      {defs.map((q) => (
-        <div key={q.key} className="space-y-1.5">
-          <Label className="text-sm leading-snug">
-            {q.prompt}
-            {!q.optional && <span className="text-destructive"> *</span>}
-            {q.optional && (
-              <span className="text-muted-foreground font-normal"> (optional)</span>
-            )}
-          </Label>
-          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
-            {q.dimension.replace(/_/g, " ")}
-          </p>
-          {q.type === "likert" && q.options ? (
-            <>
-              <Select
-                value={answers[q.key]?.option_key ?? ""}
-                onValueChange={(key) => {
-                  const opt = q.options!.find((o) => o.key === key);
-                  setAnswers((prev) => ({
-                    ...prev,
-                    [q.key]: {
-                      ...prev[q.key],
-                      option_key: key,
-                      score: opt?.score,
-                    },
-                  }));
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select…" />
-                </SelectTrigger>
-                <SelectContent>
-                  {q.options.map((o) => (
-                    <SelectItem key={o.key} value={o.key}>
-                      {o.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {q.openFollowUp && (
-                <Textarea
-                  rows={2}
-                  className="mt-1.5"
-                  placeholder="Optional comment…"
-                  value={answers[q.key]?.open_text ?? ""}
-                  onChange={(e) =>
+      <p className="text-xs text-muted-foreground sticky top-0 bg-background py-1">
+        {answeredRequiredCount} of {requiredCount} required questions answered
+      </p>
+      {defs.map((q) => {
+        const a = answers[q.key];
+        const isAnswered =
+          q.optional ||
+          (q.type === "likert" ? Boolean(a?.option_key) : Boolean(a?.open_text?.trim()));
+
+        return (
+          <div
+            key={q.key}
+            className={`space-y-1.5 rounded-md border p-3 ${isAnswered ? "border-border" : "border-destructive/30"}`}
+          >
+            <Label className="text-sm leading-snug">
+              {q.prompt}
+              {!q.optional && <span className="text-destructive"> *</span>}
+              {q.optional && (
+                <span className="text-muted-foreground font-normal"> (optional)</span>
+              )}
+            </Label>
+            <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+              {q.dimension.replace(/_/g, " ")}
+            </p>
+            {q.type === "likert" && q.options ? (
+              <>
+                <Select
+                  value={answers[q.key]?.option_key ?? ""}
+                  onValueChange={(key) => {
+                    const opt = q.options!.find((o) => o.key === key);
                     setAnswers((prev) => ({
                       ...prev,
-                      [q.key]: { ...prev[q.key], open_text: e.target.value },
-                    }))
-                  }
-                />
-              )}
-            </>
-          ) : (
-            <Textarea
-              rows={2}
-              required={!q.optional}
-              value={answers[q.key]?.open_text ?? ""}
-              onChange={(e) =>
-                setAnswers((prev) => ({
-                  ...prev,
-                  [q.key]: { ...prev[q.key], open_text: e.target.value },
-                }))
-              }
-            />
-          )}
-        </div>
-      ))}
+                      [q.key]: {
+                        ...prev[q.key],
+                        option_key: key,
+                        score: opt?.score,
+                      },
+                    }));
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {q.options.map((o) => (
+                      <SelectItem key={o.key} value={o.key}>
+                        {o.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {q.openFollowUp && (
+                  <Textarea
+                    rows={2}
+                    className="mt-1.5"
+                    placeholder="Optional comment…"
+                    value={answers[q.key]?.open_text ?? ""}
+                    onChange={(e) =>
+                      setAnswers((prev) => ({
+                        ...prev,
+                        [q.key]: { ...prev[q.key], open_text: e.target.value },
+                      }))
+                    }
+                  />
+                )}
+              </>
+            ) : (
+              <Textarea
+                rows={2}
+                required={!q.optional}
+                value={answers[q.key]?.open_text ?? ""}
+                onChange={(e) =>
+                  setAnswers((prev) => ({
+                    ...prev,
+                    [q.key]: { ...prev[q.key], open_text: e.target.value },
+                  }))
+                }
+              />
+            )}
+          </div>
+        );
+      })}
       <Button
         className="w-full"
         disabled={submit.isPending || !allAnswered}
@@ -223,8 +257,11 @@ export default function QuestionnaireForm({ questionnaire, applicationId, readOn
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="default">
-          Open questionnaire
+        <Button size="sm" variant="default" className="gap-2">
+          Complete questionnaire
+          <Badge variant="secondary" className="font-normal">
+            {statusLabel(questionnaire.status)}
+          </Badge>
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-lg sm:max-w-xl">
@@ -234,7 +271,7 @@ export default function QuestionnaireForm({ questionnaire, applicationId, readOn
             {questionnaire.month_number}
           </DialogTitle>
           <DialogDescription>
-            All questions are required. You cannot submit until every answer is complete.
+            All required questions must be answered. Progress: {answeredRequiredCount}/{requiredCount}.
           </DialogDescription>
         </DialogHeader>
         {formBody}

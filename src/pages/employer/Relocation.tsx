@@ -9,6 +9,7 @@ import { resolveProfile } from "@/lib/resolveProfile";
 import { TRACK_META, type Track } from "@/lib/track";
 import { relocationStepProgress } from "@/lib/relocationModule";
 import type { SelectionApplication } from "@/lib/selectionModule";
+import { PageSpinner } from "@/components/ui/PageSpinner";
 
 function RelocationAppRow({ app }: { app: SelectionApplication }) {
   const profile = resolveProfile(app.candidates?.profiles);
@@ -50,11 +51,7 @@ export default function EmployerRelocation() {
   const { data: apps, isLoading } = useEmployerRelocationApplications();
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <PageSpinner />;
   }
 
   const list = apps ?? [];

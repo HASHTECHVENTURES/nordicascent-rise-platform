@@ -105,13 +105,15 @@ export default function FollowupTrackerPanel({
     );
   }
 
-  if (recordLoading || tpLoading || ensureInit.isPending) {
+  if (recordLoading || tpLoading) {
     return (
       <div className="flex justify-center py-8">
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     );
   }
+
+  const initializing = list.length === 0 && ensureInit.isPending;
 
   const header = (
     <div className="flex flex-wrap items-center gap-3">
@@ -230,7 +232,13 @@ export default function FollowupTrackerPanel({
       )}
 
       <div className="space-y-4">
-        {list.map((tp) => {
+        {initializing ? (
+          <div className="flex items-center gap-2 py-6 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+            Setting up follow-up schedule…
+          </div>
+        ) : (
+          list.map((tp) => {
           const partySummaries = (summaries ?? []).filter((s) => s.touchpoint_id === tp.id);
           const candLogged = partySummaries.find((s) => s.party === "candidate")?.is_logged;
           const coLogged = partySummaries.find((s) => s.party === "company")?.is_logged;
@@ -406,7 +414,8 @@ export default function FollowupTrackerPanel({
               )}
             </div>
           );
-        })}
+        })
+        )}
       </div>
 
       {/* Ad-hoc */}

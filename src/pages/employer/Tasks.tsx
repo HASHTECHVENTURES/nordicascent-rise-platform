@@ -15,6 +15,7 @@ import {
   useCreateEmployerTask,
 } from "@/hooks/useData";
 import { useToast } from "@/hooks/use-toast";
+import { PageSpinner } from "@/components/ui/PageSpinner";
 
 const EmployerTasks = () => {
   const { data: tasks, isLoading: tasksLoading } = useEmployerTasks();
@@ -40,11 +41,7 @@ const EmployerTasks = () => {
   };
 
   if (tasksLoading || appsLoading) {
-    return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <PageSpinner />;
   }
 
   const taskList = tasks ?? [];

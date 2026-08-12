@@ -4,17 +4,14 @@ import { Users, Building2, Briefcase, AlertTriangle, Loader2 } from "lucide-reac
 import { useAdminCandidates, usePlatformStats } from "@/hooks/useData";
 import { TRACK_META } from "@/lib/track";
 import { PIPELINE_STAGES } from "@/lib/pipeline";
+import { PageSpinner } from "@/components/ui/PageSpinner";
 
 const AdminAnalytics = () => {
   const { data: candidates, isLoading: cLoading } = useAdminCandidates();
   const { data: stats, isLoading: sLoading } = usePlatformStats();
 
   if (cLoading || sLoading) {
-    return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <PageSpinner />;
   }
 
   const list = candidates ?? [];

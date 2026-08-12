@@ -12,6 +12,7 @@ import { resolveProfile } from "@/lib/resolveProfile";
 import { TRACK_META, type Track } from "@/lib/track";
 import { onboardingStepProgress } from "@/lib/onboardingModule";
 import type { SelectionApplication } from "@/lib/selectionModule";
+import { PageSpinner } from "@/components/ui/PageSpinner";
 
 function OnboardingAppRow({ app }: { app: SelectionApplication }) {
   const profile = resolveProfile(app.candidates?.profiles);
@@ -54,11 +55,7 @@ export default function EmployerOnboarding() {
   const list = apps ?? [];
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <PageSpinner />;
   }
 
   return (

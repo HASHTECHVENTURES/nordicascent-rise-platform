@@ -1,9 +1,10 @@
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, Briefcase, Clock, CheckCircle, Loader2, Plus, ArrowRight } from "lucide-react";
+import { Users, Briefcase, Clock, CheckCircle, Plus, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { PIPELINE_STAGES, normalizePipelineStageId } from "@/lib/pipeline";
+import { PageSpinner } from "@/components/ui/PageSpinner";
 import { useEmployerApplications, useEmployerJobs, useEmployerTasks } from "@/hooks/useData";
 
 const EmployerDashboard = () => {
@@ -28,11 +29,7 @@ const EmployerDashboard = () => {
   const onboarded = (byStage["onboarding"] ?? 0) + (byStage["followup"] ?? 0);
 
   if (appsLoading || jobsLoading || tasksLoading) {
-    return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <PageSpinner />;
   }
 
   return (
@@ -107,7 +104,7 @@ const EmployerDashboard = () => {
             {PIPELINE_STAGES.map((stage, index) => {
               const count = byStage[stage.id] ?? 0;
               return (
-                <Link key={stage.id} to="/employer/candidates" className="flex items-center">
+                <Link key={stage.id} to={stage.employerHref} className="flex items-center">
                   <div className="flex flex-col items-center min-w-[90px] hover:opacity-80 transition-opacity">
                     <div className={`w-14 h-14 rounded-full flex items-center justify-center border-2 mb-2 ${
                       count > 0 ? "bg-primary/10 border-primary text-primary" : "bg-muted border-muted-foreground/30 text-muted-foreground"

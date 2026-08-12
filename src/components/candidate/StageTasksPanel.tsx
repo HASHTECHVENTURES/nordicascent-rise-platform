@@ -13,7 +13,7 @@ import {
   useMyApplications,
   useAdvanceStageIfReady,
 } from "@/hooks/useData";
-import { PIPELINE_STAGES } from "@/lib/pipeline";
+import { PIPELINE_STAGES, stageDisplayMeta } from "@/lib/pipeline";
 import { computeStageReadiness } from "@/lib/profileCompleteness";
 import { hasUnlockedPipeline, isPostPreparationStage, hasActiveApplication } from "@/lib/applicationJourney";
 import { STAGES_WITH_TASK_PAGES, stageListPath, stageTaskPath } from "@/lib/stageRoutes";
@@ -40,7 +40,7 @@ export default function StageTasksPanel({
   nestedInActivation = false,
 }: Props) {
   const [track] = useTrack();
-  const stageMeta = PIPELINE_STAGES.find((s) => s.id === stageId);
+  const stageMeta = stageDisplayMeta(stageId);
   const { data: tasks, isLoading: tasksLoading } = useStageTasks(stageId);
   const { data: progress } = useMyTaskProgress();
   const { data: stageProgress } = useMyStageProgress();

@@ -26,6 +26,7 @@ import {
 } from "@/lib/selectionModule";
 import { isMentorAssignmentOverdue } from "@/lib/mentorProgram";
 import type { SelectionApplication } from "@/lib/selectionModule";
+import { PageSpinner } from "@/components/ui/PageSpinner";
 
 function isBulkEligibleStep1(app: SelectionApplication) {
   const step = getSelectionStepFromStatus(app.status, app.selection_step);
@@ -129,11 +130,7 @@ const AdminSelection = () => {
   const allSelected = bulkEligible.length > 0 && bulkEligible.every((a) => selectedIds.has(a.id));
 
   if (jobsLoading) {
-    return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <PageSpinner />;
   }
 
   return (

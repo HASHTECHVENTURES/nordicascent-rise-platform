@@ -9,6 +9,7 @@ import { useCandidateById, useUpdateCandidateTrack, useUpdateCandidateStatus, us
 import { useToast } from "@/hooks/use-toast";
 import { adminJourneyStageLabel } from "@/lib/adminJourney";
 import AdminDeleteButton from "@/components/admin/AdminDeleteButton";
+import { PageSpinner } from "@/components/ui/PageSpinner";
 
 const AdminCandidateDetail = () => {
   const { id } = useParams();
@@ -55,11 +56,7 @@ const AdminCandidateDetail = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <PageSpinner />;
   }
 
   if (!candidate) {

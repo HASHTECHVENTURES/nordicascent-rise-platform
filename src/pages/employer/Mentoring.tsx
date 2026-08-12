@@ -12,6 +12,7 @@ import { useState } from "react";
 import { resolveProfile } from "@/lib/resolveProfile";
 import { TRACK_META, type Track } from "@/lib/track";
 import { mentorMeetingCountForTrack } from "@/lib/mentorProgram";
+import { PageSpinner } from "@/components/ui/PageSpinner";
 
 const EmployerMentoring = () => {
   const { data: mentors, isLoading: mentorsLoading } = useCompanyMentors();
@@ -54,11 +55,7 @@ const EmployerMentoring = () => {
   };
 
   if (mentorsLoading) {
-    return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <PageSpinner />;
   }
 
   return (

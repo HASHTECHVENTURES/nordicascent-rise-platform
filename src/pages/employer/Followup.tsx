@@ -7,6 +7,7 @@ import { useActivationRecord } from "@/hooks/useActivation";
 import { useMyCompany } from "@/hooks/useData";
 import { resolveProfile } from "@/lib/resolveProfile";
 import type { SelectionApplication } from "@/lib/selectionModule";
+import { PageSpinner } from "@/components/ui/PageSpinner";
 
 function Row({ app }: { app: SelectionApplication }) {
   const profile = resolveProfile(app.candidates?.profiles);
@@ -40,11 +41,7 @@ export default function EmployerFollowup() {
   const list = apps ?? [];
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <PageSpinner />;
   }
 
   return (
