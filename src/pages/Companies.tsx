@@ -28,8 +28,12 @@ export default function Companies() {
           <h1 className="text-4xl sm:text-5xl font-semibold text-primary tracking-tight mb-5 leading-tight">
             Hire proven engineers from India, without the integration risk.
           </h1>
-          <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-            We validate cultural and technical fit before arrival and support integration for six months after — so the engineer you hire is the engineer who stays.
+          <p className="text-lg text-muted-foreground mb-4 leading-relaxed">
+            We validate cultural and technical fit before arrival and support integration for six
+            months after — so the engineer you hire is the engineer who stays.
+          </p>
+          <p className="text-sm text-muted-foreground mb-8">
+            Engineers from the top Indian institutions choose this path.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <Button size="lg" asChild className="bg-warning text-warning-foreground hover:opacity-90">
@@ -44,9 +48,11 @@ export default function Companies() {
 
       <section className="py-16 lg:py-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl">
-          <h2 className="text-2xl font-semibold text-foreground mb-4">The real risk isn’t finding talent</h2>
+          <h2 className="text-2xl font-semibold text-foreground mb-4">The problem</h2>
           <p className="text-muted-foreground leading-relaxed">
-            The Nordic engineering shortage is well known. The harder problem is a hire that doesn’t work out — a mis-hire can cost 2–3 MNOK. Nordic Ascent retires that risk step by step before you commit to relocation.
+            The Nordic engineering shortage is well known. The harder problem is a hire that doesn’t
+            work out — a mis-hire can cost 2–3 MNOK. Nordic Ascent retires that risk step by step
+            before you commit to relocation.
           </p>
         </div>
       </section>
@@ -61,7 +67,9 @@ export default function Companies() {
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
                     {i + 1}
                   </span>
-                  <span className="text-xs sm:text-sm font-medium text-foreground leading-snug">{step}</span>
+                  <span className="text-xs sm:text-sm font-medium text-foreground leading-snug">
+                    {step}
+                  </span>
                 </div>
                 {i < STEPS.length - 1 && (
                   <ArrowRight className="hidden sm:block h-4 w-4 text-muted-foreground mx-1 shrink-0" />
@@ -70,7 +78,8 @@ export default function Companies() {
             ))}
           </div>
           <p className="text-sm text-muted-foreground mt-6 leading-relaxed">
-            Final Clearance lets your company decide before it commits. Relocation is arranged directly with specialist partners — not resold.
+            Final Clearance lets your company decide before it commits. Relocation is arranged
+            directly with specialist partners — not resold.
           </p>
         </div>
       </section>
@@ -94,7 +103,9 @@ export default function Companies() {
           <h2 className="text-2xl font-semibold text-foreground mb-6">Proof</h2>
           <div className="flex flex-wrap justify-center gap-x-10 gap-y-3 mb-10">
             {PARTNERS.map((p) => (
-              <span key={p} className="text-sm font-medium text-primary/70">{p}</span>
+              <span key={p} className="text-sm font-medium text-primary/70">
+                {p}
+              </span>
             ))}
           </div>
           <p className="text-muted-foreground mb-6">

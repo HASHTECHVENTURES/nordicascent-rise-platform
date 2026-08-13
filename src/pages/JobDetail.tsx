@@ -102,7 +102,7 @@ export default function JobDetail() {
   return (
     <div className="container mx-auto px-4 py-20 text-center">
       <h1 className="text-2xl font-bold mb-4">Content not found</h1>
-      <Button asChild><Link to="/insight">Back to Insight</Link></Button>
+      <Button asChild><Link to="/insight">Back to Insights</Link></Button>
     </div>
   );
 }

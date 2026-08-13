@@ -3,10 +3,11 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
 
 const JOURNEY = [
-  "Preparation and profile",
-  "A mentor who has your back",
-  "Digital internship to prove yourself",
-  "Relocation handled with partners",
+  "Preparation — profile, university, and readiness for the path",
+  "Selection — matched to a Nordic role",
+  "A mentor who has your back through Readiness and internship",
+  "Digital internship to prove yourself before relocation",
+  "Relocation handled with specialist partners",
   "Support for six months after you arrive",
 ];
 
@@ -24,8 +25,12 @@ export default function Engineers() {
           <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight mb-5 leading-tight">
             Build your engineering career in the Nordics.
           </h1>
-          <p className="text-lg text-primary-foreground/85 mb-8 leading-relaxed">
-            A structured path from a top Indian university to a lasting role in a Nordic company — with cultural preparation, a mentor, and support long after you arrive.
+          <p className="text-lg text-primary-foreground/85 mb-4 leading-relaxed">
+            A structured path from a top Indian university to a lasting role in a Nordic company —
+            with cultural preparation, a mentor, and support long after you arrive.
+          </p>
+          <p className="text-sm text-primary-foreground/70 mb-8">
+            Engineers from the top Indian institutions choose this path.
           </p>
           <Button
             size="lg"
@@ -41,9 +46,11 @@ export default function Engineers() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl">
           <h2 className="text-2xl font-semibold text-foreground mb-6">What the journey looks like</h2>
           <ul className="space-y-3">
-            {JOURNEY.map((item) => (
+            {JOURNEY.map((item, i) => (
               <li key={item} className="flex items-start gap-3">
-                <CheckCircle className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                <span className="text-xs font-semibold text-muted-foreground w-5 pt-1 shrink-0">
+                  {i + 1}
+                </span>
                 <span className="text-muted-foreground">{item}</span>
               </li>
             ))}
@@ -63,7 +70,8 @@ export default function Engineers() {
             ))}
           </ul>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Being honest about the bar makes the opportunity feel real — this path is for engineers ready to commit.
+            Being honest about the bar makes the opportunity feel real — this path is for engineers
+            ready to commit.
           </p>
         </div>
       </section>
@@ -72,7 +80,8 @@ export default function Engineers() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl text-center">
           <h2 className="text-2xl font-semibold text-foreground mb-3">Stories and outcomes</h2>
           <p className="text-muted-foreground mb-8 leading-relaxed">
-            Partner universities and the structured programme carry the credibility today. Candidate stories will live here as placements complete.
+            Partner universities and the structured programme carry the credibility today. Candidate
+            stories will live here as placements complete.
           </p>
           <Button size="lg" asChild>
             <Link to="/login?role=candidate&signup=1">Create your profile</Link>

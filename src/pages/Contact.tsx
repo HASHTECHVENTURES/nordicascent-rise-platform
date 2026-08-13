@@ -68,13 +68,15 @@ export default function Contact() {
 
   return (
     <div className="flex flex-col">
-      <section className="py-20 lg:py-28 bg-gradient-to-b from-accent/30 to-background">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto animate-fade-in">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
-              Let's Start a <span className="nordic-gradient-text">Conversation</span>
+      <section className="border-b border-border bg-background">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+          <div className="text-center max-w-3xl mx-auto">
+            <h1 className="text-4xl sm:text-5xl font-semibold text-primary tracking-tight mb-5">
+              Contact
             </h1>
-            <p className="text-xl text-muted-foreground">Have questions? Want to see a demo? We're here to help you find the right solution.</p>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              Book a demo or send a message — we’ll get back to you promptly.
+            </p>
           </div>
         </div>
       </section>
@@ -85,7 +87,7 @@ export default function Contact() {
             <Card className="animate-fade-in-up">
               <CardHeader>
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="h-10 w-10 rounded-lg nordic-gradient flex items-center justify-center"><Calendar className="h-5 w-5 text-primary-foreground" /></div>
+                  <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center"><Calendar className="h-5 w-5 text-primary-foreground" /></div>
                   <CardTitle>Book a Demo</CardTitle>
                 </div>
                 <p className="text-muted-foreground">See Nordic Ascent in action with a personalized demo.</p>
@@ -166,8 +168,8 @@ export default function Contact() {
                       onChange={(e) => setDemoForm((f) => ({ ...f, message: e.target.value }))}
                     />
                   </div>
-                  <Button type="submit" className="w-full nordic-gradient nordic-glow" disabled={submitContact.isPending}>
-                    {submitContact.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Request Demo"}
+                  <Button type="submit" className="w-full bg-warning text-warning-foreground hover:opacity-90" disabled={submitContact.isPending}>
+                    {submitContact.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Book a demo"}
                   </Button>
                 </form>
               </CardContent>

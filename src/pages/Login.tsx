@@ -254,20 +254,20 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
   return (
     <div className="min-h-screen flex">
       {/* Left Panel */}
-      <div className="hidden lg:flex lg:w-1/2 bg-primary p-12 flex-col justify-between">
+      <div className="hidden lg:flex lg:w-1/2 bg-primary p-10 xl:p-12 flex-col justify-between overflow-hidden">
         <div>
           <Link to="/" className="flex items-center gap-3 text-primary-foreground">
               <img src={logoImage} alt="Nordic Ascent" className="h-24 w-auto" style={{ filter: "brightness(0) saturate(100%) invert(19%) sepia(32%) saturate(1200%) hue-rotate(183deg) brightness(95%) contrast(92%)" }} />
             <span className="text-xl font-medium">Nordic Ascent</span>
           </Link>
         </div>
-        <div className="space-y-6">
-          <h1 className="text-4xl font-medium text-primary-foreground leading-tight text-center">
+        <div className="space-y-6 px-2 text-center">
+          <h1 className="text-3xl xl:text-4xl font-medium text-primary-foreground leading-tight text-balance">
             {selectedRole
               ? `Welcome, ${roleConfig[selectedRole].title}`
               : "Engineering talent from India, hired to stay."}
           </h1>
-          <p className="text-xl text-primary-foreground/80 text-center">
+          <p className="text-lg xl:text-xl text-primary-foreground/80 text-balance">
             {selectedRole
               ? roleConfig[selectedRole].description
               : "Validated before arrival. Supported for six months after. Not placement — integration."}
@@ -315,17 +315,14 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
                 <CardDescription>Choose how you want to use Nordic Ascent</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {(["employer", "candidate", "mentor", "university"] as const).map((key) => {
+                {(["employer", "candidate"] as const).map((key) => {
                   const config = roleConfig[key];
                   const Icon = config.icon;
                   return (
                     <button
                       key={key}
                       type="button"
-                      onClick={() => {
-                        setSelectedRole(key);
-                        if (key === "mentor" || key === "university") setAuthMode("signin");
-                      }}
+                      onClick={() => setSelectedRole(key)}
                       className="w-full p-4 rounded border border-border hover:border-primary bg-card hover:bg-muted/50 group flex items-center justify-between text-left"
                     >
                       <div className="flex items-center gap-4">
@@ -341,14 +338,40 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
                     </button>
                   );
                 })}
-                <div className="pt-3 border-t border-border">
-                  <Link
-                    to="/admin/login"
+                <div className="pt-3 border-t border-border space-y-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedRole("mentor");
+                      setAuthMode("signin");
+                    }}
                     className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
                   >
-                    Team access
+                    Mentor access
                     <ChevronRight className="h-3 w-3" />
-                  </Link>
+                  </button>
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedRole("university");
+                        setAuthMode("signin");
+                      }}
+                      className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+                    >
+                      University access
+                      <ChevronRight className="h-3 w-3" />
+                    </button>
+                  </div>
+                  <div>
+                    <Link
+                      to="/admin/login"
+                      className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+                    >
+                      Team access
+                      <ChevronRight className="h-3 w-3" />
+                    </Link>
+                  </div>
                 </div>
               </CardContent>
             </Card>
