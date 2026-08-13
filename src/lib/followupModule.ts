@@ -568,7 +568,7 @@ export const QUESTIONNAIRE_DEFS: Record<"candidate_3" | "company_3" | "candidate
     {
       key: "c6_decision",
       prompt: "How do you feel about your decision to move to Norway?",
-      dimension: "retention",
+      dimension: "future",
       type: "likert",
       options: LIKERT_5([
         "Very positive",
@@ -581,7 +581,7 @@ export const QUESTIONNAIRE_DEFS: Record<"candidate_3" | "company_3" | "candidate
     {
       key: "c6_future",
       prompt: "Where do you see yourself in the next 12 months?",
-      dimension: "retention",
+      dimension: "future",
       type: "likert",
       options: [
         { key: "o1", label: "Continuing in this role", score: 5 },
@@ -1005,6 +1005,9 @@ export async function syncFollowupStatus(applicationId: string) {
 export async function upsertMeetingLog(input: {
   logId: string;
   applicationId: string;
+  touchpointId?: string;
+  monthNumber?: number;
+  party?: MeetingParty;
   state: MeetingState;
   meeting_date?: string | null;
   notes?: string | null;
@@ -1030,15 +1033,17 @@ export async function upsertMeetingLog(input: {
   if (error) throw error;
 
   if (input.setAtRiskRetention) {
-    await supabase
-      .from("activation_records")
-      .update({
-        at_risk_retention: true,
-        at_risk_retention_at: now,
-        followup_status: "at_risk_retention",
-        updated_at: now,
-      })
-      .eq("application_id", input.applicationId);
+    await setAtRiskRetention(input.applicationId, true);
+  }
+
+  if (input.state === "flag" && input.touchpointId && input.monthNumber && input.party) {
+    await supabase.rpc("create_followup_flag_issue", {
+      p_application_id: input.applicationId,
+      p_touchpoint_id: input.touchpointId,
+      p_party: input.party,
+      p_month_number: input.monthNumber,
+      p_notes: input.notes?.trim() || input.confidential_notes?.trim() || null,
+    });
   }
 
   await syncFollowupStatus(input.applicationId);
@@ -1046,17 +1051,11 @@ export async function upsertMeetingLog(input: {
 }
 
 export async function setAtRiskRetention(applicationId: string, value: boolean) {
-  const now = new Date().toISOString();
-  const { error } = await supabase
-    .from("activation_records")
-    .update({
-      at_risk_retention: value,
-      at_risk_retention_at: value ? now : null,
-      updated_at: now,
-    })
-    .eq("application_id", applicationId);
+  const { error } = await supabase.rpc("set_at_risk_retention", {
+    p_application_id: applicationId,
+    p_value: value,
+  });
   if (error) throw error;
-  await syncFollowupStatus(applicationId);
 }
 
 export async function submitQuestionnaire(input: {
@@ -1102,7 +1101,7 @@ export async function submitQuestionnaire(input: {
     .eq("id", input.questionnaireId);
   if (error) throw error;
 
-  // Retention signal from company low confidence
+  // Retention signal from company questionnaire (6-month Q15 primary; 3-month early signal kept)
   if (input.party === "company") {
     const retentionKey = input.month === 3 ? "co3_retention" : "co6_retention";
     const score = input.answers[retentionKey]?.score;
@@ -1111,19 +1110,56 @@ export async function submitQuestionnaire(input: {
     }
   }
 
-  // Candidate 6-mo confidential open text can signal retention risk
-  if (input.party === "candidate" && input.month === 6) {
-    const riskText = Object.entries(input.answers).find(([k, a]) => {
-      const def = defs.find((d) => d.key === k);
-      return def?.dimension === "retention" && Boolean(a.open_text?.trim());
-    });
-    if (riskText && (input.answers[riskText[0]]?.open_text ?? "").toLowerCase().includes("risk")) {
-      await setAtRiskRetention(input.applicationId, true);
-    }
-  }
-
   await syncFollowupStatus(input.applicationId);
   await supabase.rpc("complete_followup_if_ready", { p_application_id: input.applicationId });
+}
+
+export async function openDueFollowupQuestionnaires() {
+  const { data, error } = await supabase.rpc("open_due_followup_questionnaires");
+  if (error) throw error;
+  return (data as number) ?? 0;
+}
+
+/** Cohort rollup: avg Likert score by readiness dimension (admin reporting). */
+export async function fetchFollowupDimensionRollup() {
+  const { data, error } = await supabase
+    .from("followup_answers")
+    .select("readiness_dimension, score, question_key, application_id, followup_questionnaires!inner(month_number, party, status)")
+    .not("score", "is", null);
+  if (error) throw error;
+
+  type Acc = { dimension: string; month: number; party: string; sum: number; count: number };
+  const map = new Map<string, Acc>();
+
+  for (const row of data ?? []) {
+    const q = row.followup_questionnaires as
+      | { month_number?: number; party?: string; status?: string }
+      | { month_number?: number; party?: string; status?: string }[]
+      | null;
+    const meta = Array.isArray(q) ? q[0] : q;
+    if (!meta || meta.status !== "submitted" || !row.readiness_dimension || row.score == null) continue;
+    const key = `${row.readiness_dimension}|${meta.month_number}|${meta.party}`;
+    const cur = map.get(key) ?? {
+      dimension: row.readiness_dimension as string,
+      month: meta.month_number as number,
+      party: meta.party as string,
+      sum: 0,
+      count: 0,
+    };
+    cur.sum += Number(row.score);
+    cur.count += 1;
+    map.set(key, cur);
+  }
+
+  return [...map.values()]
+    .map((r) => ({
+      dimension: r.dimension,
+      month: r.month,
+      party: r.party,
+      avgScore: Math.round((r.sum / r.count) * 10) / 10,
+      responses: r.count,
+    }))
+    .sort((a, b) => a.month - b.month || a.dimension.localeCompare(b.dimension));
 }
 
 export async function createAddonRequest(input: {

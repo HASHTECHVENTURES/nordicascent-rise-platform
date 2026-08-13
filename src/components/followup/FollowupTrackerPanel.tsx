@@ -132,13 +132,18 @@ export default function FollowupTrackerPanel({
         </p>
       </div>
       {role === "admin" ? (
-        done || rollup === "followup_complete" ? (
-          <Badge className="bg-success text-success-foreground">Complete</Badge>
-        ) : (
-          <Badge variant={rollup === "at_risk_retention" || rollup === "followup_flag" ? "destructive" : "outline"}>
-            {rollupStatusLabel(rollup)}
-          </Badge>
-        )
+        <div className="flex flex-wrap gap-2">
+          {(record?.at_risk_retention || rollup === "at_risk_retention") && (
+            <Badge variant="destructive">At risk (retention)</Badge>
+          )}
+          {done || rollup === "followup_complete" ? (
+            <Badge className="bg-success text-success-foreground">Complete</Badge>
+          ) : (
+            <Badge variant={rollup === "followup_flag" ? "destructive" : "outline"}>
+              {rollupStatusLabel(rollup)}
+            </Badge>
+          )}
+        </div>
       ) : done ? (
         <Badge className="bg-success text-success-foreground">Period complete</Badge>
       ) : (

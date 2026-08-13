@@ -55,6 +55,7 @@ export default function MeetingLogForm({
   const partyLabel = party === "candidate" ? "Candidate meeting" : "Company meeting";
   const accent =
     party === "candidate" ? "border-sky-200 bg-sky-50/50" : "border-emerald-200 bg-emerald-50/50";
+  const showAtRisk = monthNumber === 6;
 
   return (
     <div className={`rounded-lg border p-4 space-y-3 ${accent}`}>
@@ -91,6 +92,11 @@ export default function MeetingLogForm({
                   <SelectItem value="flag">Flag</SelectItem>
                 </SelectContent>
               </Select>
+              {state === "flag" && (
+                <p className="text-xs text-destructive">
+                  Flag creates an admin task and may trigger contact before the next touchpoint.
+                </p>
+              )}
             </div>
             <div className="space-y-1.5">
               <Label>Meeting date</Label>
@@ -114,17 +120,17 @@ export default function MeetingLogForm({
                 rows={2}
                 placeholder="Internal only — never shared with company"
               />
-              {monthNumber === 6 && (
-                <label className="flex items-center gap-2 text-xs text-destructive">
-                  <input
-                    type="checkbox"
-                    checked={atRisk}
-                    onChange={(e) => setAtRisk(e.target.checked)}
-                  />
-                  Set AT_RISK_RETENTION (placement may not hold)
-                </label>
-              )}
             </div>
+          )}
+          {showAtRisk && (
+            <label className="flex items-center gap-2 text-xs text-destructive">
+              <input
+                type="checkbox"
+                checked={atRisk}
+                onChange={(e) => setAtRisk(e.target.checked)}
+              />
+              Set AT_RISK_RETENTION (placement may not hold)
+            </label>
           )}
           <div className="space-y-1.5">
             <Label>Follow-up actions</Label>
@@ -138,6 +144,9 @@ export default function MeetingLogForm({
                 await upsert.mutateAsync({
                   logId: log.id,
                   applicationId,
+                  touchpointId: log.touchpoint_id,
+                  monthNumber,
+                  party,
                   state,
                   meeting_date: meetingDate || null,
                   notes,
@@ -145,7 +154,13 @@ export default function MeetingLogForm({
                   follow_up_actions: actions,
                   setAtRiskRetention: atRisk,
                 });
-                toast({ title: `${partyLabel} logged` });
+                toast({
+                  title: `${partyLabel} logged`,
+                  description:
+                    state === "flag"
+                      ? "Admin task created for early contact if needed."
+                      : undefined,
+                });
               } catch (err) {
                 toast({
                   title: "Could not save meeting",
