@@ -289,13 +289,14 @@ export function useMyCompany() {
   const { profile } = useAuth();
   return useQuery({
     queryKey: ["my-company", profile?.id],
-    enabled: profile?.role === "employer",
+    enabled: profile?.role === "employer" && !!profile?.id,
+    retry: 1,
     queryFn: async () => {
       const { data: employer, error: e1 } = await supabase
         .from("employers")
         .select("*, companies(*)")
         .eq("profile_id", profile!.id)
-        .single();
+        .maybeSingle();
       if (e1) throw e1;
       return employer;
     },

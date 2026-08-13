@@ -83,7 +83,7 @@ const selectContentProps = {
 const EmployerCompanyProfile = () => {
   const navigate = useNavigate();
   const { profile } = useAuth();
-  const { data: employerData, isLoading } = useMyCompany();
+  const { data: employerData, isLoading, isError, error, refetch } = useMyCompany();
   const updateCompany = useUpdateCompany();
   const updateEmployerContact = useUpdateEmployerContact();
   const { toast } = useToast();
@@ -146,11 +146,27 @@ const EmployerCompanyProfile = () => {
     );
   }
 
+  if (isError) {
+    return (
+      <div className="space-y-4 py-12 text-center">
+        <p className="text-muted-foreground">Couldn’t load your company profile.</p>
+        <p className="text-sm text-muted-foreground">
+          {error instanceof Error ? error.message : "Please try again."}
+        </p>
+        <Button variant="outline" onClick={() => refetch()}>
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
   if (!company?.id) {
     return (
       <div className="space-y-4 py-12 text-center">
         <p className="text-muted-foreground">No company linked to your account.</p>
-        <p className="text-sm text-muted-foreground">Log out and sign up again as a company, or contact support.</p>
+        <p className="text-sm text-muted-foreground">
+          Log out and sign up again as a company, or contact support.
+        </p>
       </div>
     );
   }
