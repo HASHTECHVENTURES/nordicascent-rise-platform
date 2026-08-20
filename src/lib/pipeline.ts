@@ -83,6 +83,48 @@ export function normalizePipelineStageId(stageId: string | null | undefined): st
   return stageId;
 }
 
+/** Map application.status onto the company Candidates pipeline tabs. */
+const STATUS_TO_PIPELINE_STAGE: Record<string, string> = {
+  applied: "preparation",
+  application_complete: "preparation",
+  reviewing: "preparation",
+  interview: "preparation",
+  offer: "preparation",
+  rejected: "preparation",
+  accepted: "selection",
+  eligibility_review: "selection",
+  eligibility_pass: "selection",
+  offee_review: "selection",
+  offee_pass: "selection",
+  step3_review: "selection",
+  step3_pass: "selection",
+  step4_review: "selection",
+  step4_pass: "selection",
+  selected_for_readiness: "selection",
+  selection_hold: "selection",
+  selection_rejected: "selection",
+  mentor_assigned: "readiness",
+  readiness_active: "readiness",
+  readiness_complete: "readiness",
+  internship: "activation",
+  go_no_go: "activation",
+  pre_arrival: "activation",
+  relocation: "relocation",
+  onboarding: "onboarding",
+  followup: "followup",
+  journey_complete: "followup",
+};
+
+/** Pipeline tab for an application. Status wins over a stale/null stage_id. */
+export function pipelineStageFromApplication(app: {
+  status?: string | null;
+  stage_id?: string | null;
+}): string {
+  const fromStatus = app.status ? STATUS_TO_PIPELINE_STAGE[app.status] : undefined;
+  if (fromStatus) return fromStatus;
+  return normalizePipelineStageId(app.stage_id);
+}
+
 /** Task pages may still use legacy stage ids (e.g. internship tasks inside Activation). */
 export function stageDisplayMeta(stageId: string) {
   const normalized = normalizePipelineStageId(stageId);

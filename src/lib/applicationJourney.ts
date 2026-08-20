@@ -202,10 +202,10 @@ export function employerApplicationStatusLabel(status: string) {
     case "rejected":
       return "Declined";
     default:
-      if (isSelectionPipelineStatus(status)) {
-        return selectionStatusLabel(status);
-      }
-      return status.replace(/_/g, " ");
+      return (
+        applicationJourneyStatusLabel(status) ??
+        (isSelectionPipelineStatus(status) ? selectionStatusLabel(status) : status.replace(/_/g, " "))
+      );
   }
 }
 

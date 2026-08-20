@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { isSelectionPipelineStatus, isTerminalSelectionStatus, SELECTION_STATUSES } from "@/lib/selectionModule";
+import { pipelineStageFromApplication } from "@/lib/pipeline";
 
 /** Statuses after selection board — stored on applications.status per spec. */
 export const APPLICATION_JOURNEY_STATUSES = {
@@ -122,7 +123,11 @@ export async function syncPrimaryApplicationStatus(candidateId: string, status: 
 
   await supabase
     .from("applications")
-    .update({ status, updated_at: new Date().toISOString() })
+    .update({
+      status,
+      stage_id: pipelineStageFromApplication({ status }),
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", appId);
 }
 

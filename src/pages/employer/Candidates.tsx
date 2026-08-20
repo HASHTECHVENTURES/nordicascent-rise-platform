@@ -11,7 +11,7 @@ import { useMemo, useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { applicationStatusVariant, employerApplicationStatusLabel } from "@/lib/applicationJourney";
 import { TRACK_META, type Track } from "@/lib/track";
-import { PIPELINE_STAGES, normalizePipelineStageId } from "@/lib/pipeline";
+import { PIPELINE_STAGES, normalizePipelineStageId, pipelineStageFromApplication } from "@/lib/pipeline";
 import { useEmployerApplications } from "@/hooks/useData";
 import { resolveProfile } from "@/lib/resolveProfile";
 import { PageSpinner } from "@/components/ui/PageSpinner";
@@ -36,7 +36,7 @@ const EmployerCandidates = () => {
     const map: Record<string, typeof applications> = {};
     PIPELINE_STAGES.forEach((s) => { map[s.id] = []; });
     (applications ?? []).forEach((app) => {
-      const stage = normalizePipelineStageId(app.stage_id);
+      const stage = pipelineStageFromApplication(app);
       if (!map[stage]) map[stage] = [];
       map[stage].push(app);
     });
