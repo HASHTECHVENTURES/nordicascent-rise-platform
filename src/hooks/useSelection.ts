@@ -44,23 +44,18 @@ export function useAdminSelectionJobs() {
   });
 }
 
-export function useAdminJobSelectionApplications(jobId: string | undefined, stepFilter?: SelectionStepId | "all") {
+export function useAdminJobSelectionApplications(jobId: string | undefined) {
   return useQuery({
-    queryKey: ["admin-selection-applications", jobId, stepFilter],
+    queryKey: ["admin-selection-applications", jobId],
     enabled: Boolean(jobId),
     queryFn: async () => {
-      let query = supabase
+      const { data, error } = await supabase
         .from("applications")
         .select(ADMIN_SELECTION_SELECT)
         .eq("job_id", jobId!)
         .order("applied_at", { ascending: false });
-
-      const { data, error } = await query;
       if (error) throw error;
-
-      const apps = (data ?? []) as SelectionApplication[];
-      if (stepFilter === "all" || !stepFilter) return apps;
-      return apps.filter((a) => getSelectionStepFromStatus(a.status, a.selection_step) === stepFilter);
+      return (data ?? []) as SelectionApplication[];
     },
   });
 }

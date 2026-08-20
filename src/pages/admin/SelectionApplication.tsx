@@ -44,7 +44,7 @@ import CandidateDocumentsPanel from "@/components/selection/CandidateDocumentsPa
 const AdminSelectionApplication = () => {
   const { applicationId } = useParams<{ applicationId: string }>();
   const { data: app, isLoading, isError, error } = useAdminSelectionApplication(applicationId);
-  const { data: jobApplications } = useAdminJobSelectionApplications(app?.job_id, "all");
+  const { data: jobApplications } = useAdminJobSelectionApplications(app?.job_id);
   const decide = useSelectionStepDecision();
   const board = useSelectionBoardDecision();
   const refreshChecks = useRefreshEligibilityChecks();
