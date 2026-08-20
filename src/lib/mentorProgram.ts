@@ -91,6 +91,44 @@ export function mentorMeetingTitle(meetingNumber: number, cmsTitle?: string | nu
   return cmsTitle?.trim() || MENTOR_MEETING_TITLES[meetingNumber] || `Meeting ${meetingNumber}`;
 }
 
+export type MeetingCallProvider = "google_meet" | "teams" | "zoom" | "other";
+
+export function meetingCallProvider(url: string | null | undefined): MeetingCallProvider | null {
+  if (!url?.trim()) return null;
+  let host = "";
+  try {
+    host = new URL(url.trim()).hostname.toLowerCase();
+  } catch {
+    return "other";
+  }
+  if (host.includes("meet.google.")) return "google_meet";
+  if (host.includes("teams.microsoft.") || host.includes("teams.live.")) return "teams";
+  if (host.includes("zoom.us") || host.includes("zoom.com")) return "zoom";
+  return "other";
+}
+
+export function meetingJoinLabel(url: string | null | undefined): string {
+  switch (meetingCallProvider(url)) {
+    case "google_meet":
+      return "Join Google Meet";
+    case "teams":
+      return "Join Microsoft Teams";
+    case "zoom":
+      return "Join Zoom";
+    default:
+      return "Join call";
+  }
+}
+
+export function isValidMeetingUrl(url: string) {
+  try {
+    const parsed = new URL(url.trim());
+    return parsed.protocol === "https:" || parsed.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
 /** Split theme_body into agenda bullets (newline / bullet / semicolon separated). */
 export function agendaBulletsFromThemeBody(body: string | null | undefined): string[] {
   if (!body?.trim()) return [];
@@ -201,10 +239,21 @@ export function countReadinessAreasSubmitted(
 }
 
 export type ReadinessMentorGate = {
-  /** Both cultural & technical Readiness level-2 tests submitted (spec: part 2A + 2B). */
+  /** Both cultural & technical Level 1 tests submitted. */
+  level1BothSubmitted: boolean;
+  /** Both cultural & technical Level 2 tests submitted. */
   level2BothSubmitted: boolean;
+  /** Both cultural & technical Level 3 tests submitted. */
+  level3BothSubmitted: boolean;
   /** All Readiness tests (both areas × 3 levels) submitted. */
   allTestsSubmitted: boolean;
+};
+
+export const EMPTY_READINESS_MENTOR_GATE: ReadinessMentorGate = {
+  level1BothSubmitted: false,
+  level2BothSubmitted: false,
+  level3BothSubmitted: false,
+  allTestsSubmitted: false,
 };
 
 export type ActivationMentorGate = {
@@ -221,14 +270,17 @@ export function buildReadinessMentorGate(
     return a?.status === "submitted" || a?.status === "expired";
   };
 
-  const level2Tests = tests.filter((t) => t.level === 2);
-  const level2BothSubmitted =
-    level2Tests.length >= 2 && level2Tests.every((t) => isSubmitted(t.id));
+  const bothAreasAtLevel = (level: number) => {
+    const atLevel = tests.filter((t) => t.level === level);
+    return atLevel.length >= 2 && atLevel.every((t) => isSubmitted(t.id));
+  };
 
-  const allTestsSubmitted =
-    tests.length > 0 && tests.every((t) => isSubmitted(t.id));
-
-  return { level2BothSubmitted, allTestsSubmitted };
+  return {
+    level1BothSubmitted: bothAreasAtLevel(1),
+    level2BothSubmitted: bothAreasAtLevel(2),
+    level3BothSubmitted: bothAreasAtLevel(3),
+    allTestsSubmitted: tests.length > 0 && tests.every((t) => isSubmitted(t.id)),
+  };
 }
 
 export function computeNextMeetingUnlocks(
@@ -255,7 +307,7 @@ export function computeNextMeetingUnlocks(
     } else if (m.meeting_number === 2) {
       shouldBeAvailable = isCompleted(1) && gate.level2BothSubmitted;
     } else if (m.meeting_number === 3) {
-      shouldBeAvailable = isCompleted(2) && gate.allTestsSubmitted;
+      shouldBeAvailable = isCompleted(2) && gate.level3BothSubmitted;
     } else if (m.meeting_number === 4) {
       shouldBeAvailable =
         track === "entry" &&
@@ -319,18 +371,18 @@ export function getMeetingLockedReason(
   }
 
   if (meetingNumber === 1) {
-    return "Available once your mentor is assigned";
+    return "Available once your mentor is assigned. Completing it unlocks Readiness Level 1";
   }
 
   if (meetingNumber === 2) {
     if (!isCompleted(1)) return "Complete Meeting 1 first";
     if (!gate.level2BothSubmitted) {
-      return "Unlocks after Readiness part 2 (technical and cultural)";
+      return "Unlocks after Readiness Level 2 (technical and cultural). Completing it unlocks Level 3";
     }
   } else if (meetingNumber === 3) {
     if (!isCompleted(2)) return "Complete Meeting 2 first";
-    if (!gate.allTestsSubmitted) {
-      return "Unlocks when Readiness is complete — take time to reflect first";
+    if (!gate.level3BothSubmitted) {
+      return "Unlocks after Readiness Level 3 (technical and cultural)";
     }
   } else if (meetingNumber > 1) {
     const prev = byNum.get(meetingNumber - 1);
@@ -369,10 +421,7 @@ export async function refreshMeetingUnlocks(
     .eq("id", applicationId)
     .single();
 
-  let gate: ReadinessMentorGate = {
-    level2BothSubmitted: false,
-    allTestsSubmitted: false,
-  };
+  let gate: ReadinessMentorGate = { ...EMPTY_READINESS_MENTOR_GATE };
   if (app?.candidate_id) {
     const [{ data: attempts }, { data: tests }] = await Promise.all([
       supabase

@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useMyApplications } from "@/hooks/useData";
 import {
   buildReadinessMentorGate,
+  EMPTY_READINESS_MENTOR_GATE,
   initializeMentorMeetings,
   refreshMeetingUnlocks,
   refreshMentorMeetingUnlocksForCandidate,
@@ -126,7 +127,7 @@ export function useReadinessMentorGateForApplication(applicationId: string | und
         .eq("id", applicationId!)
         .single();
       if (!app?.candidate_id) {
-        return { level2BothSubmitted: false, allTestsSubmitted: false };
+        return { ...EMPTY_READINESS_MENTOR_GATE };
       }
       const [{ data: attempts }, { data: tests }] = await Promise.all([
         supabase
@@ -437,7 +438,7 @@ export function useMyMentorProgramContext() {
 
   const applicationId = activeApp?.id as string | undefined;
   const { data: assigned } = useAssignedMentorForApplication(applicationId);
-  const { data: meetings } = useMentorProgramMeetings(applicationId);
+  const { data: meetings, isLoading: meetingsLoading } = useMentorProgramMeetings(applicationId);
 
   const track =
     (assigned?.track as Track | null) ??
@@ -462,6 +463,7 @@ export function useMyMentorProgramContext() {
     mentor,
     company,
     meetings: meetings ?? [],
+    meetingsLoading,
     track,
     isLoading: !applications,
   };

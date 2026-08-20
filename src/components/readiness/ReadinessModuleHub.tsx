@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Loader2, Lock, PlayCircle, AlertCircle } from "lucide-react";
 import { useReadinessTests, useMyReadinessAttempts } from "@/hooks/useReadiness";
-import { isLevelUnlocked, getAttemptExpiresAtMs, hasStrictTimer, getReadinessLevelSubtitle } from "@/lib/readiness";
+import { isLevelUnlocked, readinessLevelLockReason, getAttemptExpiresAtMs, hasStrictTimer, getReadinessLevelSubtitle } from "@/lib/readiness";
 import ReadinessCountdown from "@/components/readiness/ReadinessCountdown";
 import {
   READINESS_AREA_LABELS,
   READINESS_LEVEL_LABELS,
 } from "@/data/readinessModuleSeed";
+import { useMyMentorProgramContext } from "@/hooks/useMentorProgram";
 
 type Props = {
   compact?: boolean;
@@ -19,8 +20,9 @@ type Props = {
 export default function ReadinessModuleHub({ compact = false, hideHeader = false }: Props) {
   const { data: tests, isLoading, isError, error } = useReadinessTests();
   const { data: attempts } = useMyReadinessAttempts();
+  const { meetings, meetingsLoading } = useMyMentorProgramContext();
 
-  if (isLoading) {
+  if (isLoading || meetingsLoading) {
     return (
       <div className="flex justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -91,7 +93,22 @@ export default function ReadinessModuleHub({ compact = false, hideHeader = false
               {areaTests.map((test) => {
                 const status = getAttemptStatus(test.id);
                 const attempt = attempts?.find((a) => a.test_id === test.id);
-                const unlocked = isLevelUnlocked(test.level, area, attempts ?? [], tests ?? []);
+                const unlocked = isLevelUnlocked(
+                  test.level,
+                  area,
+                  attempts ?? [],
+                  tests ?? [],
+                  meetings
+                );
+                const lockReason = unlocked
+                  ? null
+                  : readinessLevelLockReason(
+                      test.level,
+                      area,
+                      attempts ?? [],
+                      tests ?? [],
+                      meetings
+                    );
                 const done = status === "submitted" || status === "expired";
                 const inProgress = status === "in_progress";
                 const strictTimer = hasStrictTimer(test);
@@ -134,10 +151,10 @@ export default function ReadinessModuleHub({ compact = false, hideHeader = false
                       )}
                     </div>
                     <div>
-                      {!unlocked ? (
+                      {!unlocked && !inProgress && !done ? (
                         <Button size="sm" variant="outline" disabled className="gap-1">
                           <Lock className="h-4 w-4" />
-                          Level {test.level - 1} first
+                          {lockReason ?? "Locked"}
                         </Button>
                       ) : done ? (
                         <Button size="sm" variant="outline" disabled>Submitted</Button>

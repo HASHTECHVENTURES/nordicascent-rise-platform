@@ -6,7 +6,7 @@ import {
   APPLICATION_JOURNEY_STATUSES,
   syncPrimaryApplicationStatus,
 } from "@/lib/applicationStatusFlow";
-import { seedReadinessModuleIfEmpty, allTestsSubmitted, fetchReadinessCms, updateReadinessCms } from "@/lib/readiness";
+import { seedReadinessModuleIfEmpty, allTestsSubmitted, fetchReadinessCms, updateReadinessCms, readinessLevelLockReason } from "@/lib/readiness";
 import { refreshMentorMeetingUnlocksForCandidate } from "@/lib/mentorProgram";
 
 export type ReadinessTest = {
@@ -199,6 +199,35 @@ export function useStartReadinessAttempt() {
           return patched as ReadinessAttempt;
         }
         return existing;
+      }
+
+      const [{ data: allTests }, { data: allAttempts }, { data: apps }] = await Promise.all([
+        supabase.from("readiness_tests").select("id, area, level").eq("active", true),
+        supabase.from("readiness_attempts").select("test_id, status").eq("candidate_id", candidate.id),
+        supabase
+          .from("applications")
+          .select("id")
+          .eq("candidate_id", candidate.id)
+          .not("readiness_unlocked_at", "is", null)
+          .order("applied_at", { ascending: false })
+          .limit(1),
+      ]);
+      const appId = apps?.[0]?.id;
+      const { data: meetings } = appId
+        ? await supabase
+            .from("mentor_program_meetings")
+            .select("meeting_number, status")
+            .eq("application_id", appId)
+        : { data: [] as { meeting_number: number; status: string }[] };
+      const lockReason = readinessLevelLockReason(
+        test.level,
+        test.area,
+        allAttempts ?? [],
+        allTests ?? [],
+        meetings ?? []
+      );
+      if (lockReason) {
+        throw new Error(`This level is locked. ${lockReason}.`);
       }
 
       const { data, error } = await supabase

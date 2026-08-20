@@ -26,9 +26,11 @@ import {
 import { useActivationRecord } from "@/hooks/useActivation";
 import {
   agendaBulletsFromThemeBody,
+  EMPTY_READINESS_MENTOR_GATE,
   getMeetingLockedReason,
   mentorMeetingCountForTrack,
   mentorMeetingTitle,
+  meetingJoinLabel,
   type ActivationMentorGate,
   type MentorProgramMeeting,
 } from "@/lib/mentorProgram";
@@ -81,7 +83,7 @@ export default function CandidateMentoring() {
   const completed = activeMeetings.filter((m) => m.status === "completed").length;
   const total = mentorMeetingCountForTrack(track);
   const progressPct = total > 0 ? Math.round((completed / total) * 100) : 0;
-  const readinessGate = gate ?? { level2BothSubmitted: false, allTestsSubmitted: false };
+  const readinessGate = gate ?? EMPTY_READINESS_MENTOR_GATE;
   const activationGate: ActivationMentorGate = {
     activationUnlocked: Boolean(activationRecord),
     internshipStartDate: activationRecord?.internship_start_date ?? null,
@@ -103,8 +105,8 @@ export default function CandidateMentoring() {
       <div>
         <h1 className="text-2xl font-medium">Mentoring</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Parallel with Readiness and Activation. Your mentor follows a shared agenda — you prepare
-          from it; observations stay with your mentor.
+          Follow the flow: Meeting 1 → Level 1 → Level 2 → Meeting 2 → Level 3 → Meeting 3.
+          Your mentor sends the Meet, Teams, or Zoom link; you join from here or the email.
         </p>
       </div>
 
@@ -193,7 +195,7 @@ export default function CandidateMentoring() {
               <Button size="sm" asChild>
                 <a href={nextMeeting.meeting_url} target="_blank" rel="noopener noreferrer">
                   <Video className="h-4 w-4 mr-2" />
-                  Join call
+                  {meetingJoinLabel(nextMeeting.meeting_url)}
                   <ExternalLink className="h-3 w-3 ml-1 opacity-60" />
                 </a>
               </Button>
@@ -267,6 +269,17 @@ export default function CandidateMentoring() {
                       <p className="text-[11px] text-muted-foreground mt-0.5">
                         {formatSessionWhen(m.scheduled_at)}
                       </p>
+                    )}
+                    {available && m.meeting_url && (
+                      <a
+                        href={m.meeting_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[11px] text-primary hover:underline mt-0.5 inline-flex items-center gap-1"
+                      >
+                        {meetingJoinLabel(m.meeting_url)}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
                     )}
                   </div>
                   {done ? (

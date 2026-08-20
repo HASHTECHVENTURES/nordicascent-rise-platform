@@ -114,7 +114,8 @@ export default function CandidateReadiness() {
       <div>
         <h1 className="text-2xl font-medium">Readiness</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Complete the timed tests. Mentor meetings 1–3 run in parallel.
+          Follow the flow, one step at a time: Meeting 1 → Level 1 → Level 2 → Meeting 2 →
+          Level 3 → Meeting 3 (both cultural and technical).
         </p>
       </div>
       {mentorCtx.mentor && (

@@ -52,19 +52,6 @@ export async function seedReadinessModuleIfEmpty(): Promise<{ seeded: boolean; c
   return { seeded: true, count: testsCreated };
 }
 
-export function isLevelUnlocked(
-  level: number,
-  area: string,
-  attempts: { test_id: string; status: string }[],
-  tests: { id: string; level: number; area: string }[]
-) {
-  if (level <= 1) return true;
-  const prevTest = tests.find((t) => t.area === area && t.level === level - 1);
-  if (!prevTest) return true;
-  const attempt = attempts.find((a) => a.test_id === prevTest.id);
-  return attempt?.status === "submitted" || attempt?.status === "expired";
-}
-
 export function allTestsSubmitted(
   tests: { id: string }[],
   attempts: { test_id: string; status: string }[]
@@ -74,6 +61,61 @@ export function allTestsSubmitted(
     const a = attempts.find((x) => x.test_id === t.id);
     return a?.status === "submitted" || a?.status === "expired";
   });
+}
+
+export type MentorMeetingLockInput = {
+  meeting_number: number;
+  status: string;
+};
+
+/**
+ * Meeting 1 → Level 1 → Level 2 → Meeting 2 → Level 3 → Meeting 3.
+ * Level 2 has no extra meeting; it opens after Level 1.
+ */
+export function mentorMeetingRequiredForLevel(level: number): number | null {
+  if (level === 1) return 1;
+  if (level === 3) return 2;
+  return null;
+}
+
+export function isMentorMeetingDone(
+  meetingNumber: number,
+  meetings: MentorMeetingLockInput[]
+) {
+  return meetings.some((m) => m.meeting_number === meetingNumber && m.status === "completed");
+}
+
+export function readinessLevelLockReason(
+  level: number,
+  area: string,
+  attempts: { test_id: string; status: string }[],
+  tests: { id: string; level: number; area: string }[],
+  meetings: MentorMeetingLockInput[]
+): string | null {
+  if (level > 1) {
+    const prevTest = tests.find((t) => t.area === area && t.level === level - 1);
+    if (prevTest) {
+      const attempt = attempts.find((a) => a.test_id === prevTest.id);
+      if (attempt?.status !== "submitted" && attempt?.status !== "expired") {
+        return `Level ${level - 1} first`;
+      }
+    }
+  }
+  const meeting = mentorMeetingRequiredForLevel(level);
+  if (meeting && !isMentorMeetingDone(meeting, meetings)) {
+    return `Mentor meeting ${meeting} first`;
+  }
+  return null;
+}
+
+export function isLevelUnlocked(
+  level: number,
+  area: string,
+  attempts: { test_id: string; status: string }[],
+  tests: { id: string; level: number; area: string }[],
+  meetings: MentorMeetingLockInput[] = []
+) {
+  return readinessLevelLockReason(level, area, attempts, tests, meetings) === null;
 }
 
 export function formatTimer(seconds: number) {

@@ -14,6 +14,8 @@ import {
   useStartReadinessAttempt,
   type ReadinessAttempt,
 } from "@/hooks/useReadiness";
+import { isLevelUnlocked, readinessLevelLockReason } from "@/lib/readiness";
+import { useMyMentorProgramContext } from "@/hooks/useMentorProgram";
 
 type TestLocationState = {
   attempt?: ReadinessAttempt;
@@ -44,12 +46,20 @@ export default function CandidateReadinessTest() {
     refetch: refetchAttempts,
   } = useMyReadinessAttempts();
   const startAttempt = useStartReadinessAttempt();
+  const { meetings, meetingsLoading } = useMyMentorProgramContext();
   const [startError, setStartError] = useState<string | null>(null);
   const [startedAttempt, setStartedAttempt] = useState<ReadinessAttempt | null>(null);
   const autoStartRef = useRef(false);
 
   const test = tests?.find((t) => t.id === testId);
   const attemptFromQuery = attempts?.find((a) => a.test_id === testId);
+  const levelUnlocked = Boolean(
+    test &&
+      isLevelUnlocked(test.level, test.area, attempts ?? [], tests ?? [], meetings)
+  );
+  const lockReason = test
+    ? readinessLevelLockReason(test.level, test.area, attempts ?? [], tests ?? [], meetings)
+    : null;
   const attempt =
     (isActiveAttempt(startedAttempt) ? startedAttempt : undefined) ??
     (isActiveAttempt(attemptFromQuery) ? attemptFromQuery : undefined) ??
@@ -58,6 +68,7 @@ export default function CandidateReadinessTest() {
 
   useEffect(() => {
     if (!ready || !test || attempt || autoStartRef.current) return;
+    if (!levelUnlocked || meetingsLoading) return;
     if (closedAttempt?.status === "submitted" || closedAttempt?.status === "expired") return;
     if (authLoading || testsLoading || attemptsLoading || startAttempt.isPending) return;
 
@@ -82,6 +93,8 @@ export default function CandidateReadinessTest() {
     test,
     attempt,
     closedAttempt,
+    levelUnlocked,
+    meetingsLoading,
     authLoading,
     testsLoading,
     attemptsLoading,
@@ -123,7 +136,7 @@ export default function CandidateReadinessTest() {
     );
   }
 
-  if (authLoading || testsLoading || (attemptsLoading && !attempts)) {
+  if (authLoading || testsLoading || (attemptsLoading && !attempts) || (meetingsLoading && !attempt)) {
     return (
       <div className="flex justify-center py-20">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -161,6 +174,38 @@ export default function CandidateReadinessTest() {
           <Link to="/candidate/readiness">Back to Readiness</Link>
         </Button>
         <p className="text-muted-foreground">Test not found.</p>
+      </div>
+    );
+  }
+
+  if (!attempt && !levelUnlocked) {
+    return (
+      <div className="space-y-4 max-w-lg">
+        <Button variant="ghost" size="sm" asChild>
+          <Link to="/candidate/readiness">Back to Readiness</Link>
+        </Button>
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="pt-6 flex items-start gap-3">
+            <Info className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+            <p className="text-sm text-muted-foreground">
+              {lockReason
+                ? `This test is locked. Complete ${lockReason.replace(" first", "")} to continue.`
+                : "This test is locked until the previous step is completed."}
+              {lockReason?.toLowerCase().includes("mentor meeting")
+                ? " Open Mentoring to attend the meeting, then return here."
+                : ""}
+            </p>
+          </CardContent>
+        </Card>
+        {lockReason?.toLowerCase().includes("mentor meeting") ? (
+          <Button size="sm" asChild>
+            <Link to="/candidate/mentoring">Go to Mentoring</Link>
+          </Button>
+        ) : (
+          <Button size="sm" asChild>
+            <Link to="/candidate/readiness">Back to Readiness</Link>
+          </Button>
+        )}
       </div>
     );
   }

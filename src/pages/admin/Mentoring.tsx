@@ -68,8 +68,8 @@ export default function AdminMentoring({ embedded = false }: { embedded?: boolea
           <p className="font-medium text-foreground">Meeting structure</p>
           <ul className="list-disc pl-5 space-y-1">
             <li>
-              <strong>Meetings 1–3 (Readiness):</strong> Introduction → reflection after part 2 →
-              final reflection + Signal note
+              <strong>Meetings 1–3 (Readiness):</strong> Meeting 1 → Level 1 → Level 2 →
+              Meeting 2 → Level 3 → Meeting 3
             </li>
             <li>
               <strong>Meetings 4–6 (Activation, Entry only):</strong> Weeks 1–2, 3–5, end of

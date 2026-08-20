@@ -20,7 +20,7 @@ import {
   useSaveMeetingSchedule,
   refreshMeetingUnlocks,
 } from "@/hooks/useMentorProgram";
-import { getMeetingLockedReason, isMentorMeetingOverdue, agendaBulletsFromThemeBody } from "@/lib/mentorProgram";
+import { getMeetingLockedReason, isMentorMeetingOverdue, agendaBulletsFromThemeBody, EMPTY_READINESS_MENTOR_GATE, isValidMeetingUrl, meetingJoinLabel } from "@/lib/mentorProgram";
 import type { ActivationMentorGate, MentorMeetingObservation, MentorProgramMeeting } from "@/lib/mentorProgram";
 import type { Track } from "@/lib/track";
 import MentorMeetingDots from "@/components/mentor/MentorMeetingDots";
@@ -55,7 +55,7 @@ export default function MentorProgramPanel({
   const { data: themes } = useMentorMeetingThemes();
   const { data: meetings, isLoading, refetch } = useMentorProgramMeetings(applicationId);
   const { data: readinessGate } = useReadinessMentorGateForApplication(applicationId);
-  const gate = readinessGate ?? { level2BothSubmitted: false, allTestsSubmitted: false };
+  const gate = readinessGate ?? EMPTY_READINESS_MENTOR_GATE;
   const { data: activationRecord } = useActivationRecord(applicationId);
   const activationGate: ActivationMentorGate = {
     activationUnlocked: Boolean(activationRecord),
@@ -98,7 +98,7 @@ export default function MentorProgramPanel({
   useEffect(() => {
     if (!applicationId || !track) return;
     refreshMeetingUnlocks(applicationId, track).then(() => refetch());
-  }, [applicationId, track, gate.level2BothSubmitted, gate.allTestsSubmitted, refetch]);
+  }, [applicationId, track, gate.level1BothSubmitted, gate.level2BothSubmitted, gate.level3BothSubmitted, refetch]);
 
   useEffect(() => {
     if (!signalNote) return;
@@ -252,13 +252,17 @@ export default function MentorProgramPanel({
                 />
               </div>
               <div className="space-y-1">
-                <Label>Join link</Label>
+                <Label>Meeting link</Label>
                 <Input
                   type="url"
-                  placeholder="https://meet.google.com/..."
+                  placeholder="Google Meet, Teams, or Zoom URL"
                   value={meetingUrl}
                   onChange={(e) => setMeetingUrl(e.target.value)}
                 />
+                <p className="text-[11px] text-muted-foreground">
+                  Paste a Google Meet, Microsoft Teams, or Zoom join link. The student sees it in
+                  Mentoring and in the invite email.
+                </p>
               </div>
             </div>
             <div className="flex gap-2">
@@ -267,11 +271,20 @@ export default function MentorProgramPanel({
                 disabled={saveSchedule.isPending}
                 onClick={async () => {
                   try {
+                    const url = meetingUrl.trim();
+                    if (url && !isValidMeetingUrl(url)) {
+                      toast({
+                        title: "Invalid meeting link",
+                        description: "Use a full https:// link from Google Meet, Teams, or Zoom.",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
                     await saveSchedule.mutateAsync({
                       meetingId: m.id,
                       applicationId,
                       scheduled_at: scheduleAt ? new Date(scheduleAt).toISOString() : null,
-                      meeting_url: meetingUrl.trim() || null,
+                      meeting_url: url || null,
                       meetingNumber: m.meeting_number,
                     });
                     toast({ title: "Session scheduled" });
@@ -298,8 +311,15 @@ export default function MentorProgramPanel({
         {m.scheduled_at && (
           <p className="text-xs text-muted-foreground">
             Scheduled {new Date(m.scheduled_at).toLocaleString()}
-            {m.meeting_url ? " · Join link set" : ""}
+            {m.meeting_url ? ` · ${meetingJoinLabel(m.meeting_url)} set` : ""}
           </p>
+        )}
+        {m.meeting_url && !locked && (
+          <Button size="sm" variant="outline" asChild>
+            <a href={m.meeting_url} target="_blank" rel="noopener noreferrer">
+              {meetingJoinLabel(m.meeting_url)}
+            </a>
+          </Button>
         )}
 
         {canEdit && locked && (
