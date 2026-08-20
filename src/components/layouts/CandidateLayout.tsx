@@ -12,7 +12,6 @@ import {
   Home,
   UsersRound,
   Briefcase,
-  ClipboardList,
 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -28,10 +27,9 @@ import { CANDIDATE_PROFILE_PATH } from "@/lib/candidateAccess";
 
 // No sub-items needed; My Journey is a direct link
 
-// Standalone nav items — Job roles + applications per client feedback
+// Standalone nav items — Job roles only in the left panel (applications stay inside Job roles)
 const standaloneNav = [
   { name: "Job roles", href: "/candidate/jobs", icon: Briefcase, tooltip: "Browse open Nordic engineering roles and apply" },
-  { name: "My applications", href: "/candidate/applications", icon: ClipboardList, tooltip: "Track applications you have submitted" },
   { name: "Mentoring", href: "/candidate/mentoring", icon: UsersRound, tooltip: "Your mentor, meeting agendas, and programme progress" },
   { name: "Messages", href: "/candidate/messages", icon: MessageSquare, tooltip: "Communication with employers and Nordic Ascent team" },
   { name: "Support", href: "/candidate/support", icon: AlertTriangle, tooltip: "Open a support ticket with Nordic Ascent" },
