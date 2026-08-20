@@ -11,6 +11,8 @@ import {
   User,
   Home,
   UsersRound,
+  Briefcase,
+  ClipboardList,
 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -26,13 +28,21 @@ import { CANDIDATE_PROFILE_PATH } from "@/lib/candidateAccess";
 
 // No sub-items needed; My Journey is a direct link
 
-// Standalone nav items
+// Standalone nav items — Job roles + applications per client feedback
 const standaloneNav = [
-  { name: "My Profile", href: "/candidate/profile", icon: User, tooltip: "Complete your profile, upload CV, and add skills" },
+  { name: "Job roles", href: "/candidate/jobs", icon: Briefcase, tooltip: "Browse open Nordic engineering roles and apply" },
+  { name: "My applications", href: "/candidate/applications", icon: ClipboardList, tooltip: "Track applications you have submitted" },
   { name: "Mentoring", href: "/candidate/mentoring", icon: UsersRound, tooltip: "Your mentor, meeting agendas, and programme progress" },
   { name: "Messages", href: "/candidate/messages", icon: MessageSquare, tooltip: "Communication with employers and Nordic Ascent team" },
   { name: "Support", href: "/candidate/support", icon: AlertTriangle, tooltip: "Open a support ticket with Nordic Ascent" },
 ];
+
+const profileNavItem = {
+  name: "My Profile",
+  href: "/candidate/profile",
+  icon: User,
+  tooltip: "Complete your profile, upload CV, and add skills",
+};
 
 const CandidateLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -46,9 +56,7 @@ const CandidateLayout = () => {
   useCandidateOnboardingRedirect();
   const waitlistLocked = useWaitlistProfileLock();
   const homePath = waitlistLocked ? CANDIDATE_PROFILE_PATH : "/candidate/dashboard";
-  const visibleStandaloneNav = waitlistLocked
-    ? standaloneNav.filter((item) => item.href === CANDIDATE_PROFILE_PATH)
-    : standaloneNav.filter((item) => item.href !== CANDIDATE_PROFILE_PATH);
+  const visibleStandaloneNav = waitlistLocked ? [profileNavItem] : standaloneNav;
 
   const renderNavItem = (item: { name: string; href: string; icon: React.ElementType; tooltip?: string }, indented = false) => {
     const isActive = location.pathname === item.href || location.pathname.startsWith(`${item.href}/`);
