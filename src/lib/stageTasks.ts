@@ -14,6 +14,36 @@ export async function getCandidateAcceptedCompanyId(candidateId: string): Promis
   return jobs?.company_id ?? null;
 }
 
+export function isPlatformStageTask(task: { company_id: string | null }) {
+  return task.company_id == null;
+}
+
+/** Nordic Ascent defaults (admin Program Tasks) plus optional company extras. */
+export async function fetchCompanyOrPlatformStageTasks(stageId: string, companyId?: string | null) {
+  let query = supabase.from("stage_tasks").select("*").eq("stage_id", stageId);
+  if (companyId) {
+    query = query.or(`company_id.eq.${companyId},company_id.is.null`);
+  } else {
+    query = query.is("company_id", null);
+  }
+  const { data, error } = await query
+    .order("company_id", { ascending: true, nullsFirst: true })
+    .order("sort_order");
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function fetchPlatformStageTasks() {
+  const { data, error } = await supabase
+    .from("stage_tasks")
+    .select("*")
+    .is("company_id", null)
+    .order("stage_id")
+    .order("sort_order");
+  if (error) throw error;
+  return data ?? [];
+}
+
 /** Tasks a candidate should see for a pipeline stage. */
 export async function fetchStageTasksForCandidate(
   candidateId: string | undefined,
@@ -21,26 +51,10 @@ export async function fetchStageTasksForCandidate(
 ) {
   if ((stageId === "internship" || stageId === "activation") && candidateId) {
     const companyId = await getCandidateAcceptedCompanyId(candidateId);
-    if (!companyId) return [];
-
-    const { data, error } = await supabase
-      .from("stage_tasks")
-      .select("*")
-      .eq("stage_id", stageId)
-      .eq("company_id", companyId)
-      .order("sort_order");
-    if (error) throw error;
-    return data ?? [];
+    return fetchCompanyOrPlatformStageTasks(stageId, companyId);
   }
 
-  const { data, error } = await supabase
-    .from("stage_tasks")
-    .select("*")
-    .eq("stage_id", stageId)
-    .is("company_id", null)
-    .order("sort_order");
-  if (error) throw error;
-  return data ?? [];
+  return fetchCompanyOrPlatformStageTasks(stageId, null);
 }
 
 export async function fetchStageTaskIdsForCandidate(

@@ -41,7 +41,7 @@ type Props = {
 export default function AdminStageTasks({
   fixedStageId,
   title = "Program Tasks",
-  description = "Content candidates see when they click Continue",
+  description = "These tasks show for every company on their Tasks page, and for candidates when they continue a stage",
 }: Props) {
   const { toast } = useToast();
   const { data: stages, isLoading: stagesLoading } = usePipelineStages();

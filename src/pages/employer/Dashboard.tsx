@@ -3,14 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, Briefcase, Clock, CheckCircle, Plus, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { PIPELINE_STAGES, pipelineStageFromApplication } from "@/lib/pipeline";
+import { PIPELINE_STAGES, pipelineStageFromApplication, programStageLabel } from "@/lib/pipeline";
 import { PageSpinner } from "@/components/ui/PageSpinner";
-import { useEmployerApplications, useEmployerJobs, useEmployerTasks } from "@/hooks/useData";
+import { useEmployerApplications, useEmployerJobs, useEmployerTasks, usePlatformStageTasks } from "@/hooks/useData";
 
 const EmployerDashboard = () => {
   const { data: applications, isLoading: appsLoading } = useEmployerApplications();
   const { data: jobs, isLoading: jobsLoading } = useEmployerJobs();
   const { data: tasks, isLoading: tasksLoading } = useEmployerTasks();
+  const { data: platformTasks, isLoading: platformLoading } = usePlatformStageTasks();
 
   const byStage = useMemo(() => {
     const map: Record<string, number> = {};
@@ -28,7 +29,7 @@ const EmployerDashboard = () => {
   const acceptedCount = applications?.filter((a) => a.status === "accepted").length ?? 0;
   const onboarded = (byStage["onboarding"] ?? 0) + (byStage["followup"] ?? 0);
 
-  if (appsLoading || jobsLoading || tasksLoading) {
+  if (appsLoading || jobsLoading || tasksLoading || platformLoading) {
     return <PageSpinner />;
   }
 
@@ -177,9 +178,27 @@ const EmployerDashboard = () => {
         </Card>
       </div>
 
+      {(platformTasks ?? []).length > 0 && (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-lg">Program tasks</CardTitle>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/employer/tasks">View all</Link>
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {platformTasks!.slice(0, 5).map((t) => (
+              <div key={t.id} className="flex items-center justify-between p-3 border rounded gap-3">
+                <span className="truncate">{t.title}</span>
+                <span className="text-xs text-muted-foreground shrink-0">{programStageLabel(t.stage_id)}</span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
       {(tasks ?? []).length > 0 && (
         <Card>
-          <CardHeader><CardTitle className="text-lg">Recent Tasks</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-lg">Your company checklist</CardTitle></CardHeader>
           <CardContent className="space-y-2">
             {tasks!.slice(0, 5).map((t) => (
               <div key={t.id} className="flex items-center justify-between p-3 border rounded">

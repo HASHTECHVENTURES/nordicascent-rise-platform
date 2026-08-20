@@ -29,7 +29,12 @@ import {
   isTaskManuallyCompletable,
   isTaskRequirementMet,
 } from "@/lib/profileCompleteness";
-import { fetchStageTasksForCandidate, fetchStageTaskIdsForCandidate } from "@/lib/stageTasks";
+import {
+  fetchStageTasksForCandidate,
+  fetchStageTaskIdsForCandidate,
+  fetchPlatformStageTasks,
+  fetchCompanyOrPlatformStageTasks,
+} from "@/lib/stageTasks";
 import { UNIVERSITY_SEED, type InstitutionType } from "@/lib/universities";
 
 // ─── Pipeline ───────────────────────────────────────────────────────────────
@@ -1370,6 +1375,17 @@ export function useAdminEmployerUsers() {
 
 // ─── Employer tasks ─────────────────────────────────────────────────────────
 
+export function usePlatformStageTasks() {
+  const { profile } = useAuth();
+  return useQuery({
+    queryKey: ["platform-stage-tasks"],
+    enabled: profile?.role === "employer" || profile?.role === "admin",
+    staleTime: 0,
+    refetchOnMount: "always" as const,
+    queryFn: fetchPlatformStageTasks,
+  });
+}
+
 export function useEmployerTasks() {
   const { profile } = useAuth();
   return useQuery({
@@ -1441,14 +1457,7 @@ export function useEmployerInternshipTasks() {
         .eq("profile_id", profile!.id)
         .single();
       if (!employer?.company_id) return [];
-      const { data, error } = await supabase
-        .from("stage_tasks")
-        .select("*")
-        .eq("stage_id", "internship")
-        .eq("company_id", employer.company_id)
-        .order("sort_order");
-      if (error) throw error;
-      return data;
+      return fetchCompanyOrPlatformStageTasks("internship", employer.company_id);
     },
   });
 }
@@ -1485,7 +1494,11 @@ export function useSaveEmployerInternshipTask() {
       };
 
       if (task.id) {
-        const { error } = await supabase.from("stage_tasks").update(payload).eq("id", task.id);
+        const { error } = await supabase
+          .from("stage_tasks")
+          .update(payload)
+          .eq("id", task.id)
+          .eq("company_id", employer.company_id);
         if (error) throw error;
       } else {
         const { error } = await supabase.from("stage_tasks").insert(payload);
@@ -1501,9 +1514,20 @@ export function useSaveEmployerInternshipTask() {
 
 export function useDeleteEmployerInternshipTask() {
   const qc = useQueryClient();
+  const { profile } = useAuth();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("stage_tasks").delete().eq("id", id);
+      const { data: employer } = await supabase
+        .from("employers")
+        .select("company_id")
+        .eq("profile_id", profile!.id)
+        .single();
+      if (!employer?.company_id) throw new Error("Company profile required");
+      const { error } = await supabase
+        .from("stage_tasks")
+        .delete()
+        .eq("id", id)
+        .eq("company_id", employer.company_id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -1525,14 +1549,7 @@ export function useEmployerActivationTasks() {
         .eq("profile_id", profile!.id)
         .single();
       if (!employer?.company_id) return [];
-      const { data, error } = await supabase
-        .from("stage_tasks")
-        .select("*")
-        .eq("stage_id", "activation")
-        .eq("company_id", employer.company_id)
-        .order("sort_order");
-      if (error) throw error;
-      return data;
+      return fetchCompanyOrPlatformStageTasks("activation", employer.company_id);
     },
   });
 }
@@ -1569,7 +1586,11 @@ export function useSaveEmployerActivationTask() {
       };
 
       if (task.id) {
-        const { error } = await supabase.from("stage_tasks").update(payload).eq("id", task.id);
+        const { error } = await supabase
+          .from("stage_tasks")
+          .update(payload)
+          .eq("id", task.id)
+          .eq("company_id", employer.company_id);
         if (error) throw error;
       } else {
         const { error } = await supabase.from("stage_tasks").insert(payload);
@@ -1585,9 +1606,20 @@ export function useSaveEmployerActivationTask() {
 
 export function useDeleteEmployerActivationTask() {
   const qc = useQueryClient();
+  const { profile } = useAuth();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("stage_tasks").delete().eq("id", id);
+      const { data: employer } = await supabase
+        .from("employers")
+        .select("company_id")
+        .eq("profile_id", profile!.id)
+        .single();
+      if (!employer?.company_id) throw new Error("Company profile required");
+      const { error } = await supabase
+        .from("stage_tasks")
+        .delete()
+        .eq("id", id)
+        .eq("company_id", employer.company_id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -2340,6 +2372,9 @@ export function useSaveStageTask() {
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ["stage-tasks", vars.stage_id] });
       qc.invalidateQueries({ queryKey: ["admin-stage-tasks"] });
+      qc.invalidateQueries({ queryKey: ["platform-stage-tasks"] });
+      qc.invalidateQueries({ queryKey: ["employer-internship-tasks"] });
+      qc.invalidateQueries({ queryKey: ["employer-activation-tasks"] });
     },
   });
 }
@@ -2355,6 +2390,9 @@ export function useDeleteStageTask() {
     onSuccess: (stageId) => {
       qc.invalidateQueries({ queryKey: ["stage-tasks", stageId] });
       qc.invalidateQueries({ queryKey: ["admin-stage-tasks"] });
+      qc.invalidateQueries({ queryKey: ["platform-stage-tasks"] });
+      qc.invalidateQueries({ queryKey: ["employer-internship-tasks"] });
+      qc.invalidateQueries({ queryKey: ["employer-activation-tasks"] });
     },
   });
 }

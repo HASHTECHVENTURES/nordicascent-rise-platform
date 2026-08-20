@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Plus, Trash2, Pencil } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import {
   useEmployerInternshipTasks,
   useSaveEmployerInternshipTask,
@@ -12,6 +13,7 @@ import {
 } from "@/hooks/useData";
 import { useToast } from "@/hooks/use-toast";
 import { STAGE_TASK_PRESETS } from "@/lib/stageTaskPresets";
+import { isPlatformStageTask } from "@/lib/stageTasks";
 
 const emptyForm = {
   title: "",
@@ -43,6 +45,7 @@ export default function EmployerInternshipTasksPanel({ embedded }: Props) {
   };
 
   const startEdit = (task: (typeof taskList)[number]) => {
+    if (isPlatformStageTask(task)) return;
     setEditingId(task.id);
     setForm({
       title: task.title,
@@ -76,7 +79,7 @@ export default function EmployerInternshipTasksPanel({ embedded }: Props) {
         content_url: form.content_url.trim() || null,
         sort_order: editingId
           ? taskList.find((t) => t.id === editingId)?.sort_order ?? taskList.length + 1
-          : taskList.length + 1,
+          : Math.max(0, ...taskList.map((t) => t.sort_order)) + 1,
         task_type: "task",
       });
       toast({ title: editingId ? "Task updated" : "Task added" });
@@ -128,34 +131,42 @@ export default function EmployerInternshipTasksPanel({ embedded }: Props) {
       <CardContent className="space-y-4">
         {taskList.length === 0 && !showForm && (
           <p className="text-sm text-muted-foreground">
-            No internship tasks yet. Add agreements, team intros, project kickoff, or check-ins.
+            Program internship tasks from Nordic Ascent will appear here. You can add company extras if needed.
           </p>
         )}
 
-        {taskList.map((task) => (
-          <div key={task.id} className="flex items-start justify-between gap-3 p-3 border rounded-lg">
-            <div className="min-w-0">
-              <p className="font-medium text-sm">{task.title}</p>
-              {task.description && (
-                <p className="text-xs text-muted-foreground mt-0.5">{task.description}</p>
+        {taskList.map((task) => {
+          const platform = isPlatformStageTask(task);
+          return (
+            <div key={task.id} className="flex items-start justify-between gap-3 p-3 border rounded-lg">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="font-medium text-sm">{task.title}</p>
+                  {platform && <Badge variant="secondary">Program</Badge>}
+                </div>
+                {task.description && (
+                  <p className="text-xs text-muted-foreground mt-0.5">{task.description}</p>
+                )}
+              </div>
+              {!platform && (
+                <div className="flex gap-1 shrink-0">
+                  <Button size="icon" variant="ghost" onClick={() => startEdit(task)}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="text-destructive"
+                    onClick={() => handleDelete(task.id)}
+                    disabled={deleteTask.isPending}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               )}
             </div>
-            <div className="flex gap-1 shrink-0">
-              <Button size="icon" variant="ghost" onClick={() => startEdit(task)}>
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="text-destructive"
-                onClick={() => handleDelete(task.id)}
-                disabled={deleteTask.isPending}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
 
         {showForm && (
           <form onSubmit={handleSave} className="space-y-4 pt-2 border-t">

@@ -126,6 +126,12 @@ export function pipelineStageFromApplication(app: {
 }
 
 /** Task pages may still use legacy stage ids (e.g. internship tasks inside Activation). */
+export function programStageLabel(stageId: string): string {
+  if (stageId === "internship") return "Internship";
+  if (stageId === "mentoring") return "Mentoring";
+  return PIPELINE_STAGES.find((s) => s.id === stageId)?.name ?? stageId;
+}
+
 export function stageDisplayMeta(stageId: string) {
   const normalized = normalizePipelineStageId(stageId);
   const fromPipeline = PIPELINE_STAGES.find((s) => s.id === normalized);
