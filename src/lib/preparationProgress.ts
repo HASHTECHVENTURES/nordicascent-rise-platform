@@ -167,17 +167,17 @@ export async function activateMentoringStage(candidateId: string) {
   }
 }
 
-/** After admin unlocks jobs from Mentoring panel, complete mentoring and open selection. */
-export async function activateJobsAfterMentoringUnlock(candidateId: string, track: Track) {
+/** After Activation unlock, complete Readiness/mentoring and open Activation. */
+export async function activateJobsAfterMentoringUnlock(candidateId: string, _track: Track) {
   const now = new Date().toISOString();
   const { data: progress } = await supabase
     .from("candidate_stage_progress")
-    .select("id, stage_id, status")
+    .select("id, stage_id, status, started_at")
     .eq("candidate_id", candidateId);
 
   const rows = progress ?? [];
 
-  for (const stageId of ["mentoring", "readiness"] as const) {
+  for (const stageId of ["mentoring", "readiness", "selection"] as const) {
     const row = rows.find((p) => p.stage_id === stageId);
     if (row && row.status !== "completed") {
       await supabase
@@ -187,13 +187,13 @@ export async function activateJobsAfterMentoringUnlock(candidateId: string, trac
     }
   }
 
-  const nextStage = TRACK_META[track].stages.includes("selection") ? "selection" : "activation";
+  const nextStage = "activation";
   const next = rows.find((p) => p.stage_id === nextStage);
   if (next) {
-    if (next.status === "not_started") {
+    if (next.status !== "active") {
       await supabase
         .from("candidate_stage_progress")
-        .update({ status: "active", started_at: now })
+        .update({ status: "active", started_at: next.started_at ?? now })
         .eq("id", next.id);
     }
   } else {

@@ -1,13 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/contexts/AuthContext";
-import { activateMentoringStage } from "@/lib/preparationProgress";
+import { activateMentoringStage, activateJobsAfterMentoringUnlock } from "@/lib/preparationProgress";
 import {
   APPLICATION_JOURNEY_STATUSES,
   syncPrimaryApplicationStatus,
 } from "@/lib/applicationStatusFlow";
 import { seedReadinessModuleIfEmpty, allTestsSubmitted, fetchReadinessCms, updateReadinessCms, readinessLevelLockReason } from "@/lib/readiness";
 import { refreshMentorMeetingUnlocksForCandidate } from "@/lib/mentorProgram";
+import { initializeActivationForApplication } from "@/lib/activationModule";
+import type { Track } from "@/lib/track";
 
 export type ReadinessTest = {
   id: string;
@@ -493,6 +495,45 @@ export function useSaveReadinessEvaluation() {
         const { error } = await supabase.from("readiness_evaluations").insert(payload);
         if (error) throw error;
       }
+
+      // Approving for activation must open Module 4 — do not leave candidates stuck on Readiness.
+      if (approved_for_activation && !red_flag) {
+        const { data: cand } = await supabase
+          .from("candidates")
+          .select("track, jobs_unlocked")
+          .eq("id", candidateId)
+          .single();
+
+        if (!cand?.jobs_unlocked) {
+          const { error: unlockErr } = await supabase
+            .from("candidates")
+            .update({ jobs_unlocked: true, updated_at: now })
+            .eq("id", candidateId);
+          if (unlockErr) throw unlockErr;
+        }
+
+        await activateJobsAfterMentoringUnlock(candidateId, (cand?.track ?? "entry") as Track);
+        await syncPrimaryApplicationStatus(candidateId, APPLICATION_JOURNEY_STATUSES.INTERNSHIP);
+
+        const { data: app } = await supabase
+          .from("applications")
+          .select("id")
+          .eq("candidate_id", candidateId)
+          .in("status", [
+            "accepted",
+            "mentor_assigned",
+            "readiness_active",
+            "readiness_complete",
+            "internship",
+            "go_no_go",
+          ])
+          .order("applied_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (app?.id) {
+          await initializeActivationForApplication(app.id);
+        }
+      }
     },
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ["readiness-evaluation", vars.candidateId] });
@@ -500,6 +541,9 @@ export function useSaveReadinessEvaluation() {
       qc.invalidateQueries({ queryKey: ["candidate", vars.candidateId] });
       qc.invalidateQueries({ queryKey: ["stage-progress"] });
       qc.invalidateQueries({ queryKey: ["admin-readiness-overview"] });
+      qc.invalidateQueries({ queryKey: ["admin-mentoring-pipeline"] });
+      qc.invalidateQueries({ queryKey: ["admin-activation-applications"] });
+      qc.invalidateQueries({ queryKey: ["admin-journey-stats"] });
     },
   });
 }
