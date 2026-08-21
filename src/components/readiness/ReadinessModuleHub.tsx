@@ -10,6 +10,8 @@ import {
   AlertCircle,
   CalendarCheck,
   CheckCircle2,
+  Video,
+  ExternalLink,
 } from "lucide-react";
 import { useReadinessTests, useMyReadinessAttempts } from "@/hooks/useReadiness";
 import {
@@ -32,6 +34,7 @@ import {
   EMPTY_READINESS_MENTOR_GATE,
   getMeetingLockedReason,
   mentorMeetingTitle,
+  meetingJoinLabel,
   type MentorProgramMeeting,
 } from "@/lib/mentorProgram";
 import { cn } from "@/lib/utils";
@@ -87,22 +90,42 @@ function MeetingStepRow({
           )}
         </div>
         <p className="text-xs text-muted-foreground">{title}</p>
+        {available && meeting?.scheduled_at && (
+          <p className="text-xs text-muted-foreground">
+            Scheduled {new Date(meeting.scheduled_at).toLocaleString()}
+          </p>
+        )}
         <p className="text-xs text-muted-foreground">
           {done
             ? `Done — unlocked ${unlocksLabel}.`
-            : available
-              ? `Attend with your mentor. When they mark it complete, ${unlocksLabel} unlock.`
-              : lockedReason ?? "Complete the previous step first."}
+            : available && meeting?.meeting_url
+              ? "Your mentor shared a call link — join when it is time."
+              : available
+                ? `Open Mentoring for details. When your mentor marks this complete, ${unlocksLabel} unlock.`
+                : lockedReason ?? "Complete the previous step first."}
         </p>
       </div>
-      <div>
+      <div className="flex flex-wrap gap-2 justify-end">
         {done ? (
           <Button size="sm" variant="outline" asChild>
-            <Link to="/candidate/mentoring">View Mentoring</Link>
+            <Link to={`/candidate/mentoring?meeting=${meetingNumber}`}>View Mentoring</Link>
           </Button>
+        ) : available && meeting?.meeting_url ? (
+          <>
+            <Button size="sm" className="gap-1" asChild>
+              <a href={meeting.meeting_url} target="_blank" rel="noopener noreferrer">
+                <Video className="h-4 w-4" />
+                {meetingJoinLabel(meeting.meeting_url)}
+                <ExternalLink className="h-3 w-3 opacity-70" />
+              </a>
+            </Button>
+            <Button size="sm" variant="outline" asChild>
+              <Link to={`/candidate/mentoring?meeting=${meetingNumber}`}>Details</Link>
+            </Button>
+          </>
         ) : available ? (
           <Button size="sm" className="gap-1" asChild>
-            <Link to="/candidate/mentoring">
+            <Link to={`/candidate/mentoring?meeting=${meetingNumber}`}>
               Open Mentoring
               <ArrowRight className="h-4 w-4" />
             </Link>

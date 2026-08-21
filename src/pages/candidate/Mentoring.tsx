@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import { useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ import {
 } from "@/lib/mentorProgram";
 import MentorMeetingDots from "@/components/mentor/MentorMeetingDots";
 import { PageSpinner } from "@/components/ui/PageSpinner";
+import { cn } from "@/lib/utils";
 
 function formatSessionWhen(iso: string) {
   const d = new Date(iso);
@@ -50,6 +52,13 @@ function formatSessionWhen(iso: string) {
 }
 
 export default function CandidateMentoring() {
+  const [searchParams] = useSearchParams();
+  const focusMeetingRaw = searchParams.get("meeting");
+  const focusMeetingNumber = focusMeetingRaw && /^[1-6]$/.test(focusMeetingRaw)
+    ? Number(focusMeetingRaw)
+    : null;
+  const focusRef = useRef<HTMLDivElement | null>(null);
+
   const { profile, candidate } = useAuth();
   const { data: applications, isLoading: appsLoading } = useMyApplications();
   const { applicationId, mentor, company, meetings, track, isLoading } =
@@ -58,11 +67,31 @@ export default function CandidateMentoring() {
   const { data: gate } = useReadinessMentorGateForApplication(applicationId);
   const { data: activationRecord } = useActivationRecord(applicationId);
 
+  const mentoringOpen = canAccessMentoring(profile, candidate, false, applications ?? []);
+  const activeMeetings = (meetings ?? []).filter((m) => m.status !== "not_applicable");
+  const readinessGate = gate ?? EMPTY_READINESS_MENTOR_GATE;
+  const activationGate: ActivationMentorGate = {
+    activationUnlocked: Boolean(activationRecord),
+    internshipStartDate: activationRecord?.internship_start_date ?? null,
+  };
+
+  const nextMeeting =
+    (focusMeetingNumber
+      ? activeMeetings.find((m) => m.meeting_number === focusMeetingNumber)
+      : null) ??
+    activeMeetings.find((m) => m.status === "available") ??
+    activeMeetings.find((m) => m.status === "locked") ??
+    null;
+
+  useEffect(() => {
+    if (!nextMeeting || !focusMeetingNumber) return;
+    focusRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [nextMeeting?.id, focusMeetingNumber]);
+
   if (appsLoading || isLoading) {
     return <PageSpinner />;
   }
 
-  const mentoringOpen = canAccessMentoring(profile, candidate, false, applications ?? []);
   if (!mentoringOpen || !mentor) {
     return (
       <div className="space-y-4 max-w-2xl">
@@ -79,20 +108,9 @@ export default function CandidateMentoring() {
   }
 
   const themeByNumber = new Map((themes ?? []).map((t) => [t.meeting_number, t]));
-  const activeMeetings = (meetings ?? []).filter((m) => m.status !== "not_applicable");
   const completed = activeMeetings.filter((m) => m.status === "completed").length;
   const total = mentorMeetingCountForTrack(track);
   const progressPct = total > 0 ? Math.round((completed / total) * 100) : 0;
-  const readinessGate = gate ?? EMPTY_READINESS_MENTOR_GATE;
-  const activationGate: ActivationMentorGate = {
-    activationUnlocked: Boolean(activationRecord),
-    internshipStartDate: activationRecord?.internship_start_date ?? null,
-  };
-
-  const nextMeeting =
-    activeMeetings.find((m) => m.status === "available") ??
-    activeMeetings.find((m) => m.status === "locked") ??
-    null;
 
   const lockedReason = (m: MentorProgramMeeting) =>
     getMeetingLockedReason(m.meeting_number, activeMeetings, readinessGate, activationGate);
@@ -167,7 +185,14 @@ export default function CandidateMentoring() {
       </Card>
 
       {nextMeeting && (
-        <Card className="border-nordic-orange/30">
+        <Card
+          ref={focusRef}
+          id={`meeting-${nextMeeting.meeting_number}`}
+          className={cn(
+            "border-nordic-orange/30",
+            focusMeetingNumber === nextMeeting.meeting_number && "ring-2 ring-primary/30"
+          )}
+        >
           <CardHeader className="pb-2">
             <CardTitle className="text-base">
               {nextMeeting.status === "available" ? "Next mentor meeting" : "Upcoming mentor meeting"}
@@ -201,6 +226,11 @@ export default function CandidateMentoring() {
                   <ExternalLink className="h-3 w-3 ml-1 opacity-60" />
                 </a>
               </Button>
+            )}
+            {nextMeeting.status === "available" && !nextMeeting.meeting_url && (
+              <p className="text-sm text-muted-foreground">
+                Waiting for your mentor to add the Google Meet / Teams / Zoom link.
+              </p>
             )}
             {(() => {
               const bullets = agendaBulletsFromThemeBody(
