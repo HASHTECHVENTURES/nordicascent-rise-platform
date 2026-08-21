@@ -62,7 +62,12 @@ const ACTIVE_STATUSES = [
 ] as const;
 
 export function hasUnlockedPipeline(applications: ApplicationRow[]) {
-  return applications.some((a) => a.status === "accepted");
+  return applications.some(
+    (a) =>
+      a.status === "accepted" ||
+      isSelectionPipelineStatus(a.status) ||
+      isPostSelectionJourneyStatus(a.status)
+  );
 }
 
 export function hasActiveApplication(applications: ApplicationRow[]) {
@@ -70,8 +75,13 @@ export function hasActiveApplication(applications: ApplicationRow[]) {
 }
 
 export function getPrimaryApplication(applications: ApplicationRow[]) {
-  const accepted = applications.find((a) => a.status === "accepted");
-  if (accepted) return accepted;
+  const preferred = applications.find(
+    (a) =>
+      a.status === "accepted" ||
+      isSelectionPipelineStatus(a.status) ||
+      isPostSelectionJourneyStatus(a.status)
+  );
+  if (preferred) return preferred;
   const active = applications.find((a) =>
     ACTIVE_STATUSES.includes(a.status as (typeof ACTIVE_STATUSES)[number])
   );

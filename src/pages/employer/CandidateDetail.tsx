@@ -140,8 +140,33 @@ export default function EmployerCandidateDetail() {
     const previous = status;
     setStatus(next);
     try {
-      await updateApp.mutateAsync({ id: app.id, status: next });
-      toast({ title: label });
+      const payload: {
+        id: string;
+        status: string;
+        selection_step?: number;
+        selection_step_entered_at?: string;
+        needs_action?: boolean;
+      } = { id: app.id, status: next };
+
+      // Accepting moves them into Selection eligibility (Nordic Ascent + company pipeline).
+      if (next === "accepted") {
+        payload.status = "eligibility_review";
+        payload.selection_step = 1;
+        payload.selection_step_entered_at = new Date().toISOString();
+        payload.needs_action = true;
+        setStatus("accepted");
+      }
+
+      await updateApp.mutateAsync(payload);
+      if (next === "accepted") {
+        setStatus("eligibility_review" as AppStatus);
+        toast({
+          title: label,
+          description: "They are now in Selection → Eligibility. Nordic Ascent reviews eligibility next.",
+        });
+      } else {
+        toast({ title: label });
+      }
     } catch (err) {
       setStatus(previous);
       toast({ title: "Failed", description: getSupabaseErrorMessage(err), variant: "destructive" });

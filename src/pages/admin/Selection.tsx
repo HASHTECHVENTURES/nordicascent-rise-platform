@@ -63,6 +63,7 @@ function isBulkEligibleStep1(app: SelectionApplication) {
   if (step !== 1) return false;
   if (isTerminalSelectionStatus(app.status)) return false;
   return (
+    app.status === "accepted" ||
     app.status === SELECTION_STATUSES.APPLICATION_COMPLETE ||
     app.status === SELECTION_STATUSES.ELIGIBILITY_REVIEW ||
     app.status.startsWith("eligibility_")

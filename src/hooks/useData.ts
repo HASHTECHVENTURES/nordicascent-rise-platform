@@ -973,6 +973,8 @@ export function useUpdateApplication() {
       stage_id?: string;
       status?: string;
       needs_action?: boolean;
+      selection_step?: number;
+      selection_step_entered_at?: string;
     }) => {
       const { data: app, error: fetchError } = await supabase
         .from("applications")
@@ -1001,9 +1003,11 @@ export function useUpdateApplication() {
     },
     onSuccess: async ({ app, updates }) => {
       qc.invalidateQueries({ queryKey: ["employer-applications"] });
+      qc.invalidateQueries({ queryKey: ["employer-selection-applications"] });
       qc.invalidateQueries({ queryKey: ["employer-candidate"] });
       qc.invalidateQueries({ queryKey: ["applications"] });
       qc.invalidateQueries({ queryKey: ["my-applications"] });
+      qc.invalidateQueries({ queryKey: ["admin-selection-applications"] });
       qc.invalidateQueries({ queryKey: ["notifications"] });
       qc.invalidateQueries({ queryKey: ["stage-progress"] });
 

@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageSpinner } from "@/components/ui/PageSpinner";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, AlertTriangle, ChevronRight } from "lucide-react";
 import { useEmployerJobs } from "@/hooks/useData";
@@ -19,13 +20,50 @@ import { isMentorAssignmentOverdue } from "@/lib/mentorProgram";
 import type { SelectionApplication } from "@/lib/selectionModule";
 import { resolveProfile } from "@/lib/resolveProfile";
 
+const ALL_JOBS = "all";
+
 const EmployerSelection = () => {
   const { data: jobs, isLoading: jobsLoading } = useEmployerJobs();
   const [jobId, setJobId] = useState<string>("");
   const [stepFilter, setStepFilter] = useState<SelectionStepId | "all">("all");
+  const [jobDefaulted, setJobDefaulted] = useState(false);
 
-  const selectedJobId = jobId || jobs?.[0]?.id;
-  const { data: applications, isLoading: appsLoading } = useEmployerSelectionApplications(selectedJobId);
+  // Load all company applications first so we can pick a sensible default job
+  const { data: allCompanyApps, isLoading: allAppsLoading } = useEmployerSelectionApplications(undefined);
+
+  const preferredJobId = useMemo(() => {
+    const pipeline = (allCompanyApps ?? []).filter((a) => isEmployerSelectionListStatus(a.status));
+    if (pipeline.length === 0) return jobs?.[0]?.id ?? "";
+    const counts = new Map<string, number>();
+    for (const app of pipeline) {
+      const id = app.job_id;
+      counts.set(id, (counts.get(id) ?? 0) + 1);
+    }
+    let best = "";
+    let bestCount = -1;
+    for (const [id, count] of counts) {
+      if (count > bestCount) {
+        best = id;
+        bestCount = count;
+      }
+    }
+    return best || jobs?.[0]?.id || "";
+  }, [allCompanyApps, jobs]);
+
+  useEffect(() => {
+    if (jobDefaulted || !preferredJobId) return;
+    setJobId(preferredJobId);
+    setJobDefaulted(true);
+  }, [preferredJobId, jobDefaulted]);
+
+  const selectedJobId = jobId || preferredJobId || ALL_JOBS;
+  const filterByJob = selectedJobId !== ALL_JOBS;
+  const { data: jobApps, isLoading: jobAppsLoading } = useEmployerSelectionApplications(
+    filterByJob ? selectedJobId : undefined
+  );
+
+  const applications = filterByJob ? jobApps : allCompanyApps;
+  const appsLoading = filterByJob ? jobAppsLoading : allAppsLoading;
 
   const filteredApps = useMemo(() => {
     const inPipeline = (applications ?? []).filter((a) => isEmployerSelectionListStatus(a.status));
@@ -45,6 +83,12 @@ const EmployerSelection = () => {
     return counts;
   }, [applications]);
 
+  const pipelineTotal = (applications ?? []).filter((a) => isEmployerSelectionListStatus(a.status)).length;
+  const selectedJobTitle =
+    selectedJobId === ALL_JOBS
+      ? "All job roles"
+      : jobs?.find((j) => j.id === selectedJobId)?.title ?? "this job role";
+
   if (jobsLoading) {
     return <PageSpinner />;
   }
@@ -55,14 +99,16 @@ const EmployerSelection = () => {
         <div>
           <h1 className="text-2xl font-medium">Selection</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Review applications in the Selection pipeline. Mentor assignment happens here.
+            After you accept a candidate, they appear here. Eligibility and Offee are done by Nordic
+            Ascent; then you run Technical, Motivation, and the Selection board.
           </p>
         </div>
-        <Select value={selectedJobId ?? ""} onValueChange={setJobId}>
+        <Select value={selectedJobId} onValueChange={setJobId}>
           <SelectTrigger className="w-full sm:w-72">
             <SelectValue placeholder="Select a job role" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value={ALL_JOBS}>All job roles</SelectItem>
             {(jobs ?? []).map((j) => (
               <SelectItem key={j.id} value={j.id}>
                 {j.title}
@@ -95,12 +141,14 @@ const EmployerSelection = () => {
               : "border-border hover:border-nordic-orange/40 bg-muted/40"
           }`}
         >
-          <span className="text-xl font-bold">
-            {(applications ?? []).filter((a) => isEmployerSelectionListStatus(a.status)).length}
+          <span className="text-xl font-bold">{pipelineTotal}</span>
+          <span
+            className={`text-[10px] text-center font-medium leading-tight ${
+              stepFilter === "all" ? "text-primary" : "text-muted-foreground"
+            }`}
+          >
+            Candidates
           </span>
-          <span className={`text-[10px] text-center font-medium leading-tight ${
-            stepFilter === "all" ? "text-primary" : "text-muted-foreground"
-          }`}>Candidates</span>
         </button>
       </div>
 
@@ -114,16 +162,20 @@ const EmployerSelection = () => {
               <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
           ) : filteredApps.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">
-              {((applications ?? []).filter((a) => isEmployerSelectionListStatus(a.status)).length === 0 &&
-              (applications ?? []).some((a) => !isEmployerSelectionListStatus(a.status)))
-                ? "Accepted candidates appear here once they enter the Selection pipeline."
-                : "No applications match this filter for the selected job role."}
-            </p>
+            <div className="py-8 text-center space-y-3">
+              <p className="text-sm text-muted-foreground">
+                {pipelineTotal === 0
+                  ? `No Selection applications for ${selectedJobTitle} yet. Accept a candidate from Candidates first, or switch to a job that already has accepted applications (e.g. “dd”).`
+                  : `No applications on this step for ${selectedJobTitle}. Click Candidates above to see all Selection people.`}
+              </p>
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/employer/candidates">Go to Candidates</Link>
+              </Button>
+            </div>
           ) : (
             <div className="space-y-2">
               {filteredApps.map((app) => (
-                <ApplicationRow key={app.id} app={app} />
+                <ApplicationRow key={app.id} app={app} showJob={selectedJobId === ALL_JOBS} />
               ))}
             </div>
           )}
@@ -133,16 +185,16 @@ const EmployerSelection = () => {
   );
 };
 
-function ApplicationRow({ app }: { app: SelectionApplication }) {
+function ApplicationRow({ app, showJob }: { app: SelectionApplication; showJob?: boolean }) {
   const cand = app.candidates;
   const profile = resolveProfile(cand?.profiles);
-  const candidateId = cand?.id;
   const step = getSelectionStepFromStatus(app.status, app.selection_step);
   const overdue = isStepOverdue(step, app.selection_step_entered_at);
   const mentorOverdue =
     (app.status === "selected_for_readiness" || step >= 5) &&
     !app.assigned_mentor_id &&
     isMentorAssignmentOverdue(app.board_decided_at);
+  const jobTitle = app.jobs?.title;
 
   return (
     <Link
@@ -154,6 +206,7 @@ function ApplicationRow({ app }: { app: SelectionApplication }) {
           {profile?.full_name ?? cand?.full_name ?? "Candidate"}
         </p>
         <p className="text-xs text-muted-foreground truncate">
+          {showJob && jobTitle ? `${jobTitle} · ` : ""}
           Step {step}: {SELECTION_STEPS.find((s) => s.step === step)?.label}
           {app.readiness_unlocked_at && " · Mentor programme active"}
         </p>

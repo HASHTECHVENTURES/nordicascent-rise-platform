@@ -143,7 +143,13 @@ export function getSelectionStepFromStatus(
   if (selectionStep != null && selectionStep >= 1 && selectionStep <= 5) {
     return selectionStep as SelectionStepId;
   }
-  if (status === SELECTION_STATUSES.APPLICATION_COMPLETE || status.startsWith("eligibility_")) return 1;
+  if (
+    status === "accepted" ||
+    status === SELECTION_STATUSES.APPLICATION_COMPLETE ||
+    status.startsWith("eligibility_")
+  ) {
+    return 1;
+  }
   if (status.startsWith("offee_")) return 2;
   if (status.startsWith("step3_")) return 3;
   if (status.startsWith("step4_")) return 4;
@@ -226,6 +232,8 @@ export function isStepOverdue(step: SelectionStepId, enteredAt: string | null | 
 
 export function selectionStatusLabel(status: string) {
   switch (status) {
+    case "accepted":
+      return "Accepted — awaiting eligibility";
     case SELECTION_STATUSES.APPLICATION_COMPLETE:
       return "Application complete";
     case SELECTION_STATUSES.ELIGIBILITY_REVIEW:
