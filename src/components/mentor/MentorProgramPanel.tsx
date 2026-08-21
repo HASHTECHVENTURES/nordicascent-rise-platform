@@ -22,6 +22,7 @@ import {
 } from "@/hooks/useMentorProgram";
 import { getMeetingLockedReason, isMentorMeetingOverdue, agendaBulletsFromThemeBody, EMPTY_READINESS_MENTOR_GATE, isValidMeetingUrl, meetingJoinLabel } from "@/lib/mentorProgram";
 import type { ActivationMentorGate, MentorMeetingObservation, MentorProgramMeeting } from "@/lib/mentorProgram";
+import { levelUnlockedByMeeting } from "@/lib/readiness";
 import type { Track } from "@/lib/track";
 import MentorMeetingDots from "@/components/mentor/MentorMeetingDots";
 import { useActivationRecord } from "@/hooks/useActivation";
@@ -223,7 +224,9 @@ export default function MentorProgramPanel({
                 variant={done ? "outline" : "default"}
                 onClick={() => openMeetingForm(m.meeting_number)}
               >
-                Complete meeting
+                {levelUnlockedByMeeting(m.meeting_number)
+                  ? `Complete meeting & unlock Level ${levelUnlockedByMeeting(m.meeting_number)}`
+                  : "Complete meeting"}
               </Button>
             )}
           </div>
@@ -411,7 +414,12 @@ export default function MentorProgramPanel({
         concerns: concerns.trim() || undefined,
         addon_topics: addonTopics.trim() || undefined,
       });
-      toast({ title: `Meeting ${meetingNumber} saved` });
+      const unlocksLevel = levelUnlockedByMeeting(meetingNumber);
+      toast({
+        title: unlocksLevel
+          ? `Meeting ${meetingNumber} complete — Level ${unlocksLevel} unlocked`
+          : `Meeting ${meetingNumber} saved`,
+      });
       setActiveMeeting(null);
       await refetch();
     } catch (err) {

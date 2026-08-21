@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Loader2, Lock, PlayCircle, AlertCircle } from "lucide-react";
 import { useReadinessTests, useMyReadinessAttempts } from "@/hooks/useReadiness";
-import { isLevelUnlocked, readinessLevelLockReason, getAttemptExpiresAtMs, hasStrictTimer, getReadinessLevelSubtitle } from "@/lib/readiness";
+import { isLevelUnlocked, readinessLevelLockReason, getAttemptExpiresAtMs, hasStrictTimer, getReadinessLevelSubtitle, mentorMeetingRequiredForLevel } from "@/lib/readiness";
 import ReadinessCountdown from "@/components/readiness/ReadinessCountdown";
 import {
   READINESS_AREA_LABELS,
@@ -152,10 +152,20 @@ export default function ReadinessModuleHub({ compact = false, hideHeader = false
                     </div>
                     <div>
                       {!unlocked && !inProgress && !done ? (
-                        <Button size="sm" variant="outline" disabled className="gap-1">
-                          <Lock className="h-4 w-4" />
-                          {lockReason ?? "Locked"}
-                        </Button>
+                        mentorMeetingRequiredForLevel(test.level) &&
+                        lockReason?.startsWith("Mentor Meeting") ? (
+                          <Button size="sm" variant="outline" className="gap-1" asChild>
+                            <Link to="/candidate/mentoring">
+                              <Lock className="h-4 w-4" />
+                              {lockReason}
+                            </Link>
+                          </Button>
+                        ) : (
+                          <Button size="sm" variant="outline" disabled className="gap-1">
+                            <Lock className="h-4 w-4" />
+                            {lockReason ?? "Locked"}
+                          </Button>
+                        )
                       ) : done ? (
                         <Button size="sm" variant="outline" disabled>Submitted</Button>
                       ) : inProgress ? (

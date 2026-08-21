@@ -70,11 +70,12 @@ export type MentorMeetingLockInput = {
 
 /**
  * Meeting 1 → Level 1 → Level 2 → Meeting 2 → Level 3 → Meeting 3.
- * - Meeting 1 unlocks Level 1
- * - Level 1 (both areas) unlocks Level 2 — no extra meeting
- * - Level 2 (both areas) unlocks Meeting 2
- * - Meeting 2 unlocks Level 3
- * - Level 3 (both areas) unlocks Meeting 3
+ * Candidates never start exams until the mentor completes the required meeting.
+ * - Meeting 1 (mentor completes) unlocks Level 1
+ * - Level 1 both areas unlocks Level 2 — no extra meeting
+ * - Level 2 both areas unlocks Meeting 2
+ * - Meeting 2 (mentor completes) unlocks Level 3
+ * - Level 3 both areas unlocks Meeting 3
  */
 export function mentorMeetingRequiredForLevel(level: number): number | null {
   if (level === 1) return 1;
@@ -111,13 +112,76 @@ export function readinessLevelLockReason(
 ): string | null {
   const meeting = mentorMeetingRequiredForLevel(level);
   if (meeting && !isMentorMeetingDone(meeting, meetings)) {
-    return `Mentor meeting ${meeting} first`;
+    return `Mentor Meeting ${meeting} first`;
   }
 
   if (level > 1 && !bothAreasSubmittedAtLevel(level - 1, attempts, tests)) {
     return `Complete Level ${level - 1} (cultural & technical) first`;
   }
 
+  return null;
+}
+
+export type ReadinessNextAction =
+  | { kind: "meeting"; meetingNumber: 1 | 2 | 3; unlocks: string }
+  | { kind: "level"; level: 1 | 2 | 3; detail: string }
+  | { kind: "done" };
+
+/** What the candidate (or mentor) should do next in the Readiness sequence. */
+export function getReadinessNextAction(
+  attempts: { test_id: string; status: string }[],
+  tests: { id: string; level: number; area: string }[],
+  meetings: MentorMeetingLockInput[]
+): ReadinessNextAction {
+  if (!isMentorMeetingDone(1, meetings)) {
+    return {
+      kind: "meeting",
+      meetingNumber: 1,
+      unlocks: "Level 1 tests (cultural & technical)",
+    };
+  }
+  if (!bothAreasSubmittedAtLevel(1, attempts, tests)) {
+    return {
+      kind: "level",
+      level: 1,
+      detail: "Complete both Cultural and Technical Level 1",
+    };
+  }
+  if (!bothAreasSubmittedAtLevel(2, attempts, tests)) {
+    return {
+      kind: "level",
+      level: 2,
+      detail: "Complete both Cultural and Technical Level 2",
+    };
+  }
+  if (!isMentorMeetingDone(2, meetings)) {
+    return {
+      kind: "meeting",
+      meetingNumber: 2,
+      unlocks: "Level 3 tests (cultural & technical)",
+    };
+  }
+  if (!bothAreasSubmittedAtLevel(3, attempts, tests)) {
+    return {
+      kind: "level",
+      level: 3,
+      detail: "Complete both Cultural and Technical Level 3",
+    };
+  }
+  if (!isMentorMeetingDone(3, meetings)) {
+    return {
+      kind: "meeting",
+      meetingNumber: 3,
+      unlocks: "closing the Readiness mentor programme",
+    };
+  }
+  return { kind: "done" };
+}
+
+/** Level unlocked after mentor marks this meeting complete. */
+export function levelUnlockedByMeeting(meetingNumber: number): number | null {
+  if (meetingNumber === 1) return 1;
+  if (meetingNumber === 2) return 3;
   return null;
 }
 

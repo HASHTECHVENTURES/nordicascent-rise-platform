@@ -371,13 +371,13 @@ export function getMeetingLockedReason(
   }
 
   if (meetingNumber === 1) {
-    return "Available once your mentor is assigned. Completing it unlocks Readiness Level 1";
+    return "Attend this meeting first. When your mentor marks it complete, Level 1 tests unlock";
   }
 
   if (meetingNumber === 2) {
     if (!isCompleted(1)) return "Complete Meeting 1 first";
     if (!gate.level2BothSubmitted) {
-      return "Unlocks after Level 2 (both cultural and technical)";
+      return "Unlocks after Level 2 (both cultural and technical). Mentor completion then unlocks Level 3";
     }
   } else if (meetingNumber === 3) {
     if (!isCompleted(2)) return "Complete Meeting 2 first";
