@@ -361,7 +361,13 @@ export function candidateTrackerMessage(status: string, selectionStep?: number |
       ? "Motivation session in progress."
       : "Motivation session complete — the selection board will decide soon.";
   }
-  if (status === SELECTION_STATUSES.APPLICATION_COMPLETE || status.startsWith("eligibility_")) {
+  if (status === SELECTION_STATUSES.APPLICATION_COMPLETE) {
+    return "Your application is with the company. They review it first — no action needed from you yet.";
+  }
+  if (status === "accepted") {
+    return "The company accepted your application. Nordic Ascent and the company will continue Selection (eligibility, Offee, sessions). We'll notify you when something changes.";
+  }
+  if (status.startsWith("eligibility_")) {
     return "We're checking eligibility. After that, Offee assessment comes next — no action needed from you yet.";
   }
   return "We're reviewing your application. No action needed — we'll notify you when something changes.";

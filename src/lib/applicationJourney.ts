@@ -178,12 +178,16 @@ export function applicationStatusVariant(status: string): "default" | "secondary
 
 /** Employer pre-accept workflow (review → interview → accept/decline). */
 export function isEmployerPreAcceptWorkflow(status: string) {
-  return ["applied", "reviewing", "interview", "offer"].includes(status);
+  // New applies land as application_complete (not "applied") — companies must still be able to accept.
+  return ["applied", "application_complete", "reviewing", "interview", "offer"].includes(status);
 }
 
-/** Employer should use Selection module instead of pre-accept workflow. */
+/** Employer should use Selection module after they have accepted (or pipeline has moved past apply). */
 export function isEmployerSelectionHandoff(status: string) {
-  return status === "accepted" || isSelectionPipelineStatus(status);
+  if (status === "accepted") return true;
+  // application_complete is still the company review step — not Selection yet
+  if (status === "application_complete" || status === "applied") return false;
+  return isSelectionPipelineStatus(status);
 }
 
 /** Shorter labels for employer-facing UI */
@@ -198,7 +202,9 @@ export function employerApplicationStatusLabel(status: string) {
     case "offer":
       return "Offer in progress";
     case "accepted":
-      return "Accepted";
+      return "Accepted — continue in Selection";
+    case "application_complete":
+      return "New application";
     case "rejected":
       return "Declined";
     default:

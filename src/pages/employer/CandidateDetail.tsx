@@ -30,7 +30,7 @@ import { resolveProfile } from "@/lib/resolveProfile";
 import { getSupabaseErrorMessage } from "@/lib/supabaseError";
 import { cn } from "@/lib/utils";
 
-type AppStatus = "applied" | "reviewing" | "interview" | "accepted" | "rejected";
+type AppStatus = "applied" | "application_complete" | "reviewing" | "interview" | "accepted" | "rejected";
 
 type AppRecord = {
   id: string;
@@ -263,7 +263,7 @@ export default function EmployerCandidateDetail() {
             <div>
               <p className="font-medium">In Selection pipeline</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Status: {selectionStatusLabel(appStatus)}. Complete technical, motivation, and board steps in Selection.
+                Status: {selectionStatusLabel(appStatus)}. Continue the next Selection steps here.
               </p>
             </div>
             <Button variant="outline" size="sm" asChild>
@@ -273,7 +273,7 @@ export default function EmployerCandidateDetail() {
         </Card>
       )}
 
-      {status === "accepted" && app && (
+      {appStatus === "accepted" && app && (
         <Card className="border-success/30 bg-success/5">
           <CardContent className="pt-6 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
             <div>
@@ -282,7 +282,7 @@ export default function EmployerCandidateDetail() {
                 You accepted this candidate
               </p>
               <p className="text-sm text-muted-foreground mt-1">
-                They can continue in the Nordic Ascent program from Selection stage.
+                Continue Selection (technical, motivation, board). Nordic Ascent handles eligibility and Offee first when needed.
               </p>
             </div>
             <Button variant="outline" size="sm" asChild>
@@ -309,7 +309,7 @@ export default function EmployerCandidateDetail() {
             <CardTitle className="text-base">What to do next</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <StepRow done={reviewDone} active={status === "applied" || reviewDone} title="1. Review their profile and resume">
+            <StepRow done={reviewDone} active={status === "applied" || status === "application_complete" || reviewDone} title="1. Review their profile and resume">
               <div className="space-y-3">
                 {candidate.cv_url ? (
                   <div className="flex flex-wrap items-center gap-2 p-3 rounded-lg border bg-muted/30">
@@ -327,7 +327,7 @@ export default function EmployerCandidateDetail() {
                 ) : (
                   <p className="text-sm text-muted-foreground">No resume uploaded yet.</p>
                 )}
-                {status === "applied" ? (
+                {status === "applied" || status === "application_complete" ? (
                   <Button
                     onClick={() => setApplicationStatus("reviewing", "Marked as under review")}
                     disabled={updateApp.isPending}

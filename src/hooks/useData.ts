@@ -18,6 +18,7 @@ import {
   notifyAdminsNewApplicationComplete,
 } from "@/lib/applicationEffects";
 import { syncPrimaryApplicationStatus } from "@/lib/applicationStatusFlow";
+import { pipelineStageFromApplication } from "@/lib/pipeline";
 import { getOrCreateConversationWithProfile, resolveConversationParticipant } from "@/lib/conversations";
 import { sendInterviewInvite } from "@/lib/sendInterviewInvite";
 import {
@@ -984,7 +985,14 @@ export function useUpdateApplication() {
         .from("applications")
         .update({
           ...updates,
-          ...(updates.status ? { needs_action: false } : {}),
+          ...(updates.status
+            ? {
+                needs_action: updates.needs_action ?? false,
+                stage_id:
+                  updates.stage_id ??
+                  pipelineStageFromApplication({ status: updates.status }),
+              }
+            : {}),
         })
         .eq("id", id);
       if (error) throw error;
