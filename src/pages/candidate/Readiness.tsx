@@ -2,13 +2,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, CalendarCheck } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import ReadinessModuleHub from "@/components/readiness/ReadinessModuleHub";
 import { canAccessReadiness, isPreparationComplete } from "@/lib/candidateJourney";
 import { useMyReadinessAttempts, useReadinessTests } from "@/hooks/useReadiness";
 import { useMyApplications } from "@/hooks/useData";
-import { allTestsSubmitted, getReadinessNextAction } from "@/lib/readiness";
+import { allTestsSubmitted } from "@/lib/readiness";
 import { isSelectionPipelineStatus } from "@/lib/selectionModule";
 import { hasSeenReadinessIntro } from "@/lib/readinessIntro";
 import MentorAssignedBanner from "@/components/mentor/MentorAssignedBanner";
@@ -25,11 +25,6 @@ export default function CandidateReadiness() {
 
   const submitted =
     tests && tests.length > 0 && attempts ? allTestsSubmitted(tests, attempts) : false;
-
-  const nextAction =
-    tests && attempts
-      ? getReadinessNextAction(attempts, tests, mentorCtx.meetings ?? [])
-      : null;
 
   useEffect(() => {
     if (ready) {
@@ -119,11 +114,8 @@ export default function CandidateReadiness() {
       <div>
         <h1 className="text-2xl font-medium">Readiness</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          You do not start exams first. Attend the mentor meeting; when your mentor marks it
-          complete, the next level unlocks.
-        </p>
-        <p className="text-sm text-muted-foreground mt-2">
-          Sequence: Meeting 1 → Level 1 → Level 2 → Meeting 2 → Level 3 → Meeting 3
+          Follow the path in order. Mentor meeting rows sit above the levels they unlock — click
+          Open Mentoring, then come back here for tests.
         </p>
       </div>
       {mentorCtx.mentor && (
@@ -133,35 +125,6 @@ export default function CandidateReadiness() {
           meetings={mentorCtx.meetings}
           track={mentorCtx.track}
         />
-      )}
-      {nextAction?.kind === "meeting" && (
-        <Card className="border-primary/30 bg-primary/5">
-          <CardContent className="pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <CalendarCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <p className="text-sm font-medium">
-                  Next: Mentor Meeting {nextAction.meetingNumber}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Attend this session with your mentor. When they mark it complete, that unlocks{" "}
-                  {nextAction.unlocks}. Tests stay locked until then.
-                </p>
-              </div>
-            </div>
-            <Button size="sm" asChild className="shrink-0">
-              <Link to="/candidate/mentoring">Go to Mentoring</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-      {nextAction?.kind === "level" && (
-        <Card className="border-primary/20 bg-muted/30">
-          <CardContent className="pt-6">
-            <p className="text-sm font-medium">Next: Level {nextAction.level} tests</p>
-            <p className="text-sm text-muted-foreground mt-1">{nextAction.detail}</p>
-          </CardContent>
-        </Card>
       )}
       {submitted ? (
         <Card>
