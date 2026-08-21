@@ -129,34 +129,19 @@ export default function CandidateReadiness() {
       {submitted ? (
         <Card>
           <CardContent className="pt-6 space-y-3">
-            {candidate?.jobs_unlocked ? (
-              <>
-                <p className="text-sm text-muted-foreground">
-                  Readiness is complete and Activation is open. Continue in Activation — mentor
-                  meetings 4–6 run there during the internship.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <Button size="sm" asChild>
-                    <Link to="/candidate/activation">Go to Activation</Link>
-                  </Button>
-                  <Button size="sm" variant="outline" asChild>
-                    <Link to="/candidate/mentoring">Mentoring</Link>
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <>
-                <p className="text-sm text-muted-foreground">
-                  All Readiness tests are submitted. Finish mentor meetings 1–3 if any remain.
-                  Activation opens when Nordic Ascent approves you for the next stage.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <Button size="sm" asChild>
-                    <Link to="/candidate/mentoring">Go to Mentoring</Link>
-                  </Button>
-                </div>
-              </>
-            )}
+            <p className="text-sm text-muted-foreground">
+              All Readiness tests are submitted. Continue mentor meetings in Mentoring, then move to Activation when unlocked.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" asChild>
+                <Link to="/candidate/mentoring">Go to Mentoring</Link>
+              </Button>
+              {candidate?.jobs_unlocked && (
+                <Button size="sm" variant="outline" asChild>
+                  <Link to="/candidate/activation">Go to Activation</Link>
+                </Button>
+              )}
+            </div>
           </CardContent>
         </Card>
       ) : (

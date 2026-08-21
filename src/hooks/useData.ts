@@ -17,7 +17,6 @@ import {
   notifyEmployersNewApplication,
   notifyAdminsNewApplicationComplete,
 } from "@/lib/applicationEffects";
-import { syncPrimaryApplicationStatus } from "@/lib/applicationStatusFlow";
 import { getOrCreateConversationWithProfile, resolveConversationParticipant } from "@/lib/conversations";
 import { sendInterviewInvite } from "@/lib/sendInterviewInvite";
 import {
@@ -2660,19 +2659,12 @@ export function useUnlockCandidateJobs() {
           .from("applications")
           .select("id")
           .eq("candidate_id", candidateId)
-          .in("status", [
-            "accepted",
-            "mentor_assigned",
-            "readiness_active",
-            "readiness_complete",
-            "internship",
-          ])
+          .in("status", ["accepted", "mentor_assigned", "readiness_active", "readiness_complete"])
           .order("applied_at", { ascending: false })
           .limit(1)
           .maybeSingle();
         if (app?.id) {
           await initializeActivationForApplication(app.id);
-          await syncPrimaryApplicationStatus(candidateId, "internship");
         }
       }
     },
@@ -2681,7 +2673,6 @@ export function useUnlockCandidateJobs() {
       qc.invalidateQueries({ queryKey: ["admin-journey-stats"] });
       qc.invalidateQueries({ queryKey: ["admin-candidate-journey-brief"] });
       qc.invalidateQueries({ queryKey: ["admin-candidates"] });
-      qc.invalidateQueries({ queryKey: ["admin-activation-applications"] });
       qc.invalidateQueries({ queryKey: ["candidate", candidateId] });
       qc.invalidateQueries({ queryKey: ["stage-progress"] });
     },
