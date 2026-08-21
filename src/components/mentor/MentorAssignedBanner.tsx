@@ -34,13 +34,15 @@ export default function MentorAssignedBanner({
   const companyName = company?.name?.trim();
 
   return (
-    <Card className="border-primary/20 bg-primary/5">
+    <Card className="border-2 border-nordic-orange bg-nordic-orange/15 shadow-sm">
       <CardContent className="pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-start gap-3">
-          <UserCircle className="h-10 w-10 text-primary shrink-0" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-nordic-orange text-white">
+            <UserCircle className="h-6 w-6" />
+          </div>
           <div>
-            <p className="text-sm font-medium text-primary">Your mentor</p>
-            <p className="text-sm mt-1">
+            <p className="text-sm font-medium text-nordic-orange">Your mentor</p>
+            <p className="text-sm mt-1 text-foreground">
               Your mentor is <strong>{mentor.name}</strong>
               {role ? `, ${role}` : ""}
               {companyName ? ` at ${companyName}` : ""}.
