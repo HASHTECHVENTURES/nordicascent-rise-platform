@@ -35,11 +35,117 @@ export function useAdminSelectionJobs() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("jobs")
-        .select("id, title, status, positions_count, companies(name)")
+        .select("id, title, status, positions_count, company_id, companies(id, name)")
         .in("status", ["open", "closed"])
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
+    },
+  });
+}
+
+export type AdminSelectionCompanyRow = {
+  id: string;
+  name: string;
+  location: string | null;
+  status: string | null;
+  jobCount: number;
+  applicationCount: number;
+  needsActionCount: number;
+  positionsTotal: number;
+};
+
+/** Companies with open/closed jobs — click through to that company's Selection pipeline. */
+export function useAdminSelectionCompanies() {
+  return useQuery({
+    queryKey: ["admin-selection-companies"],
+    queryFn: async () => {
+      const { data: jobs, error: jobsErr } = await supabase
+        .from("jobs")
+        .select("id, positions_count, company_id, companies(id, name, location, status)")
+        .in("status", ["open", "closed"]);
+      if (jobsErr) throw jobsErr;
+
+      const jobIds = (jobs ?? []).map((j) => j.id);
+      let apps: { id: string; job_id: string; needs_action: boolean | null }[] = [];
+      if (jobIds.length > 0) {
+        const { data: appRows, error: appsErr } = await supabase
+          .from("applications")
+          .select("id, job_id, needs_action")
+          .in("job_id", jobIds);
+        if (appsErr) throw appsErr;
+        apps = appRows ?? [];
+      }
+
+      const appsByJob = new Map<string, { count: number; needs: number }>();
+      for (const a of apps) {
+        const cur = appsByJob.get(a.job_id) ?? { count: 0, needs: 0 };
+        cur.count += 1;
+        if (a.needs_action) cur.needs += 1;
+        appsByJob.set(a.job_id, cur);
+      }
+
+      const byCompany = new Map<string, AdminSelectionCompanyRow>();
+      for (const j of jobs ?? []) {
+        const company = j.companies as {
+          id: string;
+          name: string;
+          location: string | null;
+          status: string | null;
+        } | null;
+        const companyId = j.company_id ?? company?.id;
+        if (!companyId || !company) continue;
+        const appStats = appsByJob.get(j.id) ?? { count: 0, needs: 0 };
+        const existing = byCompany.get(companyId);
+        if (existing) {
+          existing.jobCount += 1;
+          existing.applicationCount += appStats.count;
+          existing.needsActionCount += appStats.needs;
+          existing.positionsTotal += j.positions_count ?? 0;
+        } else {
+          byCompany.set(companyId, {
+            id: companyId,
+            name: company.name,
+            location: company.location,
+            status: company.status,
+            jobCount: 1,
+            applicationCount: appStats.count,
+            needsActionCount: appStats.needs,
+            positionsTotal: j.positions_count ?? 0,
+          });
+        }
+      }
+
+      return [...byCompany.values()].sort((a, b) => {
+        if (b.needsActionCount !== a.needsActionCount) return b.needsActionCount - a.needsActionCount;
+        if (b.applicationCount !== a.applicationCount) return b.applicationCount - a.applicationCount;
+        return a.name.localeCompare(b.name);
+      });
+    },
+  });
+}
+
+export function useAdminCompanySelectionApplications(companyId: string | undefined) {
+  return useQuery({
+    queryKey: ["admin-selection-applications", "company", companyId],
+    enabled: Boolean(companyId),
+    queryFn: async () => {
+      const { data: jobs, error: jobsErr } = await supabase
+        .from("jobs")
+        .select("id, title, positions_count")
+        .eq("company_id", companyId!)
+        .in("status", ["open", "closed"]);
+      if (jobsErr) throw jobsErr;
+      const jobIds = (jobs ?? []).map((j) => j.id);
+      if (jobIds.length === 0) return { applications: [] as SelectionApplication[], jobs: jobs ?? [] };
+
+      const { data, error } = await supabase
+        .from("applications")
+        .select(ADMIN_SELECTION_SELECT)
+        .in("job_id", jobIds)
+        .order("applied_at", { ascending: false });
+      if (error) throw error;
+      return { applications: (data ?? []) as SelectionApplication[], jobs: jobs ?? [] };
     },
   });
 }
@@ -226,6 +332,7 @@ export function useSelectionStepDecision() {
     onSuccess: async ({ app, newStatus, step, decision, companyRejectReason, fields }) => {
       qc.invalidateQueries({ queryKey: ["admin-selection-applications"] });
       qc.invalidateQueries({ queryKey: ["admin-selection-application"] });
+      qc.invalidateQueries({ queryKey: ["admin-selection-companies"] });
       qc.invalidateQueries({ queryKey: ["employer-selection-applications"] });
       qc.invalidateQueries({ queryKey: ["my-applications"] });
       qc.invalidateQueries({ queryKey: ["notifications"] });
@@ -321,6 +428,7 @@ export function useSelectionBoardDecision() {
     onSuccess: async ({ app, status, companyDecision }) => {
       qc.invalidateQueries({ queryKey: ["admin-selection-applications"] });
       qc.invalidateQueries({ queryKey: ["admin-selection-application"] });
+      qc.invalidateQueries({ queryKey: ["admin-selection-companies"] });
       qc.invalidateQueries({ queryKey: ["employer-selection-applications"] });
       qc.invalidateQueries({ queryKey: ["my-applications"] });
       qc.invalidateQueries({ queryKey: ["notifications"] });
@@ -475,6 +583,7 @@ export function useAssignMentorToApplication() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-selection-applications"] });
       qc.invalidateQueries({ queryKey: ["admin-selection-application"] });
+      qc.invalidateQueries({ queryKey: ["admin-selection-companies"] });
       qc.invalidateQueries({ queryKey: ["employer-selection-applications"] });
       qc.invalidateQueries({ queryKey: ["employer-selection-application"] });
       qc.invalidateQueries({ queryKey: ["my-applications"] });
@@ -525,6 +634,7 @@ export function useBulkSelectionDecision() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-selection-applications"] });
       qc.invalidateQueries({ queryKey: ["admin-selection-application"] });
+      qc.invalidateQueries({ queryKey: ["admin-selection-companies"] });
       qc.invalidateQueries({ queryKey: ["employer-selection-applications"] });
       qc.invalidateQueries({ queryKey: ["my-applications"] });
       qc.invalidateQueries({ queryKey: ["notifications"] });

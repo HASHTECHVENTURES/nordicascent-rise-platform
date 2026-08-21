@@ -278,9 +278,19 @@ const EmployerSelectionApplication = () => {
       )}
 
       {step < 3 && (
-        <Card>
-          <CardContent className="py-8 text-center text-sm text-muted-foreground">
-            This candidate is still in early selection stages. You'll be invited when they reach technical assessment.
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="py-8 space-y-3 text-center">
+            <p className="text-sm font-medium text-foreground">
+              Waiting on Nordic Ascent (Eligibility & Offee)
+            </p>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+              Steps 1–2 are completed in the <strong>Admin → Selection</strong> portal. When those
+              pass, this page unlocks Technical assessment, Motivation, Selection board, then mentor
+              assignment.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Current status: {selectionStatusLabel(app.status)}
+            </p>
           </CardContent>
         </Card>
       )}

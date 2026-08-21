@@ -216,7 +216,7 @@ const AdminSelectionApplication = () => {
           {error instanceof Error ? error.message : "This application could not be loaded."}
         </p>
         <Button variant="outline" asChild>
-          <Link to="/admin/selection">Back to Selection pipeline</Link>
+          <Link to="/admin/selection">Back to Selection</Link>
         </Button>
       </div>
     );
@@ -231,12 +231,15 @@ const AdminSelectionApplication = () => {
   const selectedCount = countSelectedForJob(jobApplications ?? []);
   const maxSelected = maxSelectionsForJob(positions);
   const job = app.jobs;
+  const companyBackHref = job?.company_id
+    ? `/admin/selection/company/${job.company_id}`
+    : "/admin/selection";
 
   return (
     <div className="space-y-6 max-w-4xl">
       <div className="flex items-start gap-4">
         <Button variant="ghost" size="icon" asChild>
-          <Link to="/admin/selection">
+          <Link to={companyBackHref}>
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>

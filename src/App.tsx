@@ -112,6 +112,7 @@ import AdminOnboardingApplication from "./pages/admin/OnboardingApplication";
 import AdminFollowup from "./pages/admin/Followup";
 import AdminFollowupApplication from "./pages/admin/FollowupApplication";
 import AdminSelection from "./pages/admin/Selection";
+import AdminSelectionCompany from "./pages/admin/SelectionCompany";
 import AdminSelectionApplication from "./pages/admin/SelectionApplication";
 import AdminActivation from "./pages/admin/Activation";
 import AdminActivationApplication from "./pages/admin/ActivationApplication";
@@ -258,6 +259,7 @@ const App = () => (
                 <Route path="/admin/onboarding/:applicationId" element={<AdminOnboardingApplication />} />
                 <Route path="/admin/followup" element={<AdminFollowup />} />
                 <Route path="/admin/followup/:applicationId" element={<AdminFollowupApplication />} />
+                <Route path="/admin/selection/company/:companyId" element={<AdminSelectionCompany />} />
                 <Route path="/admin/selection/:applicationId" element={<AdminSelectionApplication />} />
                 <Route path="/admin/selection" element={<AdminSelection />} />
                 <Route path="/admin/security" element={<AdminSecurity />} />
