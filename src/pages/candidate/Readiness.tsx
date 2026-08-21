@@ -114,9 +114,15 @@ export default function CandidateReadiness() {
       <div>
         <h1 className="text-2xl font-medium">Readiness</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Follow the flow, one step at a time: Meeting 1 → Level 1 → Level 2 → Meeting 2 →
-          Level 3 → Meeting 3 (both cultural and technical).
+          Meeting 1 → Level 1 → Level 2 → Meeting 2 → Level 3 → Meeting 3
         </p>
+        <ul className="mt-2 text-sm text-muted-foreground list-disc pl-5 space-y-1 max-w-2xl">
+          <li>Meeting 1 unlocks Level 1</li>
+          <li>After Level 1 (both cultural and technical), Level 2 opens — no extra meeting</li>
+          <li>After Level 2, Meeting 2 opens</li>
+          <li>After Meeting 2, Level 3 opens</li>
+          <li>After Level 3, Meeting 3 opens</li>
+        </ul>
       </div>
       {mentorCtx.mentor && (
         <MentorAssignedBanner

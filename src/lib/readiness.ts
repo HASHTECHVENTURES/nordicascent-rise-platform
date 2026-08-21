@@ -70,12 +70,16 @@ export type MentorMeetingLockInput = {
 
 /**
  * Meeting 1 → Level 1 → Level 2 → Meeting 2 → Level 3 → Meeting 3.
- * Level 2 has no extra meeting; it opens after Level 1.
+ * - Meeting 1 unlocks Level 1
+ * - Level 1 (both areas) unlocks Level 2 — no extra meeting
+ * - Level 2 (both areas) unlocks Meeting 2
+ * - Meeting 2 unlocks Level 3
+ * - Level 3 (both areas) unlocks Meeting 3
  */
 export function mentorMeetingRequiredForLevel(level: number): number | null {
   if (level === 1) return 1;
   if (level === 3) return 2;
-  return null;
+  return null; // Level 2 opens after Level 1 only
 }
 
 export function isMentorMeetingDone(
@@ -85,26 +89,35 @@ export function isMentorMeetingDone(
   return meetings.some((m) => m.meeting_number === meetingNumber && m.status === "completed");
 }
 
+function bothAreasSubmittedAtLevel(
+  level: number,
+  attempts: { test_id: string; status: string }[],
+  tests: { id: string; level: number; area: string }[]
+) {
+  const atLevel = tests.filter((t) => t.level === level);
+  if (atLevel.length < 2) return false;
+  return atLevel.every((t) => {
+    const a = attempts.find((x) => x.test_id === t.id);
+    return a?.status === "submitted" || a?.status === "expired";
+  });
+}
+
 export function readinessLevelLockReason(
   level: number,
-  area: string,
+  _area: string,
   attempts: { test_id: string; status: string }[],
   tests: { id: string; level: number; area: string }[],
   meetings: MentorMeetingLockInput[]
 ): string | null {
-  if (level > 1) {
-    const prevTest = tests.find((t) => t.area === area && t.level === level - 1);
-    if (prevTest) {
-      const attempt = attempts.find((a) => a.test_id === prevTest.id);
-      if (attempt?.status !== "submitted" && attempt?.status !== "expired") {
-        return `Level ${level - 1} first`;
-      }
-    }
-  }
   const meeting = mentorMeetingRequiredForLevel(level);
   if (meeting && !isMentorMeetingDone(meeting, meetings)) {
     return `Mentor meeting ${meeting} first`;
   }
+
+  if (level > 1 && !bothAreasSubmittedAtLevel(level - 1, attempts, tests)) {
+    return `Complete Level ${level - 1} (cultural & technical) first`;
+  }
+
   return null;
 }
 

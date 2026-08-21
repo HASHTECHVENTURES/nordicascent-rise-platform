@@ -106,6 +106,8 @@ export default function CandidateMentoring() {
         <h1 className="text-2xl font-medium">Mentoring</h1>
         <p className="text-muted-foreground text-sm mt-1">
           Follow the flow: Meeting 1 → Level 1 → Level 2 → Meeting 2 → Level 3 → Meeting 3.
+          Meeting 1 unlocks Level 1; Level 1 (both areas) unlocks Level 2; Level 2 unlocks
+          Meeting 2; Meeting 2 unlocks Level 3; Level 3 unlocks Meeting 3.
           Your mentor sends the Meet, Teams, or Zoom link; you join from here or the email.
         </p>
       </div>

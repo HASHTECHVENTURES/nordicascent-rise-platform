@@ -377,12 +377,12 @@ export function getMeetingLockedReason(
   if (meetingNumber === 2) {
     if (!isCompleted(1)) return "Complete Meeting 1 first";
     if (!gate.level2BothSubmitted) {
-      return "Unlocks after Readiness Level 2 (technical and cultural). Completing it unlocks Level 3";
+      return "Unlocks after Level 2 (both cultural and technical)";
     }
   } else if (meetingNumber === 3) {
     if (!isCompleted(2)) return "Complete Meeting 2 first";
     if (!gate.level3BothSubmitted) {
-      return "Unlocks after Readiness Level 3 (technical and cultural)";
+      return "Unlocks after Level 3 (both cultural and technical)";
     }
   } else if (meetingNumber > 1) {
     const prev = byNum.get(meetingNumber - 1);

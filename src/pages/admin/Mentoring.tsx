@@ -69,7 +69,9 @@ export default function AdminMentoring({ embedded = false }: { embedded?: boolea
           <ul className="list-disc pl-5 space-y-1">
             <li>
               <strong>Meetings 1–3 (Readiness):</strong> Meeting 1 → Level 1 → Level 2 →
-              Meeting 2 → Level 3 → Meeting 3
+              Meeting 2 → Level 3 → Meeting 3. Meeting 1 unlocks Level 1; Level 1 (both areas)
+              unlocks Level 2 (no extra meeting); Level 2 unlocks Meeting 2; Meeting 2 unlocks
+              Level 3; Level 3 unlocks Meeting 3.
             </li>
             <li>
               <strong>Meetings 4–6 (Activation, Entry only):</strong> Weeks 1–2, 3–5, end of
