@@ -65,26 +65,36 @@ function MeetingStepRow({
   return (
     <div
       className={cn(
-        "flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4",
-        available && !done && "border-primary/40 bg-primary/5",
-        done && "border-success/30 bg-success/5"
+        "flex flex-wrap items-center justify-between gap-3 rounded-lg border-2 p-4",
+        done && "border-emerald-500/40 bg-emerald-50 dark:bg-emerald-950/30",
+        available && !done && "border-nordic-orange bg-nordic-orange/15 shadow-sm",
+        !available && !done && "border-nordic-orange/40 bg-nordic-orange/10"
       )}
     >
       <div className="space-y-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <CalendarCheck className="h-4 w-4 text-primary shrink-0" />
-          <p className="font-medium text-sm">Mentor Meeting {meetingNumber}</p>
+          <div
+            className={cn(
+              "flex h-8 w-8 shrink-0 items-center justify-center rounded-md",
+              done && "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400",
+              available && !done && "bg-nordic-orange text-white",
+              !available && !done && "bg-nordic-orange/20 text-nordic-orange"
+            )}
+          >
+            <CalendarCheck className="h-4 w-4" />
+          </div>
+          <p className="font-medium text-sm text-foreground">Mentor Meeting {meetingNumber}</p>
           {done ? (
-            <Badge className="bg-success text-success-foreground gap-1">
+            <Badge className="bg-emerald-600 text-white hover:bg-emerald-600 gap-1">
               <CheckCircle2 className="h-3 w-3" />
               Completed
             </Badge>
           ) : available ? (
-            <Badge variant="outline" className="text-xs border-primary text-primary">
+            <Badge className="bg-nordic-orange text-white hover:bg-nordic-orange text-xs">
               Your next step
             </Badge>
           ) : (
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant="outline" className="text-xs border-nordic-orange/50 text-nordic-orange">
               Locked
             </Badge>
           )}
@@ -107,31 +117,39 @@ function MeetingStepRow({
       </div>
       <div className="flex flex-wrap gap-2 justify-end">
         {done ? (
-          <Button size="sm" variant="outline" asChild>
+          <Button size="sm" variant="outline" className="border-emerald-500/40" asChild>
             <Link to={`/candidate/mentoring?meeting=${meetingNumber}`}>View Mentoring</Link>
           </Button>
         ) : available && meeting?.meeting_url ? (
           <>
-            <Button size="sm" className="gap-1" asChild>
+            <Button
+              size="sm"
+              className="gap-1 bg-nordic-orange hover:bg-nordic-orange/90 text-white"
+              asChild
+            >
               <a href={meeting.meeting_url} target="_blank" rel="noopener noreferrer">
                 <Video className="h-4 w-4" />
                 {meetingJoinLabel(meeting.meeting_url)}
                 <ExternalLink className="h-3 w-3 opacity-70" />
               </a>
             </Button>
-            <Button size="sm" variant="outline" asChild>
+            <Button size="sm" variant="outline" className="border-nordic-orange/40" asChild>
               <Link to={`/candidate/mentoring?meeting=${meetingNumber}`}>Details</Link>
             </Button>
           </>
         ) : available ? (
-          <Button size="sm" className="gap-1" asChild>
+          <Button
+            size="sm"
+            className="gap-1 bg-nordic-orange hover:bg-nordic-orange/90 text-white"
+            asChild
+          >
             <Link to={`/candidate/mentoring?meeting=${meetingNumber}`}>
               Open Mentoring
               <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
         ) : (
-          <Button size="sm" variant="outline" disabled className="gap-1">
+          <Button size="sm" variant="outline" disabled className="gap-1 border-nordic-orange/30">
             <Lock className="h-4 w-4" />
             Locked
           </Button>
