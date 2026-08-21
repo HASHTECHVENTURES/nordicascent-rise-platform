@@ -79,9 +79,11 @@ export default function SelectionStageContent({ embedded = false }: { embedded?:
 
       {embedded && (
         <div>
-          <h2 className="text-lg font-medium text-foreground">After acceptance</h2>
+          <h2 className="text-lg font-medium text-foreground">Selection progress</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Employer match complete — continue your journey from here.
+            {selectionComplete
+              ? "Selection is complete — continue to Readiness."
+              : "Company accept is only the first step. Readiness unlocks after Selection assessments and mentor assignment."}
           </p>
         </div>
       )}

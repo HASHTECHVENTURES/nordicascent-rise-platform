@@ -13,6 +13,8 @@ export type ApplicationRow = {
   job_id: string;
   status: string;
   selection_step?: number | null;
+  assigned_mentor_id?: string | null;
+  readiness_unlocked_at?: string | null;
   applied_at: string;
   interview_meet_url?: string | null;
   interview_scheduled_at?: string | null;
@@ -93,7 +95,7 @@ export function applicationStatusLabel(status: string) {
     case "offer":
       return "Offer in progress";
     case "accepted":
-      return "Accepted — journey started";
+      return "Accepted — Selection in progress";
     case "rejected":
       return "Not selected";
     default:
@@ -140,7 +142,7 @@ export function applicationStatusNextStep(status: string, selectionStep?: number
     case "offer":
       return "Offer discussions may be in progress. Watch for updates here and in Messages.";
     case "accepted":
-      return "Congratulations! Continue your journey in My Journey → Selection.";
+      return "The company accepted you. Nordic Ascent and the company continue Selection (eligibility, Offee, sessions, board). Readiness opens after a mentor is assigned — no action needed from you yet.";
     case "rejected":
       return "This job role was not a match. Browse Job Roles to apply elsewhere.";
     default:
@@ -231,24 +233,36 @@ export type SelectionStep = {
 /** Selection steps driven by job application status — not profile fields. */
 export function getSelectionStepState(applications: ApplicationRow[]): SelectionStep[] {
   const primary = getPrimaryApplication(applications);
-  const accepted = hasUnlockedPipeline(applications);
   const status = primary?.status ?? "";
   const job = primary ? getApplicationJob(primary) : null;
   const company = job?.companies?.name ?? "the employer";
 
-  const matchedDone = accepted || status === "accepted";
-  const screeningDone = ["reviewing", "interview", "offer", "accepted"].includes(status);
+  const companyAccepted =
+    status === "accepted" ||
+    isSelectionPipelineStatus(status) ||
+    isPostSelectionJourneyStatus(status);
+  const screeningDone =
+    ["reviewing", "interview", "offer", "accepted"].includes(status) ||
+    isSelectionPipelineStatus(status) ||
+    isPostSelectionJourneyStatus(status);
+  const boardDone =
+    status === "selected_for_readiness" || isPostSelectionJourneyStatus(status);
+  const readinessOpen = Boolean(
+    primary?.assigned_mentor_id && primary?.readiness_unlocked_at
+  );
 
   return [
     {
       id: "matching",
       taskKey: "employer matching",
       title: "Matched with an employer",
-      description: matchedDone
+      description: companyAccepted
         ? `You were accepted for ${job?.title ?? "a job role"} at ${company}.`
         : "Apply to a job role and wait for an employer to accept you.",
-      done: matchedDone,
-      hint: matchedDone ? undefined : "Browse open roles below, apply, then track status in Your applications.",
+      done: companyAccepted,
+      hint: companyAccepted
+        ? undefined
+        : "Browse open roles below, apply, then track status in Your applications.",
     },
     {
       id: "screening",
@@ -261,6 +275,32 @@ export function getSelectionStepState(applications: ApplicationRow[]): Selection
       hint: screeningDone
         ? undefined
         : "Status updates when the employer clicks Review, Interview, or Accept.",
+    },
+    {
+      id: "assessments",
+      taskKey: "selection assessments",
+      title: "Selection assessments",
+      description: boardDone
+        ? "Eligibility, Offee, sessions, and selection board are complete."
+        : "Nordic Ascent and the company complete eligibility, Offee, technical and motivation sessions, then the selection board.",
+      done: boardDone || readinessOpen,
+      hint:
+        boardDone || readinessOpen
+          ? undefined
+          : "No action needed from you yet — updates appear in Your applications.",
+    },
+    {
+      id: "mentor",
+      taskKey: "mentor assigned",
+      title: "Mentor assigned",
+      description: readinessOpen
+        ? "Your mentor is assigned. Readiness is open."
+        : "After Selection, the company assigns a mentor. Then Readiness unlocks.",
+      done: readinessOpen,
+      hint:
+        boardDone && !readinessOpen
+          ? "Waiting for mentor assignment from the company."
+          : undefined,
     },
   ];
 }

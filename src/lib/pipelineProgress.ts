@@ -162,11 +162,16 @@ export async function completeStageIfTasksDone(
   return true;
 }
 
-/** Selection is driven by application status — advance when employer steps are complete. */
+/** Selection completes only when Readiness is unlocked (mentor assigned). */
 export async function completeSelectionIfReady(
   candidateId: string,
   applications: ApplicationRow[]
 ): Promise<boolean> {
+  const readinessOpen = applications.some(
+    (a) => Boolean(a.assigned_mentor_id) && Boolean(a.readiness_unlocked_at)
+  );
+  if (!readinessOpen) return false;
+
   const steps = getSelectionStepState(applications);
   if (!steps.length || !steps.every((s) => s.done)) return false;
 
@@ -186,10 +191,10 @@ export async function completeSelectionIfReady(
 async function ensureSelectionCompleteIfAccepted(candidateId: string) {
   const { data: apps } = await supabase
     .from("applications")
-    .select("status")
+    .select("status, assigned_mentor_id, readiness_unlocked_at")
     .eq("candidate_id", candidateId);
-  const accepted = apps?.some((a) => a.status === "accepted");
-  if (!accepted) return;
+  const ready = apps?.some((a) => a.assigned_mentor_id && a.readiness_unlocked_at);
+  if (!ready) return;
 
   const { data: selRow } = await supabase
     .from("candidate_stage_progress")
