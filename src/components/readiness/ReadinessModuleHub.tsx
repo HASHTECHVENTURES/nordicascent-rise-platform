@@ -65,10 +65,9 @@ function MeetingStepRow({
   return (
     <div
       className={cn(
-        "flex flex-wrap items-center justify-between gap-3 rounded-lg border-2 p-4",
-        done && "border-emerald-500/40 bg-emerald-50 dark:bg-emerald-950/30",
-        available && !done && "border-nordic-orange bg-nordic-orange/15 shadow-sm",
-        !available && !done && "border-nordic-orange/40 bg-nordic-orange/10"
+        "flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4",
+        done && "border-emerald-500/40 bg-emerald-50",
+        !done && "border-[#CED4DA] bg-[#EBEDEF]"
       )}
     >
       <div className="space-y-1 min-w-0">
@@ -76,36 +75,34 @@ function MeetingStepRow({
           <div
             className={cn(
               "flex h-8 w-8 shrink-0 items-center justify-center rounded-md",
-              done && "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400",
-              available && !done && "bg-nordic-orange text-white",
-              !available && !done && "bg-nordic-orange/20 text-nordic-orange"
+              done ? "bg-emerald-500/15 text-emerald-700" : "bg-[#102A4C]/10 text-[#102A4C]"
             )}
           >
             <CalendarCheck className="h-4 w-4" />
           </div>
-          <p className="font-medium text-sm text-foreground">Mentor Meeting {meetingNumber}</p>
+          <p className="font-medium text-sm text-[#102A4C]">Mentor Meeting {meetingNumber}</p>
           {done ? (
             <Badge className="bg-emerald-600 text-white hover:bg-emerald-600 gap-1">
               <CheckCircle2 className="h-3 w-3" />
               Completed
             </Badge>
           ) : available ? (
-            <Badge className="bg-nordic-orange text-white hover:bg-nordic-orange text-xs">
+            <Badge className="bg-[#102A4C] text-white hover:bg-[#102A4C] text-xs">
               Your next step
             </Badge>
           ) : (
-            <Badge variant="outline" className="text-xs border-nordic-orange/50 text-nordic-orange">
+            <Badge variant="outline" className="text-xs border-[#CED4DA] text-[#102A4C]">
               Locked
             </Badge>
           )}
         </div>
-        <p className="text-xs text-muted-foreground">{title}</p>
+        <p className="text-xs text-[#102A4C]/75">{title}</p>
         {available && meeting?.scheduled_at && (
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-[#102A4C]/75">
             Scheduled {new Date(meeting.scheduled_at).toLocaleString()}
           </p>
         )}
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-[#102A4C]/75">
           {done
             ? `Done — unlocked ${unlocksLabel}.`
             : available && meeting?.meeting_url
@@ -124,7 +121,7 @@ function MeetingStepRow({
           <>
             <Button
               size="sm"
-              className="gap-1 bg-nordic-orange hover:bg-nordic-orange/90 text-white"
+              className="gap-1 bg-[#102A4C] hover:bg-[#102A4C]/90 text-white"
               asChild
             >
               <a href={meeting.meeting_url} target="_blank" rel="noopener noreferrer">
@@ -133,14 +130,14 @@ function MeetingStepRow({
                 <ExternalLink className="h-3 w-3 opacity-70" />
               </a>
             </Button>
-            <Button size="sm" variant="outline" className="border-nordic-orange/40" asChild>
+            <Button size="sm" variant="outline" className="border-[#CED4DA] text-[#102A4C]" asChild>
               <Link to={`/candidate/mentoring?meeting=${meetingNumber}`}>Details</Link>
             </Button>
           </>
         ) : available ? (
           <Button
             size="sm"
-            className="gap-1 bg-nordic-orange hover:bg-nordic-orange/90 text-white"
+            className="gap-1 bg-[#102A4C] hover:bg-[#102A4C]/90 text-white"
             asChild
           >
             <Link to={`/candidate/mentoring?meeting=${meetingNumber}`}>
@@ -149,7 +146,7 @@ function MeetingStepRow({
             </Link>
           </Button>
         ) : (
-          <Button size="sm" variant="outline" disabled className="gap-1 border-nordic-orange/30">
+          <Button size="sm" variant="outline" disabled className="gap-1 border-[#CED4DA] text-[#102A4C]/60">
             <Lock className="h-4 w-4" />
             Locked
           </Button>
