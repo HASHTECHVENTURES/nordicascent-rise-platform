@@ -23,6 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { PortalUserMenu, PortalUserSidebar } from "@/components/PortalUserMenu";
+import PortalFooter from "@/components/PortalFooter";
 import { useMyCompany, useNotifications, useMarkAllNotificationsRead, useUnreadMessageCount } from "@/hooks/useData";
 import { useEmployerOnboardingRedirect } from "@/hooks/useEmployerOnboarding";
 
@@ -232,6 +233,7 @@ const EmployerLayout = () => {
         <main className="p-6">
           <Outlet />
         </main>
+        <PortalFooter />
       </div>
     </div>
   );

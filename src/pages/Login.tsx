@@ -279,6 +279,15 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
           <a href="#" className="hover:text-primary-foreground">Privacy</a>
           <span>•</span>
           <a href="#" className="hover:text-primary-foreground">Terms</a>
+          <span>•</span>
+          <a
+            href="https://www.linkedin.com/company/nordic-ascent/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-primary-foreground"
+          >
+            LinkedIn
+          </a>
         </div>
       </div>
 

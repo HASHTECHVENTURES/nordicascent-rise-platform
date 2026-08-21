@@ -17,6 +17,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import JourneyProgress from "@/components/candidate/JourneyProgress";
 import { PortalUserMenu, PortalUserSidebar } from "@/components/PortalUserMenu";
+import PortalFooter from "@/components/PortalFooter";
 import { TRACK_META, useTrack } from "@/lib/track";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNotifications, useMarkAllNotificationsRead, useUnreadMessageCount } from "@/hooks/useData";
@@ -230,6 +231,7 @@ const CandidateLayout = () => {
         <main className="p-6">
           <Outlet />
         </main>
+        <PortalFooter />
       </div>
     </div>
   );

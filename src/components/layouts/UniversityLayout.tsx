@@ -5,6 +5,7 @@ import { LayoutDashboard, GraduationCap, ChevronLeft, ChevronRight, LogOut } fro
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyUniversityStaff } from "@/hooks/useUniversityPortal";
+import PortalFooter from "@/components/PortalFooter";
 
 const navigation = [
   { name: "Dashboard", href: "/university/dashboard", icon: LayoutDashboard },
@@ -116,6 +117,7 @@ export default function UniversityLayout() {
         <main className="p-6">
           <Outlet />
         </main>
+        <PortalFooter />
       </div>
     </div>
   );

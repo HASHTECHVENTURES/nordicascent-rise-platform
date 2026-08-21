@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { LayoutDashboard, UsersRound, ChevronLeft, ChevronRight, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import PortalFooter from "@/components/PortalFooter";
 
 const navigation = [
   { name: "Dashboard", href: "/mentor/dashboard", icon: LayoutDashboard },
@@ -111,6 +112,7 @@ export default function MentorLayout() {
         <main className="p-6">
           <Outlet />
         </main>
+        <PortalFooter />
       </div>
     </div>
   );

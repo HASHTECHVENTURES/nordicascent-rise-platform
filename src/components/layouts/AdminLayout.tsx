@@ -29,6 +29,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PortalUserMenu, PortalUserSidebar } from "@/components/PortalUserMenu";
+import PortalFooter from "@/components/PortalFooter";
 import AdminJourneyProgress from "@/components/admin/AdminJourneyProgress";
 import { useAdminCandidates, useAdminEmployers, useNotifications, useUnreadMessageCount } from "@/hooks/useData";
 
@@ -267,6 +268,7 @@ const AdminLayout = () => {
         <main className="p-6">
           <Outlet />
         </main>
+        <PortalFooter />
       </div>
     </div>
   );

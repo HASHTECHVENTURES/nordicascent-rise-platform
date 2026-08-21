@@ -189,7 +189,12 @@ export function PublicLayout() {
               © 2026 Nordic Ascent. All rights reserved.
             </p>
             <div className="flex gap-6">
-              <a href="#" className="text-primary-foreground/70 hover:text-primary-foreground">
+              <a
+                href="https://www.linkedin.com/company/nordic-ascent/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary-foreground/70 hover:text-primary-foreground"
+              >
                 LinkedIn
               </a>
             </div>
