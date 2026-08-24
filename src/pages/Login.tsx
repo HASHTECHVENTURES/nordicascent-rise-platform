@@ -270,7 +270,7 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
           <p className="text-lg xl:text-xl text-primary-foreground/80 text-balance">
             {selectedRole
               ? roleConfig[selectedRole].description
-              : "Validated before arrival. Supported for six months after. Not placement — integration."}
+              : "Validated before arrival. Supported for six months after. Not placement - integration."}
           </p>
         </div>
         <div className="flex items-center gap-4 text-primary-foreground/60 text-sm">

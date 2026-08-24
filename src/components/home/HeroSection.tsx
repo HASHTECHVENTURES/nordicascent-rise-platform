@@ -16,7 +16,7 @@ export default function HeroSection() {
           </h1>
           <p className="text-lg lg:text-xl text-muted-foreground mb-4 max-w-2xl mx-auto leading-relaxed">
             <span className="inline-block border-l-[3px] border-warning/70 pl-4 text-left sm:border-l-0 sm:pl-0 sm:text-center">
-              Validated before arrival. Supported for six months after. Not placement — integration.
+              Validated before arrival. Supported for six months after. Not placement - integration.
             </span>
           </p>
           <p className="text-sm text-muted-foreground/90 mb-12 max-w-xl mx-auto">
