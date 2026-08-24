@@ -301,7 +301,7 @@ export default function PreInternshipGatePanel({
                       description: creditBlocks
                         ? "Accepted. Checkpoints unlock after academic approval."
                         : record.internship_start_date
-                          ? "Checkpoint #1 can unlock once the gate is complete."
+                          ? "Checkpoint #0 can unlock once the gate is complete."
                           : "Accepted. Checkpoints unlock after Nordic Ascent sets your start date.",
                     });
                   } catch (err) {

@@ -230,12 +230,20 @@ export const ACTIVATION_STATUS_LABELS: Record<ActivationStatus, string> = {
 
 export const INTERNSHIP_CHECKPOINT_DEFS = [
   {
+    checkpoint_number: 0,
+    phase: "onboarding" as const,
+    title: "Assignment defined and access granted",
+    who_confirms: "company" as const,
+    auto_source: null,
+    hint: "Pre-start / Week 1: confirm role assignment, systems access, and that the candidate can begin.",
+  },
+  {
     checkpoint_number: 1,
     phase: "onboarding" as const,
     title: "Kick-off meeting held",
     who_confirms: "company" as const,
     auto_source: null,
-    hint: "Confirm the internship kick-off meeting (channels, access, and first tasks).",
+    hint: "Confirm the internship kick-off meeting (channels, expectations, and first tasks).",
   },
   {
     checkpoint_number: 2,
@@ -243,7 +251,7 @@ export const INTERNSHIP_CHECKPOINT_DEFS = [
     title: "Follow-up meeting (Meeting 4)",
     who_confirms: "system" as const,
     auto_source: "mentor_meeting_4" as const,
-    hint: "Auto-completed when Mentor Meeting 4 (early experience / follow-up) is done.",
+    hint: "Auto-completed when Mentor Meeting 4 (follow-up / early experience) is done.",
   },
   {
     checkpoint_number: 3,
@@ -294,13 +302,26 @@ const MENTOR_MEETING_FOR_CHECKPOINT: Record<number, number> = {
   7: 6,
 };
 
+export const INTERNSHIP_CHECKPOINT_TOTAL = INTERNSHIP_CHECKPOINT_DEFS.length;
+
 export function allInternshipCheckpointsComplete(checkpoints: InternshipCheckpoint[]) {
-  return checkpoints.length === 7 && checkpoints.every((c) => c.status === "completed");
+  return (
+    checkpoints.length >= INTERNSHIP_CHECKPOINT_TOTAL &&
+    INTERNSHIP_CHECKPOINT_DEFS.every((d) =>
+      checkpoints.some((c) => c.checkpoint_number === d.checkpoint_number && c.status === "completed")
+    )
+  );
 }
 
 export function internshipCheckpointProgress(checkpoints: InternshipCheckpoint[]) {
-  const done = checkpoints.filter((c) => c.status === "completed").length;
-  return { done, total: 7, percent: Math.round((done / 7) * 100) };
+  const done = INTERNSHIP_CHECKPOINT_DEFS.filter((d) =>
+    checkpoints.some((c) => c.checkpoint_number === d.checkpoint_number && c.status === "completed")
+  ).length;
+  return {
+    done,
+    total: INTERNSHIP_CHECKPOINT_TOTAL,
+    percent: Math.round((done / INTERNSHIP_CHECKPOINT_TOTAL) * 100),
+  };
 }
 
 /** Company checkpoint available longer than this many days → admin overdue flag. */
@@ -337,7 +358,7 @@ export async function initializeActivationForApplication(
     title: d.title,
     who_confirms: d.who_confirms,
     auto_source: d.auto_source,
-    // Always start locked — refresh_internship_checkpoint_unlocks opens CP1 after the gate
+    // Always start locked — refresh_internship_checkpoint_unlocks opens CP0 after the gate
     status: "locked",
   }));
 
@@ -394,7 +415,7 @@ export function getCheckpointLockedReason(
 ): string | null {
   if (checkpoint.status !== "locked") return null;
   if (
-    checkpoint.checkpoint_number === 1 &&
+    checkpoint.checkpoint_number === 0 &&
     activationRecord &&
     !isPreInternshipGateComplete(activationRecord)
   ) {
@@ -405,7 +426,7 @@ export function getCheckpointLockedReason(
       return "Complete Step 2 above: click “Accept internship” — acknowledging alone does not unlock checkpoints";
     }
     if (activationRecord.university_credit_required && !activationRecord.academic_unlocked_at) {
-      return "Academic approval is still required before checkpoint #1 unlocks";
+      return "Academic approval is still required before checkpoint #0 unlocks";
     }
     return "Complete the pre-internship gate above first";
   }

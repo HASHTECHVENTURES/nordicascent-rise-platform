@@ -18,6 +18,7 @@ import {
 import {
   ACTIVATION_STATUS_LABELS,
   INTERNSHIP_CHECKPOINT_DEFS,
+  INTERNSHIP_CHECKPOINT_TOTAL,
   getCheckpointLockedReason,
   internshipCheckpointProgress,
   isPreInternshipGateComplete,
@@ -56,7 +57,7 @@ export default function InternshipCheckpointsPanel({
   const list = checkpoints ?? [];
   const progress = internshipCheckpointProgress(list);
   const gateComplete = isPreInternshipGateComplete(record);
-  const cp1 = list.find((c) => c.checkpoint_number === 1);
+  const cp0 = list.find((c) => c.checkpoint_number === 0);
 
   useEffect(() => {
     if (!applicationId || cpLoading) return;
@@ -71,14 +72,14 @@ export default function InternshipCheckpointsPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [applicationId, list.length]);
 
-  // Self-heal: gate done but CP1 still locked → force unlock refresh
+  // Self-heal: gate done but CP0 still locked → force unlock refresh
   useEffect(() => {
-    if (!applicationId || !gateComplete || !cp1) return;
-    if (cp1.status === "locked" && !syncCheckpoints.isPending) {
+    if (!applicationId || !gateComplete || !cp0) return;
+    if (cp0.status === "locked" && !syncCheckpoints.isPending) {
       syncCheckpoints.mutate();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [applicationId, gateComplete, cp1?.status]);
+  }, [applicationId, gateComplete, cp0?.status]);
 
   if (recordLoading || cpLoading || ensureInit.isPending) {
     return (
@@ -94,10 +95,12 @@ export default function InternshipCheckpointsPanel({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
         <div>
-          <h3 className="text-base font-medium">Internship checkpoints (7)</h3>
+          <h3 className="text-base font-medium">
+            Internship checkpoints ({INTERNSHIP_CHECKPOINT_TOTAL})
+          </h3>
           <p className="text-sm text-muted-foreground">
-            Entry track — all 7 must be complete before Final Clearance unlocks. Meetings 4–6
-            auto-complete from Module 3B.
+            Entry track — all {INTERNSHIP_CHECKPOINT_TOTAL} must be complete before Final Clearance
+            unlocks. Meetings 4–6 auto-complete from Module 3B.
           </p>
         </div>
         {showStatus && record && (
@@ -108,11 +111,11 @@ export default function InternshipCheckpointsPanel({
         </Badge>
       </div>
 
-      {gateComplete && cp1?.status === "available" && (
+      {gateComplete && cp0?.status === "available" && (
         <p className="text-sm rounded-lg border border-success/30 bg-success/5 px-3 py-2 text-foreground">
-          Pre-internship gate complete — checkpoint #1 is unlocked
+          Pre-internship gate complete — checkpoint #0 is unlocked
           {canEdit
-            ? ". Confirm it below to continue the sequence."
+            ? ". Confirm assignment and access below to continue."
             : ". Your company confirms company checkpoints; mentor meetings auto-complete theirs."}
         </p>
       )}
@@ -120,7 +123,7 @@ export default function InternshipCheckpointsPanel({
       {!gateComplete && (
         <p className="text-sm rounded-lg border px-3 py-2 text-muted-foreground">
           Complete the pre-internship gate above (acknowledge presentation + accept internship)
-          to unlock checkpoint #1.
+          to unlock checkpoint #0.
         </p>
       )}
 
@@ -215,15 +218,19 @@ export default function InternshipCheckpointsPanel({
                     {!done && !locked && cp.who_confirms === "company" && canEdit && !isEval && (
                       <CheckpointConfirm
                         notesLabel={
-                          cp.checkpoint_number === 1
-                            ? "What is the candidate working on?"
-                            : "Notes"
+                          cp.checkpoint_number === 0
+                            ? "Assignment / access details"
+                            : cp.checkpoint_number === 1
+                              ? "Kick-off notes — what was covered?"
+                              : "Notes"
                         }
-                        notesRequired={cp.checkpoint_number === 1}
+                        notesRequired={cp.checkpoint_number === 0 || cp.checkpoint_number === 1}
                         notesPlaceholder={
-                          cp.checkpoint_number === 3
-                            ? "On track? Any adjustments?"
-                            : undefined
+                          cp.checkpoint_number === 0
+                            ? "Role assignment, systems access granted…"
+                            : cp.checkpoint_number === 3
+                              ? "On track? Any adjustments?"
+                              : undefined
                         }
                         isPending={confirmCheckpoint.isPending}
                         onConfirm={async (data) => {
