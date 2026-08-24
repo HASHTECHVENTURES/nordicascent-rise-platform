@@ -219,6 +219,14 @@ export function useSaveMeetingSchedule() {
             text: mail.text,
           });
         }
+
+        const { notifyMentorSessionScheduled } = await import("@/lib/applicationEffects");
+        await notifyMentorSessionScheduled({
+          applicationId,
+          meetingNumber: meetingNumber ?? 0,
+          scheduledAt: scheduled_at,
+          meetingUrl: meeting_url,
+        });
       }
     },
     onSuccess: (_, vars) => {

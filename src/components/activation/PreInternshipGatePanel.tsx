@@ -52,7 +52,6 @@ export default function PreInternshipGatePanel({
   const { data: cms } = useActivationCms();
   const acceptSectionRef = useRef<HTMLDivElement>(null);
   const [highlightAccept, setHighlightAccept] = useState(false);
-  const [startDate, setStartDateLocal] = useState("");
   const [adminStartDate, setAdminStartDate] = useState("");
 
   const presentationText = normalizeActivationCmsText(
@@ -70,7 +69,6 @@ export default function PreInternshipGatePanel({
 
   useEffect(() => {
     if (record?.internship_start_date) {
-      setStartDateLocal(record.internship_start_date);
       setAdminStartDate(record.internship_start_date);
     }
   }, [record?.internship_start_date]);
@@ -219,7 +217,8 @@ export default function PreInternshipGatePanel({
           </div>
           <p className="text-xs text-muted-foreground">
             This is the step that unlocks internship checkpoints. Acknowledging the presentation alone
-            is not enough. Set a start date so mentor meetings 4–6 unlock on the correct week schedule.
+            is not enough. Nordic Ascent or your company sets the internship start date so mentor
+            meetings 4–6 unlock on the correct week schedule.
           </p>
           {accepted ? (
             <div className="space-y-3">
@@ -228,7 +227,7 @@ export default function PreInternshipGatePanel({
                 Accepted {new Date(record.candidate_accepted_at!).toLocaleDateString()}
                 {record.internship_start_date
                   ? ` · Start ${record.internship_start_date}`
-                  : " · Start date missing"}
+                  : " · Start date pending (set by Nordic Ascent / company)"}
               </p>
               {canEditStartDate && (
                 <div className="flex flex-wrap items-end gap-2">
@@ -274,32 +273,25 @@ export default function PreInternshipGatePanel({
             </div>
           ) : canCandidate ? (
             <div className="space-y-3">
-              <div className="space-y-1.5 max-w-xs">
-                <Label htmlFor="internship-start-date">Internship start date</Label>
-                <Input
-                  id="internship-start-date"
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDateLocal(e.target.value)}
-                  required
-                />
-              </div>
+              {!record.internship_start_date && (
+                <p className="text-xs text-muted-foreground">
+                  Your internship start date is set by Nordic Ascent or the company — you do not need
+                  to enter it here.
+                </p>
+              )}
+              {record.internship_start_date && (
+                <p className="text-xs text-muted-foreground">
+                  Planned start: <span className="font-medium">{record.internship_start_date}</span>
+                </p>
+              )}
               <Button
                 size="sm"
-                disabled={accept.isPending || !acknowledged || !startDate}
+                disabled={accept.isPending || !acknowledged}
                 onClick={async () => {
-                  if (!startDate) {
-                    toast({
-                      title: "Start date required",
-                      description: "Choose when your internship begins.",
-                      variant: "destructive",
-                    });
-                    return;
-                  }
                   try {
                     await accept.mutateAsync({
                       applicationId,
-                      internship_start_date: startDate,
+                      internship_start_date: null,
                     });
                     setHighlightAccept(false);
                     const creditBlocks =
@@ -307,8 +299,10 @@ export default function PreInternshipGatePanel({
                     toast({
                       title: "Internship accepted",
                       description: creditBlocks
-                        ? "Accepted. Checkpoints unlock after academic approval (step 1)."
-                        : "Checkpoint #1 is now unlocked.",
+                        ? "Accepted. Checkpoints unlock after academic approval."
+                        : record.internship_start_date
+                          ? "Checkpoint #1 can unlock once the gate is complete."
+                          : "Accepted. Checkpoints unlock after Nordic Ascent sets your start date.",
                     });
                   } catch (err) {
                     toast({
@@ -329,9 +323,6 @@ export default function PreInternshipGatePanel({
                 <p className="text-xs text-muted-foreground">
                   Complete Step 1 first — click “I have read this” above.
                 </p>
-              )}
-              {acknowledged && !startDate && (
-                <p className="text-xs text-muted-foreground">Choose a start date to accept.</p>
               )}
             </div>
           ) : (

@@ -99,7 +99,16 @@ export default function MentorProgramPanel({
   useEffect(() => {
     if (!applicationId || !track) return;
     refreshMeetingUnlocks(applicationId, track).then(() => refetch());
-  }, [applicationId, track, gate.level1BothSubmitted, gate.level2BothSubmitted, gate.level3BothSubmitted, refetch]);
+  }, [
+    applicationId,
+    track,
+    gate.level1BothSubmitted,
+    gate.level2BothSubmitted,
+    gate.level3BothSubmitted,
+    activationGate.activationUnlocked,
+    activationGate.internshipStartDate,
+    refetch,
+  ]);
 
   useEffect(() => {
     if (!signalNote) return;
@@ -254,17 +263,38 @@ export default function MentorProgramPanel({
                   onChange={(e) => setScheduleAt(e.target.value)}
                 />
               </div>
-              <div className="space-y-1">
+              <div className="space-y-1 sm:col-span-2">
                 <Label>Meeting link</Label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="gap-1"
+                    onClick={() => {
+                      window.open("https://meet.google.com/new", "_blank", "noopener,noreferrer");
+                      toast({
+                        title: "Google Meet opened",
+                        description:
+                          "Copy the new meeting link from the browser tab and paste it below.",
+                      });
+                    }}
+                  >
+                    Create Google Meet
+                  </Button>
+                  <span className="text-[11px] text-muted-foreground self-center">
+                    or paste a Teams / Zoom link
+                  </span>
+                </div>
                 <Input
                   type="url"
-                  placeholder="Google Meet, Teams, or Zoom URL"
+                  placeholder="Paste Google Meet, Teams, or Zoom URL"
                   value={meetingUrl}
                   onChange={(e) => setMeetingUrl(e.target.value)}
                 />
                 <p className="text-[11px] text-muted-foreground">
-                  Paste a Google Meet, Microsoft Teams, or Zoom join link. The student sees it in
-                  Mentoring and in the invite email.
+                  Prefer Google Meet: create one above, then paste the link. Teams and Zoom work the
+                  same way — paste their join URL.
                 </p>
               </div>
             </div>

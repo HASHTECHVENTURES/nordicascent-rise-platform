@@ -533,6 +533,20 @@ export function useSaveReadinessEvaluation() {
         if (app?.id) {
           await initializeActivationForApplication(app.id);
         }
+
+        const { data: candProfile } = await supabase
+          .from("candidates")
+          .select("full_name, profile_id")
+          .eq("id", candidateId)
+          .maybeSingle();
+        if (candProfile?.profile_id) {
+          const { notifyReadinessApprovedForActivation } = await import("@/lib/applicationEffects");
+          await notifyReadinessApprovedForActivation({
+            candidateProfileId: candProfile.profile_id,
+            candidateName: candProfile.full_name ?? "Candidate",
+            candidateId,
+          });
+        }
       }
     },
     onSuccess: (_, vars) => {

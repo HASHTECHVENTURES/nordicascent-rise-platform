@@ -28,12 +28,8 @@ import {
 } from "@/data/readinessModuleSeed";
 import {
   useMyMentorProgramContext,
-  useReadinessMentorGateForApplication,
 } from "@/hooks/useMentorProgram";
 import {
-  EMPTY_READINESS_MENTOR_GATE,
-  getMeetingLockedReason,
-  mentorMeetingTitle,
   meetingJoinLabel,
   type MentorProgramMeeting,
 } from "@/lib/mentorProgram";
@@ -49,18 +45,13 @@ const AREAS = ["cultural_social", "technical"] as const;
 function MeetingStepRow({
   meetingNumber,
   meeting,
-  lockedReason,
-  unlocksLabel,
 }: {
   meetingNumber: 1 | 2 | 3;
   meeting: MentorProgramMeeting | undefined;
-  lockedReason: string | null;
-  unlocksLabel: string;
 }) {
   const status = meeting?.status ?? "locked";
   const done = status === "completed";
   const available = status === "available";
-  const title = mentorMeetingTitle(meetingNumber);
 
   return (
     <div
@@ -96,21 +87,11 @@ function MeetingStepRow({
             </Badge>
           )}
         </div>
-        <p className="text-xs text-[#102A4C]/75">{title}</p>
         {available && meeting?.scheduled_at && (
           <p className="text-xs text-[#102A4C]/75">
             Scheduled {new Date(meeting.scheduled_at).toLocaleString()}
           </p>
         )}
-        <p className="text-xs text-[#102A4C]/75">
-          {done
-            ? `Done — unlocked ${unlocksLabel}.`
-            : available && meeting?.meeting_url
-              ? "Your mentor shared a call link — join when it is time."
-              : available
-                ? `Open Mentoring for details. When your mentor marks this complete, ${unlocksLabel} unlock.`
-                : lockedReason ?? "Complete the previous step first."}
-        </p>
       </div>
       <div className="flex flex-wrap gap-2 justify-end">
         {done ? (
@@ -156,17 +137,10 @@ function MeetingStepRow({
   );
 }
 
-function unlocksForMeeting(n: 1 | 2 | 3) {
-  if (n === 1) return "Level 1";
-  if (n === 2) return "Level 3";
-  return "closing Readiness mentoring";
-}
-
 export default function ReadinessModuleHub({ compact = false, hideHeader = false }: Props) {
   const { data: tests, isLoading, isError, error } = useReadinessTests();
   const { data: attempts } = useMyReadinessAttempts();
-  const { meetings, meetingsLoading, applicationId } = useMyMentorProgramContext();
-  const { data: gate } = useReadinessMentorGateForApplication(applicationId);
+  const { meetings, meetingsLoading } = useMyMentorProgramContext();
 
   if (isLoading || meetingsLoading) {
     return (
@@ -209,7 +183,6 @@ export default function ReadinessModuleHub({ compact = false, hideHeader = false
     );
   }
 
-  const readinessGate = gate ?? EMPTY_READINESS_MENTOR_GATE;
   const meetingList = meetings ?? [];
 
   const getAttemptStatus = (testId: string) => {
@@ -220,17 +193,11 @@ export default function ReadinessModuleHub({ compact = false, hideHeader = false
 
   const renderMeeting = (meetingNumber: 1 | 2 | 3) => {
     const meeting = meetingList.find((m) => m.meeting_number === meetingNumber);
-    const lockedReason =
-      meeting?.status === "locked"
-        ? getMeetingLockedReason(meetingNumber, meetingList, readinessGate, false)
-        : null;
     return (
       <MeetingStepRow
         key={`meeting-${meetingNumber}`}
         meetingNumber={meetingNumber}
         meeting={meeting}
-        lockedReason={lockedReason}
-        unlocksLabel={unlocksForMeeting(meetingNumber)}
       />
     );
   };
@@ -272,7 +239,7 @@ export default function ReadinessModuleHub({ compact = false, hideHeader = false
               </Badge>
             ) : (
               <Badge variant="secondary" className="text-xs">
-                No time limit
+                Level 1 and 2
               </Badge>
             )}
             {done && <Badge className="bg-success text-success-foreground">Submitted</Badge>}

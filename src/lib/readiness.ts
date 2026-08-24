@@ -240,7 +240,7 @@ export const DEFAULT_READINESS_CMS: ReadinessCms = {
   timer_hard_note:
     "Level 3 tests have a fixed 60-minute time limit. The timer starts when you click Next and the test opens.",
   timer_soft_note:
-    "This level has no fixed time limit. Take the time you need to answer thoughtfully.",
+    "Level 1 and 2 have no fixed time limit. Take the time you need to answer thoughtfully.",
 };
 
 export async function fetchReadinessCms(): Promise<ReadinessCms> {

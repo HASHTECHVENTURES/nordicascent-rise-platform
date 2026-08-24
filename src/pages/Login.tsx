@@ -417,7 +417,8 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
                   </CardDescription>
                 ) : selectedRole === "mentor" ? (
                   <CardDescription>
-                    Use the invite credentials your company emailed you.
+                    Use the email and temporary password from your company invite. Sign in as Mentor,
+                    then open assigned candidates from your mentor dashboard.
                   </CardDescription>
                 ) : (
                   <Tabs value={authMode} onValueChange={(v) => setAuthMode(v as "signin" | "signup")} className="w-full">

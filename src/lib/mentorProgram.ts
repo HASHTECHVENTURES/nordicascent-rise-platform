@@ -68,7 +68,7 @@ export const MENTOR_MEETING_TITLES: Record<number, string> = {
   1: "Introduction and mindset",
   2: "Readiness reflection",
   3: "Final reflection",
-  4: "Early experience",
+  4: "Follow-up (early experience)",
   5: "Work reflection",
   6: "Final reflection",
 };
@@ -309,6 +309,8 @@ export function computeNextMeetingUnlocks(
     } else if (m.meeting_number === 3) {
       shouldBeAvailable = isCompleted(2) && gate.level3BothSubmitted;
     } else if (m.meeting_number === 4) {
+      // M4 waits for internship start (week ≥ 1). M5/M6 unlock sequentially
+      // after the previous meeting — week windows are guidance, not hard locks.
       shouldBeAvailable =
         track === "entry" &&
         isCompleted(3) &&
@@ -319,13 +321,13 @@ export function computeNextMeetingUnlocks(
         track === "entry" &&
         isCompleted(4) &&
         activationGate.activationUnlocked &&
-        isActivationMeetingWeekOpen(5, activationGate.internshipStartDate);
+        Boolean(activationGate.internshipStartDate);
     } else if (m.meeting_number === 6) {
       shouldBeAvailable =
         track === "entry" &&
         isCompleted(5) &&
         activationGate.activationUnlocked &&
-        isActivationMeetingWeekOpen(6, activationGate.internshipStartDate);
+        Boolean(activationGate.internshipStartDate);
     }
 
     if (m.meeting_number > 3 && track === "fast") {
@@ -364,9 +366,12 @@ export function getMeetingLockedReason(
     if (!activationGate.internshipStartDate) {
       return "Unlocks once the internship start date is confirmed";
     }
-    if (!isActivationMeetingWeekOpen(meetingNumber, activationGate.internshipStartDate)) {
-      const window = MENTOR_ACTIVATION_WEEK_WINDOWS[meetingNumber as 4 | 5 | 6];
-      return `Opens during ${window.label}`;
+    // Only Meeting 4 is hard-gated on internship week; M5/M6 follow Meeting 4/5.
+    if (
+      meetingNumber === 4 &&
+      !isActivationMeetingWeekOpen(4, activationGate.internshipStartDate)
+    ) {
+      return `Opens during ${MENTOR_ACTIVATION_WEEK_WINDOWS[4].label}`;
     }
   }
 

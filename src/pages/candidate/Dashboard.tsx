@@ -12,6 +12,8 @@ import {
   type StageProgressRow,
 } from "@/lib/candidateJourney";
 import { allTestsSubmitted } from "@/lib/readiness";
+import { isJobHuntProfileReady } from "@/lib/profileCompleteness";
+import { CANDIDATE_PROFILE_PATH } from "@/lib/candidateAccess";
 
 const CandidateDashboard = () => {
   const { profile, candidate } = useAuth();
@@ -20,6 +22,7 @@ const CandidateDashboard = () => {
   const { data: applications } = useMyApplications();
   const { data: stageProgressRaw } = useMyStageProgress();
 
+  const profileReady = isJobHuntProfileReady(profile, candidate);
   const submitted = tests && attempts ? allTestsSubmitted(tests, attempts) : false;
   const apps = applications ?? [];
   const stageProgress: StageProgressRow[] = (stageProgressRaw ?? []).map((p) => ({
@@ -58,6 +61,25 @@ const CandidateDashboard = () => {
           <p className="text-muted-foreground text-sm mt-1">Current step: {currentStep.label}</p>
         )}
       </div>
+
+      {!profileReady && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="pt-6 flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="font-medium text-sm">Complete your profile</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Add the details employers need so you can apply to roles.
+              </p>
+            </div>
+            <Button asChild size="sm">
+              <Link to={CANDIDATE_PROFILE_PATH}>
+                Open My Profile
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {activeStageId === "preparation" && (
         <Card>

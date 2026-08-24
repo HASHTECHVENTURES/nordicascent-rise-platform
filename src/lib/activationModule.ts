@@ -148,6 +148,22 @@ export async function setInternshipStartDate(input: {
     (app?.track as Track | null) ??
     ((app?.candidates as { track?: Track } | null)?.track ?? "entry");
   await refreshMeetingUnlocks(input.applicationId, track);
+
+  const { data: notifyApp } = await supabase
+    .from("applications")
+    .select("jobs(company_id), candidates(profile_id)")
+    .eq("id", input.applicationId)
+    .maybeSingle();
+  const { notifyInternshipStartDateSet } = await import("@/lib/applicationEffects");
+  await notifyInternshipStartDateSet({
+    applicationId: input.applicationId,
+    startDate: date,
+    candidateProfileId:
+      ((notifyApp?.candidates as { profile_id?: string } | null)?.profile_id as string | null) ??
+      null,
+    companyId:
+      ((notifyApp?.jobs as { company_id?: string } | null)?.company_id as string | null) ?? null,
+  });
 }
 
 export async function unlockAcademicInternship(input: {
@@ -216,18 +232,18 @@ export const INTERNSHIP_CHECKPOINT_DEFS = [
   {
     checkpoint_number: 1,
     phase: "onboarding" as const,
-    title: "Internship started",
+    title: "Kick-off meeting held",
     who_confirms: "company" as const,
     auto_source: null,
-    hint: "Confirm kick-off, channels, and tasks. Date + what the candidate is working on.",
+    hint: "Confirm the internship kick-off meeting (channels, access, and first tasks).",
   },
   {
     checkpoint_number: 2,
     phase: "onboarding" as const,
-    title: "Mentor Meeting 4 done",
+    title: "Follow-up meeting (Meeting 4)",
     who_confirms: "system" as const,
     auto_source: "mentor_meeting_4" as const,
-    hint: "Auto-completed when Meeting 4 is done in the mentor programme (Module 3B).",
+    hint: "Auto-completed when Mentor Meeting 4 (early experience / follow-up) is done.",
   },
   {
     checkpoint_number: 3,
@@ -621,26 +637,26 @@ export type PreArrivalCheckpoint = {
 export const PRE_ARRIVAL_CHECKPOINT_DEFS = [
   {
     checkpoint_number: 1,
-    title: "Employment contract signed",
+    title: "Assignment defined and access granted",
     who_confirms: "company" as const,
-    hint: "Upload signed contract and confirm date.",
+    hint: "Pre-start: role/assignment defined, systems access granted, and employment paperwork in place.",
     requiresAttachment: true,
     notesRequired: false,
     notesLabel: "Notes (optional)",
   },
   {
     checkpoint_number: 2,
-    title: "Remote work setup confirmed",
+    title: "Remote work & kick-off meeting ready",
     who_confirms: "company" as const,
-    hint: "Candidate has equipment, access, and remote setup ready.",
+    hint: "Confirm remote setup and that the kick-off meeting is scheduled or held.",
   },
   {
     checkpoint_number: 3,
-    title: "Tasks and projects assigned",
+    title: "Employment contract signed",
     who_confirms: "company" as const,
-    hint: "Describe initial tasks and projects.",
+    hint: "Upload signed employment contract and confirm date.",
     notesRequired: true,
-    notesLabel: "Task / project description",
+    notesLabel: "Contract / employment notes",
   },
 ];
 

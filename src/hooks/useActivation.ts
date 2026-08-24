@@ -631,6 +631,14 @@ export function useMyActivationContext() {
         .maybeSingle();
       if (!candidate?.jobs_unlocked) return null;
 
+      // Activation requires an explicit Readiness review approval (Entry and Fast track).
+      const { data: evaluation } = await supabase
+        .from("readiness_evaluations")
+        .select("approved_for_activation, red_flag")
+        .eq("candidate_id", candidate.id)
+        .maybeSingle();
+      if (!evaluation?.approved_for_activation || evaluation.red_flag) return null;
+
       const { data: app } = await supabase
         .from("applications")
         .select("id, track, jobs(title, companies(name))")

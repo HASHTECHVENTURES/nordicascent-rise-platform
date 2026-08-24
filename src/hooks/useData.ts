@@ -2654,6 +2654,19 @@ export function useUnlockCandidateJobs() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ candidateId, unlock }: { candidateId: string; unlock: boolean }) => {
+      if (unlock) {
+        const { data: evaluation } = await supabase
+          .from("readiness_evaluations")
+          .select("approved_for_activation, red_flag")
+          .eq("candidate_id", candidateId)
+          .maybeSingle();
+        if (!evaluation?.approved_for_activation || evaluation.red_flag) {
+          throw new Error(
+            "Complete Readiness review and approve for Activation before unlocking (required for Entry and Fast track)."
+          );
+        }
+      }
+
       const { error } = await supabase
         .from("candidates")
         .update({ jobs_unlocked: unlock, updated_at: new Date().toISOString() })

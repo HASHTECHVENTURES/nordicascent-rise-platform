@@ -33,7 +33,7 @@ type Props = {
 };
 
 const PHASE_LABELS: Record<string, string> = {
-  onboarding: "Phase 1 — Onboarding (Week 1–2)",
+  onboarding: "Phase 1 — Onboarding (Pre-start and Week 1)",
   execution: "Phase 2 — Execution (Week 3–5/6)",
   review: "Phase 3 — Review (Final 2 weeks)",
 };
@@ -151,7 +151,7 @@ export default function InternshipCheckpointsPanel({
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="font-medium text-sm">
-                          #{cp.checkpoint_number}: {cp.title}
+                          #{cp.checkpoint_number}: {def?.title ?? cp.title}
                         </p>
                         {def?.hint && (
                           <p className="text-xs text-muted-foreground mt-0.5">{def.hint}</p>
