@@ -1,23 +1,33 @@
+import { useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, AlertTriangle, CheckCircle, Send, UserCheck, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ArrowLeft, AlertTriangle, CheckCircle, Send, UserCheck, Loader2, Download, Pencil, Shield } from "lucide-react";
 import { TRACK_META, type Track } from "@/lib/track";
 import { useCandidateById, useUpdateCandidateTrack, useUpdateCandidateStatus, useCreateIssue, useAdvanceCandidateStage, useCandidateStageProgress, useCandidateTaskProgress, useStageTasks, useAdminMarkTaskComplete, useAdminCandidateJourneyBrief, useUnlockCandidateJobs, useDeleteCandidate } from "@/hooks/useData";
+import { useExportCandidate, useLogCandidateAccess, useUpdateRetentionDate } from "@/hooks/useGdpr";
+import { suggestRetentionDate } from "@/lib/gdpr";
 import { useToast } from "@/hooks/use-toast";
 import { adminJourneyStageLabel } from "@/lib/adminJourney";
 import AdminDeleteButton from "@/components/admin/AdminDeleteButton";
 import { PageSpinner } from "@/components/ui/PageSpinner";
+import { useAuth } from "@/contexts/AuthContext";
 
 const AdminCandidateDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isMasterAdmin } = useAuth();
   const { data: candidate, isLoading } = useCandidateById(id);
   const { data: journeyMap } = useAdminCandidateJourneyBrief();
   const unlockJobs = useUnlockCandidateJobs();
   const deleteCandidate = useDeleteCandidate();
+  const exportCandidate = useExportCandidate();
+  const logAccess = useLogCandidateAccess();
+  const updateRetention = useUpdateRetentionDate();
   const updateTrack = useUpdateCandidateTrack();
   const updateStatus = useUpdateCandidateStatus();
   const createIssue = useCreateIssue();
@@ -40,6 +50,14 @@ const AdminCandidateDetail = () => {
 
   const track = (candidate?.track ?? "entry") as Track;
   const journeyStage = id ? journeyMap?.get(id) : undefined;
+  const retentionDate =
+    (candidate as { retention_date?: string | null } | undefined)?.retention_date ??
+    (candidate ? suggestRetentionDate(candidate.status) : "");
+
+  useEffect(() => {
+    if (id) logAccess.mutate(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- log once per candidate open
+  }, [id]);
 
   const onTrackChange = async (v: string) => {
     if (!candidate) return;
@@ -77,6 +95,7 @@ const AdminCandidateDetail = () => {
           <p className="text-muted-foreground">{profile?.email} · {candidate.location ?? "—"}</p>
         </div>
         <AdminDeleteButton
+          allowed={isMasterAdmin}
           label="Delete candidate"
           title={`Delete ${profile?.full_name ?? "candidate"}?`}
           description="Permanently removes this candidate account and all related data. This cannot be undone."
@@ -184,6 +203,88 @@ const AdminCandidateDetail = () => {
               </Button>
             )}
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            GDPR & data
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="outline" asChild>
+              <Link to={`/admin/candidates/${candidate.id}/edit`}>
+                <Pencil className="h-4 w-4 mr-1" />
+                Correct details
+              </Link>
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={exportCandidate.isPending}
+              onClick={async () => {
+                try {
+                  const data = await exportCandidate.mutateAsync(candidate.id);
+                  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = `candidate-export-${candidate.id}.json`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  toast({ title: "Export downloaded" });
+                } catch (err) {
+                  toast({
+                    title: "Export failed",
+                    description: err instanceof Error ? err.message : "Try again",
+                    variant: "destructive",
+                  });
+                }
+              }}
+            >
+              {exportCandidate.isPending ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4 mr-1" />
+              )}
+              Export all data
+            </Button>
+          </div>
+          <div className="grid gap-2 max-w-xs">
+            <Label htmlFor="retention">Retention date</Label>
+            <div className="flex gap-2">
+              <Input
+                id="retention"
+                type="date"
+                defaultValue={retentionDate}
+                key={retentionDate}
+                onBlur={async (e) => {
+                  const val = e.target.value || null;
+                  try {
+                    await updateRetention.mutateAsync({ candidateId: candidate.id, retentionDate: val });
+                    toast({ title: "Retention date saved" });
+                  } catch (err) {
+                    toast({
+                      title: "Failed to save retention date",
+                      description: err instanceof Error ? err.message : "Try again",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Set from status; editable. Delete runs after this date via retention job.
+            </p>
+          </div>
+          {isMasterAdmin && (
+            <p className="text-xs text-muted-foreground">
+              Delete removes database records and lists storage paths for cleanup. Supabase backups are managed separately.
+            </p>
+          )}
         </CardContent>
       </Card>
 

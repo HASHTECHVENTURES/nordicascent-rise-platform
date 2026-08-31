@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import PrivacyConsentGate from "@/components/gdpr/PrivacyConsentGate";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import MaintenanceGate from "@/components/MaintenanceGate";
 
@@ -24,6 +25,7 @@ import About from "./pages/About";
 import Insight from "./pages/Insight";
 import JobDetail from "./pages/JobDetail";
 import Contact from "./pages/Contact";
+import Privacy from "./pages/Privacy";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 
@@ -93,6 +95,7 @@ import AdminSupport from "./pages/admin/Support";
 import AdminNotifications from "./pages/admin/Notifications";
 import AdminActivity from "./pages/admin/Activity";
 import AdminCandidateDetail from "./pages/admin/CandidateDetail";
+import AdminCandidateEdit from "./pages/admin/CandidateEdit";
 import AdminEmployerDetail from "./pages/admin/EmployerDetail";
 import AdminUsers from "./pages/admin/Users";
 import AdminJobs from "./pages/admin/Jobs";
@@ -124,6 +127,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
+      <PrivacyConsentGate>
       <MaintenanceGate>
       <TooltipProvider>
         <Toaster />
@@ -141,6 +145,7 @@ const App = () => (
               <Route path="/insight" element={<Insight />} />
               <Route path="/insight/:id" element={<JobDetail />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/privacy" element={<Privacy />} />
             </Route>
 
             {/* Auth Routes */}
@@ -235,6 +240,7 @@ const App = () => (
                 <Route path="/admin/employers/:id" element={<AdminEmployerDetail />} />
                 <Route path="/admin/candidates" element={<AdminCandidates />} />
                 <Route path="/admin/candidates/:id" element={<AdminCandidateDetail />} />
+                <Route path="/admin/candidates/:id/edit" element={<AdminCandidateEdit />} />
                 <Route path="/admin/issues" element={<AdminIssues />} />
                 <Route path="/admin/analytics" element={<AdminAnalytics />} />
                 <Route path="/admin/support" element={<AdminSupport />} />
@@ -272,6 +278,7 @@ const App = () => (
         </BrowserRouter>
       </TooltipProvider>
       </MaintenanceGate>
+      </PrivacyConsentGate>
     </AuthProvider>
   </QueryClientProvider>
 );

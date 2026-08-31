@@ -219,7 +219,10 @@ export default function EmployerCandidateDetail() {
     return (
       <div className="space-y-4">
         <Button variant="ghost" size="icon" asChild><Link to="/employer/candidates"><ArrowLeft className="h-4 w-4" /></Link></Button>
-        <p className="text-muted-foreground">Candidate not found or not in your pipeline.</p>
+        <p className="text-muted-foreground">
+          This candidate is not visible yet. Nordic Ascent reviews eligibility and Offee first — your
+          company sees them from the Technical step onward.
+        </p>
       </div>
     );
   }

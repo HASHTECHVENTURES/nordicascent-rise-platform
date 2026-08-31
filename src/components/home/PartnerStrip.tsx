@@ -1,9 +1,4 @@
-const PARTNERS = [
-  "GCE NODE",
-  "UiT",
-  "Bangalore university partners",
-  "Relocation Agder",
-];
+import PartnerLogos from "@/components/home/PartnerLogos";
 
 export default function PartnerStrip() {
   return (
@@ -12,16 +7,7 @@ export default function PartnerStrip() {
         <p className="text-center text-xs font-semibold tracking-[0.18em] uppercase text-muted-foreground mb-6">
           Working with
         </p>
-        <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
-          {PARTNERS.map((name) => (
-            <span
-              key={name}
-              className="text-sm sm:text-base font-medium text-primary/70 tracking-wide"
-            >
-              {name}
-            </span>
-          ))}
-        </div>
+        <PartnerLogos />
       </div>
     </section>
   );

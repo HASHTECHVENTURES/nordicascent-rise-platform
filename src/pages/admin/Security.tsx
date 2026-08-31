@@ -1,13 +1,22 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Clock, Loader2, Search, Shield } from "lucide-react";
+import { AlertTriangle, Clock, Loader2, Search, Shield } from "lucide-react";
 import { useActivityLog } from "@/hooks/useData";
+import { useAccessAnomalies, useProcessExpiredRetention, useResolveAccessAnomaly } from "@/hooks/useGdpr";
 import { formatDistanceToNow } from "date-fns";
 import { useMemo, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const AdminSecurity = () => {
+  const { isMasterAdmin } = useAuth();
+  const { toast } = useToast();
   const { data: activityLog, isLoading } = useActivityLog();
+  const { data: anomalies, isLoading: anomaliesLoading } = useAccessAnomalies();
+  const resolveAnomaly = useResolveAccessAnomaly();
+  const processRetention = useProcessExpiredRetention();
   const [search, setSearch] = useState("");
 
   const filteredLogs = useMemo(() => {
@@ -39,6 +48,90 @@ const AdminSecurity = () => {
         <CardContent className="text-sm text-muted-foreground space-y-1">
           <p>Admin accounts are invite-only. Password policy and 2FA are managed in Supabase → Authentication.</p>
           <p>Row Level Security is enabled on platform tables.</p>
+          <p>GDPR retention runs daily at 03:00 UTC via pg_cron (job: gdpr-retention-daily).</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Access anomalies
+            </CardTitle>
+            {isMasterAdmin && (
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={processRetention.isPending}
+                onClick={async () => {
+                  try {
+                    const result = await processRetention.mutateAsync();
+                    toast({
+                      title: "Retention job complete",
+                      description: `Deleted ${result.deleted}, anonymised ${result.anonymized}`,
+                    });
+                  } catch (err) {
+                    toast({
+                      title: "Retention job failed",
+                      description: err instanceof Error ? err.message : "Try again",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+              >
+                Run retention job
+              </Button>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {anomaliesLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : (anomalies ?? []).length === 0 ? (
+            <p className="text-sm text-muted-foreground">No unresolved access anomalies.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Type</TableHead>
+                  <TableHead>User</TableHead>
+                  <TableHead>Details</TableHead>
+                  <TableHead>When</TableHead>
+                  <TableHead />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {(anomalies ?? []).map((flag) => {
+                  const actor = flag.profiles as { full_name: string | null; email: string | null } | null;
+                  return (
+                    <TableRow key={flag.id}>
+                      <TableCell className="font-medium">{flag.anomaly_type.replace(/_/g, " ")}</TableCell>
+                      <TableCell>{actor?.full_name ?? actor?.email ?? "—"}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground max-w-xs truncate">
+                        {JSON.stringify(flag.details)}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {formatDistanceToNow(new Date(flag.created_at), { addSuffix: true })}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          disabled={resolveAnomaly.isPending}
+                          onClick={() => resolveAnomaly.mutate(flag.id)}
+                        >
+                          Resolve
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 

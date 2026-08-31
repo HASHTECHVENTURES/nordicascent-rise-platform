@@ -10,6 +10,7 @@ import {
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import type { Candidate, Profile, UserRole } from "@/types/database";
+import { isMasterAdmin as checkMasterAdmin } from "@/lib/adminAccess";
 import {
   HARDCODED_ADMIN_EMAIL,
   HARDCODED_ADMIN_PASSWORD,
@@ -27,10 +28,16 @@ type AuthContextValue = {
   signUp: (
     email: string,
     password: string,
-    metadata: { role: UserRole; full_name: string; company_name?: string }
+    metadata: {
+      role: UserRole;
+      full_name: string;
+      company_name?: string;
+      privacy_notice_version?: string;
+    }
   ) => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  isMasterAdmin: boolean;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -153,7 +160,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (
       email: string,
       password: string,
-      metadata: { role: UserRole; full_name: string; company_name?: string }
+      metadata: {
+        role: UserRole;
+        full_name: string;
+        company_name?: string;
+        privacy_notice_version?: string;
+      }
     ): Promise<void> => {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -168,8 +180,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       if (error) throw error;
 
-      // Supabase returns a user with empty identities when the email is already registered
-      // (to avoid account enumeration). Treat that as a clear duplicate-signup error.
       if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
         throw new Error("This email is already registered. Please sign in instead.");
       }
@@ -177,6 +187,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!data.session) {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
         if (signInError) throw signInError;
+      }
+
+      if (metadata.privacy_notice_version) {
+        const { error: consentError } = await supabase.rpc("record_privacy_consent", {
+          p_version: metadata.privacy_notice_version,
+        });
+        if (consentError) {
+          console.warn("Privacy consent recording failed:", consentError.message);
+        }
       }
     },
     []
@@ -199,6 +218,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signUp,
       signOut,
       refreshProfile,
+      isMasterAdmin: checkMasterAdmin(profile),
     }),
     [session, profile, candidate, loading, signIn, signInAsAdmin, signUp, signOut, refreshProfile]
   );

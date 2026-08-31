@@ -13,6 +13,7 @@ import {
   useDeleteInsightArticle,
 } from "@/hooks/useData";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const emptyForm = {
   title: "",
@@ -25,6 +26,7 @@ const emptyForm = {
 };
 
 export default function AdminInsights() {
+  const { isMasterAdmin } = useAuth();
   const { data: articles, isLoading } = useAdminInsightArticles();
   const saveArticle = useSaveInsightArticle();
   const deleteArticle = useDeleteInsightArticle();
@@ -93,17 +95,19 @@ export default function AdminInsights() {
                   <p className="font-medium text-sm">{a.title}</p>
                   <Badge variant="outline" className="mt-1 text-xs">{a.published ? "Published" : "Draft"}</Badge>
                 </button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={async () => {
-                    await deleteArticle.mutateAsync(a.id);
-                    toast({ title: "Deleted" });
-                    if (editingId === a.id) startNew();
-                  }}
-                >
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
+                {isMasterAdmin && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={async () => {
+                      await deleteArticle.mutateAsync(a.id);
+                      toast({ title: "Deleted" });
+                      if (editingId === a.id) startNew();
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                )}
               </div>
             ))}
           </CardContent>

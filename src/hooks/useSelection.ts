@@ -15,19 +15,13 @@ import {
   type StepDecision,
 } from "@/lib/selectionModule";
 import { onHoldCandidateActivated, onSelectionStatusChange } from "@/lib/selectionEffects";
+import { filterVisibleToEmployer, isVisibleToEmployer } from "@/lib/employerVisibility";
 import { APPLICATION_JOURNEY_STATUSES } from "@/lib/applicationStatusFlow";
 import { initializeMentorMeetings } from "@/lib/mentorProgram";
 import type { Track } from "@/lib/track";
+import { ADMIN_SELECTION_SELECT, EMPLOYER_SELECTION_SELECT, EMPLOYER_APPLICATION_WITH_INNER_JOB } from "@/lib/selectionSelect";
 
-export const ADMIN_SELECTION_SELECT = `
-  *,
-  jobs(id, title, positions_count, target_track, company_id, core_skills, engineering_discipline, experience_level, requirements, companies(id, name)),
-  candidates(
-    id, profile_id, full_name, track, university_id, university_waitlist_name,
-    gpa_or_standing, field_of_study, cv_url, family_relocating, family_member_count,
-    profiles(full_name, email, phone, avatar_url)
-  )
-`;
+export { ADMIN_SELECTION_SELECT };
 
 export function useAdminSelectionJobs() {
   return useQuery({
@@ -197,13 +191,13 @@ export function useEmployerSelectionApplications(jobId?: string) {
 
       let query = supabase
         .from("applications")
-        .select(`${ADMIN_SELECTION_SELECT}, jobs!inner(company_id)`)
+        .select(EMPLOYER_APPLICATION_WITH_INNER_JOB)
         .eq("jobs.company_id", employer.company_id)
         .order("applied_at", { ascending: false });
       if (jobId) query = query.eq("job_id", jobId);
       const { data, error } = await query;
       if (error) throw error;
-      return (data ?? []) as SelectionApplication[];
+      return filterVisibleToEmployer((data ?? []) as SelectionApplication[]);
     },
   });
 }
@@ -215,11 +209,15 @@ export function useEmployerSelectionApplication(applicationId: string | undefine
     queryFn: async () => {
       const { data, error } = await supabase
         .from("applications")
-        .select(ADMIN_SELECTION_SELECT)
+        .select(EMPLOYER_SELECTION_SELECT)
         .eq("id", applicationId!)
         .single();
       if (error) throw error;
-      return data as SelectionApplication;
+      const app = data as SelectionApplication;
+      if (!isVisibleToEmployer(app)) {
+        throw new Error("This candidate is not visible to your company yet.");
+      }
+      return app;
     },
   });
 }
@@ -254,7 +252,7 @@ export function useEmployerMentoringApplications() {
 
       const { data, error } = await supabase
         .from("applications")
-        .select(`${ADMIN_SELECTION_SELECT}, jobs!inner(company_id)`)
+        .select(EMPLOYER_APPLICATION_WITH_INNER_JOB)
         .eq("jobs.company_id", employer.company_id)
         .not("readiness_unlocked_at", "is", null)
         .order("applied_at", { ascending: false });

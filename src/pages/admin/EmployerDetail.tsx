@@ -6,10 +6,12 @@ import { ArrowLeft, Building2, CheckCircle, Loader2 } from "lucide-react";
 import { useCompanyById, useUpdateCompany, useDeleteCompany } from "@/hooks/useData";
 import { useToast } from "@/hooks/use-toast";
 import AdminDeleteButton from "@/components/admin/AdminDeleteButton";
+import { useAuth } from "@/contexts/AuthContext";
 
 const AdminEmployerDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isMasterAdmin } = useAuth();
   const { data: company, isLoading } = useCompanyById(id);
   const updateCompany = useUpdateCompany();
   const deleteCompany = useDeleteCompany();
@@ -83,6 +85,7 @@ const AdminEmployerDetail = () => {
           </p>
         </div>
         <AdminDeleteButton
+          allowed={isMasterAdmin}
           label="Delete company"
           title={`Delete ${company.name}?`}
           description="Permanently removes this company, all jobs, and employer login accounts."

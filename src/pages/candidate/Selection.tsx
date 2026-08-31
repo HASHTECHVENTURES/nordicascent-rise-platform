@@ -4,6 +4,7 @@ import { useJobsAccessLock } from "@/hooks/useJobsAccessLock";
 import CandidateApplications from "@/pages/candidate/Applications";
 import CandidateJobs from "@/pages/candidate/Jobs";
 import SelectionStageContent from "@/components/candidate/SelectionStageContent";
+import JourneyUnlockedBanner from "@/components/candidate/JourneyUnlockedBanner";
 import { hasUnlockedPipeline } from "@/lib/applicationJourney";
 
 /**
@@ -32,6 +33,14 @@ export default function CandidateSelection() {
         </p>
       </div>
 
+      {unlocked && (
+        <JourneyUnlockedBanner
+          variant="pipeline-unlocked"
+          continueHref="#journey-progress"
+          continueLabel="View selection progress"
+        />
+      )}
+
       <section id="applications" className="scroll-mt-6">
         <CandidateApplications embedded />
       </section>
@@ -42,7 +51,11 @@ export default function CandidateSelection() {
         </section>
       )}
 
-      {unlocked && <SelectionStageContent embedded />}
+      {unlocked && (
+        <div id="journey-progress" className="scroll-mt-6">
+          <SelectionStageContent embedded />
+        </div>
+      )}
     </div>
   );
 }

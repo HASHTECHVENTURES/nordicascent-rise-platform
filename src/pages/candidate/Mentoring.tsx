@@ -12,7 +12,6 @@ import {
   Loader2,
   Lock,
   MessageSquare,
-  Phone,
   UserCircle,
   Video,
 } from "lucide-react";
@@ -165,14 +164,6 @@ export default function CandidateMentoring() {
                     <a href={`mailto:${mentor.email}`}>
                       <Calendar className="h-4 w-4 mr-2" />
                       Email mentor
-                    </a>
-                  </Button>
-                )}
-                {mentor.phone && (
-                  <Button variant="ghost" size="sm" asChild>
-                    <a href={`tel:${mentor.phone}`}>
-                      <Phone className="h-4 w-4 mr-2" />
-                      Call
                     </a>
                   </Button>
                 )}

@@ -13,11 +13,6 @@ import {
   ClipboardList,
   BarChart3,
   AlertTriangle,
-  UserCheck,
-  MapPin,
-  Rocket,
-  HeartHandshake,
-  ClipboardCheck,
   UsersRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,15 +32,11 @@ const overviewNav: NavItem[] = [
 const hiringNav: NavItem[] = [
   { name: "Candidates", href: "/employer/candidates", icon: Users },
   { name: "Job Roles", href: "/employer/jobs", icon: Briefcase },
-  { name: "Selection", href: "/employer/selection", icon: UserCheck },
 ];
 
+/** Selection, Activation, Relocation, Onboarding, Follow-up: hidden from nav for now — reach via Pipeline Overview. */
 const journeyNav: NavItem[] = [
   { name: "Mentoring", href: "/employer/mentoring", icon: UsersRound },
-  { name: "Activation", href: "/employer/activation", icon: ClipboardCheck },
-  { name: "Relocation", href: "/employer/relocation", icon: MapPin },
-  { name: "Onboarding", href: "/employer/onboarding", icon: Rocket },
-  { name: "Follow-up", href: "/employer/followup", icon: HeartHandshake },
 ];
 
 const workspaceNav: NavItem[] = [

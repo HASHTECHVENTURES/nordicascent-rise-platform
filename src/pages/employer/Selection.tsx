@@ -32,7 +32,9 @@ const EmployerSelection = () => {
   const { data: allCompanyApps, isLoading: allAppsLoading } = useEmployerSelectionApplications(undefined);
 
   const preferredJobId = useMemo(() => {
-    const pipeline = (allCompanyApps ?? []).filter((a) => isEmployerSelectionListStatus(a.status));
+    const pipeline = (allCompanyApps ?? []).filter((a) =>
+      isEmployerSelectionListStatus(a.status, a.selection_step)
+    );
     if (pipeline.length === 0) return jobs?.[0]?.id ?? "";
     const counts = new Map<string, number>();
     for (const app of pipeline) {
@@ -66,7 +68,9 @@ const EmployerSelection = () => {
   const appsLoading = filterByJob ? jobAppsLoading : allAppsLoading;
 
   const filteredApps = useMemo(() => {
-    const inPipeline = (applications ?? []).filter((a) => isEmployerSelectionListStatus(a.status));
+    const inPipeline = (applications ?? []).filter((a) =>
+      isEmployerSelectionListStatus(a.status, a.selection_step)
+    );
     if (stepFilter === "all") return inPipeline;
     return inPipeline.filter(
       (a) => getSelectionStepFromStatus(a.status, a.selection_step) === stepFilter
@@ -74,7 +78,9 @@ const EmployerSelection = () => {
   }, [applications, stepFilter]);
 
   const funnelCounts = useMemo(() => {
-    const inPipeline = (applications ?? []).filter((a) => isEmployerSelectionListStatus(a.status));
+    const inPipeline = (applications ?? []).filter((a) =>
+      isEmployerSelectionListStatus(a.status, a.selection_step)
+    );
     const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     inPipeline.forEach((a) => {
       const step = getSelectionStepFromStatus(a.status, a.selection_step);
@@ -83,7 +89,9 @@ const EmployerSelection = () => {
     return counts;
   }, [applications]);
 
-  const pipelineTotal = (applications ?? []).filter((a) => isEmployerSelectionListStatus(a.status)).length;
+  const pipelineTotal = (applications ?? []).filter((a) =>
+    isEmployerSelectionListStatus(a.status, a.selection_step)
+  ).length;
   const selectedJobTitle =
     selectedJobId === ALL_JOBS
       ? "All job roles"

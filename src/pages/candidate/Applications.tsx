@@ -5,14 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Briefcase,
-  CheckCircle,
   Clock,
   Loader2,
   MapPin,
-  ArrowRight,
   Bell,
 } from "lucide-react";
-import { useMyApplications, useMyStageProgress } from "@/hooks/useData";
+import { useMyApplications } from "@/hooks/useData";
 import { useJobsAccessLock } from "@/hooks/useJobsAccessLock";
 import InterviewInviteCard from "@/components/candidate/InterviewInviteCard";
 import SelectionProgressTracker from "@/components/selection/SelectionProgressTracker";
@@ -26,9 +24,7 @@ import {
   applicationStatusNextStep,
   applicationStatusVariant,
   getApplicationJob,
-  hasUnlockedPipeline,
 } from "@/lib/applicationJourney";
-import { stageListPath } from "@/lib/stageRoutes";
 
 type Props = {
   /** When true, render as a Selection journey section (no standalone page chrome / no redirect). */
@@ -45,13 +41,8 @@ function isOffeeForwardStatus(status: string) {
 
 export default function CandidateApplications({ embedded = false }: Props) {
   const { data: applications, isLoading } = useMyApplications();
-  const { data: stageProgress } = useMyStageProgress();
   const { jobsOpen } = useJobsAccessLock();
   const apps = applications ?? [];
-  const accepted = hasUnlockedPipeline(apps);
-  const selectionDone = stageProgress?.some((s) => s.stage_id === "selection" && s.status === "completed");
-  const continueHref = selectionDone ? stageListPath("internship") : stageListPath("selection");
-  const continueLabel = selectionDone ? "Continue to Internship" : "Continue journey";
 
   if (!embedded) {
     return <Navigate to="/candidate/selection#applications" replace />;
@@ -83,28 +74,6 @@ export default function CandidateApplications({ embedded = false }: Props) {
           </Button>
         )}
       </div>
-
-      {accepted && (
-        <Card className="border-success/30 bg-success/5">
-          <CardContent className="pt-6 flex items-start gap-3">
-            <CheckCircle className="h-5 w-5 text-success shrink-0 mt-0.5" />
-            <div>
-              <p className="font-medium">You have an accepted application</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Your employer journey has started. Continue in My Journey below.
-              </p>
-              {!selectionDone && (
-                <Button size="sm" className="mt-3" asChild>
-                  <Link to={continueHref}>
-                    {continueLabel}
-                    <ArrowRight className="ml-1 h-4 w-4" />
-                  </Link>
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {apps.length === 0 ? (
         <Card>

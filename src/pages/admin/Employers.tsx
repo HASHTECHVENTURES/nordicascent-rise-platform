@@ -15,8 +15,10 @@ import {
 } from "@/hooks/useData";
 import AdminDeleteButton from "@/components/admin/AdminDeleteButton";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const AdminEmployers = () => {
+  const { isMasterAdmin } = useAuth();
   const { data: employers, isLoading: companiesLoading } = useAdminEmployers();
   const { data: employerUsers, isLoading: usersLoading } = useAdminEmployerUsers();
   const deleteCompany = useDeleteCompany();
@@ -123,6 +125,7 @@ const AdminEmployers = () => {
                         </Link>
                       </Button>
                       <AdminDeleteButton
+                        allowed={isMasterAdmin}
                         label="Delete"
                         title={`Delete ${emp.name}?`}
                         description="Permanently removes this company, all jobs, applications, and employer login accounts. This cannot be undone."
@@ -183,6 +186,7 @@ const AdminEmployers = () => {
                     <div className="flex items-center gap-2">
                       <Badge variant="outline">Employer</Badge>
                       <AdminDeleteButton
+                        allowed={isMasterAdmin}
                         label="Delete"
                         title={`Delete ${user.full_name ?? user.email}?`}
                         description="Removes this employer login account. The company record stays unless you delete the whole company."

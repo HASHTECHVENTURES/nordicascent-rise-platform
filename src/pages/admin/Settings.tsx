@@ -26,6 +26,8 @@ import { useReadinessCms, useUpdateReadinessCms } from "@/hooks/useReadiness";
 import { DEFAULT_READINESS_CMS, type ReadinessCms } from "@/lib/readiness";
 import MentorCmsPanel from "@/components/admin/MentorCmsPanel";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { Link } from "react-router-dom";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,6 +41,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const AdminSettings = () => {
+  const { isMasterAdmin } = useAuth();
   const { data: settings, isLoading } = usePlatformSettings();
   const updateSettings = useUpdatePlatformSettings();
   const clearPlatformData = useClearPlatformData();
@@ -174,6 +177,21 @@ const AdminSettings = () => {
       });
     }
   };
+
+  if (!isMasterAdmin) {
+    return (
+      <div className="space-y-4 max-w-lg">
+        <h1 className="text-2xl font-semibold">Settings restricted</h1>
+        <p className="text-muted-foreground">
+          Platform settings and data reset are limited to Master admins. Contact your Master admin if
+          you need changes here.
+        </p>
+        <Button variant="outline" asChild>
+          <Link to="/admin/dashboard">Back to dashboard</Link>
+        </Button>
+      </div>
+    );
+  }
 
   if (
     isLoading ||

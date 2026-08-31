@@ -13,10 +13,12 @@ import { usePublicConfig } from "@/hooks/useData";
 import type { UserRole } from "@/types/database";
 import logoImage from "@/assets/nordic-ascent-logo.png";
 import { HARDCODED_ADMIN_EMAIL, HARDCODED_ADMIN_PASSWORD } from "@/lib/adminCredentials";
+import { useCurrentPrivacyNoticeVersion } from "@/hooks/useGdpr";
 import {
   postCandidateSignupPath,
   rememberPendingJobFromPath,
 } from "@/lib/pendingJobApplication";
+import { DEFAULT_PRIVACY_NOTICE_VERSION } from "@/lib/gdpr";
 
 type LoginRole = "candidate" | "employer" | "internal" | "mentor" | "university" | null;
 
@@ -67,6 +69,7 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
   const { toast } = useToast();
   const { signIn, signInAsAdmin, signUp } = useAuth();
   const { data: publicConfig } = usePublicConfig();
+  const { data: privacyVersion } = useCurrentPrivacyNoticeVersion();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState<LoginRole>(fixedRole ?? null);
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
@@ -139,7 +142,7 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
     }
 
     if (authMode === "signup" && !acceptedTerms) {
-      toast({ title: "Please accept the Terms of Service", variant: "destructive" });
+      toast({ title: "Please accept the Privacy Notice to continue", variant: "destructive" });
       return;
     }
 
@@ -216,6 +219,7 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
           role: config.dbRole,
           full_name: `${firstName} ${lastName}`.trim(),
           company_name: selectedRole === "employer" ? companyName : undefined,
+          privacy_notice_version: privacyVersion ?? DEFAULT_PRIVACY_NOTICE_VERSION,
         });
         sessionStorage.removeItem(ROLE_STORAGE_KEY);
         rememberPendingJobFromPath(safeRedirect);
@@ -492,8 +496,11 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
                         onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
                       />
                       <Label htmlFor="terms" className="text-sm font-normal leading-tight">
-                        I agree to the <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link> and{" "}
-                        <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
+                        I have read and accept the{" "}
+                        <Link to="/privacy" target="_blank" className="text-primary hover:underline">
+                          Privacy Notice
+                        </Link>{" "}
+                        (required to register)
                       </Label>
                     </div>
                   )}

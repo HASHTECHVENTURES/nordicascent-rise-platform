@@ -3,14 +3,39 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ArrowRight } from "lucide-react";
 
-const MODULES = [
+type Step = { name: string; desc: string };
+
+const ENTRY_STEPS: Step[] = [
   { name: "Preparation", desc: "Company and candidate registration feed the rest of the system." },
   { name: "Selection", desc: "Eligibility through selection board — mentor assigned when selected for readiness." },
-  { name: "Readiness", desc: "Structured validation of cultural and technical fit before any internship." },
-  { name: "Activation", desc: "Digital internship (Entry Track) and Final Clearance before relocation." },
+  { name: "Readiness", desc: "Structured validation of cultural and technical fit before internship." },
+  { name: "Activation", desc: "Digital internship with checkpoints, then Final Clearance before relocation." },
   { name: "Relocation", desc: "Coordinated with specialist partners — not resold by Nordic Ascent." },
   { name: "Onboarding", desc: "First weeks on site with structured checkpoints." },
   { name: "Follow-up", desc: "Six-month support with questionnaires and coordinator meetings." },
+];
+
+const FAST_STEPS: Step[] = [
+  { name: "Preparation", desc: "Company and candidate registration feed the rest of the system." },
+  { name: "Selection", desc: "Eligibility through selection board — mentor assigned when selected for readiness." },
+  { name: "Readiness", desc: "Structured validation of cultural and technical fit before clearance." },
+  { name: "Activation", desc: "Skips internship — Final Clearance after Readiness, then pre-arrival employment." },
+  { name: "Relocation", desc: "Coordinated with specialist partners — not resold by Nordic Ascent." },
+  { name: "Onboarding", desc: "First weeks on site with structured checkpoints." },
+  { name: "Follow-up", desc: "Six-month support with questionnaires and coordinator meetings." },
+];
+
+const TRACKS: { label: string; short: string; steps: Step[] }[] = [
+  {
+    label: "Entry Track",
+    short: "Final-year students · 0–12 months experience",
+    steps: ENTRY_STEPS,
+  },
+  {
+    label: "Fast Track",
+    short: "Accelerated · 1+ years experience · no internship",
+    steps: FAST_STEPS,
+  },
 ];
 
 const faqs = [
@@ -20,6 +45,30 @@ const faqs = [
   { question: "What kind of mentoring support is provided?", answer: "Mentoring begins during Readiness and continues through Activation with a dedicated company mentor. Meetings follow a shared agenda; observations stay with mentor, company, and admin." },
   { question: "Do candidates need to speak a Nordic language?", answer: "A1-level Norwegian is part of preparation before arrival. Further language training can continue after onboarding." },
 ];
+
+function TrackColumn({ label, short, steps }: { label: string; short: string; steps: Step[] }) {
+  return (
+    <div className="min-w-0">
+      <div className="mb-6 pb-4 border-b border-border">
+        <h2 className="text-lg font-semibold text-foreground">{label}</h2>
+        <p className="text-sm text-muted-foreground mt-1">{short}</p>
+      </div>
+      <div className="space-y-6">
+        {steps.map((m, i) => (
+          <div key={m.name} className="flex gap-4 border-b border-border pb-6 last:border-0 last:pb-0">
+            <span className="text-sm font-semibold text-muted-foreground w-8 shrink-0 pt-0.5">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <div>
+              <h3 className="text-base font-semibold text-foreground mb-1">{m.name}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed">{m.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function HowItWorks() {
   return (
@@ -36,18 +85,12 @@ export default function HowItWorks() {
       </section>
 
       <section className="py-16 lg:py-20">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl space-y-6">
-          {MODULES.map((m, i) => (
-            <div key={m.name} className="flex gap-4 border-b border-border pb-6 last:border-0">
-              <span className="text-sm font-semibold text-muted-foreground w-8 shrink-0 pt-0.5">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <div>
-                <h2 className="text-lg font-semibold text-foreground mb-1">{m.name}</h2>
-                <p className="text-muted-foreground text-sm leading-relaxed">{m.desc}</p>
-              </div>
-            </div>
-          ))}
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-10 lg:gap-16">
+            {TRACKS.map((track) => (
+              <TrackColumn key={track.label} {...track} />
+            ))}
+          </div>
         </div>
       </section>
 

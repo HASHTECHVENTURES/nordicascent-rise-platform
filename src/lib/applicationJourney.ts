@@ -121,7 +121,7 @@ export function applicationStatusNextStep(status: string, selectionStep?: number
       case "readiness_active":
         return "Complete your Readiness tests in My Journey.";
       case "readiness_complete":
-        return "Readiness is complete. Your employer journey continues in My Journey.";
+        return "Readiness is complete. Your candidate journey continues in My Journey.";
       case "internship":
         return "Your internship stage is in progress.";
       case "go_no_go":

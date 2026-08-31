@@ -26,6 +26,8 @@ import {
   isCandidateVisibleJob,
 } from "@/lib/jobVisibility";
 import { CANDIDATE_JOB_COMPANY_SELECT } from "@/lib/jobPostingDisplay";
+import { filterVisibleToEmployer } from "@/lib/employerVisibility";
+import { isMasterAdmin } from "@/lib/adminAccess";
 import {
   computeStageReadiness,
   isTaskManuallyCompletable,
@@ -753,8 +755,6 @@ export function useInsightArticle(id: string | undefined) {
   });
 }
 
-// ─── Applications ───────────────────────────────────────────────────────────
-
 export function useEmployerApplications() {
   const { profile } = useAuth();
   return useQuery({
@@ -774,7 +774,7 @@ export function useEmployerApplications() {
         )
         .eq("jobs.company_id", employer.company_id);
       if (error) throw error;
-      return data;
+      return filterVisibleToEmployer(data ?? []);
     },
   });
 }
@@ -1369,6 +1369,27 @@ export function useAdminUsers() {
   });
 }
 
+export function useUpdateAdminTier() {
+  const qc = useQueryClient();
+  const { profile } = useAuth();
+  return useMutation({
+    mutationFn: async ({ id, admin_tier }: { id: string; admin_tier: "regular" | "master" }) => {
+      if (!isMasterAdmin(profile)) {
+        throw new Error("Master admin access required");
+      }
+      const { error } = await supabase
+        .from("profiles")
+        .update({ admin_tier })
+        .eq("id", id)
+        .eq("role", "admin");
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-users"] });
+    },
+  });
+}
+
 export function useAdminEmployerUsers() {
   return useQuery({
     queryKey: ["admin-employer-users"],
@@ -1661,7 +1682,7 @@ export function useEmployerJobApplications(jobId: string | undefined) {
         .eq("jobs.company_id", employer.company_id)
         .order("applied_at", { ascending: false });
       if (error) throw error;
-      return data;
+      return filterVisibleToEmployer(data ?? []);
     },
   });
 }
@@ -1760,10 +1781,17 @@ export function useDeleteCandidate() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (candidateId: string) => {
-      const { error } = await supabase.rpc("admin_delete_candidate", {
+      const { data, error } = await supabase.rpc("admin_delete_candidate", {
         p_candidate_id: candidateId,
       });
       if (error) throw error;
+
+      const result = data as { storage_paths?: string[] } | null;
+      const paths = result?.storage_paths ?? [];
+      if (paths.length > 0) {
+        await supabase.storage.from("documents").remove(paths.filter(Boolean));
+      }
+      return result;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin-candidates"] });
@@ -2880,12 +2908,15 @@ export function useEmployerApplicantCandidate(candidateId: string | undefined) {
         .eq("applications.jobs.company_id", employer.company_id)
         .maybeSingle();
       if (error) throw error;
-      return data;
+      if (!data) return null;
+      const visibleApps = filterVisibleToEmployer(
+        (data.applications as { status: string; selection_step?: number | null }[]) ?? []
+      );
+      if (visibleApps.length === 0) return null;
+      return { ...data, applications: visibleApps };
     },
   });
 }
-
-// ─── Notifications ───────────────────────────────────────────────────────────
 
 export function useMarkNotificationRead() {
   const qc = useQueryClient();

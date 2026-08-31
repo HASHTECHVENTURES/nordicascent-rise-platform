@@ -6,6 +6,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useMyReadinessAttempts, useReadinessTests } from "@/hooks/useReadiness";
 import { useMyApplications, useMyStageProgress } from "@/hooks/useData";
 import PreparationStageCard from "@/components/candidate/PreparationStageCard";
+import JourneyUnlockedBanner from "@/components/candidate/JourneyUnlockedBanner";
+import { useTrack } from "@/lib/track";
 import {
   computeEarlyJourneySteps,
   getEffectiveJourneyStage,
@@ -17,6 +19,7 @@ import { CANDIDATE_PROFILE_PATH } from "@/lib/candidateAccess";
 
 const CandidateDashboard = () => {
   const { profile, candidate } = useAuth();
+  const [track] = useTrack();
   const { data: tests, isLoading } = useReadinessTests();
   const { data: attempts } = useMyReadinessAttempts();
   const { data: applications } = useMyApplications();
@@ -61,6 +64,10 @@ const CandidateDashboard = () => {
           <p className="text-muted-foreground text-sm mt-1">Current step: {currentStep.label}</p>
         )}
       </div>
+
+      {candidate?.jobs_unlocked && (
+        <JourneyUnlockedBanner variant="activation-unlocked" track={track} />
+      )}
 
       {!profileReady && (
         <Card className="border-primary/20 bg-primary/5">

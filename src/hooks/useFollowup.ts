@@ -401,16 +401,10 @@ export function useAdminFollowupDashboard() {
   });
 }
 
-/** Employer list: use jobs!inner so company filter works (do not stack with ADMIN_SELECTION_SELECT jobs embed). */
-const EMPLOYER_FOLLOWUP_SELECT = `
-  *,
-  jobs!inner(id, title, positions_count, target_track, company_id, core_skills, engineering_discipline, experience_level, requirements, companies(id, name)),
-  candidates(
-    id, profile_id, full_name, track, university_id, university_waitlist_name,
-    gpa_or_standing, field_of_study, cv_url, family_relocating, family_member_count,
-    profiles(full_name, email, phone, avatar_url)
-  )
-`;
+import { EMPLOYER_APPLICATION_WITH_INNER_JOB } from "@/lib/selectionSelect";
+
+/** Employer list: use jobs!inner so company filter works. */
+const EMPLOYER_FOLLOWUP_SELECT = EMPLOYER_APPLICATION_WITH_INNER_JOB;
 
 export function useEmployerFollowupApplications() {
   const { profile } = useAuth();

@@ -114,9 +114,11 @@ export function isSelectionPipelineStatus(status: string) {
   );
 }
 
-/** Employer Selection list: pipeline apps plus employer-accepted (before admin moves status). */
-export function isEmployerSelectionListStatus(status: string) {
-  return status === "accepted" || isSelectionPipelineStatus(status);
+/** Employer Selection list — from Technical (step 3) onward; admin handles eligibility & Offee first. */
+export function isEmployerSelectionListStatus(status: string, selectionStep?: number | null) {
+  if (!isSelectionPipelineStatus(status) && status !== "accepted") return false;
+  const step = getSelectionStepFromStatus(status, selectionStep);
+  return step >= 3;
 }
 
 /**

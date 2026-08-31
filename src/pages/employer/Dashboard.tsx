@@ -48,7 +48,8 @@ const EmployerDashboard = () => {
                 {awaitingAction} application{awaitingAction > 1 ? "s" : ""} need your review
               </p>
               <p className="text-sm text-muted-foreground mt-1">
-                New candidates applied to your roles — review and accept or decline.
+                Candidates ready for your input appear here after Nordic Ascent completes eligibility
+                and Offee.
               </p>
             </div>
             <Button className="gap-2 bg-nordic-orange hover:bg-nordic-orange/90 text-white shrink-0" asChild>

@@ -13,6 +13,7 @@ import { useAdminCandidates, useAdminCandidateJourneyBrief, useDeleteCandidate }
 import { adminJourneyStageLabel } from "@/lib/adminJourney";
 import AdminDeleteButton from "@/components/admin/AdminDeleteButton";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const TrackBadge = ({ track }: { track: Track }) => (
   <Badge variant="outline" className="border-primary/40 text-primary">
@@ -21,6 +22,7 @@ const TrackBadge = ({ track }: { track: Track }) => (
 );
 
 const AdminCandidates = () => {
+  const { isMasterAdmin } = useAuth();
   const { data: candidates, isLoading } = useAdminCandidates();
   const { data: journeyMap } = useAdminCandidateJourneyBrief();
   const deleteCandidate = useDeleteCandidate();
@@ -167,6 +169,7 @@ const AdminCandidates = () => {
                       </Link>
                     </Button>
                     <AdminDeleteButton
+                      allowed={isMasterAdmin}
                       label="Delete"
                       title={`Delete ${name}?`}
                       description="Permanently removes this candidate account, profile, applications, and readiness data. This cannot be undone."

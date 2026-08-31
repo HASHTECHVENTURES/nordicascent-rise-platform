@@ -309,7 +309,7 @@ export default function CandidateJobApplication() {
               </CardHeader>
               <CardContent>
                 <PdfUploadField
-                  label="Upload portfolio (PDF, optional)"
+                  label="Upload portfolio (PDF)"
                   uploading={uploading === "portfolio_path"}
                   uploaded={Boolean(form.portfolio_path)}
                   onFile={(f) => uploadPdf("portfolio_path", f)}

@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { CheckCircle, Circle, ArrowRight, MessageSquare } from "lucide-react";
 import { useMyApplications, useMyTaskProgress, useStageTasks, useCompleteTask } from "@/hooks/useData";
 import InterviewInviteCard from "@/components/candidate/InterviewInviteCard";
@@ -116,19 +115,6 @@ export default function SelectionStageContent({ embedded = false }: { embedded?:
           notes={primary.interview_notes}
         />
       )}
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-medium">Stage progress</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between mb-2 text-sm">
-            <span className="text-muted-foreground">{completedCount} of {steps.length} steps</span>
-            <span className="font-medium">{percent}%</span>
-          </div>
-          <Progress value={percent} className="h-2" />
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader>

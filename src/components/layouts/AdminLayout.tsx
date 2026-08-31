@@ -32,6 +32,7 @@ import { PortalUserMenu, PortalUserSidebar } from "@/components/PortalUserMenu";
 import PortalFooter from "@/components/PortalFooter";
 import AdminJourneyProgress from "@/components/admin/AdminJourneyProgress";
 import { useAdminCandidates, useAdminEmployers, useNotifications, useUnreadMessageCount } from "@/hooks/useData";
+import { useAuth } from "@/contexts/AuthContext";
 
 type NavItem = { name: string; href: string; icon: React.ElementType };
 
@@ -75,11 +76,17 @@ const AdminLayout = () => {
   const [showResults, setShowResults] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { isMasterAdmin } = useAuth();
   const { data: candidates } = useAdminCandidates();
   const { data: employers } = useAdminEmployers();
   const { data: notifications } = useNotifications();
   const unreadCount = notifications?.filter((n) => !n.read_at).length ?? 0;
   const unreadMessages = useUnreadMessageCount();
+
+  const visiblePlatformNav = useMemo(
+    () => platformNav.filter((item) => item.href !== "/admin/settings" || isMasterAdmin),
+    [isMasterAdmin]
+  );
 
   const searchResults = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -184,7 +191,7 @@ const AdminLayout = () => {
             {renderSection("Overview", operationsNav.slice(0, 1))}
             {renderSection("Candidate journey", journeyNav)}
             {renderSection("People", peopleNav)}
-            {renderSection("Platform", platformNav)}
+            {renderSection("Platform", visiblePlatformNav)}
             {renderSection("Operations", operationsNav.slice(1))}
           </nav>
 

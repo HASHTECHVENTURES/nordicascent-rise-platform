@@ -166,9 +166,9 @@ export function PublicLayout() {
               <h4 className="font-medium mb-4">Legal</h4>
               <ul className="space-y-2 text-sm text-primary-foreground/70">
                 <li>
-                  <a href="#" className="hover:text-primary-foreground">
-                    Privacy Policy
-                  </a>
+                  <Link to="/privacy" className="hover:text-primary-foreground">
+                    Privacy Notice
+                  </Link>
                 </li>
                 <li>
                   <a href="#" className="hover:text-primary-foreground">

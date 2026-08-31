@@ -20,6 +20,7 @@ type Props = {
   isPending?: boolean;
   size?: "sm" | "default";
   variant?: "destructive" | "outline" | "ghost";
+  allowed?: boolean;
 };
 
 export default function AdminDeleteButton({
@@ -30,7 +31,9 @@ export default function AdminDeleteButton({
   isPending = false,
   size = "sm",
   variant = "destructive",
+  allowed = true,
 }: Props) {
+  if (!allowed) return null;
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
