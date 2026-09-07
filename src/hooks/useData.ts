@@ -206,12 +206,29 @@ export function useUpdateCandidateStatus() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const { error } = await supabase.from("candidates").update({ status }).eq("id", id);
+      // Appendix A · Data protection §2 — retention date is recalculated
+      // automatically whenever status changes, so admins no longer have to
+      // manually apply the suggestion. The suggest_retention_date RPC holds the
+      // single source of truth for the retention rules.
+      const { data: suggestedRetention, error: suggestError } = await supabase.rpc(
+        "suggest_retention_date",
+        { p_status: status },
+      );
+      if (suggestError) throw suggestError;
+
+      const updates: { status: string; retention_date?: string } = { status };
+      if (suggestedRetention) {
+        updates.retention_date = suggestedRetention as unknown as string;
+      }
+
+      const { error } = await supabase.from("candidates").update(updates).eq("id", id);
       if (error) throw error;
     },
     onSuccess: (_, { id }) => {
       qc.invalidateQueries({ queryKey: ["candidate", id] });
+      qc.invalidateQueries({ queryKey: ["admin-candidate", id] });
       qc.invalidateQueries({ queryKey: ["admin-candidates"] });
+      qc.invalidateQueries({ queryKey: ["candidate-status-history", id] });
     },
   });
 }
@@ -1786,11 +1803,54 @@ export function useDeleteCandidate() {
       });
       if (error) throw error;
 
-      const result = data as { storage_paths?: string[] } | null;
-      const paths = result?.storage_paths ?? [];
+      const result = data as {
+        storage_paths?: string[] | unknown;
+        candidate_id?: string;
+        profile_id?: string;
+        email?: string | null;
+        full_name?: string | null;
+        backup_window_days?: number;
+        backup_expires_at?: string;
+        deleted?: boolean;
+      } | null;
+
+      const rawPaths = result?.storage_paths;
+      const paths = Array.isArray(rawPaths)
+        ? (rawPaths as string[])
+        : [];
       if (paths.length > 0) {
         await supabase.storage.from("documents").remove(paths.filter(Boolean));
       }
+
+      // Erasure ledger lives in Storage (NOT in DB backups). After a PITR/daily
+      // restore, master admin re-applies these entries so resurrected rows are
+      // deleted again — the only practical way to honour "including backups".
+      if (result?.candidate_id) {
+        const erasedAt = new Date().toISOString();
+        const windowDays = result.backup_window_days ?? 30;
+        const expires =
+          result.backup_expires_at ??
+          new Date(Date.now() + windowDays * 86400000).toISOString().slice(0, 10);
+        const ledger = {
+          candidate_id: result.candidate_id,
+          profile_id: result.profile_id ?? null,
+          email: result.email ?? null,
+          full_name: result.full_name ?? null,
+          erased_at: erasedAt,
+          backup_window_days: windowDays,
+          backup_expires_at: expires,
+        };
+        const blob = new Blob([JSON.stringify(ledger, null, 2)], {
+          type: "application/json",
+        });
+        await supabase.storage
+          .from("erasure-ledger")
+          .upload(`${result.candidate_id}.json`, blob, {
+            contentType: "application/json",
+            upsert: true,
+          });
+      }
+
       return result;
     },
     onSuccess: () => {
@@ -1801,6 +1861,7 @@ export function useDeleteCandidate() {
       qc.invalidateQueries({ queryKey: ["admin-mentoring-pipeline"] });
       qc.invalidateQueries({ queryKey: ["admin-readiness-overview"] });
       qc.invalidateQueries({ queryKey: ["platform-stats"] });
+      qc.invalidateQueries({ queryKey: ["erasure-ledger"] });
     },
   });
 }
@@ -2464,6 +2525,55 @@ export function useCandidateStageProgress(candidateId: string | undefined) {
         .eq("candidate_id", candidateId!);
       if (error) throw error;
       return data;
+    },
+  });
+}
+
+// Appendix A · Core §3 — candidate status history for the admin timeline.
+export type CandidateStatusHistoryRow = {
+  id: string;
+  candidate_id: string;
+  from_status: string | null;
+  to_status: string;
+  changed_by: string | null;
+  changed_at: string;
+  profiles: { full_name: string | null } | null;
+};
+
+export function useCandidateStatusHistory(candidateId: string | undefined) {
+  return useQuery({
+    queryKey: ["candidate-status-history", candidateId],
+    enabled: !!candidateId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("candidate_status_history")
+        .select("*, profiles:changed_by(full_name)")
+        .eq("candidate_id", candidateId!)
+        .order("changed_at", { ascending: false });
+      if (error) throw error;
+      return data as unknown as CandidateStatusHistoryRow[];
+    },
+  });
+}
+
+// Appendix A · Core §10 — unified internal notes across all workflow stages.
+export type CandidateInternalNote = {
+  stage: string;
+  label: string;
+  note: string;
+  noted_at: string | null;
+};
+
+export function useCandidateInternalNotes(candidateId: string | undefined) {
+  return useQuery({
+    queryKey: ["candidate-internal-notes", candidateId],
+    enabled: !!candidateId,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("admin_candidate_internal_notes", {
+        p_candidate_id: candidateId!,
+      });
+      if (error) throw error;
+      return (data ?? []) as CandidateInternalNote[];
     },
   });
 }

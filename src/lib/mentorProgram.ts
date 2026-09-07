@@ -135,13 +135,13 @@ export function agendaBulletsFromThemeBody(body: string | null | undefined): str
   const raw = body.trim();
   const byLine = raw
     .split(/\n+/)
-    .map((l) => l.replace(/^[\s•\-\*\d.)]+/, "").trim())
+    .map((l) => l.replace(/^[\s•\-*\d.)]+/, "").trim())
     .filter(Boolean);
   if (byLine.length > 1) return byLine;
 
   const byBullet = raw
     .split(/\s*[•|;]\s*/)
-    .map((l) => l.replace(/^[\s\-\*\d.)]+/, "").trim())
+    .map((l) => l.replace(/^[\s\-*\d.)]+/, "").trim())
     .filter(Boolean);
   if (byBullet.length > 1) return byBullet;
 

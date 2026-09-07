@@ -14,6 +14,7 @@ import { adminJourneyStageLabel } from "@/lib/adminJourney";
 import AdminDeleteButton from "@/components/admin/AdminDeleteButton";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLogCandidateExport, useExportPipeline, type PipelineExportRow } from "@/hooks/useGdpr";
 
 const TrackBadge = ({ track }: { track: Track }) => (
   <Badge variant="outline" className="border-primary/40 text-primary">
@@ -26,7 +27,44 @@ const AdminCandidates = () => {
   const { data: candidates, isLoading } = useAdminCandidates();
   const { data: journeyMap } = useAdminCandidateJourneyBrief();
   const deleteCandidate = useDeleteCandidate();
+  const logExport = useLogCandidateExport();
+  const exportPipeline = useExportPipeline();
   const { toast } = useToast();
+
+  const escapeCsv = (v: unknown) => {
+    const s = v == null ? "" : String(v);
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+
+  const handleExportPipeline = async () => {
+    try {
+      const rows = await exportPipeline.mutateAsync();
+      const headers = [
+        "Application ID", "Candidate", "Email", "Job", "Company",
+        "Track", "Stage", "Status", "Selection step", "Applied at", "Updated at",
+      ];
+      const body = rows.map((r: PipelineExportRow) => [
+        r.application_id, r.candidate_name, r.candidate_email, r.job_title, r.company_name,
+        r.track, r.stage, r.status, r.selection_step,
+        r.applied_at?.split("T")[0] ?? "", r.updated_at?.split("T")[0] ?? "",
+      ]);
+      const csv = [headers, ...body].map((row) => row.map(escapeCsv).join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "pipeline-export.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+      toast({ title: "Pipeline exported", description: `${rows.length} applications across all stages.` });
+    } catch (err) {
+      toast({
+        title: "Pipeline export failed",
+        description: err instanceof Error ? err.message : "Try again",
+        variant: "destructive",
+      });
+    }
+  };
   const [trackFilter, setTrackFilter] = useState<"all" | Track>("all");
   const [poolFilter, setPoolFilter] = useState<"all" | CandidatePoolCategory>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -69,21 +107,28 @@ const AdminCandidates = () => {
           <h1 className="text-2xl font-medium">Candidates</h1>
           <p className="text-sm text-muted-foreground mt-1">Candidate login accounts only</p>
         </div>
-        <Button variant="outline" className="gap-2" onClick={() => {
-          const headers = ["Name", "Email", "Location", "Title", "Status", "Pool", "Track", "Joined"];
-          const rows = filtered.map((c) => {
-            const p = c.profiles as { full_name: string | null; email: string | null } | null;
-            return [p?.full_name ?? "", p?.email ?? "", c.location ?? "", c.title ?? "", c.status, POOL_CATEGORY_LABELS[c.pool_category as CandidatePoolCategory], TRACK_META[c.track as Track].label, c.created_at.split("T")[0]];
-          });
-          const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
-          const blob = new Blob([csv], { type: "text/csv" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a"); a.href = url; a.download = "candidates-export.csv"; a.click();
-          URL.revokeObjectURL(url);
-        }}>
-          <Download className="h-4 w-4" />
-          Export
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" className="gap-2" onClick={() => {
+            const headers = ["Name", "Email", "Location", "Title", "Status", "Pool", "Track", "Joined"];
+            const rows = filtered.map((c) => {
+              const p = c.profiles as { full_name: string | null; email: string | null } | null;
+              return [p?.full_name ?? "", p?.email ?? "", c.location ?? "", c.title ?? "", c.status, POOL_CATEGORY_LABELS[c.pool_category as CandidatePoolCategory], TRACK_META[c.track as Track].label, c.created_at.split("T")[0]];
+            });
+            const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
+            const blob = new Blob([csv], { type: "text/csv" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a"); a.href = url; a.download = "candidates-export.csv"; a.click();
+            URL.revokeObjectURL(url);
+            logExport.mutate({ scope: "candidate_list_csv", count: rows.length });
+          }}>
+            <Download className="h-4 w-4" />
+            Export
+          </Button>
+          <Button variant="outline" className="gap-2" onClick={handleExportPipeline} disabled={exportPipeline.isPending}>
+            {exportPipeline.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+            Export pipeline
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">

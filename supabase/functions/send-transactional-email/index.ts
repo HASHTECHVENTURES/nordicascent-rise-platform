@@ -18,7 +18,23 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { to, subject, html, text } = (await req.json()) as EmailBody;
+    const body = (await req.json().catch(() => ({}))) as Partial<EmailBody> & { healthcheck?: boolean };
+
+    // Safe readiness probe — reports whether Resend is configured without
+    // sending any email. Used by ops to confirm production email is wired.
+    if (body.healthcheck === true) {
+      return new Response(
+        JSON.stringify({
+          ok: true,
+          healthcheck: true,
+          resendConfigured: Boolean(Deno.env.get("RESEND_API_KEY")),
+          from: Deno.env.get("TRANSACTIONAL_EMAIL_FROM") ?? null,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { to, subject, html, text } = body as EmailBody;
 
     if (!to?.trim() || !subject?.trim() || !html?.trim()) {
       return new Response(JSON.stringify({ ok: false, reason: "missing_fields" }), {

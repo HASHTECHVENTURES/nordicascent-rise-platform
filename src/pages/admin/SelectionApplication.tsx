@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, ArrowLeft, Download, FileText, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLogCandidateExport } from "@/hooks/useGdpr";
 import { supabase } from "@/lib/supabase";
 import { openStoredDocument } from "@/lib/documentAccess";
 import StepDecisionButtons from "@/components/selection/StepDecisionButtons";
@@ -50,6 +51,7 @@ const AdminSelectionApplication = () => {
   const refreshChecks = useRefreshEligibilityChecks();
   const assignMentor = useAssignMentorToApplication();
   const activateHold = useActivateHoldCandidate();
+  const logExport = useLogCandidateExport();
   const { toast } = useToast();
 
   const companyId = app?.jobs?.company_id;
@@ -326,7 +328,10 @@ const AdminSelectionApplication = () => {
             variant="outline"
             size="sm"
             className="gap-1"
-            onClick={() => downloadCsv(`offee-export-${app.id}.csv`, buildOffeeCsvRows([app]))}
+            onClick={() => {
+              downloadCsv(`offee-export-${app.id}.csv`, buildOffeeCsvRows([app]));
+              logExport.mutate({ scope: "offee_csv", count: 1, candidateId: app.candidate_id });
+            }}
           >
             <Download className="h-3 w-3" />
             CSV
@@ -380,7 +385,7 @@ const AdminSelectionApplication = () => {
                   }
                   setOffeeUploading(true);
                   try {
-                    const path = `offee-reports/${app.id}/${Date.now()}-${file.name.replace(/[^\w.\-]+/g, "_")}`;
+                    const path = `offee-reports/${app.id}/${Date.now()}-${file.name.replace(/[^\w.-]+/g, "_")}`;
                     const { error: upErr } = await supabase.storage
                       .from("documents")
                       .upload(path, file, { contentType: "application/pdf", upsert: false });

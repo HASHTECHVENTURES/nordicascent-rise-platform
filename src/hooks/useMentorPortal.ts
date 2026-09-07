@@ -9,6 +9,7 @@ export type MentorAssignmentRow = {
   track: string | null;
   readiness_unlocked_at: string | null;
   candidates: {
+    id?: string | null;
     full_name?: string | null;
     track?: string | null;
     profiles?: { full_name: string | null; email: string | null } | { full_name: string | null; email: string | null }[] | null;
@@ -42,7 +43,7 @@ export function useMyMentorAssignments() {
           status,
           track,
           readiness_unlocked_at,
-          candidates (full_name, track, profiles (full_name, email)),
+          candidates (id, full_name, track, profiles (full_name, email)),
           jobs (title, companies (name))
         `
         )

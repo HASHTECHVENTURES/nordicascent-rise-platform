@@ -54,6 +54,29 @@ Migrations `001`–`011` are applied on the connected project. Local SQL copies 
 - `avatars` — public profile images
 - `documents` — private CVs and uploads
 
+### Transactional email (Resend)
+
+In-app notifications always fire on workflow events. Transactional email is sent
+via the `send-transactional-email` edge function (deployed, ACTIVE) and is
+**off until configured**. To enable in production, set Supabase function secrets:
+
+```
+RESEND_API_KEY=<resend key>
+TRANSACTIONAL_EMAIL_FROM=Nordic Ascent <noreply@your-verified-domain>
+```
+
+Readiness can be checked safely (no email sent) by POSTing `{"healthcheck":true}`
+to the function — it returns `resendConfigured: true|false`. As of the last check
+`resendConfigured` is `false`, so email currently no-ops and in-app notifications
+remain the channel.
+
+### Data hosting & residency (EU/EEA)
+
+Candidate data is stored in Supabase project `dcjxjuqngfukljcifprt` in
+**`eu-north-1` (North EU / Stockholm)** — the Nordic EU/EEA region (Supabase has
+no Norway-specific region). See [`docs/DATA_HOSTING.md`](docs/DATA_HOSTING.md)
+for evidence, the privacy-notice residency statement, and the documented schema.
+
 ### Auth & security
 
 - `handle_new_user` trigger creates profile + role-specific rows

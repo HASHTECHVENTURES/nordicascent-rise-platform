@@ -25,6 +25,7 @@ import {
   Rocket,
   HeartHandshake,
   UsersRound,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,6 +69,7 @@ const operationsNav: NavItem[] = [
   { name: "Support", href: "/admin/support", icon: Mail },
   { name: "Contacts", href: "/admin/contacts", icon: Mail },
   { name: "Activity", href: "/admin/activity", icon: History },
+  { name: "Deletions", href: "/admin/security", icon: Trash2 },
 ];
 
 const AdminLayout = () => {

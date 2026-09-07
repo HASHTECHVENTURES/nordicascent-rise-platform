@@ -22,6 +22,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useEmployerApplicantCandidate, useUpdateApplication, useSendInterviewInvite } from "@/hooks/useData";
+import { useLogCandidateAccess } from "@/hooks/useGdpr";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { applicationStatusVariant, employerApplicationStatusLabel, isEmployerPreAcceptWorkflow, isEmployerSelectionHandoff } from "@/lib/applicationJourney";
@@ -78,7 +79,14 @@ export default function EmployerCandidateDetail() {
   const { data: candidate, isLoading } = useEmployerApplicantCandidate(candidateId);
   const updateApp = useUpdateApplication();
   const sendInvite = useSendInterviewInvite();
+  const logAccess = useLogCandidateAccess();
   const { toast } = useToast();
+
+  // Appendix A · Audit log — record when an employer opens a candidate record.
+  useEffect(() => {
+    if (candidate?.id) logAccess.mutate(candidate.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- log once per candidate open
+  }, [candidate?.id]);
   const [status, setStatus] = useState<AppStatus>("applied");
   const [meetUrl, setMeetUrl] = useState("");
   const [scheduledAt, setScheduledAt] = useState("");

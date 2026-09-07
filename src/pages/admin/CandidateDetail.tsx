@@ -6,9 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, AlertTriangle, CheckCircle, Send, UserCheck, Loader2, Download, Pencil, Shield } from "lucide-react";
+import { ArrowLeft, AlertTriangle, CheckCircle, Send, UserCheck, Loader2, Download, Pencil, Shield, History, NotebookPen } from "lucide-react";
 import { TRACK_META, type Track } from "@/lib/track";
-import { useCandidateById, useUpdateCandidateTrack, useUpdateCandidateStatus, useCreateIssue, useAdvanceCandidateStage, useCandidateStageProgress, useCandidateTaskProgress, useStageTasks, useAdminMarkTaskComplete, useAdminCandidateJourneyBrief, useUnlockCandidateJobs, useDeleteCandidate } from "@/hooks/useData";
+import { useCandidateById, useUpdateCandidateTrack, useUpdateCandidateStatus, useCreateIssue, useAdvanceCandidateStage, useCandidateStageProgress, useCandidateTaskProgress, useStageTasks, useAdminMarkTaskComplete, useAdminCandidateJourneyBrief, useUnlockCandidateJobs, useDeleteCandidate, useCandidateStatusHistory, useCandidateInternalNotes } from "@/hooks/useData";
 import { useExportCandidate, useLogCandidateAccess, useUpdateRetentionDate } from "@/hooks/useGdpr";
 import { suggestRetentionDate } from "@/lib/gdpr";
 import { useToast } from "@/hooks/use-toast";
@@ -35,6 +35,8 @@ const AdminCandidateDetail = () => {
   const { toast } = useToast();
   const { data: stageProgress } = useCandidateStageProgress(id);
   const { data: taskProgress } = useCandidateTaskProgress(id);
+  const { data: statusHistory } = useCandidateStatusHistory(id);
+  const { data: internalNotes } = useCandidateInternalNotes(id);
   const markTaskComplete = useAdminMarkTaskComplete();
 
   const activeStage = stageProgress?.find((s) => s.status === "active");
@@ -98,12 +100,15 @@ const AdminCandidateDetail = () => {
           allowed={isMasterAdmin}
           label="Delete candidate"
           title={`Delete ${profile?.full_name ?? "candidate"}?`}
-          description="Permanently removes this candidate account and all related data. This cannot be undone."
+          description="Permanently removes this candidate from the live database and Platform storage, and records the erasure in the backup-window ledger (30 days). Immutable Supabase backups cannot be scrubbed per person; after any restore, re-apply erasures from Security."
           isPending={deleteCandidate.isPending}
           onConfirm={async () => {
             try {
               await deleteCandidate.mutateAsync(candidate.id);
-              toast({ title: "Candidate deleted" });
+              toast({
+                title: "Candidate deleted",
+                description: "Live data removed. Erasure recorded for the backup window.",
+              });
               navigate("/admin/candidates");
             } catch (err) {
               toast({
@@ -282,7 +287,9 @@ const AdminCandidateDetail = () => {
           </div>
           {isMasterAdmin && (
             <p className="text-xs text-muted-foreground">
-              Delete removes database records and lists storage paths for cleanup. Supabase backups are managed separately.
+              Delete removes live database records and Platform storage, and writes an erasure ledger
+              entry (outside DB backups). After any Supabase backup restore within ~30 days, use
+              Security → Re-apply erasures so resurrected rows are deleted again.
             </p>
           )}
         </CardContent>
@@ -413,6 +420,76 @@ const AdminCandidateDetail = () => {
                     Mark done
                   </Button>
                 )}
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <NotebookPen className="h-4 w-4" />
+            Internal notes
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            All admin-only notes across selection, readiness, mentoring and follow-up. Hidden from candidates and employers.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {(internalNotes ?? []).length === 0 && (
+            <p className="text-sm text-muted-foreground">No internal notes recorded yet.</p>
+          )}
+          {(internalNotes ?? []).map((n, i) => (
+            <div key={`${n.stage}-${n.label}-${i}`} className="rounded-lg border p-3">
+              <div className="flex items-center gap-2 mb-1">
+                <Badge variant="secondary" className="text-xs">{n.stage}</Badge>
+                <span className="text-xs font-medium text-muted-foreground">{n.label}</span>
+                {n.noted_at && (
+                  <span className="text-xs text-muted-foreground ml-auto">
+                    {new Date(n.noted_at).toLocaleDateString()}
+                  </span>
+                )}
+              </div>
+              <p className="text-sm whitespace-pre-wrap">{n.note}</p>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <History className="h-4 w-4" />
+            Status history
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {(statusHistory ?? []).length === 0 && (
+            <p className="text-sm text-muted-foreground">No status changes recorded yet.</p>
+          )}
+          {(statusHistory ?? []).map((entry) => {
+            const actor = entry.profiles?.full_name ?? "System";
+            const when = new Date(entry.changed_at).toLocaleString();
+            return (
+              <div key={entry.id} className="flex items-start gap-3 text-sm">
+                <div className="mt-1 h-2 w-2 rounded-full bg-primary shrink-0" />
+                <div className="min-w-0">
+                  <p className="font-medium">
+                    {entry.from_status ? (
+                      <>
+                        {entry.from_status.replace(/_/g, " ")}
+                        <span className="text-muted-foreground"> &rarr; </span>
+                        {entry.to_status.replace(/_/g, " ")}
+                      </>
+                    ) : (
+                      <>Initial status: {entry.to_status.replace(/_/g, " ")}</>
+                    )}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {when} &middot; by {actor}
+                  </p>
+                </div>
               </div>
             );
           })}

@@ -1,9 +1,11 @@
+import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";
 import { PageSpinner } from "@/components/ui/PageSpinner";
 import { useMyMentorAssignments } from "@/hooks/useMentorPortal";
+import { useLogCandidateAccess } from "@/hooks/useGdpr";
 import MentorProgramPanel from "@/components/mentor/MentorProgramPanel";
 import { resolveProfile } from "@/lib/resolveProfile";
 import { TRACK_META, type Track } from "@/lib/track";
@@ -12,10 +14,19 @@ import { selectionStatusLabel } from "@/lib/selectionModule";
 export default function MentorCandidateDetail() {
   const { applicationId } = useParams<{ applicationId: string }>();
   const { data, isLoading } = useMyMentorAssignments();
+  const logAccess = useLogCandidateAccess();
+
+  const app = (data?.assignments ?? []).find((a) => a.id === applicationId);
+  const viewedCandidateId = app?.candidates?.id ?? null;
+
+  // Appendix A · Audit log — record when a mentor opens their assigned candidate.
+  useEffect(() => {
+    if (viewedCandidateId) logAccess.mutate(viewedCandidateId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- log once per candidate open
+  }, [viewedCandidateId]);
 
   if (isLoading) return <PageSpinner />;
 
-  const app = (data?.assignments ?? []).find((a) => a.id === applicationId);
   if (!app) {
     return (
       <div className="space-y-4 max-w-lg py-12">
