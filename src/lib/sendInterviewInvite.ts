@@ -28,7 +28,7 @@ export async function sendInterviewInvite(input: SendInterviewInviteInput) {
   const when = formatInterviewWhen(input.scheduledAt);
   const notesLine = input.notes?.trim() ? `\n\nNotes from ${input.companyName}:\n${input.notes.trim()}` : "";
 
-  const messageBody = `Interview invitation — ${input.jobTitle}
+  const messageBody = `Interview invitation: ${input.jobTitle}
 
 Your interview with ${input.companyName} is scheduled for:
 ${when}
@@ -63,7 +63,7 @@ Please join a few minutes early. Reply in this thread if you need to reschedule.
   try {
     conversationId = await getOrCreateConversationWithProfile(
       input.candidateProfileId,
-      `Interview — ${input.jobTitle}`
+      `Interview: ${input.jobTitle}`
     );
   } catch (err) {
     throw new Error(`Could not open message thread: ${getSupabaseErrorMessage(err)}`);

@@ -18,7 +18,7 @@ import { READINESS_SIGNAL_LABELS } from "@/data/readinessModuleSeed";
 import ReadinessEvaluationPanel from "@/components/admin/ReadinessEvaluationPanel";
 
 function signalBadge(signal: string | null) {
-  if (!signal) return <Badge variant="secondary">—</Badge>;
+  if (!signal) return <Badge variant="secondary">n/a</Badge>;
   const label = READINESS_SIGNAL_LABELS[signal as keyof typeof READINESS_SIGNAL_LABELS] ?? signal;
   const cls =
     signal === "strong"
@@ -174,7 +174,7 @@ export default function AdminReadinessCandidates() {
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
               <UserCheck className="h-5 w-5" />
-              {reviewRow?.fullName ?? "Candidate"} — Readiness review
+              {reviewRow?.fullName ?? "Candidate"}: Readiness review
             </SheetTitle>
             <p className="text-sm text-muted-foreground">{reviewRow?.email}</p>
           </SheetHeader>

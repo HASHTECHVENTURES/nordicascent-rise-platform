@@ -44,7 +44,7 @@ export default function ApplicationSubmittedDialog({ open, onOpenChange, jobTitl
           </div>
           <div className="flex gap-3">
             <ArrowRight className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
-            <p>You can apply to other open job roles anytime — track everything in Selection.</p>
+            <p>You can apply to other open job roles anytime: track everything in Selection.</p>
           </div>
         </div>
 

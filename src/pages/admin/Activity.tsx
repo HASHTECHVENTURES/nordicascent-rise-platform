@@ -19,7 +19,7 @@ const AdminActivity = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Activity log</h1>
-        <p className="text-muted-foreground">Who did what and when — for transparency and debugging</p>
+        <p className="text-muted-foreground">Who did what and when: for transparency and debugging</p>
       </div>
 
       <Card>

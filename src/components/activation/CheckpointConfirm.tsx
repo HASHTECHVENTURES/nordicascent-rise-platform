@@ -20,7 +20,7 @@ type Props = {
   onConfirm: (data: { event_date: string; notes?: string; file?: File }) => void | Promise<void>;
 };
 
-/** Reusable checkpoint confirm — date + optional notes + confirm (Module 4 build note). */
+/** Reusable checkpoint confirm: date + optional notes + confirm (Module 4 build note). */
 export default function CheckpointConfirm({
   title = "Confirm checkpoint",
   notesLabel = "Notes",

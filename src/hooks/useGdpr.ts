@@ -54,7 +54,7 @@ export function useLogCandidateAccess() {
   });
 }
 
-// Appendix A · Audit log — record candidate-data exports (list CSV, Offee CSV)
+// Appendix A · Audit log: record candidate-data exports (list CSV, Offee CSV)
 // so exports are attributable to the acting user, not just record opens.
 export function useLogCandidateExport() {
   return useMutation({
@@ -90,7 +90,7 @@ export function useExportCandidate() {
   });
 }
 
-// Appendix A · Integrations §4 — pipeline-wide export (all applications, all stages).
+// Appendix A · Integrations §4: pipeline-wide export (all applications, all stages).
 export type PipelineExportRow = {
   application_id: string;
   candidate_name: string | null;

@@ -23,7 +23,7 @@ export default function MentorDashboard() {
         <h1 className="text-2xl font-medium">Dashboard</h1>
         <p className="text-muted-foreground text-sm mt-1">
           {mentor
-            ? `${mentor.name}${mentor.role_title ? ` · ${mentor.role_title}` : ""} — standardised mentor programme (agendas + observation forms).`
+            ? `${mentor.name}${mentor.role_title ? ` · ${mentor.role_title}` : ""}: standardised mentor programme (agendas + observation forms).`
             : "Your assigned candidates appear here once a company links you as mentor."}
         </p>
       </div>

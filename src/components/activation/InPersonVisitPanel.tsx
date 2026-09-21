@@ -92,7 +92,7 @@ export default function InPersonVisitPanel({
           )}
         </div>
         <p className="text-sm text-muted-foreground">
-          Company-only — candidate is notified only when you confirm a visit. Not shown to
+          Company-only: candidate is notified only when you confirm a visit. Not shown to
           universities.
         </p>
       </CardHeader>
@@ -148,7 +148,7 @@ export default function InPersonVisitPanel({
                   visitConfirmedTemplate: cms?.visit_confirmed ?? "",
                 });
                 toast({
-                  title: chosen ? "Visit confirmed" : "Recorded — no visit",
+                  title: chosen ? "Visit confirmed" : "Recorded: no visit",
                   description: chosen ? "Candidate has been notified." : undefined,
                 });
               } catch (err) {
@@ -163,7 +163,7 @@ export default function InPersonVisitPanel({
             <RadioGroup value={visitChosen} onValueChange={setVisitChosen}>
               <div className="flex items-center gap-2">
                 <RadioGroupItem value="yes" id="visit-yes" />
-                <Label htmlFor="visit-yes">Yes — schedule a visit</Label>
+                <Label htmlFor="visit-yes">Yes: schedule a visit</Label>
               </div>
               <div className="flex items-center gap-2">
                 <RadioGroupItem value="no" id="visit-no" />

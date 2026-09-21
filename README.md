@@ -1,4 +1,4 @@
-# Nordic Ascent Rise Platform — Backend Setup
+# Nordic Ascent Rise Platform - Backend Setup
 
 Full-stack talent mobility platform with **Supabase** backend and three role-based portals.
 
@@ -26,7 +26,7 @@ App runs at `http://localhost:8080`
 | Employer | `/employer/*` | Company on login page |
 | Admin | `/admin/*` | Admin (disabled by default; see env) |
 
-All portal routes are **protected** — unauthenticated users redirect to `/login`.
+All portal routes are **protected** - unauthenticated users redirect to `/login`.
 
 ## Environment variables
 
@@ -38,7 +38,7 @@ VITE_ALLOW_ADMIN_SIGNUP=false   # set true only for local dev
 
 ## Supabase
 
-Migrations `001`–`011` are applied on the connected project. Local SQL copies are in `supabase/migrations/` (001–008 were applied remotely first; 009–011 are mirrored locally).
+Migrations `001`-`011` are applied on the connected project. Local SQL copies are in `supabase/migrations/` (001-008 were applied remotely first; 009-011 are mirrored locally).
 
 ### Database tables
 
@@ -51,8 +51,8 @@ Migrations `001`–`011` are applied on the connected project. Local SQL copies 
 
 ### Storage buckets
 
-- `avatars` — public profile images
-- `documents` — private CVs and uploads
+- `avatars` - public profile images
+- `documents` - private CVs and uploads
 
 ### Transactional email (Resend)
 
@@ -66,14 +66,14 @@ TRANSACTIONAL_EMAIL_FROM=Nordic Ascent <noreply@your-verified-domain>
 ```
 
 Readiness can be checked safely (no email sent) by POSTing `{"healthcheck":true}`
-to the function — it returns `resendConfigured: true|false`. As of the last check
+to the function - it returns `resendConfigured: true|false`. As of the last check
 `resendConfigured` is `false`, so email currently no-ops and in-app notifications
 remain the channel.
 
 ### Data hosting & residency (EU/EEA)
 
 Candidate data is stored in Supabase project `dcjxjuqngfukljcifprt` in
-**`eu-north-1` (North EU / Stockholm)** — the Nordic EU/EEA region (Supabase has
+**`eu-north-1` (North EU / Stockholm)** - the Nordic EU/EEA region (Supabase has
 no Norway-specific region). See [`docs/DATA_HOSTING.md`](docs/DATA_HOSTING.md)
 for evidence, the privacy-notice residency statement, and the documented schema.
 
@@ -81,7 +81,7 @@ for evidence, the privacy-notice residency statement, and the documented schema.
 
 - `handle_new_user` trigger creates profile + role-specific rows
 - Server-side blocks: admin signup (unless `allowAdminSignup` in settings), registration toggles, maintenance mode
-- `profiles.account_status` — suspend users from admin panel
+- `profiles.account_status` - suspend users from admin panel
 - RLS on all tables; public RPCs: `get_public_stats`, `get_public_config`
 
 ## Scripts

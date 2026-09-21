@@ -164,7 +164,7 @@ function JobRoleFormFields({
             </SelectContent>
           </Select>
           <p className="text-xs text-muted-foreground">
-            0–12 months experience → Entry track (default). 1+ year → Fast track.
+            0-12 months experience → Entry track (default). 1+ year → Fast track.
           </p>
         </div>
       </div>
@@ -178,7 +178,7 @@ function JobRoleFormFields({
           </SelectContent>
         </Select>
         <p className="text-xs text-muted-foreground">
-          Locked from experience level — cannot be changed after it is set.
+          Locked from experience level; cannot be changed after it is set.
         </p>
       </div>
       <div className="space-y-2">
@@ -188,7 +188,7 @@ function JobRoleFormFields({
           rows={4}
           value={form.core_skills}
           onChange={(e) => setForm({ ...form, core_skills: e.target.value })}
-          placeholder="Describe the role and required skills — candidates see this text."
+          placeholder="Describe the role and required skills: candidates see this text."
         />
       </div>
       <div className="space-y-2">
@@ -456,8 +456,8 @@ const EmployerJobPostings = () => {
                   <Badge variant={job.status === "open" ? "default" : job.status === "draft" ? "outline" : "secondary"}>{job.status}</Badge>
                 </div>
                 <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-                  <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{job.location ?? "—"}</span>
-                  <span className="flex items-center gap-1"><Briefcase className="h-3 w-3" />{job.job_type ?? "—"}</span>
+                  <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{job.location ?? "n/a"}</span>
+                  <span className="flex items-center gap-1"><Briefcase className="h-3 w-3" />{job.job_type ?? "n/a"}</span>
                   {job.posted_at && (
                     <span className="flex items-center gap-1"><Clock className="h-3 w-3" />Posted {job.posted_at.split("T")[0]}</span>
                   )}

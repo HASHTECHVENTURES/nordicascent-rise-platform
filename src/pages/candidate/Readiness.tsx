@@ -72,7 +72,7 @@ export default function CandidateReadiness() {
             {awaitingMentor ? (
               <>
                 <p className="text-sm text-muted-foreground">
-                  Congratulations — you were selected. Readiness unlocks once your company assigns a mentor.
+                  Congratulations: you were selected. Readiness unlocks once your company assigns a mentor.
                 </p>
                 <Button size="sm" variant="outline" asChild>
                   <Link to="/candidate/selection">View Selection</Link>
@@ -89,16 +89,16 @@ export default function CandidateReadiness() {
               </>
             ) : (
               <>
-                <p className="text-sm text-muted-foreground">Complete registration steps 1–3 first.</p>
+                <p className="text-sm text-muted-foreground">Complete registration steps 1-3 first.</p>
                 <div className="flex flex-wrap gap-2">
                   <Button size="sm" asChild>
-                    <Link to="/candidate/profile">Step 1 — Profile</Link>
+                    <Link to="/candidate/profile">Step 1: Profile</Link>
                   </Button>
                   <Button size="sm" variant="outline" asChild>
-                    <Link to="/candidate/university">Step 2 — University</Link>
+                    <Link to="/candidate/university">Step 2: University</Link>
                   </Button>
                   <Button size="sm" variant="outline" asChild>
-                    <Link to="/candidate/registration-details">Step 3 — Background</Link>
+                    <Link to="/candidate/registration-details">Step 3: Background</Link>
                   </Button>
                 </div>
               </>
@@ -114,7 +114,7 @@ export default function CandidateReadiness() {
       <div>
         <h1 className="text-2xl font-medium">Readiness</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Follow the path in order. Mentor meeting rows sit above the levels they unlock — click
+          Follow the path in order. Mentor meeting rows sit above the levels they unlock: click
           Open Mentoring, then come back here for tests.
         </p>
       </div>
@@ -132,8 +132,8 @@ export default function CandidateReadiness() {
             {candidate?.jobs_unlocked ? (
               <>
                 <p className="text-sm text-muted-foreground">
-                  Readiness is complete and Activation is open. Continue in Activation — mentor
-                  meetings 4–6 run there during the internship.
+                  Readiness is complete and Activation is open. Continue in Activation: mentor
+                  meetings 4-6 run there during the internship.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <Button size="sm" asChild>
@@ -147,7 +147,7 @@ export default function CandidateReadiness() {
             ) : (
               <>
                 <p className="text-sm text-muted-foreground">
-                  All Readiness tests are submitted. Finish mentor meetings 1–3 if any remain.
+                  All Readiness tests are submitted. Finish mentor meetings 1-3 if any remain.
                   Activation opens when Nordic Ascent approves you for the next stage.
                 </p>
                 <div className="flex flex-wrap gap-2">

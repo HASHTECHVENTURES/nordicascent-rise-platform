@@ -49,7 +49,7 @@ export default function EmployerFollowup() {
       <div>
         <h1 className="text-2xl font-medium">Follow-up</h1>
         <p className="text-muted-foreground">
-          Module 7 at {companyName} — your meeting schedule and questionnaires (candidate answers
+          Module 7 at {companyName}: your meeting schedule and questionnaires (candidate answers
           stay private).
         </p>
       </div>

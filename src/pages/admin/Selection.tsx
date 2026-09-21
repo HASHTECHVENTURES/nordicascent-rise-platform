@@ -66,7 +66,7 @@ const AdminSelection = () => {
                   <div className="min-w-0">
                     <h3 className="font-medium truncate">{company.name}</h3>
                     <p className="text-sm text-muted-foreground">
-                      {company.location ?? "—"} · {company.jobCount} job
+                      {company.location ?? "n/a"} · {company.jobCount} job
                       {company.jobCount === 1 ? "" : "s"} · {company.positionsTotal} positions
                     </p>
                   </div>

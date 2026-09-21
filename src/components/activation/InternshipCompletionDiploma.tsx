@@ -9,7 +9,7 @@ type Props = {
   candidateName?: string | null;
   companyName?: string | null;
   jobTitle?: string | null;
-  /** Candidates can always download once issued — even after Hold. */
+  /** Candidates can always download once issued: even after Hold. */
   canDownload?: boolean;
 };
 
@@ -23,7 +23,7 @@ function buildCertificateHtml(input: {
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Internship Completion — Nordic Ascent</title>
+  <title>Internship Completion: Nordic Ascent</title>
   <style>
     body { font-family: Georgia, serif; max-width: 720px; margin: 48px auto; padding: 32px; border: 2px solid #1a365d; color: #1a202c; }
     h1 { font-size: 28px; letter-spacing: 0.04em; text-align: center; margin-bottom: 8px; }

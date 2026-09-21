@@ -2,7 +2,7 @@ import { supabase } from "@/lib/supabase";
 import { isSelectionPipelineStatus, isTerminalSelectionStatus, SELECTION_STATUSES } from "@/lib/selectionModule";
 import { pipelineStageFromApplication } from "@/lib/pipeline";
 
-/** Statuses after selection board — stored on applications.status per spec. */
+/** Statuses after selection board: stored on applications.status per spec. */
 export const APPLICATION_JOURNEY_STATUSES = {
   MENTOR_ASSIGNED: "mentor_assigned",
   READINESS_ACTIVE: "readiness_active",

@@ -50,7 +50,7 @@ export default function AcademicWorkflowPanel({
     );
   }
 
-  const list = [...(steps ?? [])].sort((a, b) => a.step_number - b.step_number);
+  const list = [...(steps ?? [])].sort((a, b) => a.step_number: b.step_number);
   const progress = academicWorkflowProgress(list);
   const nextPending = list.find((s) => s.status !== "completed");
 
@@ -96,7 +96,7 @@ export default function AcademicWorkflowPanel({
                   )}
                   {step.step_number === 6 && !done && (
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Academic evaluation for the university (learning credit only — not hiring).
+                      Academic evaluation for the university (learning credit only: not hiring).
                     </p>
                   )}
                   {step.step_number === 7 && (

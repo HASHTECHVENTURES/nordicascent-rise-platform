@@ -7,20 +7,20 @@ type Step = { name: string; desc: string };
 
 const ENTRY_STEPS: Step[] = [
   { name: "Preparation", desc: "Company and candidate registration feed the rest of the system." },
-  { name: "Selection", desc: "Eligibility through selection board — mentor assigned when selected for readiness." },
+  { name: "Selection", desc: "Eligibility through selection board. Mentor assigned when selected for readiness." },
   { name: "Readiness", desc: "Structured validation of cultural and technical fit before internship." },
   { name: "Activation", desc: "Digital internship with checkpoints, then Final Clearance before relocation." },
-  { name: "Relocation", desc: "Coordinated with specialist partners — not resold by Nordic Ascent." },
+  { name: "Relocation", desc: "Coordinated with specialist partners, not resold by Nordic Ascent." },
   { name: "Onboarding", desc: "First weeks on site with structured checkpoints." },
   { name: "Follow-up", desc: "Six-month support with questionnaires and coordinator meetings." },
 ];
 
 const FAST_STEPS: Step[] = [
   { name: "Preparation", desc: "Company and candidate registration feed the rest of the system." },
-  { name: "Selection", desc: "Eligibility through selection board — mentor assigned when selected for readiness." },
+  { name: "Selection", desc: "Eligibility through selection board. Mentor assigned when selected for readiness." },
   { name: "Readiness", desc: "Structured validation of cultural and technical fit before clearance." },
-  { name: "Activation", desc: "Skips internship — Final Clearance after Readiness, then pre-arrival employment." },
-  { name: "Relocation", desc: "Coordinated with specialist partners — not resold by Nordic Ascent." },
+  { name: "Activation", desc: "Skips internship. Final Clearance after Readiness, then pre-arrival employment." },
+  { name: "Relocation", desc: "Coordinated with specialist partners, not resold by Nordic Ascent." },
   { name: "Onboarding", desc: "First weeks on site with structured checkpoints." },
   { name: "Follow-up", desc: "Six-month support with questionnaires and coordinator meetings." },
 ];
@@ -28,7 +28,7 @@ const FAST_STEPS: Step[] = [
 const TRACKS: { label: string; short: string; steps: Step[] }[] = [
   {
     label: "Entry Track",
-    short: "Final-year students · 0–12 months experience",
+    short: "Final-year students · 0 to 12 months experience",
     steps: ENTRY_STEPS,
   },
   {
@@ -39,7 +39,7 @@ const TRACKS: { label: string; short: string; steps: Step[] }[] = [
 ];
 
 const faqs = [
-  { question: "How long does the entire process take?", answer: "The complete pipeline typically takes 6–12 months from initial application to successful onboarding, depending on readiness and the employer’s timeline." },
+  { question: "How long does the entire process take?", answer: "The complete pipeline typically takes 6 to 12 months from initial application to successful onboarding, depending on readiness and the employer’s timeline." },
   { question: "What countries do you place candidates in?", answer: "We focus on the Nordic region: Sweden, Norway, Denmark, and Finland." },
   { question: "Is there a cost for candidates?", answer: "No. Candidates do not pay for our services. Our model is employer-funded." },
   { question: "What kind of mentoring support is provided?", answer: "Mentoring begins during Readiness and continues through Activation with a dedicated company mentor. Meetings follow a shared agenda; observations stay with mentor, company, and admin." },
@@ -79,7 +79,7 @@ export default function HowItWorks() {
             How it works
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed">
-            A structured mobility pipeline — from selection through six-month follow-up — built so Nordic companies hire to stay, and engineers arrive prepared.
+            A structured mobility pipeline from selection through six-month follow-up, built so Nordic companies hire to stay, and engineers arrive prepared.
           </p>
         </div>
       </section>

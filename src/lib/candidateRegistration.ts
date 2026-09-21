@@ -5,9 +5,9 @@ export const DEGREE_TYPES = ["BSc", "MSc", "PhD", "BE", "BTech", "Diploma", "Oth
 
 export const CANDIDATE_EXPERIENCE_OPTIONS: { value: string; label: string; track: Track }[] = [
   { value: "final-year-student", label: "Final year student", track: "entry" },
-  { value: "0-12 months", label: "0 – 12 months", track: "entry" },
-  { value: "1-3 years", label: "1 – 3 years", track: "fast" },
-  { value: "3-5 years", label: "3 – 5 years", track: "fast" },
+  { value: "0-12 months", label: "0 to 12 months", track: "entry" },
+  { value: "1-3 years", label: "1 to 3 years", track: "fast" },
+  { value: "3-5 years", label: "3 to 5 years", track: "fast" },
   { value: "5+ years", label: "5+ years", track: "fast" },
 ];
 
@@ -23,7 +23,7 @@ export function normalizeRegistrationExperience(experience: string | null | unde
   const normalized = text
     .replace(/\s+/g, " ")
     .replace(/\s*-\s*/g, "-")
-    .replace(/–/g, "-");
+    .replace(/-/g, "-");
 
   const fuzzy = CANDIDATE_EXPERIENCE_OPTIONS.find((o) => o.value.toLowerCase() === normalized.toLowerCase());
   if (fuzzy) return fuzzy.value;

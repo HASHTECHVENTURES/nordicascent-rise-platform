@@ -5,7 +5,7 @@ import {
   SELECTION_STATUSES,
 } from "@/lib/selectionModule";
 
-/** Employers see candidates from Technical (step 3) onward — admin cleans data in steps 1–2 first. */
+/** Employers see candidates from Technical (step 3) onward: admin cleans data in steps 1-2 first. */
 export const EMPLOYER_VISIBILITY_MIN_SELECTION_STEP = 3;
 
 type EmployerVisibleApp = {

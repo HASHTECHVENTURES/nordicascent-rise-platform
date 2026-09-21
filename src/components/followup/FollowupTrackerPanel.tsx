@@ -428,7 +428,7 @@ export default function FollowupTrackerPanel({
         <div>
           <p className="text-sm font-medium">Ad-hoc support</p>
           <p className="text-xs text-muted-foreground">
-            Between touchpoints — urgent same day, standard 48h. Also use{" "}
+            Between touchpoints: urgent same day, standard 48h. Also use{" "}
             <Link to={role === "admin" ? "/admin/messages" : role === "company" ? "/employer/messages" : "/candidate/messages"} className="underline">
               Messages
             </Link>
@@ -501,7 +501,7 @@ export default function FollowupTrackerPanel({
         )}
       </div>
 
-      {/* Add-ons — company + admin */}
+      {/* Add-ons: company + admin */}
       {(role === "company" || role === "admin") && (
         <div className="rounded-lg border p-4 space-y-3">
           <p className="text-sm font-medium">Add-on services</p>

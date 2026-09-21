@@ -36,7 +36,7 @@ export default function InterviewInviteCard({
           <div>
             <p className="font-medium">Interview scheduled</p>
             <p className="text-sm text-muted-foreground mt-1">
-              {companyName ? `${companyName} — ` : ""}{jobTitle}
+              {companyName ? `${companyName}: ` : ""}{jobTitle}
             </p>
           </div>
         </div>

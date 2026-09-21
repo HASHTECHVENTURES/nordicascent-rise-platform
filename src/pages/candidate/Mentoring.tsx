@@ -98,7 +98,7 @@ export default function CandidateMentoring() {
         <Card>
           <CardContent className="pt-6 text-sm text-muted-foreground">
             Your mentor programme opens once a company assigns you a mentor after Selection.
-            Mentoring runs alongside Readiness and Activation — it is a separate area in the sidebar,
+            Mentoring runs alongside Readiness and Activation: it is a separate area in the sidebar,
             not a step in My Journey. Readiness stays locked until your mentor is assigned.
           </CardContent>
         </Card>
@@ -255,7 +255,7 @@ export default function CandidateMentoring() {
           <p className="text-xs text-muted-foreground mt-2">
             {track === "fast"
               ? "Fast track ends after Meeting 3."
-              : "Meetings 1–3 during Readiness · Meetings 4–6 during Activation."}
+              : "Meetings 1-3 during Readiness · Meetings 4-6 during Activation."}
           </p>
         </CardHeader>
         <CardContent className="space-y-4">

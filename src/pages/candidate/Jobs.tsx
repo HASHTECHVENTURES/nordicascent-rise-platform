@@ -81,7 +81,7 @@ export default function CandidateJobs({ embedded = false }: Props) {
     if (!profileReady) {
       toast({
         title: "Complete your profile first",
-        description: "Finish registration steps 1–3 before applying.",
+        description: "Finish registration steps 1-3 before applying.",
         variant: "destructive",
       });
       navigate("/candidate/profile");

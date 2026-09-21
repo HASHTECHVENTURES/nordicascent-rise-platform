@@ -354,7 +354,7 @@ export default function AdminUniversities() {
               </DialogHeader>
               <p className="text-sm text-muted-foreground">
                 Creates an invite-only login for {inviteUniName}. Staff can manage academic credit
-                steps only — not Final Clearance or hiring evaluation.
+                steps only: not Final Clearance or hiring evaluation.
               </p>
               <form
                 className="grid gap-4 pt-2"

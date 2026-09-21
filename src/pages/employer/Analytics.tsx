@@ -69,7 +69,7 @@ const EmployerAnalytics = () => {
         <CardHeader><CardTitle>Pipeline Funnel</CardTitle></CardHeader>
         <CardContent className="h-72">
           {totalApps === 0 ? (
-            <p className="text-muted-foreground text-sm">No applications yet — post jobs and wait for candidates to apply.</p>
+            <p className="text-muted-foreground text-sm">No applications yet: post jobs and wait for candidates to apply.</p>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={funnel}>

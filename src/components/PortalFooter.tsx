@@ -9,7 +9,7 @@ type Props = {
   compact?: boolean;
 };
 
-/** Footer strip for authenticated portals — LinkedIn + copyright. */
+/** Footer strip for authenticated portals: LinkedIn + copyright. */
 export default function PortalFooter({ className, compact = false }: Props) {
   return (
     <footer

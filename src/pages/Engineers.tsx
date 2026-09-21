@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
 
 const JOURNEY = [
-  "Preparation — profile, university, and readiness for the path",
-  "Selection — matched to a Nordic role",
+  "Preparation: profile, university, and readiness for the path",
+  "Selection: matched to a Nordic role",
   "A mentor who has your back through Readiness and internship",
   "Digital internship to prove yourself before relocation",
   "Relocation handled with specialist partners",
@@ -26,7 +26,7 @@ export default function Engineers() {
             Build your engineering career in the Nordics.
           </h1>
           <p className="text-lg text-primary-foreground/85 mb-4 leading-relaxed">
-            A structured path from a top Indian university to a lasting role in a Nordic company —
+            A structured path from a top Indian university to a lasting role in a Nordic company,
             with cultural preparation, a mentor, and support long after you arrive.
           </p>
           <p className="text-sm text-primary-foreground/70 mb-8">
@@ -70,7 +70,7 @@ export default function Engineers() {
             ))}
           </ul>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Being honest about the bar makes the opportunity feel real — this path is for engineers
+            Being honest about the bar makes the opportunity feel real. This path is for engineers
             ready to commit.
           </p>
         </div>

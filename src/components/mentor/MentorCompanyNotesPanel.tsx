@@ -12,7 +12,7 @@ type Props = {
   track?: Track | null;
 };
 
-/** Company decision-maker view — Signal note (M3) and Activation note (M6) only. No meeting observations. */
+/** Company decision-maker view: Signal note (M3) and Activation note (M6) only. No meeting observations. */
 export default function MentorCompanyNotesPanel({ applicationId, track }: Props) {
   const { data: meetings, isLoading: meetingsLoading } = useMentorProgramMeetings(applicationId);
   const { data: signalNote, isLoading: signalLoading } = useMentorSignalNote(applicationId);
@@ -56,7 +56,7 @@ export default function MentorCompanyNotesPanel({ applicationId, track }: Props)
                 )}
               </>
             ) : (
-              <p className="text-muted-foreground">Pending — mentor completes this after Meeting 3.</p>
+              <p className="text-muted-foreground">Pending: mentor completes this after Meeting 3.</p>
             )}
           </CardContent>
         </Card>
@@ -78,7 +78,7 @@ export default function MentorCompanyNotesPanel({ applicationId, track }: Props)
                 <p><span className="text-muted-foreground">Perceived risks:</span> {activationNote.perceived_risks}</p>
               </>
             ) : (
-              <p className="text-muted-foreground">Pending — mentor completes this after Meeting 6.</p>
+              <p className="text-muted-foreground">Pending: mentor completes this after Meeting 6.</p>
             )}
           </CardContent>
         </Card>

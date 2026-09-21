@@ -22,7 +22,7 @@ export default function CtaSection() {
           </p>
           <p className="text-primary-foreground/60 text-sm italic">
             "Nordic Ascent helped us find engineers who truly integrated into our team and culture." 
-            — Engineering Director, Nordic Company
+            Engineering Director, Nordic Company
           </p>
         </div>
 

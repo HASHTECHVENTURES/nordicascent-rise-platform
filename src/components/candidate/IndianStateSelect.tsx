@@ -20,7 +20,7 @@ type Props = {
   invalid?: boolean;
 };
 
-/** Searchable state picker — avoids fast wheel-scroll in long Radix Select lists. */
+/** Searchable state picker: avoids fast wheel-scroll in long Radix Select lists. */
 export default function IndianStateSelect({ id, value, onChange, invalid }: Props) {
   const [open, setOpen] = useState(false);
 

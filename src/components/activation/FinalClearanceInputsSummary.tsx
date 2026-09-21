@@ -47,7 +47,7 @@ export default function FinalClearanceInputsSummary({ application, track }: Prop
     <div className="space-y-4">
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-base">Module 2 — Selection scores</CardTitle>
+          <CardTitle className="text-base">Module 2: Selection scores</CardTitle>
         </CardHeader>
         <CardContent className="text-sm space-y-1">
           <ScoreRow label="Offee technical" value={application.offee_technical_score} />

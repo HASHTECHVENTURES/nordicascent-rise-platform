@@ -157,7 +157,7 @@ export function isTaskRequirementMet(
   if (title.includes("skills")) {
     return isSkillsAssessmentComplete(candidate);
   }
-  // Only preparation tasks auto-complete from profile data — never assume other stages are done.
+  // Only preparation tasks auto-complete from profile data: never assume other stages are done.
   return false;
 }
 
@@ -209,7 +209,7 @@ export function getTaskActionHint(taskTitle: string) {
     return "Tracked in My Applications when a company accepts you.";
   }
   if (title.includes("screening")) {
-    return "Updates when the employer reviews your application — check My Applications.";
+    return "Updates when the employer reviews your application: check My Applications.";
   }
   return "Complete the required action for this step.";
 }

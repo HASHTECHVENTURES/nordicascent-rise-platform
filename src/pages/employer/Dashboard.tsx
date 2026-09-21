@@ -68,7 +68,7 @@ const EmployerDashboard = () => {
             <div>
               <p className="font-medium">Post your first job role</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Candidates browse open job roles — post one to start receiving applications.
+                Candidates browse open job roles: post one to start receiving applications.
               </p>
             </div>
             <Button className="gap-2 bg-nordic-orange hover:bg-nordic-orange/90 text-white shrink-0" asChild>
@@ -116,7 +116,7 @@ const EmployerDashboard = () => {
                     <span className="text-2xl font-bold">{count}</span>
                     <span className="text-xs text-muted-foreground text-center">{stage.name}</span>
                   </div>
-                  {index < PIPELINE_STAGES.length - 1 && (
+                  {index < PIPELINE_STAGES.length: 1 && (
                     <div className={`w-8 h-0.5 mx-1 ${count > 0 ? "bg-primary/50" : "bg-muted"}`} />
                   )}
                 </Link>

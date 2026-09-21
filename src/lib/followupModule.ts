@@ -95,7 +95,7 @@ export const TOUCHPOINT_TOPICS: Record<
     ],
     company: [
       "How has the candidate been received by the team?",
-      "Any early signals — positive or concerning?",
+      "Any early signals: positive or concerning?",
       "Is anything on your side not working as expected?",
     ],
   },
@@ -103,7 +103,7 @@ export const TOUCHPOINT_TOPICS: Record<
     candidate: [
       "Is the work going as expected? Are expectations clear?",
       "Are you getting feedback?",
-      "Social side — part of the team or alongside it?",
+      "Social side: part of the team or alongside it?",
       "Anything about Nordic work culture that still feels difficult?",
     ],
     company: [
@@ -114,8 +114,8 @@ export const TOUCHPOINT_TOPICS: Record<
   },
   3: {
     candidate: [
-      "Progress over three months — what works, what is still hard?",
-      "Life outside work — settling socially and practically?",
+      "Progress over three months: what works, what is still hard?",
+      "Life outside work: settling socially and practically?",
       "How useful were Readiness and the mentor, really?",
     ],
     company: [
@@ -128,13 +128,13 @@ export const TOUCHPOINT_TOPICS: Record<
   },
   6: {
     candidate: [
-      "Six months in — how do you feel about the decision to move?",
-      "Where do you see yourself in 6–12 months?",
+      "Six months in: how do you feel about the decision to move?",
+      "Where do you see yourself in 6-12 months?",
       "What made the biggest difference? What would you change?",
     ],
     company: [
       "How has the candidate developed? Meeting or exceeding expectations?",
-      "Retention confidence — do you expect them to stay?",
+      "Retention confidence: do you expect them to stay?",
       "Did we select the right person? Would you use Nordic Ascent again?",
     ],
     confidential: "Is there anything that would put your continued stay at risk?",
@@ -142,7 +142,7 @@ export const TOUCHPOINT_TOPICS: Record<
 };
 
 const LIKERT_5 = (labels: string[]) =>
-  labels.map((label, i) => ({ key: `o${i + 1}`, label, score: 5 - i }));
+  labels.map((label, i) => ({ key: `o${i + 1}`, label, score: 5: i }));
 
 /** Full Module 7 question sets (CMS-editable defaults from client spec). */
 export const QUESTIONNAIRE_DEFS: Record<"candidate_3" | "company_3" | "candidate_6" | "company_6", QuestionDef[]> = {
@@ -171,7 +171,7 @@ export const QUESTIONNAIRE_DEFS: Record<"candidate_3" | "company_3" | "candidate
     {
       key: "c3_informal_included",
       prompt:
-        "Have you been included in informal team communication — chat, jokes, casual conversations?",
+        "Have you been included in informal team communication: chat, jokes, casual conversations?",
       dimension: "cultural_social",
       type: "likert",
       options: LIKERT_5([
@@ -198,7 +198,7 @@ export const QUESTIONNAIRE_DEFS: Record<"candidate_3" | "company_3" | "candidate
     {
       key: "c3_culture_harder",
       prompt:
-        "Is there anything about the cultural or social environment that has been harder than you expected? (2–4 sentences)",
+        "Is there anything about the cultural or social environment that has been harder than you expected? (2-4 sentences)",
       dimension: "cultural_social",
       type: "open",
     },
@@ -231,7 +231,7 @@ export const QUESTIONNAIRE_DEFS: Record<"candidate_3" | "company_3" | "candidate
     },
     {
       key: "c3_settled",
-      prompt: "How settled do you feel practically — housing, transport, administrative setup?",
+      prompt: "How settled do you feel practically: housing, transport, administrative setup?",
       dimension: "life_norway",
       type: "likert",
       options: LIKERT_5([
@@ -244,7 +244,7 @@ export const QUESTIONNAIRE_DEFS: Record<"candidate_3" | "company_3" | "candidate
     },
     {
       key: "c3_family",
-      prompt: "If your family is with you — how are they settling in?",
+      prompt: "If your family is with you: how are they settling in?",
       dimension: "life_norway",
       type: "likert",
       options: LIKERT_5(["Very well", "Mostly well", "Somewhat", "Struggling", "Not applicable"]),
@@ -301,7 +301,7 @@ export const QUESTIONNAIRE_DEFS: Record<"candidate_3" | "company_3" | "candidate
     },
     {
       key: "c3_a1_timing",
-      prompt: "Was the Norwegian language course timing right — did it start early enough?",
+      prompt: "Was the Norwegian language course timing right: did it start early enough?",
       dimension: "process",
       type: "likert",
       options: LIKERT_5([
@@ -314,7 +314,7 @@ export const QUESTIONNAIRE_DEFS: Record<"candidate_3" | "company_3" | "candidate
     },
     {
       key: "c3_open",
-      prompt: "Is there anything Nordic Ascent could do differently to support you better right now? (2–4 sentences)",
+      prompt: "Is there anything Nordic Ascent could do differently to support you better right now? (2-4 sentences)",
       dimension: "process",
       type: "open",
     },
@@ -342,7 +342,7 @@ export const QUESTIONNAIRE_DEFS: Record<"candidate_3" | "company_3" | "candidate
     },
     {
       key: "co3_ownership",
-      prompt: "Is the candidate taking ownership independently — without waiting to be told?",
+      prompt: "Is the candidate taking ownership independently: without waiting to be told?",
       dimension: "cultural_social",
       type: "likert",
       options: LIKERT_5(["Consistently", "Mostly", "Sometimes", "Rarely", "Not yet"]),
@@ -398,7 +398,7 @@ export const QUESTIONNAIRE_DEFS: Record<"candidate_3" | "company_3" | "candidate
     },
     {
       key: "co3_selection",
-      prompt: "Looking back at the selection process — did we select the right candidate for this role?",
+      prompt: "Looking back at the selection process: did we select the right candidate for this role?",
       dimension: "process",
       type: "likert",
       options: LIKERT_5(["Definitely", "Mostly yes", "Uncertain", "Probably not", "No"]),
@@ -459,7 +459,7 @@ export const QUESTIONNAIRE_DEFS: Record<"candidate_3" | "company_3" | "candidate
     {
       key: "c6_readiness",
       prompt:
-        "Looking back at Readiness — how well did it prepare you for the reality of working in a Nordic team?",
+        "Looking back at Readiness: how well did it prepare you for the reality of working in a Nordic team?",
       dimension: "process",
       type: "likert",
       options: LIKERT_5(["Very well", "Mostly well", "Somewhat", "Not very well", "Not at all"]),
@@ -480,7 +480,7 @@ export const QUESTIONNAIRE_DEFS: Record<"candidate_3" | "company_3" | "candidate
     },
     {
       key: "c6_team",
-      prompt: "Do you feel genuinely part of your team — not just professionally but socially?",
+      prompt: "Do you feel genuinely part of your team: not just professionally but socially?",
       dimension: "cultural_social",
       type: "likert",
       options: LIKERT_5(["Yes fully", "Mostly", "Partially", "Not really", "No"]),
@@ -495,7 +495,7 @@ export const QUESTIONNAIRE_DEFS: Record<"candidate_3" | "company_3" | "candidate
     },
     {
       key: "c6_culture_challenge",
-      prompt: "What has been the single biggest cultural or social challenge over six months? (2–4 sentences)",
+      prompt: "What has been the single biggest cultural or social challenge over six months? (2-4 sentences)",
       dimension: "cultural_social",
       type: "open",
     },
@@ -554,14 +554,14 @@ export const QUESTIONNAIRE_DEFS: Record<"candidate_3" | "company_3" | "candidate
     },
     {
       key: "c6_family",
-      prompt: "If your family is with you — how have they settled over six months?",
+      prompt: "If your family is with you: how have they settled over six months?",
       dimension: "life_norway",
       type: "likert",
       options: LIKERT_5(["Very well", "Mostly", "Somewhat", "Still struggling", "Not applicable"]),
     },
     {
       key: "c6_life_harder",
-      prompt: "Has anything about life in Norway been significantly harder than expected? (2–4 sentences)",
+      prompt: "Has anything about life in Norway been significantly harder than expected? (2-4 sentences)",
       dimension: "life_norway",
       type: "open",
     },
@@ -593,13 +593,13 @@ export const QUESTIONNAIRE_DEFS: Record<"candidate_3" | "company_3" | "candidate
     },
     {
       key: "c6_valuable",
-      prompt: "What was the most valuable part of the Nordic Ascent process for you personally? (2–4 sentences)",
+      prompt: "What was the most valuable part of the Nordic Ascent process for you personally? (2-4 sentences)",
       dimension: "process",
       type: "open",
     },
     {
       key: "c6_change",
-      prompt: "What single change would have made the biggest difference to your integration? (2–4 sentences)",
+      prompt: "What single change would have made the biggest difference to your integration? (2-4 sentences)",
       dimension: "process",
       type: "open",
     },
@@ -643,7 +643,7 @@ export const QUESTIONNAIRE_DEFS: Record<"candidate_3" | "company_3" | "candidate
     },
     {
       key: "co6_readiness",
-      prompt: "Looking back — how well did Readiness prepare the candidate for your team's reality?",
+      prompt: "Looking back: how well did Readiness prepare the candidate for your team's reality?",
       dimension: "process",
       type: "likert",
       options: LIKERT_5(["Very well", "Well", "Somewhat", "Not very well", "Not at all"]),
@@ -699,7 +699,7 @@ export const QUESTIONNAIRE_DEFS: Record<"candidate_3" | "company_3" | "candidate
     },
     {
       key: "co6_selection",
-      prompt: "Looking back — did we select the right candidate?",
+      prompt: "Looking back: did we select the right candidate?",
       dimension: "process",
       type: "likert",
       options: LIKERT_5(["Definitely", "Mostly", "Uncertain", "Probably not", "No"]),
@@ -770,13 +770,13 @@ export const QUESTIONNAIRE_DEFS: Record<"candidate_3" | "company_3" | "candidate
     },
     {
       key: "co6_valuable",
-      prompt: "What is the single most valuable thing Nordic Ascent delivered? (2–4 sentences)",
+      prompt: "What is the single most valuable thing Nordic Ascent delivered? (2-4 sentences)",
       dimension: "process",
       type: "open",
     },
     {
       key: "co6_change",
-      prompt: "What would you change about the Nordic Ascent process? (2–4 sentences)",
+      prompt: "What would you change about the Nordic Ascent process? (2-4 sentences)",
       dimension: "process",
       type: "open",
     },
@@ -851,7 +851,7 @@ export function questionnaireDefKey(
   return `${party}_${month}` as keyof typeof QUESTIONNAIRE_DEFS;
 }
 
-/** Standing topics CMS — newline-separated prompts per month × party */
+/** Standing topics CMS: newline-separated prompts per month × party */
 export type FollowupTopicsCms = {
   m1_candidate: string;
   m1_company: string;
@@ -1159,7 +1159,7 @@ export async function fetchFollowupDimensionRollup() {
       avgScore: Math.round((r.sum / r.count) * 10) / 10,
       responses: r.count,
     }))
-    .sort((a, b) => a.month - b.month || a.dimension.localeCompare(b.dimension));
+    .sort((a, b) => a.month: b.month || a.dimension.localeCompare(b.dimension));
 }
 
 export async function createAddonRequest(input: {

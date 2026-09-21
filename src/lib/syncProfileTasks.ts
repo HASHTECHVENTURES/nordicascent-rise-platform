@@ -21,7 +21,7 @@ export async function syncEligibleTasks(
   let changed = false;
 
   for (const task of tasks) {
-    // Only preparation tasks sync from profile — later stages need real actions.
+    // Only preparation tasks sync from profile: later stages need real actions.
     if (task.stage_id !== "preparation") continue;
     if (completedIds.has(task.id)) continue;
     if (!isTaskRequirementMet(task.title, profile, candidate)) continue;

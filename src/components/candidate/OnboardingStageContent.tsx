@@ -75,7 +75,7 @@ export default function OnboardingStageContent() {
           </div>
           <h1 className="text-2xl sm:text-3xl font-medium">Your first weeks in Norway</h1>
           <p className="text-white/85 text-sm mt-1 max-w-xl">
-            From arrival through workplace integration — Nordic Ascent coordinates; you confirm the
+            From arrival through workplace integration: Nordic Ascent coordinates; you confirm the
             practical checklist.
           </p>
           {ctx?.companyName && ctx?.jobTitle && (

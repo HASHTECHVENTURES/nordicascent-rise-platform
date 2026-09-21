@@ -37,9 +37,9 @@ You will receive feedback in Messages. When you have passed, mark this task comp
       content_body: `Nordic cultural readiness module
 
 What you will cover
-1. Workplace communication — direct feedback, flat teams, work-life balance
-2. Social norms — punctuality, personal space, seasonal routines
-3. Practical basics — healthcare, banking, housing
+1. Workplace communication: direct feedback, flat teams, work-life balance
+2. Social norms: punctuality, personal space, seasonal routines
+3. Practical basics: healthcare, banking, housing
 
 Time required: about 2 hours.
 
@@ -83,7 +83,7 @@ After the call, mark this task complete.`,
       task_type: "task",
       content_body: `Project kickoff
 
-Begin your assigned internship project with clear goals for the 6–10 week period.
+Begin your assigned internship project with clear goals for the 6-10 week period.
 
 Steps
 • Review project brief and success criteria from your mentor
@@ -205,7 +205,7 @@ Mark complete after your first-week check-in.`,
       image_url: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=1200&auto=format&fit=crop",
       content_body: `Arrival check-in
 
-Welcome — complete these steps in your first week.
+Welcome: complete these steps in your first week.
 
 • Register your address with local authorities
 • Collect your work ID badge from the employer

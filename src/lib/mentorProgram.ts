@@ -78,8 +78,8 @@ export const MENTOR_ACTIVATION_WEEK_WINDOWS: Record<
   4 | 5 | 6,
   { minWeek: number; maxWeek: number; label: string }
 > = {
-  4: { minWeek: 1, maxWeek: 2, label: "weeks 1–2 of internship" },
-  5: { minWeek: 3, maxWeek: 5, label: "weeks 3–5 of internship" },
+  4: { minWeek: 1, maxWeek: 2, label: "weeks 1-2 of internship" },
+  5: { minWeek: 3, maxWeek: 5, label: "weeks 3-5 of internship" },
   6: { minWeek: 6, maxWeek: 99, label: "end of internship (before Final Clearance)" },
 };
 
@@ -154,7 +154,7 @@ export function agendaBulletsFromThemeBody(body: string | null | undefined): str
   return [raw];
 }
 
-/** Count business days between two dates (Mon–Fri), excluding start day. */
+/** Count business days between two dates (Mon-Fri), excluding start day. */
 export function businessDaysBetween(from: Date, to: Date = new Date()): number {
   const start = new Date(from);
   start.setHours(0, 0, 0, 0);
@@ -173,7 +173,7 @@ export function businessDaysBetween(from: Date, to: Date = new Date()): number {
   return days;
 }
 
-/** Weeks since internship start date (1-based; week 1 = days 0–6). */
+/** Weeks since internship start date (1-based; week 1 = days 0-6). */
 export function internshipWeekNumber(
   internshipStartDate: string | null | undefined,
   now: Date = new Date()
@@ -193,7 +193,7 @@ export function isActivationMeetingWeekOpen(
 ): boolean {
   if (meetingNumber < 4 || meetingNumber > 6) return true;
   const week = internshipWeekNumber(internshipStartDate, now);
-  // Until internship start is set, keep M4–6 locked even if activation record exists
+  // Until internship start is set, keep M4-6 locked even if activation record exists
   if (week == null || week <= 0) return false;
   const window = MENTOR_ACTIVATION_WEEK_WINDOWS[meetingNumber as 4 | 5 | 6];
   return week >= window.minWeek;
@@ -310,7 +310,7 @@ export function computeNextMeetingUnlocks(
       shouldBeAvailable = isCompleted(2) && gate.level3BothSubmitted;
     } else if (m.meeting_number === 4) {
       // M4 waits for internship start (week ≥ 1). M5/M6 unlock sequentially
-      // after the previous meeting — week windows are guidance, not hard locks.
+      // after the previous meeting: week windows are guidance, not hard locks.
       shouldBeAvailable =
         track === "entry" &&
         isCompleted(3) &&
@@ -390,7 +390,7 @@ export function getMeetingLockedReason(
       return "Unlocks after Level 3 (both cultural and technical)";
     }
   } else if (meetingNumber > 1) {
-    const prev = byNum.get(meetingNumber - 1);
+    const prev = byNum.get(meetingNumber: 1);
     if (prev && prev.status !== "completed") {
       return `Complete Meeting ${meetingNumber - 1} first`;
     }
@@ -398,7 +398,7 @@ export function getMeetingLockedReason(
   return "Complete the previous step first";
 }
 
-/** Meeting available but not completed for 7+ days — admin flag. Uses available_at. */
+/** Meeting available but not completed for 7+ days: admin flag. Uses available_at. */
 export function isMentorMeetingOverdue(
   meeting: MentorProgramMeeting,
   overdueDays = 7

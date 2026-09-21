@@ -69,7 +69,7 @@ export default function AdminRelocation() {
       <div>
         <h1 className="text-2xl font-medium">Relocation</h1>
         <p className="text-muted-foreground">
-          Module 5 — parallel coordination tracker from Final Clearance to arrival.
+          Module 5: parallel coordination tracker from Final Clearance to arrival.
         </p>
       </div>
 

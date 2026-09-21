@@ -36,7 +36,7 @@ export default function Privacy() {
           <p>
             Data is used to run the selection pipeline, readiness programme, activation, relocation,
             onboarding, and follow-up stages. Companies only see candidate data relevant to their own
-            roles and pipeline stage — internal admin notes and other companies&apos; data are not shared.
+            roles and pipeline stage. Internal admin notes and other companies&apos; data are not shared.
           </p>
 
           <h2 className="text-lg font-medium">Retention</h2>

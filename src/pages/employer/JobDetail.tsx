@@ -93,7 +93,7 @@ export default function EmployerJobDetail() {
           <h1 className="text-2xl font-bold">{job.title}</h1>
           <p className="text-muted-foreground flex items-center gap-2 mt-1">
             <MapPin className="h-4 w-4" />
-            {company?.name ?? "Company"} · {job.location ?? "—"}
+            {company?.name ?? "Company"} · {job.location ?? "n/a"}
           </p>
         </div>
         <Badge variant={job.status === "open" ? "default" : "secondary"}>{job.status}</Badge>
@@ -153,12 +153,12 @@ export default function EmployerJobDetail() {
               </form>
             ) : (
               <>
-                <p><span className="text-muted-foreground">Type </span>{job.job_type ?? "—"}</p>
-                <p><span className="text-muted-foreground">Salary </span>{job.salary_range ?? "—"}</p>
+                <p><span className="text-muted-foreground">Type </span>{job.job_type ?? "n/a"}</p>
+                <p><span className="text-muted-foreground">Salary </span>{job.salary_range ?? "n/a"}</p>
                 {job.posted_at && <p><span className="text-muted-foreground">Posted </span>{job.posted_at.split("T")[0]}</p>}
                 <div className="pt-2">
                   <p className="text-muted-foreground mb-1">Description</p>
-                  <p className="whitespace-pre-wrap">{displayText || "No description yet — use Edit text to add one."}</p>
+                  <p className="whitespace-pre-wrap">{displayText || "No description yet: use Edit text to add one."}</p>
                 </div>
               </>
             )}

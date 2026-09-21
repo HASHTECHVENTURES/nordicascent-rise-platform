@@ -97,7 +97,7 @@ export function applicationStatusLabel(status: string) {
   switch (status) {
     case "applied":
     case "application_complete":
-      return "Submitted — waiting for review";
+      return "Submitted: waiting for review";
     case "reviewing":
       return "Under review";
     case "interview":
@@ -105,7 +105,7 @@ export function applicationStatusLabel(status: string) {
     case "offer":
       return "Offer in progress";
     case "accepted":
-      return "Accepted — Selection in progress";
+      return "Accepted: Selection in progress";
     case "rejected":
       return "Not selected";
     default:
@@ -152,7 +152,7 @@ export function applicationStatusNextStep(status: string, selectionStep?: number
     case "offer":
       return "Offer discussions may be in progress. Watch for updates here and in Messages.";
     case "accepted":
-      return "The company accepted you. Nordic Ascent and the company continue Selection (eligibility, Offee, sessions, board). Readiness opens after a mentor is assigned — no action needed from you yet.";
+      return "The company accepted you. Nordic Ascent and the company continue Selection (eligibility, Offee, sessions, board). Readiness opens after a mentor is assigned. No action needed from you yet.";
     case "rejected":
       return "This job role was not a match. Browse Job Roles to apply elsewhere.";
     default:
@@ -190,14 +190,14 @@ export function applicationStatusVariant(status: string): "default" | "secondary
 
 /** Employer pre-accept workflow (review → interview → accept/decline). */
 export function isEmployerPreAcceptWorkflow(status: string) {
-  // New applies land as application_complete (not "applied") — companies must still be able to accept.
+  // New applies land as application_complete (not "applied"): companies must still be able to accept.
   return ["applied", "application_complete", "reviewing", "interview", "offer"].includes(status);
 }
 
 /** Employer should use Selection module after they have accepted (or pipeline has moved past apply). */
 export function isEmployerSelectionHandoff(status: string) {
   if (status === "accepted") return true;
-  // application_complete is still the company review step — not Selection yet
+  // application_complete is still the company review step: not Selection yet
   if (status === "application_complete" || status === "applied") return false;
   return isSelectionPipelineStatus(status);
 }
@@ -214,7 +214,7 @@ export function employerApplicationStatusLabel(status: string) {
     case "offer":
       return "Offer in progress";
     case "accepted":
-      return "Accepted — continue in Selection";
+      return "Accepted: continue in Selection";
     case "application_complete":
       return "New application";
     case "rejected":
@@ -240,7 +240,7 @@ export type SelectionStep = {
   hint?: string;
 };
 
-/** Selection steps driven by job application status — not profile fields. */
+/** Selection steps driven by job application status: not profile fields. */
 export function getSelectionStepState(applications: ApplicationRow[]): SelectionStep[] {
   const primary = getPrimaryApplication(applications);
   const status = primary?.status ?? "";
@@ -280,7 +280,7 @@ export function getSelectionStepState(applications: ApplicationRow[]): Selection
       title: "Employer screening",
       description: screeningDone
         ? `The employer reviewed your application (${applicationStatusLabel(status)}).`
-        : "The company reviews your profile after you apply — watch Your applications and Messages.",
+        : "The company reviews your profile after you apply: watch Your applications and Messages.",
       done: screeningDone,
       hint: screeningDone
         ? undefined
@@ -297,7 +297,7 @@ export function getSelectionStepState(applications: ApplicationRow[]): Selection
       hint:
         boardDone || readinessOpen
           ? undefined
-          : "No action needed from you yet — updates appear in Your applications.",
+          : "No action needed from you yet: updates appear in Your applications.",
     },
     {
       id: "mentor",

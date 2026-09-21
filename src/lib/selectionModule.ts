@@ -114,7 +114,7 @@ export function isSelectionPipelineStatus(status: string) {
   );
 }
 
-/** Employer Selection list — from Technical (step 3) onward; admin handles eligibility & Offee first. */
+/** Employer Selection list: from Technical (step 3) onward; admin handles eligibility & Offee first. */
 export function isEmployerSelectionListStatus(status: string, selectionStep?: number | null) {
   if (!isSelectionPipelineStatus(status) && status !== "accepted") return false;
   const step = getSelectionStepFromStatus(status, selectionStep);
@@ -123,7 +123,7 @@ export function isEmployerSelectionListStatus(status: string, selectionStep?: nu
 
 /**
  * Active selection step for admin/employer actions.
- * Uses `selection_step` when present — pass statuses (e.g. eligibility_pass) alone
+ * Uses `selection_step` when present: pass statuses (e.g. eligibility_pass) alone
  * would otherwise point at the completed step, not the next one.
  */
 export function getSelectionStepFromStatus(
@@ -235,11 +235,11 @@ export function isStepOverdue(step: SelectionStepId, enteredAt: string | null | 
 export function selectionStatusLabel(status: string) {
   switch (status) {
     case "accepted":
-      return "Accepted — awaiting eligibility";
+      return "Accepted: awaiting eligibility";
     case SELECTION_STATUSES.APPLICATION_COMPLETE:
       return "Application complete";
     case SELECTION_STATUSES.ELIGIBILITY_REVIEW:
-      return "Eligibility — under review";
+      return "Eligibility: under review";
     case SELECTION_STATUSES.ELIGIBILITY_PASS:
       return "Eligibility passed";
     case SELECTION_STATUSES.OFFEE_REVIEW:
@@ -247,11 +247,11 @@ export function selectionStatusLabel(status: string) {
     case SELECTION_STATUSES.OFFEE_PASS:
       return "Assessment complete";
     case SELECTION_STATUSES.STEP3_REVIEW:
-      return "Technical — under review";
+      return "Technical: under review";
     case SELECTION_STATUSES.STEP3_PASS:
       return "Technical passed";
     case SELECTION_STATUSES.STEP4_REVIEW:
-      return "Motivation — under review";
+      return "Motivation: under review";
     case SELECTION_STATUSES.STEP4_PASS:
       return "Motivation passed";
     case SELECTION_STATUSES.SELECTED_FOR_READINESS:
@@ -266,7 +266,7 @@ export function selectionStatusLabel(status: string) {
   }
 }
 
-/** Candidate-facing status — no internal labels (e.g. HOLD shows as under review). */
+/** Candidate-facing status: no internal labels (e.g. HOLD shows as under review). */
 export function candidateSelectionStatusLabel(status: string) {
   if (status === SELECTION_STATUSES.SELECTION_HOLD) {
     return "Under review";
@@ -274,7 +274,7 @@ export function candidateSelectionStatusLabel(status: string) {
   return selectionStatusLabel(status);
 }
 
-/** Max selected + hold-active candidates per job (spec: 2–3 per position). */
+/** Max selected + hold-active candidates per job (spec: 2-3 per position). */
 export function maxSelectionsForJob(positionsCount: number | null | undefined) {
   const positions = Math.max(1, positionsCount ?? 2);
   return Math.min(3, Math.max(2, positions));
@@ -352,16 +352,16 @@ export function candidateTrackerMessage(status: string, selectionStep?: number |
     return "Your application remains under review.";
   }
   if (status === SELECTION_STATUSES.ELIGIBILITY_PASS) {
-    return "Eligibility complete. Next: Offee assessment — Nordic Ascent will share details with you.";
+    return "Eligibility complete. Next: Offee assessment: Nordic Ascent will share details with you.";
   }
   if (status === SELECTION_STATUSES.OFFEE_REVIEW || status === SELECTION_STATUSES.OFFEE_PASS) {
     return status === SELECTION_STATUSES.OFFEE_PASS
-      ? "Offee complete — technical assessment is next."
+      ? "Offee complete: technical assessment is next."
       : "Offee assessment in progress. Nordic Ascent will share timing and instructions.";
   }
   if (status.startsWith("step3_")) {
     return status === SELECTION_STATUSES.STEP3_PASS
-      ? "Technical assessment complete — motivation session is next."
+      ? "Technical assessment complete: motivation session is next."
       : isReviewStatus(status)
         ? "Technical assessment in progress."
         : "Technical assessment coming up.";
@@ -369,18 +369,18 @@ export function candidateTrackerMessage(status: string, selectionStep?: number |
   if (status.startsWith("step4_")) {
     return isReviewStatus(status)
       ? "Motivation session in progress."
-      : "Motivation session complete — the selection board will decide soon.";
+      : "Motivation session complete: the selection board will decide soon.";
   }
   if (status === SELECTION_STATUSES.APPLICATION_COMPLETE) {
-    return "Your application is with the company. They review it first — no action needed from you yet.";
+    return "Your application is with the company. They review it first. No action needed from you yet.";
   }
   if (status === "accepted") {
     return "The company accepted your application. Nordic Ascent and the company will continue Selection (eligibility, Offee, sessions). We'll notify you when something changes.";
   }
   if (status.startsWith("eligibility_")) {
-    return "We're checking eligibility. After that, Offee assessment comes next — no action needed from you yet.";
+    return "We're checking eligibility. After that, Offee assessment comes next. No action needed from you yet.";
   }
-  return "We're reviewing your application. No action needed — we'll notify you when something changes.";
+  return "We're reviewing your application. No action needed: we'll notify you when something changes.";
 }
 
 export function countSelectedForJob(

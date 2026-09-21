@@ -94,7 +94,7 @@ const AdminCandidateDetail = () => {
             <h1 className="text-2xl font-bold tracking-tight">{profile?.full_name ?? "Candidate"}</h1>
             <Badge variant="outline" className="border-primary/40 text-primary">{TRACK_META[track].label}</Badge>
           </div>
-          <p className="text-muted-foreground">{profile?.email} · {candidate.location ?? "—"}</p>
+          <p className="text-muted-foreground">{profile?.email} · {candidate.location ?? "n/a"}</p>
         </div>
         <AdminDeleteButton
           allowed={isMasterAdmin}
@@ -127,7 +127,7 @@ const AdminCandidateDetail = () => {
             <CardTitle className="text-base">Profile</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <p><span className="text-muted-foreground">Title</span> {candidate.title ?? "—"}</p>
+            <p><span className="text-muted-foreground">Title</span> {candidate.title ?? "n/a"}</p>
             <p><span className="text-muted-foreground">Status</span> <Badge>{candidate.status}</Badge></p>
             <p><span className="text-muted-foreground">Joined</span> {candidate.created_at.split("T")[0]}</p>
             <p><span className="text-muted-foreground">Readiness</span> {candidate.readiness_score}%</p>
@@ -177,7 +177,7 @@ const AdminCandidateDetail = () => {
           <p className="text-sm">
             Stage:{" "}
             <Badge variant="outline">
-              {journeyStage ? adminJourneyStageLabel(journeyStage) : "—"}
+              {journeyStage ? adminJourneyStageLabel(journeyStage) : "n/a"}
             </Badge>
           </p>
           <div className="flex flex-wrap gap-2">

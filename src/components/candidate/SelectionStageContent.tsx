@@ -20,7 +20,7 @@ import { stageListPath } from "@/lib/stageRoutes";
 import { completeSelectionIfReady } from "@/lib/pipelineProgress";
 import { useQueryClient } from "@tanstack/react-query";
 
-/** Selection = you were accepted by a company. Tasks mirror your job application — not My Profile. */
+/** Selection = you were accepted by a company. Tasks mirror your job application: not My Profile. */
 export default function SelectionStageContent({ embedded = false }: { embedded?: boolean }) {
   const { candidate } = useAuth();
   const [track] = useTrack();
@@ -81,7 +81,7 @@ export default function SelectionStageContent({ embedded = false }: { embedded?:
           <h2 className="text-lg font-medium text-foreground">Selection progress</h2>
           <p className="text-sm text-muted-foreground mt-1">
             {selectionComplete
-              ? "Selection is complete — continue to Readiness."
+              ? "Selection is complete: continue to Readiness."
               : "Company accept is only the first step. Readiness unlocks after Selection assessments and mentor assignment."}
           </p>
         </div>
@@ -91,7 +91,7 @@ export default function SelectionStageContent({ embedded = false }: { embedded?:
         <Card className="border-primary/20 bg-primary/5">
           <CardContent className="pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <p className="font-medium">{job.companies?.name ?? "Company"} — {job.title}</p>
+              <p className="font-medium">{job.companies?.name ?? "Company"}: {job.title}</p>
               <Badge variant={applicationStatusVariant(primary.status)} className="mt-2">
                 {applicationStatusLabel(primary.status)}
               </Badge>

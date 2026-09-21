@@ -206,7 +206,7 @@ export function useUpdateCandidateStatus() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      // Appendix A · Data protection §2 — retention date is recalculated
+      // Appendix A · Data protection §2: retention date is recalculated
       // automatically whenever status changes, so admins no longer have to
       // manually apply the suggestion. The suggest_retention_date RPC holds the
       // single source of truth for the retention rules.
@@ -1824,7 +1824,7 @@ export function useDeleteCandidate() {
 
       // Erasure ledger lives in Storage (NOT in DB backups). After a PITR/daily
       // restore, master admin re-applies these entries so resurrected rows are
-      // deleted again — the only practical way to honour "including backups".
+      // deleted again: the only practical way to honour "including backups".
       if (result?.candidate_id) {
         const erasedAt = new Date().toISOString();
         const windowDays = result.backup_window_days ?? 30;
@@ -2529,7 +2529,7 @@ export function useCandidateStageProgress(candidateId: string | undefined) {
   });
 }
 
-// Appendix A · Core §3 — candidate status history for the admin timeline.
+// Appendix A · Core §3: candidate status history for the admin timeline.
 export type CandidateStatusHistoryRow = {
   id: string;
   candidate_id: string;
@@ -2556,7 +2556,7 @@ export function useCandidateStatusHistory(candidateId: string | undefined) {
   });
 }
 
-// Appendix A · Core §10 — unified internal notes across all workflow stages.
+// Appendix A · Core §10: unified internal notes across all workflow stages.
 export type CandidateInternalNote = {
   stage: string;
   label: string;
@@ -2769,7 +2769,7 @@ export function useAdminMentoringPipeline() {
           return {
             id: c.id,
             fullName: p?.full_name ?? "Candidate",
-            email: p?.email ?? "—",
+            email: p?.email ?? "n/a",
             testsTotal,
             testsSubmitted: submitted.length,
             jobsUnlocked: Boolean(c.jobs_unlocked),

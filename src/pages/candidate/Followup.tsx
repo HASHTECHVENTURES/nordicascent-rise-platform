@@ -33,7 +33,7 @@ export default function CandidateFollowup() {
       <div>
         <h1 className="text-2xl font-medium">Follow-up & Support</h1>
         <p className="text-muted-foreground">
-          Six months of support after arrival — separate check-ins with you and your company.
+          Six months of support after arrival: separate check-ins with you and your company.
           {ctx.companyName ? ` · ${ctx.companyName}` : ""}
         </p>
       </div>

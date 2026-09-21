@@ -119,7 +119,7 @@ export default function EmployerInternshipTasksPanel({ embedded }: Props) {
     <Card className={embedded ? "border-dashed" : undefined}>
       <CardHeader className="flex flex-row items-center justify-between gap-4">
         <CardTitle className="text-lg">
-          {embedded ? "Step 1 — Internship" : "Internship tasks"}
+          {embedded ? "Step 1: Internship" : "Internship tasks"}
         </CardTitle>
         {!showForm && (
           <Button size="sm" className="gap-2" onClick={() => setShowForm(true)}>

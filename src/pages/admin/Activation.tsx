@@ -43,7 +43,7 @@ export default function AdminActivation() {
       <div>
         <h1 className="text-2xl font-medium">Activation</h1>
         <p className="text-muted-foreground">
-          Module 4 — unlock activation, then track internship checkpoints and clearance per candidate.
+          Module 4: unlock activation, then track internship checkpoints and clearance per candidate.
         </p>
       </div>
 
@@ -53,8 +53,8 @@ export default function AdminActivation() {
           <Link to="/admin/readiness" className="text-primary font-medium hover:underline">
             Readiness
           </Link>{" "}
-          (meetings 1–3) and Activation (meetings 4–6). After readiness is complete, unlock
-          activation below. Entry track candidates get 7 internship checkpoints (M4–M6 auto-sync
+          (meetings 1-3) and Activation (meetings 4-6). After readiness is complete, unlock
+          activation below. Entry track candidates get 7 internship checkpoints (M4-M6 auto-sync
           from mentoring).
         </CardContent>
       </Card>
@@ -77,7 +77,7 @@ export default function AdminActivation() {
             {missingStartCount > 0 && (
               <p>
                 {missingStartCount} accepted internship{missingStartCount > 1 ? "s" : ""} missing
-                start date (mentor M4–M6 stay locked until set).
+                start date (mentor M4-M6 stay locked until set).
               </p>
             )}
           </CardContent>
@@ -202,7 +202,7 @@ export default function AdminActivation() {
                     <div className="min-w-0">
                       <p className="font-medium truncate">{profile?.full_name ?? "Candidate"}</p>
                       <p className="text-xs text-muted-foreground">
-                        {app.jobs?.title} · {track === "entry" ? "Entry — 7 checkpoints" : "Fast track"}
+                        {app.jobs?.title} · {track === "entry" ? "Entry: 7 checkpoints" : "Fast track"}
                       </p>
                       {(overdueCps.length > 0 || missingStart) && (
                         <div className="flex flex-wrap gap-1.5 mt-1.5">

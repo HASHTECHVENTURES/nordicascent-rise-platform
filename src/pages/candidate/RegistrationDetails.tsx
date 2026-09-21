@@ -155,7 +155,7 @@ export default function CandidateRegistrationDetails() {
         <p className="text-sm font-medium text-primary">Step 3 of 3</p>
         <h1 className="text-2xl font-bold tracking-tight">Academic & motivation</h1>
         <p className="text-sm text-muted-foreground">
-          {TRACK_META[track].label} — a few more details before applying to job roles.
+          {TRACK_META[track].label}: a few more details before applying to job roles.
         </p>
       </div>
 

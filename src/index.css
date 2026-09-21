@@ -148,6 +148,17 @@
 }
 
 @layer utilities {
+  /* Fjörd glass - floating public nav */
+  .fjord-glass {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.82) 0%,
+      rgba(255, 255, 255, 0.68) 100%
+    );
+    backdrop-filter: blur(18px) saturate(1.35);
+    -webkit-backdrop-filter: blur(18px) saturate(1.35);
+  }
+
   /* Professional button style - rectangular, solid */
   .btn-professional {
     @apply bg-primary text-primary-foreground px-6 py-2.5 font-medium;
@@ -187,6 +198,234 @@
   /* Boost contrast for the cream/gold logo */
   .logo-boost {
     filter: brightness(1.25) contrast(1.25) saturate(1.05);
+  }
+
+  /*
+   * Hero aurora - adapted from CodePen “rainbow background” (Sylvain Garnot)
+   * Brand palette only: Nordic navy, fjord blue, ice. Soft + behind content.
+   */
+  .hero-aurora {
+    opacity: 0.55;
+    mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 100%);
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 55%, transparent 100%);
+  }
+
+  .hero-aurora-stage {
+    position: absolute;
+    inset: -20% -10% 0;
+    overflow: hidden;
+  }
+
+  .hero-aurora-beam {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 0;
+    transform: rotate(12deg);
+    transform-origin: top right;
+    opacity: 0.85;
+    animation: heroAuroraSlide 48s linear infinite;
+  }
+
+  .hero-aurora-beam--1 {
+    box-shadow:
+      -100px 0 70px 32px rgba(255, 255, 255, 0.95),
+      -40px 0 45px 22px rgba(28, 58, 95, 0.35),
+      0 0 45px 22px rgba(95, 167, 209, 0.45),
+      40px 0 45px 22px rgba(168, 212, 232, 0.4),
+      100px 0 70px 32px rgba(255, 255, 255, 0.95);
+    animation-duration: 46s;
+    animation-delay: -4s;
+  }
+  .hero-aurora-beam--2 {
+    box-shadow:
+      -100px 0 70px 32px rgba(255, 255, 255, 0.95),
+      -40px 0 45px 22px rgba(95, 167, 209, 0.4),
+      0 0 45px 22px rgba(168, 212, 232, 0.45),
+      40px 0 45px 22px rgba(28, 58, 95, 0.3),
+      100px 0 70px 32px rgba(255, 255, 255, 0.95);
+    animation-duration: 50s;
+    animation-delay: -8s;
+  }
+  .hero-aurora-beam--3 {
+    box-shadow:
+      -100px 0 70px 32px rgba(255, 255, 255, 0.95),
+      -40px 0 45px 22px rgba(168, 212, 232, 0.4),
+      0 0 45px 22px rgba(28, 58, 95, 0.35),
+      40px 0 45px 22px rgba(95, 167, 209, 0.4),
+      100px 0 70px 32px rgba(255, 255, 255, 0.95);
+    animation-duration: 44s;
+    animation-delay: -12s;
+  }
+  .hero-aurora-beam--4 {
+    box-shadow:
+      -100px 0 70px 32px rgba(255, 255, 255, 0.95),
+      -40px 0 45px 22px rgba(28, 58, 95, 0.28),
+      0 0 45px 22px rgba(95, 167, 209, 0.5),
+      40px 0 45px 22px rgba(43, 74, 111, 0.35),
+      100px 0 70px 32px rgba(255, 255, 255, 0.95);
+    animation-duration: 52s;
+    animation-delay: -16s;
+  }
+  .hero-aurora-beam--5 {
+    box-shadow:
+      -100px 0 70px 32px rgba(255, 255, 255, 0.95),
+      -40px 0 45px 22px rgba(95, 167, 209, 0.35),
+      0 0 45px 22px rgba(28, 58, 95, 0.4),
+      40px 0 45px 22px rgba(168, 212, 232, 0.35),
+      100px 0 70px 32px rgba(255, 255, 255, 0.95);
+    animation-duration: 47s;
+    animation-delay: -20s;
+  }
+  .hero-aurora-beam--6 {
+    box-shadow:
+      -100px 0 70px 32px rgba(255, 255, 255, 0.95),
+      -40px 0 45px 22px rgba(168, 212, 232, 0.35),
+      0 0 45px 22px rgba(95, 167, 209, 0.4),
+      40px 0 45px 22px rgba(28, 58, 95, 0.32),
+      100px 0 70px 32px rgba(255, 255, 255, 0.95);
+    animation-duration: 49s;
+    animation-delay: -24s;
+  }
+
+  .hero-aurora-beam:nth-child(1) { top: 2%; }
+  .hero-aurora-beam:nth-child(2) { top: 8%; }
+  .hero-aurora-beam:nth-child(3) { top: 14%; }
+  .hero-aurora-beam:nth-child(4) { top: 20%; }
+  .hero-aurora-beam:nth-child(5) { top: 28%; }
+  .hero-aurora-beam:nth-child(6) { top: 36%; }
+  .hero-aurora-beam:nth-child(7) { top: 44%; }
+  .hero-aurora-beam:nth-child(8) { top: 52%; }
+  .hero-aurora-beam:nth-child(9) { top: 10%; }
+  .hero-aurora-beam:nth-child(10) { top: 24%; }
+  .hero-aurora-beam:nth-child(11) { top: 40%; }
+  .hero-aurora-beam:nth-child(12) { top: 18%; }
+
+  .hero-aurora-vignette-h {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 0;
+    box-shadow: 0 0 40vh 28vh hsl(36 22% 96%);
+    pointer-events: none;
+  }
+
+  .hero-aurora-vignette-v {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 100%;
+    box-shadow: 0 0 28vw 18vw hsl(36 22% 96%);
+    pointer-events: none;
+  }
+
+  @keyframes heroAuroraSlide {
+    from {
+      right: -30vw;
+    }
+    to {
+      right: 130vw;
+    }
+  }
+
+  /* Hero content stagger */
+  .hero-enter {
+    animation: heroEnter 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .hero-enter-1 { animation-delay: 0.05s; }
+  .hero-enter-2 { animation-delay: 0.14s; }
+  .hero-enter-3 { animation-delay: 0.24s; }
+  .hero-enter-4 { animation-delay: 0.32s; }
+  .hero-enter-5 { animation-delay: 0.42s; }
+  .hero-enter-6 { animation-delay: 0.52s; }
+
+  @keyframes heroEnter {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Journey graph motion */
+  .journey-draw {
+    transition: stroke-dashoffset 1.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .journey-dash {
+    animation: journeyDash 18s linear infinite;
+  }
+
+  .journey-pulse {
+    animation: journeyPulse 2.4s ease-in-out infinite;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+
+  .journey-pulse-inner {
+    animation: journeyPulse 2.4s ease-in-out infinite 0.35s;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+
+  .journey-panel {
+    animation: journeyPanelIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes journeyDash {
+    to {
+      stroke-dashoffset: -200;
+    }
+  }
+
+  @keyframes journeyPulse {
+    0%,
+    100% {
+      opacity: 0.7;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.15;
+      transform: scale(1.45);
+    }
+  }
+
+  @keyframes journeyPanelIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-aurora-beam,
+    .hero-enter {
+      animation: none !important;
+    }
+    .hero-enter {
+      opacity: 1;
+      transform: none;
+    }
+    .journey-draw {
+      transition: none;
+    }
+    .journey-dash,
+    .journey-pulse,
+    .journey-pulse-inner {
+      animation: none;
+    }
+    .journey-panel {
+      animation: none;
+    }
   }
 
   /* Animation utilities */

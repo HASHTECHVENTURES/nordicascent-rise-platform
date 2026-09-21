@@ -134,7 +134,7 @@ export default function FinalClearancePanel({
         )}
         {alreadyDecided && existing && (
           <Badge variant={existing.decision === "clear" ? "default" : "destructive"}>
-            {existing.decision === "clear" ? "Cleared" : "Hold — not proceeding"}
+            {existing.decision === "clear" ? "Cleared" : "Hold: not proceeding"}
           </Badge>
         )}
       </div>
@@ -194,7 +194,7 @@ export default function FinalClearancePanel({
                   <Label htmlFor="decision-hold" className="font-normal cursor-pointer">
                     <span className="font-medium text-destructive">Hold</span>
                     <p className="text-sm text-muted-foreground">
-                      Genuine red flag — do not proceed. Candidate moves to alumni.
+                      Genuine red flag: do not proceed. Candidate moves to alumni.
                     </p>
                   </Label>
                 </div>

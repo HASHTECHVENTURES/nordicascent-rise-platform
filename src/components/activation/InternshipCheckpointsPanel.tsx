@@ -29,14 +29,14 @@ type Props = {
   applicationId: string;
   canEdit?: boolean;
   showStatus?: boolean;
-  /** Candidates see checkpoint progress only — not evaluation content. */
+  /** Candidates see checkpoint progress only: not evaluation content. */
   showEvaluation?: boolean;
 };
 
 const PHASE_LABELS: Record<string, string> = {
-  onboarding: "Phase 1 — Onboarding (Pre-start and Week 1)",
-  execution: "Phase 2 — Execution (Week 3–5/6)",
-  review: "Phase 3 — Review (Final 2 weeks)",
+  onboarding: "Phase 1: Onboarding (Pre-start and Week 1)",
+  execution: "Phase 2: Execution (Week 3-5/6)",
+  review: "Phase 3: Review (Final 2 weeks)",
 };
 
 export default function InternshipCheckpointsPanel({
@@ -99,8 +99,8 @@ export default function InternshipCheckpointsPanel({
             Internship checkpoints ({INTERNSHIP_CHECKPOINT_TOTAL})
           </h3>
           <p className="text-sm text-muted-foreground">
-            Entry track — all {INTERNSHIP_CHECKPOINT_TOTAL} must be complete before Final Clearance
-            unlocks. Meetings 4–6 auto-complete from Module 3B.
+            Entry track: all {INTERNSHIP_CHECKPOINT_TOTAL} must be complete before Final Clearance
+            unlocks. Meetings 4-6 auto-complete from Module 3B.
           </p>
         </div>
         {showStatus && record && (
@@ -113,7 +113,7 @@ export default function InternshipCheckpointsPanel({
 
       {gateComplete && cp0?.status === "available" && (
         <p className="text-sm rounded-lg border border-success/30 bg-success/5 px-3 py-2 text-foreground">
-          Pre-internship gate complete — checkpoint #0 is unlocked
+          Pre-internship gate complete: checkpoint #0 is unlocked
           {canEdit
             ? ". Confirm assignment and access below to continue."
             : ". Your company confirms company checkpoints; mentor meetings auto-complete theirs."}
@@ -211,7 +211,7 @@ export default function InternshipCheckpointsPanel({
 
                     {!done && !locked && cp.who_confirms === "company" && !canEdit && (
                       <p className="text-xs text-muted-foreground">
-                        Unlocked — waiting for your company to confirm this checkpoint.
+                        Unlocked: waiting for your company to confirm this checkpoint.
                       </p>
                     )}
 
@@ -221,7 +221,7 @@ export default function InternshipCheckpointsPanel({
                           cp.checkpoint_number === 0
                             ? "Assignment / access details"
                             : cp.checkpoint_number === 1
-                              ? "Kick-off notes — what was covered?"
+                              ? "Kick-off notes: what was covered?"
                               : "Notes"
                         }
                         notesRequired={cp.checkpoint_number === 0 || cp.checkpoint_number === 1}

@@ -68,7 +68,7 @@ export function InternshipEvaluationReadOnly({ evaluation }: { evaluation: Inter
   return (
     <div className="text-sm bg-muted/50 rounded-md p-3 space-y-2">
       <p className="text-xs text-muted-foreground">
-        Company internship evaluation — not shared with the university or candidate.
+        Company internship evaluation: not shared with the university or candidate.
       </p>
       {INTERNSHIP_EVALUATION_FIELDS.map((f) => (
         <p key={f.key}>
@@ -121,7 +121,7 @@ export default function InternshipEvaluationForm({
       <div>
         <p className="text-sm font-medium">Internship evaluation</p>
         <p className="text-xs text-muted-foreground mt-0.5">
-          For Final Clearance only — separate from any academic evaluation sent to a university.
+          For Final Clearance only: separate from any academic evaluation sent to a university.
         </p>
       </div>
 

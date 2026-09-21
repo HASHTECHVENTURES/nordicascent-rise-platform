@@ -88,7 +88,7 @@ export default function AdminActivationApplication() {
       <div className="space-y-2">
         <h2 className="text-lg font-medium">Mentor programme (parallel)</h2>
         <p className="text-sm text-muted-foreground">
-          Meetings 1–3 during Readiness; meetings 4–6 unlock with Activation (Entry track).
+          Meetings 1-3 during Readiness; meetings 4-6 unlock with Activation (Entry track).
         </p>
         <MentorProgramPanel applicationId={app.id} track={track} canEdit showObservations />
         <MentorCompanyNotesPanel applicationId={app.id} track={track} />

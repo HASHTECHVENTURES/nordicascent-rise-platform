@@ -122,7 +122,7 @@ export default function AdminCandidateEdit() {
         </Button>
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Correct candidate details</h1>
-          <p className="text-muted-foreground text-sm">GDPR data correction — admin only</p>
+          <p className="text-muted-foreground text-sm">GDPR data correction: admin only</p>
         </div>
       </div>
 

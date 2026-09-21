@@ -136,7 +136,7 @@ export default function AdminFollowup() {
         <div>
           <h1 className="text-2xl font-medium">Follow-up</h1>
           <p className="text-muted-foreground">
-            Module 7 — six-month support. Overdue touchpoints, Flags, and retention risk are listed
+            Module 7: six-month support. Overdue touchpoints, Flags, and retention risk are listed
             separately from the full roster.
           </p>
         </div>
@@ -185,7 +185,7 @@ export default function AdminFollowup() {
             rows={flagged}
           />
           <Section
-            title={`At risk — retention (${retention.length})`}
+            title={`At risk: retention (${retention.length})`}
             empty="No retention risk signals."
             rows={retention}
           />
@@ -199,7 +199,7 @@ export default function AdminFollowup() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Reporting — by Readiness dimension</CardTitle>
+          <CardTitle className="text-base">Reporting: by Readiness dimension</CardTitle>
         </CardHeader>
         <CardContent>
           {rollupLoading ? (

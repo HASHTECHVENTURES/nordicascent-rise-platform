@@ -141,7 +141,7 @@ export default function PreInternshipGatePanel({
               <p className="text-sm font-medium">University credit required</p>
               <p className="text-xs text-muted-foreground">
                 When on, academic step 1 must complete before internship starts. University sees the
-                academic layer only — never Final Clearance or hiring evaluation.
+                academic layer only: never Final Clearance or hiring evaluation.
               </p>
             </div>
             <Switch
@@ -191,7 +191,7 @@ export default function PreInternshipGatePanel({
             <p className="text-xs text-muted-foreground flex items-center gap-1">
               <CheckCircle2 className="h-3.5 w-3.5 text-success" />
               Acknowledged {new Date(record.presentation_acknowledged_at!).toLocaleDateString()}
-              {!accepted ? " — continue with Step 2 below" : ""}
+              {!accepted ? ": continue with Step 2 below" : ""}
             </p>
           ) : canAcknowledge ? (
             <Button size="sm" disabled={acknowledge.isPending} onClick={runAcknowledge}>
@@ -218,7 +218,7 @@ export default function PreInternshipGatePanel({
           <p className="text-xs text-muted-foreground">
             This is the step that unlocks internship checkpoints. Acknowledging the presentation alone
             is not enough. Nordic Ascent or your company sets the internship start date so mentor
-            meetings 4–6 unlock on the correct week schedule.
+            meetings 4-6 unlock on the correct week schedule.
           </p>
           {accepted ? (
             <div className="space-y-3">
@@ -275,7 +275,7 @@ export default function PreInternshipGatePanel({
             <div className="space-y-3">
               {!record.internship_start_date && (
                 <p className="text-xs text-muted-foreground">
-                  Your internship start date is set by Nordic Ascent or the company — you do not need
+                  Your internship start date is set by Nordic Ascent or the company: you do not need
                   to enter it here.
                 </p>
               )}
@@ -321,7 +321,7 @@ export default function PreInternshipGatePanel({
               </Button>
               {!acknowledged && (
                 <p className="text-xs text-muted-foreground">
-                  Complete Step 1 first — click “I have read this” above.
+                  Complete Step 1 first: click “I have read this” above.
                 </p>
               )}
             </div>
@@ -370,7 +370,7 @@ export default function PreInternshipGatePanel({
                 {unlockAcademic.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  "Emergency override — unlock without step 1"
+                  "Emergency override: unlock without step 1"
                 )}
               </Button>
             )}

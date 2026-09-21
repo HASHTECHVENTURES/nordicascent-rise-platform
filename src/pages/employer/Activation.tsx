@@ -56,18 +56,18 @@ export default function EmployerActivation() {
       <div>
         <h1 className="text-2xl font-medium">Activation</h1>
         <p className="text-muted-foreground">
-          Module 4 at {companyName} — internship checkpoints, evaluation, and final clearance.
+          Module 4 at {companyName}: internship checkpoints, evaluation, and final clearance.
         </p>
       </div>
 
       <Card className="border-primary/20 bg-primary/5">
         <CardContent className="pt-6 text-sm text-muted-foreground space-y-2">
           <p>
-            <strong>Entry track:</strong> 7 internship checkpoints (meetings 4–6 auto-complete from
+            <strong>Entry track:</strong> 7 internship checkpoints (meetings 4-6 auto-complete from
             Mentoring). Then Final Clearance, then pre-arrival employment.
           </p>
           <p>
-            <strong>Fast track:</strong> Skips internship — goes to Final Clearance after Readiness +
+            <strong>Fast track:</strong> Skips internship: goes to Final Clearance after Readiness +
             Meeting 3 (Phase 3).
           </p>
         </CardContent>

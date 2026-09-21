@@ -167,11 +167,11 @@ const EmployerCandidates = () => {
                           <Badge variant="outline" className="border-primary/40 text-primary">{TRACK_META[candidate.track].label}</Badge>
                         </div>
                         <p className="text-sm text-muted-foreground mt-0.5">
-                          Applied for <span className="font-medium text-foreground">{job?.title ?? "—"}</span>
+                          Applied for <span className="font-medium text-foreground">{job?.title ?? "n/a"}</span>
                         </p>
                         <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1 flex-wrap">
-                          <span className="flex items-center gap-1"><Briefcase className="h-3 w-3" />{candidate.title ?? "—"}</span>
-                          <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{candidate.location ?? "—"}</span>
+                          <span className="flex items-center gap-1"><Briefcase className="h-3 w-3" />{candidate.title ?? "n/a"}</span>
+                          <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{candidate.location ?? "n/a"}</span>
                           {candidate.experience && (
                             <span className="flex items-center gap-1"><GraduationCap className="h-3 w-3" />{candidate.experience}</span>
                           )}

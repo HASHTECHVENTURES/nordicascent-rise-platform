@@ -56,7 +56,7 @@ export function canAccessReadiness(
   return hasReadinessUnlocked(applications);
 }
 
-/** Mentoring runs parallel with Readiness once unlocked (Module 3B) — not after all tests. */
+/** Mentoring runs parallel with Readiness once unlocked (Module 3B): not after all tests. */
 export function canAccessMentoring(
   profile: Profile | null,
   candidate: Candidate | null | undefined,
@@ -127,7 +127,7 @@ function tailStageState(
   return "upcoming";
 }
 
-/** Full candidate journey — always visible (done / current / upcoming). */
+/** Full candidate journey: always visible (done / current / upcoming). */
 export function computeEarlyJourneySteps(
   profile: Profile | null,
   candidate: Candidate | null | undefined,
@@ -182,7 +182,7 @@ export function computeEarlyJourneySteps(
     {
       id: "readiness",
       label: "Readiness",
-      description: "Timed Q&A tests + mentor meetings 1–3",
+      description: "Timed Q&A tests + mentor meetings 1-3",
       state: stepState("readiness"),
       href: "/candidate/readiness",
     },

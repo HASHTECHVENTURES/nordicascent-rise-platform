@@ -48,7 +48,7 @@ const EmployerMentoring = () => {
         description: invite?.emailSent
           ? "Login credentials were emailed to the mentor."
           : invite?.temporaryPassword
-            ? `Share login once: ${mentorEmail} / ${invite.temporaryPassword} (email not sent — set RESEND_API_KEY).`
+            ? `Share login once: ${mentorEmail} / ${invite.temporaryPassword} (email not sent: set RESEND_API_KEY).`
             : invite?.emailReason ?? "Account created. Ask them to sign in at /login?role=mentor.",
       });
       setMentorName("");
@@ -71,8 +71,8 @@ const EmployerMentoring = () => {
       <div>
         <h1 className="text-2xl font-medium">Mentoring</h1>
         <p className="text-muted-foreground">
-          Standard 3+3 programme — six fixed sessions per candidate (Entry track) or three (Fast track).
-          Complete mentor observations here. Optional add-on topics allowed — no custom meetings.
+          Standard 3+3 programme: six fixed sessions per candidate (Entry track) or three (Fast track).
+          Complete mentor observations here. Optional add-on topics allowed; no custom meetings.
         </p>
       </div>
 

@@ -56,7 +56,7 @@ const EmployerSelectionApplication = () => {
         mentorId,
         track: appTrack,
       });
-      toast({ title: "Mentor assigned — Readiness unlocked" });
+      toast({ title: "Mentor assigned: Readiness unlocked" });
     } catch (err) {
       toast({
         title: "Failed",
@@ -185,9 +185,9 @@ const EmployerSelectionApplication = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-3 text-sm">
-              <p><span className="text-muted-foreground">Technical:</span> {summary.technical_score ?? "—"}</p>
-              <p><span className="text-muted-foreground">Cognitive:</span> {summary.cognitive_score ?? "—"}</p>
-              <p><span className="text-muted-foreground">Motivation:</span> {summary.motivation_score ?? "—"}</p>
+              <p><span className="text-muted-foreground">Technical:</span> {summary.technical_score ?? "n/a"}</p>
+              <p><span className="text-muted-foreground">Cognitive:</span> {summary.cognitive_score ?? "n/a"}</p>
+              <p><span className="text-muted-foreground">Motivation:</span> {summary.motivation_score ?? "n/a"}</p>
             </div>
             {summary.admin_recommendation && (
               <div className="rounded-lg border p-3 text-sm">
@@ -239,7 +239,7 @@ const EmployerSelectionApplication = () => {
           <CardContent className="space-y-4">
             {isMentorAssignmentOverdue(app.board_decided_at) && !app.assigned_mentor_id && (
               <p className="text-sm text-destructive font-medium">
-                Overdue — no mentor assigned within 5 days of selection.
+                Overdue: no mentor assigned within 5 days of selection.
               </p>
             )}
             <p className="text-sm text-muted-foreground">
@@ -252,7 +252,7 @@ const EmployerSelectionApplication = () => {
               <SelectContent>
                 {(mentors ?? []).map((m) => (
                   <SelectItem key={m.id} value={m.id}>
-                    {m.name} — {m.email}
+                    {m.name}: {m.email}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -284,7 +284,7 @@ const EmployerSelectionApplication = () => {
               Waiting on Nordic Ascent (Eligibility & Offee)
             </p>
             <p className="text-sm text-muted-foreground max-w-md mx-auto">
-              Steps 1–2 are completed in the <strong>Admin → Selection</strong> portal. When those
+              Steps 1-2 are completed in the <strong>Admin → Selection</strong> portal. When those
               pass, this page unlocks Technical assessment, Motivation, Selection board, then mentor
               assignment.
             </p>

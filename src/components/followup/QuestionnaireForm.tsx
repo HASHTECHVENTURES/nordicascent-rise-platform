@@ -107,7 +107,7 @@ export default function QuestionnaireForm({ questionnaire, applicationId, readOn
                 <p className="font-medium text-foreground">{def?.prompt ?? a.question_key}</p>
                 <p className="text-muted-foreground">
                   {a.open_text ??
-                    (a.score != null ? `Score ${a.score}${a.option_key ? ` (${a.option_key})` : ""}` : "—")}
+                    (a.score != null ? `Score ${a.score}${a.option_key ? ` (${a.option_key})` : ""}` : "n/a")}
                   {a.readiness_dimension ? ` · ${a.readiness_dimension}` : ""}
                 </p>
               </div>
@@ -267,7 +267,7 @@ export default function QuestionnaireForm({ questionnaire, applicationId, readOn
       <DialogContent className="max-w-lg sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>
-            {questionnaire.party === "candidate" ? "Candidate" : "Company"} questionnaire — month{" "}
+            {questionnaire.party === "candidate" ? "Candidate" : "Company"} questionnaire: month{" "}
             {questionnaire.month_number}
           </DialogTitle>
           <DialogDescription>

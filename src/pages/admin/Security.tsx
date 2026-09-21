@@ -107,7 +107,7 @@ const AdminSecurity = () => {
                 {applyErasure.isPending ? (
                   <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                 ) : null}
-                After a backup restore — keep deletions
+                After a backup restore: keep deletions
               </Button>
             )}
           </div>
@@ -144,14 +144,14 @@ const AdminSecurity = () => {
                           <TableCell className="font-medium text-sm">
                             {entry.full_name ?? "Candidate"}
                           </TableCell>
-                          <TableCell className="text-sm">{entry.email ?? "—"}</TableCell>
+                          <TableCell className="text-sm">{entry.email ?? "n/a"}</TableCell>
                           <TableCell className="text-sm text-muted-foreground">
                             {entry.erased_at
                               ? formatDistanceToNow(new Date(entry.erased_at), { addSuffix: true })
-                              : "—"}
+                              : "n/a"}
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground">
-                            {entry.backup_expires_at ?? "—"}
+                            {entry.backup_expires_at ?? "n/a"}
                           </TableCell>
                           <TableCell>
                             <Badge variant="secondary">
@@ -277,7 +277,7 @@ const AdminSecurity = () => {
                   return (
                     <TableRow key={flag.id}>
                       <TableCell className="font-medium">{flag.anomaly_type.replace(/_/g, " ")}</TableCell>
-                      <TableCell>{actor?.full_name ?? actor?.email ?? "—"}</TableCell>
+                      <TableCell>{actor?.full_name ?? actor?.email ?? "n/a"}</TableCell>
                       <TableCell className="text-xs text-muted-foreground max-w-xs truncate">
                         {JSON.stringify(flag.details)}
                       </TableCell>

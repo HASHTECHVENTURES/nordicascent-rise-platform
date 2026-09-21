@@ -19,7 +19,7 @@ export default function MentorCandidateDetail() {
   const app = (data?.assignments ?? []).find((a) => a.id === applicationId);
   const viewedCandidateId = app?.candidates?.id ?? null;
 
-  // Appendix A · Audit log — record when a mentor opens their assigned candidate.
+  // Appendix A · Audit log: record when a mentor opens their assigned candidate.
   useEffect(() => {
     if (viewedCandidateId) logAccess.mutate(viewedCandidateId);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- log once per candidate open

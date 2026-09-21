@@ -291,7 +291,7 @@ const AdminSelectionCompany = () => {
         <div>
           <h1 className="text-2xl font-medium">{companyName}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Selection pipeline — review queue by step across this company’s roles.
+            Selection pipeline: review queue by step across this company’s roles.
           </p>
         </div>
       </div>
@@ -311,12 +311,12 @@ const AdminSelectionCompany = () => {
         <span>{allApps.length} applications</span>
         <span className="text-muted-foreground">·</span>
         <span>
-          Showing {filtered.length === 0 ? 0 : (safePage - 1) * pageSize + 1}–
+          Showing {filtered.length === 0 ? 0 : (safePage - 1) * pageSize + 1}-
           {Math.min(safePage * pageSize, filtered.length)} of {filtered.length}
         </span>
       </div>
 
-      {/* Compact step queue — inspired by Candidates filter chips / Activation tables */}
+      {/* Compact step queue: inspired by Candidates filter chips / Activation tables */}
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
@@ -413,7 +413,7 @@ const AdminSelectionCompany = () => {
                   <SelectItem value="attention">Attention first</SelectItem>
                   <SelectItem value="newest">Newest applied</SelectItem>
                   <SelectItem value="oldest">Oldest applied</SelectItem>
-                  <SelectItem value="name">Name A–Z</SelectItem>
+                  <SelectItem value="name">Name A-Z</SelectItem>
                 </SelectContent>
               </Select>
               <Select
@@ -546,12 +546,12 @@ const AdminSelectionCompany = () => {
                             >
                               <p className="font-medium leading-tight">{name}</p>
                               <p className="text-xs text-muted-foreground truncate max-w-[240px]">
-                                {email || "—"}
+                                {email || "n/a"}
                               </p>
                             </Link>
                           </TableCell>
                           <TableCell className="hidden sm:table-cell text-sm text-muted-foreground">
-                            {app.jobs?.title ?? "—"}
+                            {app.jobs?.title ?? "n/a"}
                           </TableCell>
                           <TableCell className="hidden md:table-cell text-sm text-muted-foreground whitespace-nowrap">
                             {step}. {SELECTION_STEPS.find((s) => s.step === step)?.label}
@@ -581,12 +581,12 @@ const AdminSelectionCompany = () => {
                                 </Badge>
                               )}
                               {!overdue && !mentorOverdue && !app.needs_action && (
-                                <span className="text-xs text-muted-foreground">—</span>
+                                <span className="text-xs text-muted-foreground">n/a</span>
                               )}
                             </div>
                           </TableCell>
                           <TableCell className="hidden sm:table-cell text-sm text-muted-foreground whitespace-nowrap">
-                            {app.applied_at ? app.applied_at.split("T")[0] : "—"}
+                            {app.applied_at ? app.applied_at.split("T")[0] : "n/a"}
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="inline-flex items-center gap-1">

@@ -81,7 +81,7 @@ function OnboardingAppRow({ app }: { app: SelectionApplication }) {
 export default function AdminOnboarding() {
   const { data: apps, isLoading } = useAdminOnboardingApplications();
   const list = [...(apps ?? [])].sort((a, b) => {
-    // Prefer flagged apps — rough client sort by status label presence
+    // Prefer flagged apps: rough client sort by status label presence
     return 0;
   });
 
@@ -90,14 +90,14 @@ export default function AdminOnboarding() {
       <div>
         <h1 className="text-2xl font-medium">Onboarding</h1>
         <p className="text-muted-foreground">
-          Module 6 — first four weeks after arrival. Flags require follow-up within 24 hours.
+          Module 6: first four weeks after arrival. Flags require follow-up within 24 hours.
         </p>
       </div>
 
       <Card className="border-primary/20 bg-primary/5">
         <CardContent className="pt-6 text-sm text-muted-foreground">
           Opens automatically when Relocation confirms arrival. Completion is system-driven when
-          the practical checklist, workplace onboarding, and admin items are clear — no manual
+          the practical checklist, workplace onboarding, and admin items are clear: no manual
           complete button.
         </CardContent>
       </Card>

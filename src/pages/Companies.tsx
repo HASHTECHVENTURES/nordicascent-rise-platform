@@ -20,7 +20,7 @@ export default function Companies() {
           </h1>
           <p className="text-lg text-muted-foreground mb-4 leading-relaxed">
             We validate cultural and technical fit before arrival and support integration for six
-            months after — so the engineer you hire is the engineer who stays.
+            months after, so the engineer you hire is the engineer who stays.
           </p>
           <p className="text-sm text-muted-foreground mb-8">
             Engineers from the top Indian institutions choose this path.
@@ -41,7 +41,7 @@ export default function Companies() {
           <h2 className="text-2xl font-semibold text-foreground mb-4">The problem</h2>
           <p className="text-muted-foreground leading-relaxed">
             The Nordic engineering shortage is well known. The harder problem is a hire that doesn’t
-            work out — a mis-hire can cost 2–3 MNOK. Nordic Ascent retires that risk step by step
+            work out. A mis-hire can cost 2 to 3 MNOK. Nordic Ascent retires that risk step by step
             before you commit to relocation.
           </p>
         </div>

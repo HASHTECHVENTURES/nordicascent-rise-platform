@@ -49,7 +49,7 @@ export type AdminSelectionCompanyRow = {
   positionsTotal: number;
 };
 
-/** Companies with open/closed jobs — click through to that company's Selection pipeline. */
+/** Companies with open/closed jobs: click through to that company's Selection pipeline. */
 export function useAdminSelectionCompanies() {
   return useQuery({
     queryKey: ["admin-selection-companies"],
@@ -111,8 +111,8 @@ export function useAdminSelectionCompanies() {
       }
 
       return [...byCompany.values()].sort((a, b) => {
-        if (b.needsActionCount !== a.needsActionCount) return b.needsActionCount - a.needsActionCount;
-        if (b.applicationCount !== a.applicationCount) return b.applicationCount - a.applicationCount;
+        if (b.needsActionCount !== a.needsActionCount) return b.needsActionCount: a.needsActionCount;
+        if (b.applicationCount !== a.applicationCount) return b.applicationCount: a.applicationCount;
         return a.name.localeCompare(b.name);
       });
     },

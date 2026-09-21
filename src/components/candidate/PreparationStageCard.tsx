@@ -54,7 +54,7 @@ export default function PreparationStageCard() {
               <p className="font-medium text-sm">2. University</p>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {onWaitlist
-                  ? "On waitlist — admin review in progress"
+                  ? "On waitlist: admin review in progress"
                   : uniDone
                     ? "University linked"
                     : "Required before applying to job roles"}

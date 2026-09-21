@@ -34,7 +34,7 @@ const hiringNav: NavItem[] = [
   { name: "Job Roles", href: "/employer/jobs", icon: Briefcase },
 ];
 
-/** Selection, Activation, Relocation, Onboarding, Follow-up: hidden from nav for now — reach via Pipeline Overview. */
+/** Selection, Activation, Relocation, Onboarding, Follow-up: hidden from nav for now: reach via Pipeline Overview. */
 const journeyNav: NavItem[] = [
   { name: "Mentoring", href: "/employer/mentoring", icon: UsersRound },
 ];

@@ -25,10 +25,10 @@ export default function JourneyUnlockedBanner(props: Props) {
         <CardContent className="pt-6 flex items-start gap-3">
           <Rocket className="h-5 w-5 text-nordic-orange shrink-0 mt-0.5" />
           <div className="space-y-2">
-            <p className="font-medium">Readiness complete — Activation is open</p>
+            <p className="font-medium">Readiness complete: Activation is open</p>
             <p className="text-sm text-muted-foreground">
               {track === "entry"
-                ? "Your digital internship and pre-arrival steps are ready. Mentor meetings 4–6 continue in parallel."
+                ? "Your digital internship and pre-arrival steps are ready. Mentor meetings 4-6 continue in parallel."
                 : "Your pre-arrival employment steps are ready. Continue in Activation before relocation."}
             </p>
             <Button size="sm" asChild>

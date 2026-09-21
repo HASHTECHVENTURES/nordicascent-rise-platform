@@ -81,7 +81,7 @@ const AdminEmployerDetail = () => {
         <div className="flex-1">
           <h1 className="text-2xl font-medium">{company.name}</h1>
           <p className="text-muted-foreground">
-            {primaryContact?.email ?? "—"} · {company.location ?? "—"}
+            {primaryContact?.email ?? "n/a"} · {company.location ?? "n/a"}
           </p>
         </div>
         <AdminDeleteButton
@@ -104,7 +104,7 @@ const AdminEmployerDetail = () => {
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             <p><span className="text-muted-foreground">Status </span><Badge>{company.status}</Badge></p>
-            <p><span className="text-muted-foreground">Industry </span>{company.industry ?? "—"}</p>
+            <p><span className="text-muted-foreground">Industry </span>{company.industry ?? "n/a"}</p>
             <p><span className="text-muted-foreground">Open jobs </span>{openJobs} / {jobs.length} total</p>
             <p><span className="text-muted-foreground">Joined </span>{company.created_at.split("T")[0]}</p>
             {company.website && (
@@ -124,7 +124,7 @@ const AdminEmployerDetail = () => {
               <ul className="space-y-2 text-sm">
                 {employers.map((emp) => (
                   <li key={emp.id}>
-                    {emp.profiles?.full_name ?? "—"} · {emp.profiles?.email ?? "—"}
+                    {emp.profiles?.full_name ?? "n/a"} · {emp.profiles?.email ?? "n/a"}
                     {emp.title && <span className="text-muted-foreground"> ({emp.title})</span>}
                   </li>
                 ))}

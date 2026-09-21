@@ -75,7 +75,7 @@ export default function Contact() {
               Contact
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Book a demo or send a message — we’ll get back to you promptly.
+              Book a demo or send a message. We’ll get back to you promptly.
             </p>
           </div>
         </div>

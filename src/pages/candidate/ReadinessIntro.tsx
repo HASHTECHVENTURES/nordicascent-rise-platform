@@ -45,7 +45,7 @@ export default function CandidateReadinessIntro() {
         <p className="text-sm font-medium text-primary">Readiness</p>
         <h1 className="text-2xl font-bold tracking-tight mt-1">Before you begin</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Please read this carefully — then you will enter the Readiness test area.
+          Please read this carefully, then you will enter the Readiness test area.
         </p>
       </div>
 

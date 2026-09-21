@@ -142,7 +142,7 @@ const EmployerTasks = () => {
         items.push({
           id: `interview-${app.id}`,
           category: "interviews",
-          title: "Interview scheduled — follow up",
+          title: "Interview scheduled: follow up",
           personName: name,
           stageLabel,
           dueLabel: formatDue(app.interview_scheduled_at),

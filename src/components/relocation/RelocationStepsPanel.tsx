@@ -313,10 +313,10 @@ export default function RelocationStepsPanel({
         </h3>
         <p className="text-sm text-muted-foreground">
           {role === "candidate"
-            ? "Partners handle the work — Nordic Ascent tracks progress toward your arrival."
+            ? "Partners handle the work: Nordic Ascent tracks progress toward your arrival."
             : role === "company"
               ? "High-level progress and planned arrival. Toolkit available at final prep."
-              : "Parallel coordination tracker — partners execute; you update status."}
+              : "Parallel coordination tracker: partners execute; you update status."}
         </p>
       </div>
       {relocationDone || rollup === "arrived" ? (

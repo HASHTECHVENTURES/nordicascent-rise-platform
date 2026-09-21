@@ -66,7 +66,7 @@ export default function About() {
             <h2 className="text-3xl sm:text-4xl font-bold">Our Story</h2>
             <div className="text-lg text-muted-foreground space-y-4">
               <p>Nordic Ascent was born from a simple observation: workforce management tools were either too complex for users or too simple for enterprise needs.</p>
-              <p>Founded in Stockholm in 2019 by a team of HR and engineering veterans, we set out to create a platform that combines the elegance of Nordic design with the power needed by modern organizations. We welcome engineers from all disciplines—not only tech.</p>
+              <p>Founded in Stockholm in 2019 by a team of HR and engineering veterans, we set out to create a platform that combines the elegance of Nordic design with the power needed by modern organizations. We welcome engineers from all disciplines, not only tech.</p>
               <p>Today, we serve over 500 companies across the Nordics and Europe, helping them train, manage, and empower their teams to reach new heights.</p>
             </div>
           </div>
@@ -128,7 +128,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* Careers Section - Moved below team */}
+      {/* Careers Section moved below team */}
       <section className="py-20 bg-card border-y border-border">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">

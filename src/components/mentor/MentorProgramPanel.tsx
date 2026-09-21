@@ -294,7 +294,7 @@ export default function MentorProgramPanel({
                 />
                 <p className="text-[11px] text-muted-foreground">
                   Prefer Google Meet: create one above, then paste the link. Teams and Zoom work the
-                  same way — paste their join URL.
+                  same way: paste their join URL.
                 </p>
               </div>
             </div>
@@ -447,7 +447,7 @@ export default function MentorProgramPanel({
       const unlocksLevel = levelUnlockedByMeeting(meetingNumber);
       toast({
         title: unlocksLevel
-          ? `Meeting ${meetingNumber} complete — Level ${unlocksLevel} unlocked`
+          ? `Meeting ${meetingNumber} complete: Level ${unlocksLevel} unlocked`
           : `Meeting ${meetingNumber} saved`,
       });
       setActiveMeeting(null);
@@ -479,16 +479,106 @@ export default function MentorProgramPanel({
     );
   }
 
+  const signalNoteCard =
+    (meeting3Done || signalNote) ? (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Signal note (after Meeting 3)</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Visible to company decision-makers. Individual meeting observations stay internal.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {canEditSummaryNotes && meeting3Done ? (
+            <>
+              {(
+                [
+                  ["communication_clarity", "Communication clarity"],
+                  ["thinking_structure", "Thinking structure"],
+                  ["collaboration_readiness", "Collaboration readiness"],
+                  ["cultural_alignment_signals", "Cultural alignment signals"],
+                ] as const
+              ).map(([key, label]) => (
+                <div key={key} className="space-y-1">
+                  <Label>{label}</Label>
+                  <Textarea
+                    rows={2}
+                    value={signalForm[key]}
+                    onChange={(e) =>
+                      setSignalForm((f) => ({ ...f, [key]: e.target.value }))
+                    }
+                  />
+                </div>
+              ))}
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="signal-red-flag"
+                  checked={signalForm.red_flag}
+                  onCheckedChange={(v) =>
+                    setSignalForm((f) => ({ ...f, red_flag: v === true }))
+                  }
+                />
+                <Label htmlFor="signal-red-flag">Red flags?</Label>
+              </div>
+              {signalForm.red_flag && (
+                <Textarea
+                  placeholder="Red flag details"
+                  value={signalForm.red_flag_note}
+                  onChange={(e) =>
+                    setSignalForm((f) => ({ ...f, red_flag_note: e.target.value }))
+                  }
+                  rows={2}
+                />
+              )}
+              <Button
+                size="sm"
+                disabled={saveSignal.isPending}
+                onClick={async () => {
+                  try {
+                    await saveSignal.mutateAsync({
+                      applicationId,
+                      ...signalForm,
+                    });
+                    toast({ title: "Signal note saved" });
+                  } catch (err) {
+                    toast({
+                      title: "Save failed",
+                      description: err instanceof Error ? err.message : "Try again",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+              >
+                Save signal note
+              </Button>
+            </>
+          ) : signalNote ? (
+            <div className="text-sm space-y-2">
+              <p>{signalNote.communication_clarity}</p>
+              <p>{signalNote.thinking_structure}</p>
+              <p>{signalNote.collaboration_readiness}</p>
+              <p>{signalNote.cultural_alignment_signals}</p>
+              {signalNote.red_flag && (
+                <p className="text-destructive font-medium">
+                  Red flag: {signalNote.red_flag_note}
+                </p>
+              )}
+            </div>
+          ) : null}
+        </CardContent>
+      </Card>
+    ) : null;
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-lg">
-            Mentor programme — {track === "fast" ? "3 meetings" : "3+3 meetings"}
+            Mentor programme: {track === "fast" ? "3 meetings" : "3+3 meetings"}
           </CardTitle>
           <p className="text-sm text-muted-foreground">
             {track === "fast"
-              ? "Phase 1 — 3 Readiness meetings in order. Same observation form for each meeting."
+              ? "Phase 1: three Readiness meetings in order. Same observation form for each meeting."
               : "Phase 1 (Readiness) + Phase 2 (Activation, Entry track). Same observation form for all meetings."}
           </p>
         </CardHeader>
@@ -497,107 +587,24 @@ export default function MentorProgramPanel({
           {readinessMeetings.length > 0 && (
             <div className="space-y-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Readiness phase (Meetings 1–3)
+                Readiness phase (Meetings 1-3)
               </p>
               {readinessMeetings.map(renderMeetingCard)}
-            </div>
-          )}
-          {activationMeetings.length > 0 && (
-            <div className="space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Activation phase (Meetings 4–6)
-              </p>
-              {activationMeetings.map(renderMeetingCard)}
             </div>
           )}
         </CardContent>
       </Card>
 
-      {(meeting3Done || signalNote) && (
+      {/* After Meeting 3, before Activation meetings 4-6 */}
+      {signalNoteCard}
+
+      {activationMeetings.length > 0 && (
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Signal note (after Meeting 3)</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Visible to company decision-makers. Individual meeting observations stay internal.
-            </p>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Activation phase (Meetings 4-6)</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {canEditSummaryNotes && meeting3Done ? (
-              <>
-                {(
-                  [
-                    ["communication_clarity", "Communication clarity"],
-                    ["thinking_structure", "Thinking structure"],
-                    ["collaboration_readiness", "Collaboration readiness"],
-                    ["cultural_alignment_signals", "Cultural alignment signals"],
-                  ] as const
-                ).map(([key, label]) => (
-                  <div key={key} className="space-y-1">
-                    <Label>{label}</Label>
-                    <Textarea
-                      rows={2}
-                      value={signalForm[key]}
-                      onChange={(e) =>
-                        setSignalForm((f) => ({ ...f, [key]: e.target.value }))
-                      }
-                    />
-                  </div>
-                ))}
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="signal-red-flag"
-                    checked={signalForm.red_flag}
-                    onCheckedChange={(v) =>
-                      setSignalForm((f) => ({ ...f, red_flag: v === true }))
-                    }
-                  />
-                  <Label htmlFor="signal-red-flag">Red flags?</Label>
-                </div>
-                {signalForm.red_flag && (
-                  <Textarea
-                    placeholder="Red flag details"
-                    value={signalForm.red_flag_note}
-                    onChange={(e) =>
-                      setSignalForm((f) => ({ ...f, red_flag_note: e.target.value }))
-                    }
-                    rows={2}
-                  />
-                )}
-                <Button
-                  size="sm"
-                  disabled={saveSignal.isPending}
-                  onClick={async () => {
-                    try {
-                      await saveSignal.mutateAsync({
-                        applicationId,
-                        ...signalForm,
-                      });
-                      toast({ title: "Signal note saved" });
-                    } catch (err) {
-                      toast({
-                        title: "Save failed",
-                        description: err instanceof Error ? err.message : "Try again",
-                        variant: "destructive",
-                      });
-                    }
-                  }}
-                >
-                  Save signal note
-                </Button>
-              </>
-            ) : signalNote ? (
-              <div className="text-sm space-y-2">
-                <p>{signalNote.communication_clarity}</p>
-                <p>{signalNote.thinking_structure}</p>
-                <p>{signalNote.collaboration_readiness}</p>
-                <p>{signalNote.cultural_alignment_signals}</p>
-                {signalNote.red_flag && (
-                  <p className="text-destructive font-medium">
-                    Red flag: {signalNote.red_flag_note}
-                  </p>
-                )}
-              </div>
-            ) : null}
+            {activationMeetings.map(renderMeetingCard)}
           </CardContent>
         </Card>
       )}

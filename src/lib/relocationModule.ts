@@ -65,7 +65,7 @@ export const RELOCATION_STEP_DEFS = [
     step_number: 5,
     title: "Housing",
     owner_layer: "real_estate" as const,
-    hint: "Accommodation arranged 4–8 weeks before arrival.",
+    hint: "Accommodation arranged 4-8 weeks before arrival.",
     addressField: true,
   },
   {
@@ -78,7 +78,7 @@ export const RELOCATION_STEP_DEFS = [
     step_number: 7,
     title: "Family support",
     owner_layer: "nordic_ascent" as const,
-    hint: "Family relocation support — only when family is relocating.",
+    hint: "Family relocation support: only when family is relocating.",
     familyOnly: true,
     notesRequired: true,
     notesLabel: "Family support needs",
@@ -87,7 +87,7 @@ export const RELOCATION_STEP_DEFS = [
     step_number: 8,
     title: "Buddy (INDONORD)",
     owner_layer: "nordic_ascent" as const,
-    hint: "Local buddy match 2–3 weeks before arrival.",
+    hint: "Local buddy match 2-3 weeks before arrival.",
     contactField: true,
     contactLabel: "Buddy name / contact",
   },
@@ -95,14 +95,14 @@ export const RELOCATION_STEP_DEFS = [
     step_number: 9,
     title: "Final prep + employer toolkit",
     owner_layer: "nordic_ascent" as const,
-    hint: "Arrival guide and employer onboarding toolkit 1–2 weeks before.",
+    hint: "Arrival guide and employer onboarding toolkit 1-2 weeks before.",
     toolkitVisible: true,
   },
   {
     step_number: 10,
     title: "Arrival confirmed",
     owner_layer: "none" as const,
-    hint: "Confirm arrival day — opens Module 6 onboarding.",
+    hint: "Confirm arrival day: opens Module 6 onboarding.",
   },
 ] as const;
 
@@ -129,7 +129,7 @@ export const DEFAULT_RELOCATION_CMS: RelocationCms = {
   step_7: "Family support is being coordinated for your accompanying family members.",
   step_8: "You will be connected with a local buddy through INDONORD.",
   step_9: "Final arrival guide and employer onboarding toolkit are being prepared.",
-  step_10: "Confirm your arrival in Norway — onboarding starts next.",
+  step_10: "Confirm your arrival in Norway: onboarding starts next.",
 };
 
 export function ownerLayerLabel(layer: RelocationOwnerLayer): string {
@@ -143,7 +143,7 @@ export function ownerLayerLabel(layer: RelocationOwnerLayer): string {
     case "real_estate":
       return "Real estate";
     default:
-      return "—";
+      return "n/a";
   }
 }
 

@@ -128,7 +128,7 @@ export default function RelocationStageContent() {
         <div>
           <h2 className="text-lg font-medium">Relocation guides</h2>
           <p className="text-sm text-muted-foreground">
-            Reference material from Nordic Ascent — progress above tracks official coordination.
+            Reference material from Nordic Ascent: progress above tracks official coordination.
           </p>
         </div>
 

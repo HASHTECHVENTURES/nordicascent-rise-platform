@@ -74,7 +74,7 @@ export const ONBOARDING_STEP_DEFS = [
     step_number: 4,
     title: "Administrative completion",
     responsible: "relocation_partner" as const,
-    hint: "D-number, tax card, bank — Week 1.",
+    hint: "D-number, tax card, bank: Week 1.",
   },
   {
     step_number: 5,
@@ -94,7 +94,7 @@ export const ONBOARDING_STEP_DEFS = [
     step_number: 7,
     title: "Buddy connection activated locally",
     responsible: "buddy" as const,
-    hint: "INDONORD buddy — date + name.",
+    hint: "INDONORD buddy: date + name.",
     contactField: true,
     contactLabel: "Buddy name",
   },
@@ -102,7 +102,7 @@ export const ONBOARDING_STEP_DEFS = [
     step_number: 8,
     title: "Cultural and social adjustment support",
     responsible: "buddy" as const,
-    hint: "Ongoing through week 4 — no single confirmation required.",
+    hint: "Ongoing through week 4: no single confirmation required.",
     ongoing: true,
   },
   {
@@ -128,21 +128,21 @@ export type OnboardingCms = {
 };
 
 export const DEFAULT_ONBOARDING_CMS: OnboardingCms = {
-  step_1: "You have arrived in Norway. Welcome — your first weeks of settling in start now.",
+  step_1: "You have arrived in Norway. Welcome: your first weeks of settling in start now.",
   step_2: "Airport pickup and transport to housing is being coordinated.",
   step_3: "Confirm you have moved into your housing and note any issues.",
   step_4: "Administrative items on Norwegian soil (D-number, tax, bank) are being completed.",
-  step_5: "Work through your practical checklist — housing, SIM, bank, commute, and more.",
-  step_6: "Your company is starting workplace onboarding — introductions, systems, and role.",
+  step_5: "Work through your practical checklist: housing, SIM, bank, commute, and more.",
+  step_6: "Your company is starting workplace onboarding: introductions, systems, and role.",
   step_7: "Your local buddy through INDONORD is being activated.",
   step_8: "Cultural and social adjustment support continues through your first month.",
   step_9: "When everything is in place, follow-up support opens automatically.",
   contact_directory: `Who to contact
-• Housing / keys — Relocation / real estate partner
-• Visa / D-number / tax / bank — Relocation partner
-• Workplace access & role — Your company HR / team lead
-• Buddy / local life — INDONORD buddy
-• Anything stuck — Nordic Ascent (we follow up within 24 hours)`,
+• Housing / keys: Relocation / real estate partner
+• Visa / D-number / tax / bank: Relocation partner
+• Workplace access & role: Your company HR / team lead
+• Buddy / local life: INDONORD buddy
+• Anything stuck: Nordic Ascent (we follow up within 24 hours)`,
 };
 
 export function responsibleLabel(r: OnboardingResponsible): string {
@@ -206,7 +206,7 @@ export function flagClockLabel(flaggedAt: string | null | undefined): string {
   const h = flagAgeHours(flaggedAt);
   if (h === null) return "";
   if (h < 24) return `${h}h / 24h follow-up`;
-  return `${h}h — overdue follow-up`;
+  return `${h}h: overdue follow-up`;
 }
 
 export function onboardingStepProgress(steps: OnboardingStep[]) {

@@ -477,7 +477,7 @@ const EmployerCompanyProfile = () => {
                 id="company-size"
                 value={form.size}
                 onChange={(e) => setForm({ ...form, size: e.target.value })}
-                placeholder="e.g. 50–200"
+                placeholder="e.g. 50-200"
               />
             </div>
             <div className="space-y-2 md:col-span-2">
@@ -610,7 +610,7 @@ const EmployerCompanyProfile = () => {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="workplace-language">Workplace language — how much Norwegian is needed day-to-day?</Label>
+            <Label htmlFor="workplace-language">Workplace language: how much Norwegian is needed day-to-day?</Label>
             <Select
               value={form.workplace_language || undefined}
               onValueChange={(value) => setForm({ ...form, workplace_language: value })}
@@ -698,9 +698,9 @@ const EmployerCompanyProfile = () => {
           Status:{" "}
           <strong>
             {company.status === "pending" && !isCompanyIntakeSubmitted(company)
-              ? "Pending — complete profile and save to submit for review"
+              ? "Pending: complete profile and save to submit for review"
               : isCompanyIntakeSubmitted(company)
-                ? "Submitted — awaiting Nordic Ascent review"
+                ? "Submitted: awaiting Nordic Ascent review"
                 : company.status}
           </strong>
         </p>

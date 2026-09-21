@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { READINESS_TESTS_SEED, READINESS_LEVEL_SUBTITLES } from "@/data/readinessModuleSeed";
 
-/** Idempotent seed — inserts Module 3 tests and questions if none exist (admin / service role only). */
+/** Idempotent seed: inserts Module 3 tests and questions if none exist (admin / service role only). */
 export async function seedReadinessModuleIfEmpty(): Promise<{ seeded: boolean; count: number }> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { seeded: false, count: 0 };
@@ -71,11 +71,11 @@ export type MentorMeetingLockInput = {
 /**
  * Meeting 1 → Level 1 → Level 2 → Meeting 2 → Level 3 → Meeting 3.
  * Candidates never start exams until the mentor completes the required meeting.
- * - Meeting 1 (mentor completes) unlocks Level 1
- * - Level 1 both areas unlocks Level 2 — no extra meeting
- * - Level 2 both areas unlocks Meeting 2
- * - Meeting 2 (mentor completes) unlocks Level 3
- * - Level 3 both areas unlocks Meeting 3
+ *: Meeting 1 (mentor completes) unlocks Level 1
+ *: Level 1 both areas unlocks Level 2: no extra meeting
+ *: Level 2 both areas unlocks Meeting 2
+ *: Meeting 2 (mentor completes) unlocks Level 3
+ *: Level 3 both areas unlocks Meeting 3
  */
 export function mentorMeetingRequiredForLevel(level: number): number | null {
   if (level === 1) return 1;

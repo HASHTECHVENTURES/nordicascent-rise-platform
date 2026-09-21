@@ -125,7 +125,7 @@ export default function CandidateReadinessTest() {
             <Info className="h-5 w-5 text-primary mt-0.5 shrink-0" />
             <p className="text-sm text-muted-foreground">
               {awaitingMentor
-                ? "You were selected — Readiness unlocks once your company assigns a mentor."
+                ? "You were selected: Readiness unlocks once your company assigns a mentor."
                 : selected
                   ? "Readiness opens after mentor assignment. Check My Applications for status."
                   : "Readiness opens after selection and mentor assignment. Complete registration and apply to jobs first."}

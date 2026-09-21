@@ -80,7 +80,7 @@ export function useReadinessTests() {
   });
 }
 
-/** All tests including inactive — for admin content editor. */
+/** All tests including inactive: for admin content editor. */
 export function useAdminReadinessTests() {
   return useQuery({
     queryKey: ["readiness-tests", "admin"],
@@ -496,7 +496,7 @@ export function useSaveReadinessEvaluation() {
         if (error) throw error;
       }
 
-      // Approving for activation must open Module 4 — do not leave candidates stuck on Readiness.
+      // Approving for activation must open Module 4: do not leave candidates stuck on Readiness.
       if (approved_for_activation && !red_flag) {
         const { data: cand } = await supabase
           .from("candidates")
@@ -665,7 +665,7 @@ export function useAdminReadinessOverview() {
         return {
           id: c.id,
           fullName: p?.full_name ?? "Candidate",
-          email: p?.email ?? "—",
+          email: p?.email ?? "n/a",
           testsTotal,
           testsSubmitted: submitted.length,
           testsInProgress: inProgress.length,

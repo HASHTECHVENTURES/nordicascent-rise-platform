@@ -106,7 +106,7 @@ export async function acknowledgePreInternshipPresentation(input: {
   applicationId: string;
   profileId: string;
 }) {
-  // SECURITY DEFINER RPC — candidates cannot UPDATE activation_records via RLS
+  // SECURITY DEFINER RPC: candidates cannot UPDATE activation_records via RLS
   const { error } = await supabase.rpc("acknowledge_pre_internship_presentation", {
     p_application_id: input.applicationId,
   });
@@ -117,7 +117,7 @@ export async function acceptPreInternship(input: {
   applicationId: string;
   internship_start_date?: string | null;
 }) {
-  // SECURITY DEFINER RPC — candidates cannot UPDATE activation_records via RLS
+  // SECURITY DEFINER RPC: candidates cannot UPDATE activation_records via RLS
   const { error } = await supabase.rpc("accept_pre_internship", {
     p_application_id: input.applicationId,
     p_internship_start_date: input.internship_start_date || null,
@@ -125,7 +125,7 @@ export async function acceptPreInternship(input: {
   if (error) throw error;
 }
 
-/** Company/admin: set or correct internship start date (drives mentor M4–M6 week gates). */
+/** Company/admin: set or correct internship start date (drives mentor M4-M6 week gates). */
 export async function setInternshipStartDate(input: {
   applicationId: string;
   internship_start_date: string;
@@ -358,7 +358,7 @@ export async function initializeActivationForApplication(
     title: d.title,
     who_confirms: d.who_confirms,
     auto_source: d.auto_source,
-    // Always start locked — refresh_internship_checkpoint_unlocks opens CP0 after the gate
+    // Always start locked: refresh_internship_checkpoint_unlocks opens CP0 after the gate
     status: "locked",
   }));
 
@@ -423,7 +423,7 @@ export function getCheckpointLockedReason(
       return "Complete Step 1 above: click “I have read this” on the platform presentation";
     }
     if (!activationRecord.candidate_accepted_at) {
-      return "Complete Step 2 above: click “Accept internship” — acknowledging alone does not unlock checkpoints";
+      return "Complete Step 2 above: click “Accept internship”: acknowledging alone does not unlock checkpoints";
     }
     if (activationRecord.university_credit_required && !activationRecord.academic_unlocked_at) {
       return "Academic approval is still required before checkpoint #0 unlocks";
@@ -434,7 +434,7 @@ export function getCheckpointLockedReason(
     const meetingNum = MENTOR_MEETING_FOR_CHECKPOINT[checkpoint.checkpoint_number];
     return `Completes automatically when Mentor Meeting ${meetingNum} is done`;
   }
-  const prev = checkpoints.find((c) => c.checkpoint_number === checkpoint.checkpoint_number - 1);
+  const prev = checkpoints.find((c) => c.checkpoint_number === checkpoint.checkpoint_number: 1);
   if (prev && prev.status !== "completed") {
     return `Complete checkpoint ${checkpoint.checkpoint_number - 1} first`;
   }
@@ -517,9 +517,9 @@ export type FinalClearanceDecision = {
   updated_at?: string;
 };
 
-/** Shown before company chooses — CMS key: clearance_screen_note */
+/** Shown before company chooses: CMS key: clearance_screen_note */
 export const CLEARANCE_SCREEN_NOTE =
-  "This is a red-flag check, not a new hiring decision. The candidate has already been validated through Selection, Readiness, and (for Entry track) the internship. Proceeding is the expected outcome — choose Hold only for a genuine red flag.";
+  "This is a red-flag check, not a new hiring decision. The candidate has already been validated through Selection, Readiness, and (for Entry track) the internship. Proceeding is the expected outcome: choose Hold only for a genuine red flag.";
 
 export type FinalClearanceReadiness = {
   ready: boolean;
@@ -736,7 +736,7 @@ export function getPreArrivalLockedReason(
 ): string | null {
   if (!clearanceCleared) return "Unlocks after Final Clearance (Clear decision)";
   if (checkpoint.status !== "locked") return null;
-  const prev = checkpoints.find((c) => c.checkpoint_number === checkpoint.checkpoint_number - 1);
+  const prev = checkpoints.find((c) => c.checkpoint_number === checkpoint.checkpoint_number: 1);
   if (prev && prev.status !== "completed") {
     return `Complete checkpoint ${checkpoint.checkpoint_number - 1} first`;
   }
@@ -855,16 +855,16 @@ export type ActivationCms = {
 
 export const DEFAULT_ACTIVATION_CMS: ActivationCms = {
   clearance_screen_note:
-    "This is a red-flag check, not a new hiring decision. The candidate has already been validated through Selection, Readiness, and (for Entry track) the internship. Proceeding is the expected outcome — choose Hold only for a genuine red flag.",
+    "This is a red-flag check, not a new hiring decision. The candidate has already been validated through Selection, Readiness, and (for Entry track) the internship. Proceeding is the expected outcome: choose Hold only for a genuine red flag.",
   visit_confirmed:
     "Your visit with {companyName} is confirmed for {visitDate}. Format: {visitFormat}. {notes}",
   pre_internship_presentation: `Your internship is about to begin. Review the programme expectations below, then confirm your acceptance to unlock internship checkpoints.
 
 You will work remotely with your company mentor through the internship phase, with Nordic Ascent support throughout.`,
   clearance_cleared:
-    "Congratulations — you've been cleared to move forward. You've completed your internship and come through every stage of the process. {companyName} is ready to take the next step with you toward employment in Norway. We'll be in touch shortly about relocation and onboarding.",
+    "Congratulations: you've been cleared to move forward. You've completed your internship and come through every stage of the process. {companyName} is ready to take the next step with you toward employment in Norway. We'll be in touch shortly about relocation and onboarding.",
   clearance_hold:
-    "Thank you for everything you've put into this process. This opportunity will not move forward to employment. That does not take away from what you achieved — your completed internship, and its documentation, remain yours to keep and build on. Decisions at this stage depend on many factors, and we're grateful for your effort. We wish you every success ahead.",
+    "Thank you for everything you've put into this process. This opportunity will not move forward to employment. That does not take away from what you achieved: your completed internship, and its documentation, remain yours to keep and build on. Decisions at this stage depend on many factors, and we're grateful for your effort. We wish you every success ahead.",
   clearance_company_cleared:
     "Clearance recorded. Pre-arrival employment and relocation coordination are now unlocked for this candidate.",
   clearance_company_hold:

@@ -107,9 +107,9 @@ const AdminJobs = () => {
                 <div className="flex-1">
                   <h3 className="font-semibold">{job.title}</h3>
                   <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1"><Building2 className="h-3 w-3" />{company?.name ?? "—"}</span>
-                    <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{job.location ?? "—"}</span>
-                    <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{job.job_type ?? "—"}</span>
+                    <span className="flex items-center gap-1"><Building2 className="h-3 w-3" />{company?.name ?? "n/a"}</span>
+                    <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{job.location ?? "n/a"}</span>
+                    <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{job.job_type ?? "n/a"}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -147,7 +147,7 @@ const AdminJobs = () => {
           {viewJob && (
             <div className="space-y-2 text-sm">
               <p><span className="text-muted-foreground">Company </span>{(viewJob.companies as { name: string } | null)?.name}</p>
-              <p><span className="text-muted-foreground">Location </span>{viewJob.location ?? "—"}</p>
+              <p><span className="text-muted-foreground">Location </span>{viewJob.location ?? "n/a"}</p>
               <p><span className="text-muted-foreground">Status </span>{viewJob.status}</p>
               {viewJob.description && <p className="text-muted-foreground whitespace-pre-wrap pt-2">{viewJob.description}</p>}
             </div>

@@ -70,7 +70,7 @@ export default function ReadinessTestRunner({ test, attempt }: Props) {
       try {
         await submitAttempt.mutateAsync({ attemptId: attempt.id, expired });
         toast({
-          title: expired ? "Time expired — answers submitted" : "Test submitted",
+          title: expired ? "Time expired: answers submitted" : "Test submitted",
           description: "Your answers are with the Nordic Ascent team for review.",
         });
         navigate("/candidate/readiness", { replace: true });
@@ -180,7 +180,7 @@ export default function ReadinessTestRunner({ test, attempt }: Props) {
         <div>
           {strictTimer && (
             <Badge variant="outline" className="mb-2">
-              {test.timer_minutes}-minute limit — auto-submit
+              {test.timer_minutes}-minute limit: auto-submit
             </Badge>
           )}
           <h1 className="text-2xl font-medium">{test.title}</h1>
@@ -203,7 +203,7 @@ export default function ReadinessTestRunner({ test, attempt }: Props) {
             <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
             <p>
               You have a strict <strong>{test.timer_minutes}-minute limit</strong>. The countdown updates
-              live. Your answers auto-save as you type — when time hits 0:00, the test closes and
+              live. Your answers auto-save as you type: when time hits 0:00, the test closes and
               submits automatically.
             </p>
           </CardContent>
@@ -226,7 +226,7 @@ export default function ReadinessTestRunner({ test, attempt }: Props) {
             <CardContent>
               {q.answer_type === "video" ? (
                 <div className="space-y-3">
-                  <Label>Video response (2–3 minutes)</Label>
+                  <Label>Video response (2-3 minutes)</Label>
                   <div className="flex flex-wrap gap-3">
                     <Button
                       variant="outline"

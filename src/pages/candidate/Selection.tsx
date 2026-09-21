@@ -3,13 +3,12 @@ import { useMyApplications } from "@/hooks/useData";
 import { useJobsAccessLock } from "@/hooks/useJobsAccessLock";
 import CandidateApplications from "@/pages/candidate/Applications";
 import CandidateJobs from "@/pages/candidate/Jobs";
-import SelectionStageContent from "@/components/candidate/SelectionStageContent";
 import JourneyUnlockedBanner from "@/components/candidate/JourneyUnlockedBanner";
 import { hasUnlockedPipeline } from "@/lib/applicationJourney";
 
 /**
  * Selection = My Journey hub for job roles + applications (including Offee).
- * Browse/apply and status tracking live here — not as separate sidebar items.
+ * Browse/apply and status tracking live here: not as separate sidebar items.
  */
 export default function CandidateSelection() {
   const { jobsOpen } = useJobsAccessLock();
@@ -29,15 +28,15 @@ export default function CandidateSelection() {
       <div>
         <h1 className="text-2xl font-medium text-foreground">Selection</h1>
         <p className="text-muted-foreground mt-1">
-          Apply to open roles and follow your selection journey — including Offee — in one place.
+          Apply to open roles and follow your selection journey, including Offee, in one place.
         </p>
       </div>
 
       {unlocked && (
         <JourneyUnlockedBanner
           variant="pipeline-unlocked"
-          continueHref="#journey-progress"
-          continueLabel="View selection progress"
+          continueHref="#applications"
+          continueLabel="View your applications"
         />
       )}
 
@@ -49,12 +48,6 @@ export default function CandidateSelection() {
         <section id="roles" className="scroll-mt-6">
           <CandidateJobs embedded />
         </section>
-      )}
-
-      {unlocked && (
-        <div id="journey-progress" className="scroll-mt-6">
-          <SelectionStageContent embedded />
-        </div>
       )}
     </div>
   );

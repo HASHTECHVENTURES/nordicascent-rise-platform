@@ -274,15 +274,15 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
           <p className="text-lg xl:text-xl text-primary-foreground/80 text-balance">
             {selectedRole
               ? roleConfig[selectedRole].description
-              : "Validated before arrival. Supported for six months after. Not placement - integration."}
+              : "Validated before arrival. Supported for six months after. Not placement. Integration."}
           </p>
         </div>
         <div className="flex items-center gap-4 text-primary-foreground/60 text-sm">
           <span>© 2026 Nordic Ascent</span>
           <span>•</span>
-          <a href="#" className="hover:text-primary-foreground">Privacy</a>
+          <Link to="/privacy" className="hover:text-primary-foreground">Privacy</Link>
           <span>•</span>
-          <a href="#" className="hover:text-primary-foreground">Terms</a>
+          <Link to="/terms" className="hover:text-primary-foreground">Terms</Link>
           <span>•</span>
           <a
             href="https://www.linkedin.com/company/nordic-ascent/"
@@ -499,6 +499,10 @@ export default function Login({ fixedRole }: { fixedRole?: Exclude<LoginRole, nu
                         I have read and accept the{" "}
                         <Link to="/privacy" target="_blank" className="text-primary hover:underline">
                           Privacy Notice
+                        </Link>
+                        {" "}and{" "}
+                        <Link to="/terms" target="_blank" className="text-primary hover:underline">
+                          Terms of Service
                         </Link>{" "}
                         (required to register)
                       </Label>

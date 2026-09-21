@@ -82,7 +82,7 @@ export default function EmployerCandidateDetail() {
   const logAccess = useLogCandidateAccess();
   const { toast } = useToast();
 
-  // Appendix A · Audit log — record when an employer opens a candidate record.
+  // Appendix A · Audit log: record when an employer opens a candidate record.
   useEffect(() => {
     if (candidate?.id) logAccess.mutate(candidate.id);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- log once per candidate open
@@ -228,7 +228,7 @@ export default function EmployerCandidateDetail() {
       <div className="space-y-4">
         <Button variant="ghost" size="icon" asChild><Link to="/employer/candidates"><ArrowLeft className="h-4 w-4" /></Link></Button>
         <p className="text-muted-foreground">
-          This candidate is not visible yet. Nordic Ascent reviews eligibility and Offee first — your
+          This candidate is not visible yet. Nordic Ascent reviews eligibility and Offee first: your
           company sees them from the Technical step onward.
         </p>
       </div>
@@ -463,13 +463,13 @@ export default function EmployerCandidateDetail() {
         <Card>
           <CardHeader><CardTitle className="text-base">Profile</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <p><span className="text-muted-foreground">Title </span>{candidate.title ?? "—"}</p>
+            <p><span className="text-muted-foreground">Title </span>{candidate.title ?? "n/a"}</p>
             {profile?.phone && (
               <p><span className="text-muted-foreground">Phone </span>{profile.phone}</p>
             )}
-            <p><span className="text-muted-foreground">Location </span>{candidate.location ?? "—"}</p>
-            <p><span className="text-muted-foreground">Experience </span>{candidate.experience ?? "—"}</p>
-            <p><span className="text-muted-foreground">Education </span>{candidate.education ?? "—"}</p>
+            <p><span className="text-muted-foreground">Location </span>{candidate.location ?? "n/a"}</p>
+            <p><span className="text-muted-foreground">Experience </span>{candidate.experience ?? "n/a"}</p>
+            <p><span className="text-muted-foreground">Education </span>{candidate.education ?? "n/a"}</p>
             {candidate.linkedin_url && (
               <p>
                 <span className="text-muted-foreground">LinkedIn </span>

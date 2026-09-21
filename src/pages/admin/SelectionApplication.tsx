@@ -192,7 +192,7 @@ const AdminSelectionApplication = () => {
           track: (app.track as Track | null) ?? (app.candidates as { track?: Track })?.track,
         });
       }
-      toast({ title: "Mentor assigned — Readiness unlocked" });
+      toast({ title: "Mentor assigned: Readiness unlocked" });
     } catch (err) {
       toast({
         title: "Failed",
@@ -264,11 +264,11 @@ const AdminSelectionApplication = () => {
         </Button>
       </div>
 
-      {/* Step 1 — Eligibility */}
+      {/* Step 1: Eligibility */}
       <Card>
         <CardHeader className="flex flex-row items-start justify-between gap-3">
           <div>
-            <CardTitle className="text-lg">Step 1 — Eligibility</CardTitle>
+            <CardTitle className="text-lg">Step 1: Eligibility</CardTitle>
             <p className="text-xs text-muted-foreground mt-1">
               Review auto-checks and documents. Open the full profile for skills, experience, and CV detail.
             </p>
@@ -287,13 +287,21 @@ const AdminSelectionApplication = () => {
             </div>
           )}
           <div className="grid grid-cols-2 gap-3 text-sm">
-            <p><span className="text-muted-foreground">GPA:</span> {checks?.gpa_or_standing ?? app.candidates?.gpa_or_standing ?? "—"}</p>
-            <p><span className="text-muted-foreground">Field:</span> {checks?.field_of_study ?? app.candidates?.field_of_study ?? "—"}</p>
+            <p><span className="text-muted-foreground">GPA:</span> {checks?.gpa_or_standing ?? app.candidates?.gpa_or_standing ?? "n/a"}</p>
+            <p><span className="text-muted-foreground">Field:</span> {checks?.field_of_study ?? app.candidates?.field_of_study ?? "n/a"}</p>
           </div>
           <div className="space-y-2">
             <Label>Admin notes</Label>
             <Textarea value={eligibilityNotes} onChange={(e) => setEligibilityNotes(e.target.value)} rows={2} />
           </div>
+          {app.motivation_statement && (
+            <div className="space-y-2">
+              <Label>Application motivation</Label>
+              <p className="text-sm whitespace-pre-wrap rounded-lg border bg-muted/30 p-3">
+                {app.motivation_statement}
+              </p>
+            </div>
+          )}
           <div className="space-y-2">
             <Label>Candidate documents</Label>
             <CandidateDocumentsPanel
@@ -314,13 +322,13 @@ const AdminSelectionApplication = () => {
         </CardContent>
       </Card>
 
-      {/* Step 2 — Offee */}
+      {/* Step 2: Offee */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-3">
           <div>
-            <CardTitle className="text-lg">Step 2 — Offee</CardTitle>
+            <CardTitle className="text-lg">Step 2: Offee</CardTitle>
             <p className="text-xs text-muted-foreground mt-1">
-              External tool — export CSV, run Offee outside the platform, then enter results here.
+              External tool: export CSV, run Offee outside the platform, then enter results here.
               Live Offee integration is not connected yet.
             </p>
           </div>
@@ -447,10 +455,10 @@ const AdminSelectionApplication = () => {
         </CardContent>
       </Card>
 
-      {/* Step 3 — Technical */}
+      {/* Step 3: Technical */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Step 3 — Technical & cognitive</CardTitle>
+          <CardTitle className="text-lg">Step 3: Technical & cognitive</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -508,10 +516,10 @@ const AdminSelectionApplication = () => {
         </CardContent>
       </Card>
 
-      {/* Step 4 — Motivation */}
+      {/* Step 4: Motivation */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Step 4 — Motivation</CardTitle>
+          <CardTitle className="text-lg">Step 4: Motivation</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -557,18 +565,18 @@ const AdminSelectionApplication = () => {
         </CardContent>
       </Card>
 
-      {/* Step 5 — Board */}
+      {/* Step 5: Board */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Step 5 — Selection board</CardTitle>
+          <CardTitle className="text-lg">Step 5: Selection board</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="rounded-lg border p-3 text-sm space-y-2 bg-muted/20">
             <p className="font-medium">Role requirement profile</p>
             <div className="grid grid-cols-2 gap-2 text-muted-foreground">
-              <p><span className="text-foreground">Track:</span> {job?.target_track ?? "—"}</p>
-              <p><span className="text-foreground">Level:</span> {job?.experience_level ?? "—"}</p>
-              <p><span className="text-foreground">Discipline:</span> {job?.engineering_discipline ?? "—"}</p>
+              <p><span className="text-foreground">Track:</span> {job?.target_track ?? "n/a"}</p>
+              <p><span className="text-foreground">Level:</span> {job?.experience_level ?? "n/a"}</p>
+              <p><span className="text-foreground">Discipline:</span> {job?.engineering_discipline ?? "n/a"}</p>
               <p>
                 <span className="text-foreground">Capacity:</span>{" "}
                 {positions} positions · {selectedCount} selected (max {maxSelected})
@@ -629,7 +637,7 @@ const AdminSelectionApplication = () => {
           <CardContent className="space-y-4">
             {isMentorAssignmentOverdue(app.board_decided_at) && !app.assigned_mentor_id && (
               <p className="text-sm text-destructive font-medium">
-                Overdue — no mentor assigned within 5 days of board decision.
+                Overdue: no mentor assigned within 5 days of board decision.
               </p>
             )}
             <p className="text-sm text-muted-foreground">
@@ -642,7 +650,7 @@ const AdminSelectionApplication = () => {
               <SelectContent>
                 {(mentors ?? []).map((m) => (
                   <SelectItem key={m.id} value={m.id}>
-                    {m.name} — {m.email}
+                    {m.name}: {m.email}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -659,14 +667,6 @@ const AdminSelectionApplication = () => {
         </Card>
       )}
 
-      {app.motivation_statement && (
-        <Card>
-          <CardHeader><CardTitle className="text-lg">Application motivation</CardTitle></CardHeader>
-          <CardContent>
-            <p className="text-sm whitespace-pre-wrap">{app.motivation_statement}</p>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };

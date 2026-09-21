@@ -16,7 +16,7 @@ export type SendEmailResult = {
 
 /**
  * Placeholder for client-phase email (Resend/SMTP).
- * When disabled, returns immediately — in-app notifications remain the channel.
+ * When disabled, returns immediately: in-app notifications remain the channel.
  */
 export async function sendTransactionalEmail(
   payload: TransactionalEmailPayload

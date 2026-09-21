@@ -63,7 +63,7 @@ export default function EmployerOnboarding() {
       <div>
         <h1 className="text-2xl font-medium">Onboarding</h1>
         <p className="text-muted-foreground">
-          Module 6 at {companyName} — confirm workplace onboarding and access.
+          Module 6 at {companyName}: confirm workplace onboarding and access.
         </p>
       </div>
 

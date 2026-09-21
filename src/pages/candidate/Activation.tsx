@@ -23,7 +23,7 @@ export default function CandidateActivation() {
         <h1 className="text-2xl font-medium">Activation</h1>
         <p className="text-muted-foreground mt-1">
           {isEntry
-            ? "Internship and Pre Arrival Employment — mentor meetings 4–6 run in parallel."
+            ? "Internship and Pre Arrival Employment: mentor meetings 4-6 run in parallel."
             : "Pre-arrival and employment activation before you start full-time."}
         </p>
         {ctx?.companyName && ctx?.jobTitle && (

@@ -83,7 +83,7 @@ export async function onApplicationSubmitted(profileId: string, jobTitle: string
   await notifyCandidate(
     profileId,
     "Application submitted",
-    `Your application for ${jobTitle} was sent. Our team will review it — track progress in My Journey.`,
+    `Your application for ${jobTitle} was sent. Our team will review it: track progress in My Journey.`,
     "application_submitted",
     { jobTitle }
   );
@@ -171,7 +171,7 @@ export async function notifyMentorSessionScheduled(input: {
     await notifyCompanyEmployers(
       companyId,
       `Mentor Meeting ${input.meetingNumber} scheduled`,
-      `${cand?.full_name ?? "Candidate"} — Meeting ${input.meetingNumber} at ${when}.`,
+      `${cand?.full_name ?? "Candidate"}: Meeting ${input.meetingNumber} at ${when}.`,
       "mentor_session_scheduled",
       { applicationId: input.applicationId, meetingNumber: input.meetingNumber }
     );
@@ -204,7 +204,7 @@ export async function notifyInternshipStartDateSet(input: {
   candidateProfileId: string | null;
   companyId: string | null;
 }) {
-  const body = `Internship start date set to ${input.startDate}. Mentor meetings 4–6 follow this schedule.`;
+  const body = `Internship start date set to ${input.startDate}. Mentor meetings 4-6 follow this schedule.`;
   if (input.candidateProfileId) {
     await notifyCandidate(
       input.candidateProfileId,
@@ -248,7 +248,7 @@ export async function onApplicationStatusChange(
       await notifyCandidate(
         profile_id,
         "Application under review",
-        `${job_title}: the employer is reviewing your profile. No action needed — we'll keep you posted.`,
+        `${job_title}: the employer is reviewing your profile. No action needed: we'll keep you posted.`,
         "application_reviewing",
         { applicationId: id, jobTitle: job_title }
       );
@@ -258,7 +258,7 @@ export async function onApplicationStatusChange(
       await notifyCandidate(
         profile_id,
         "Interview stage",
-        `Good news — your application for ${job_title} moved to the interview stage. Check Messages for next steps.`,
+        `Good news: your application for ${job_title} moved to the interview stage. Check Messages for next steps.`,
         "application_interview",
         { applicationId: id, jobTitle: job_title }
       );
@@ -278,7 +278,7 @@ export async function onApplicationStatusChange(
       await notifyCandidate(
         profile_id,
         "You've been accepted!",
-        `Congratulations — you've been accepted for ${job_title}. Your Selection stage is now open. Continue in My Journey.`,
+        `Congratulations: you've been accepted for ${job_title}. Your Selection stage is now open. Continue in My Journey.`,
         "application_accepted",
         { applicationId: id, jobTitle: job_title }
       );

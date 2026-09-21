@@ -92,7 +92,7 @@ export default function EmployerActivationApplication() {
       <div className="space-y-2">
         <h2 className="text-lg font-medium">Mentor programme (parallel)</h2>
         <p className="text-sm text-muted-foreground">
-          Meetings run alongside Readiness and Activation. You see agendas and company notes — not raw observations.
+          Meetings run alongside Readiness and Activation. You see agendas and company notes: not raw observations.
         </p>
         <MentorProgramPanel
           applicationId={app.id}

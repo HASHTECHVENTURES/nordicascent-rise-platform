@@ -112,7 +112,7 @@ const AdminEmployers = () => {
                       <div>
                         <h3 className="font-medium">{emp.name}</h3>
                         <p className="text-sm text-muted-foreground">
-                          {emp.location ?? "—"} · {contactEmail ?? "No contact"}
+                          {emp.location ?? "n/a"} · {contactEmail ?? "No contact"}
                         </p>
                       </div>
                     </div>
@@ -170,7 +170,7 @@ const AdminEmployers = () => {
                   title: string | null;
                   companies: { name: string } | null;
                 }> | null)?.[0];
-                const companyName = employer?.companies?.name ?? "—";
+                const companyName = employer?.companies?.name ?? "n/a";
                 return (
                   <div key={user.id} className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-lg border">
                     <div className="flex items-center gap-4">

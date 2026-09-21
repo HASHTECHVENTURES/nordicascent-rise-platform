@@ -91,7 +91,7 @@ const CandidateProfile = () => {
 
   useEffect(() => {
     if (!profile?.id || !candidate?.id) return;
-    // Sync from server on first load only — CV/avatar upload refreshes candidate and must not wipe unsaved form fields.
+    // Sync from server on first load only: CV/avatar upload refreshes candidate and must not wipe unsaved form fields.
     const syncKey = `${profile.id}:${candidate.id}`;
     if (lastSyncedAt.current === syncKey) return;
     lastSyncedAt.current = syncKey;
@@ -168,7 +168,7 @@ const CandidateProfile = () => {
       });
 
       const trackFromExperience = deriveTrackFromExperience(form.experience.trim());
-      const educationSummary = [form.degree_type, form.field_of_study].filter(Boolean).join(" — ");
+      const educationSummary = [form.degree_type, form.field_of_study].filter(Boolean).join(": ");
 
       await updateCandidate.mutateAsync({
         country: form.country.trim() || DEFAULT_COUNTRY,
@@ -344,7 +344,7 @@ const CandidateProfile = () => {
 
       {fieldErrors.size > 0 && missingPreview.length > 0 && (
         <div className="rounded-lg border border-destructive/50 bg-destructive/5 p-4 text-sm text-destructive">
-          <p className="font-medium">Missing required fields — highlighted in red below:</p>
+          <p className="font-medium">Missing required fields: highlighted in red below:</p>
           <ul className="mt-2 list-disc pl-5">
             {missingPreview.map((m) => (
               <li key={m.key}>{m.label}</li>
@@ -400,7 +400,7 @@ const CandidateProfile = () => {
                 {uploadingAvatar ? <Loader2 className="h-4 w-4 animate-spin" /> : "Change photo"}
               </Button>
               <p className={cn("text-xs mt-2", fieldInvalid("avatar") ? "text-destructive" : "text-muted-foreground")}>
-                {fieldInvalid("avatar") ? "Profile photo required" : "Square photos work best — JPG or PNG"}
+                {fieldInvalid("avatar") ? "Profile photo required" : "Square photos work best: JPG or PNG"}
               </p>
             </div>
           </div>
@@ -487,9 +487,9 @@ const CandidateProfile = () => {
               </Select>
               {derivedTrack && (
                 <p className="text-xs text-muted-foreground">
-                  Program track: <strong>{TRACK_META[derivedTrack].label}</strong> — {TRACK_META[derivedTrack].short}.
+                  Program track: <strong>{TRACK_META[derivedTrack].label}</strong>: {TRACK_META[derivedTrack].short}.
                   {derivedTrack === "entry"
-                    ? " 0–12 months experience uses Entry track."
+                    ? " 0-12 months experience uses Entry track."
                     : " 1+ year experience uses Fast track."}
                   {trackWillChange && " (updates when you save)"}
                 </p>
@@ -575,7 +575,7 @@ const CandidateProfile = () => {
           ) : (
             <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-lg border border-dashed p-6", fieldInvalid("cv") && "border-destructive")}>
               <p className={cn("text-sm", fieldInvalid("cv") ? "text-destructive" : "text-muted-foreground")}>
-                {fieldInvalid("cv") ? "CV upload required — PDF, DOC, or DOCX, max 10 MB" : "PDF, DOC, or DOCX — max 10 MB"}
+                {fieldInvalid("cv") ? "CV upload required: PDF, DOC, or DOCX, max 10 MB" : "PDF, DOC, or DOCX: max 10 MB"}
               </p>
               <Button type="button" className="gap-2" disabled={uploading} onClick={() => fileInputRef.current?.click()}>
                 {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}

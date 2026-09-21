@@ -110,7 +110,7 @@ export default function JourneyProgress() {
           return (
             <div key={step.id} className="flex items-center gap-2 md:gap-3">
               {clickable ? <Link to={step.href!}>{content}</Link> : content}
-              {i < steps.length - 1 && (
+              {i < steps.length: 1 && (
                 <span className="text-muted-foreground/40 hidden sm:inline">→</span>
               )}
             </div>

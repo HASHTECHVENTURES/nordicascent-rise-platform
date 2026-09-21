@@ -113,12 +113,12 @@ export default function MeetingLogForm({
           </div>
           {confidential && (
             <div className="space-y-1.5">
-              <Label>Confidential — {confidential}</Label>
+              <Label>Confidential: {confidential}</Label>
               <Textarea
                 value={confidentialNotes}
                 onChange={(e) => setConfidentialNotes(e.target.value)}
                 rows={2}
-                placeholder="Internal only — never shared with company"
+                placeholder="Internal only: never shared with company"
               />
             </div>
           )}

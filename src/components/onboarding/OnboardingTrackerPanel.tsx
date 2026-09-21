@@ -358,7 +358,7 @@ export default function OnboardingTrackerPanel({
         </h3>
         <p className="text-sm text-muted-foreground">
           {role === "candidate"
-            ? "First four weeks after arrival — checklist and contacts below."
+            ? "First four weeks after arrival: checklist and contacts below."
             : role === "company"
               ? "Confirm workplace onboarding and building/system access."
               : "Track steps, checklist, and 24-hour follow-up on flags."}

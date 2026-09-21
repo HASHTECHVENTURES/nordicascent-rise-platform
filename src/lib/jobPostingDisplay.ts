@@ -57,8 +57,8 @@ export function getCandidateJobLocation(
 
 export function getJobTrackBadge(job: CandidateJobPosting) {
   const track = job.target_track ?? deriveTrackFromJobExperience(job.experience_level ?? "");
-  if (track === "entry") return "Entry Track — final year students";
-  if (track === "fast") return "Fast Track — 1+ years experience";
+  if (track === "entry") return "Entry Track: final year students";
+  if (track === "fast") return "Fast Track: 1+ years experience";
   return null;
 }
 

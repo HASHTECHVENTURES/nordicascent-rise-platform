@@ -32,7 +32,7 @@ export default function MentorMeetingDots({ meetings, track, compact }: Props) {
                 active && !done && "bg-primary border-primary",
                 !done && !active && "bg-muted border-muted-foreground/30"
               )}
-              title={`Meeting ${n}${done ? " — done" : active ? " — current" : " — upcoming"}`}
+              title={`Meeting ${n}${done ? ": done" : active ? ": current" : ": upcoming"}`}
             />
             {!compact && (
               <span className="text-[10px] text-muted-foreground">{n}</span>

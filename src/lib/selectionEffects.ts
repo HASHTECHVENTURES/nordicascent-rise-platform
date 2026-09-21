@@ -148,7 +148,7 @@ export async function onSelectionStatusChange(ctx: SelectionChangeContext, rejec
     if (companyId) {
       await notifyEmployers(
         companyId,
-        "Technical assessment — your participation",
+        "Technical assessment: your participation",
         `A candidate has advanced to the technical assessment for ${jobTitle}. You will be invited to the face-to-face session when scheduled.`,
         "selection_step3_employer_invite",
         { applicationId, jobId, jobTitle, candidateId }
@@ -169,7 +169,7 @@ export async function onSelectionStatusChange(ctx: SelectionChangeContext, rejec
     if (companyId) {
       await notifyEmployers(
         companyId,
-        "Motivation session — your participation",
+        "Motivation session: your participation",
         `A candidate has advanced to the motivation session for ${jobTitle}. You will be invited when the session is scheduled.`,
         "selection_step4_employer_invite",
         { applicationId, jobId, jobTitle, candidateId }

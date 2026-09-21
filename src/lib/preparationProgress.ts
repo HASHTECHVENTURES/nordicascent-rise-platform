@@ -3,7 +3,7 @@ import { TRACK_META, type Track } from "@/lib/track";
 
 const FAST_TRACK_SKIP_STAGES = ["internship"] as const;
 
-/** After profile + university, mark preparation done. Does NOT open Readiness —
+/** After profile + university, mark preparation done. Does NOT open Readiness -
  *  candidates go to Selection (apply to jobs) next. Readiness unlocks after
  *  selection + mentor assignment (Module 2). */
 export async function completePreparationStage(candidateId: string, track: Track) {
@@ -72,7 +72,7 @@ export async function completePreparationStage(candidateId: string, track: Track
 }
 
 /** Legacy: mark preparation done and open Readiness directly.
- *  Kept for backward compatibility — prefer completePreparationStage for new flow. */
+ *  Kept for backward compatibility: prefer completePreparationStage for new flow. */
 export async function completePreparationAndActivateReadiness(candidateId: string, track: Track) {
   const now = new Date().toISOString();
   const { data: progress } = await supabase

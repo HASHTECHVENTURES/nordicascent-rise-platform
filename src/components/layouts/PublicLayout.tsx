@@ -1,102 +1,280 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { Menu, X, ArrowUpRight } from "lucide-react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import logoImage from "@/assets/nordic-ascent-logo.png";
-import logoBlue from "@/assets/nordic-ascent-logo-blue.png";
+import bridgeIcon from "@/assets/nordic-bridge-icon.png";
 
-const navigation = [
-  { name: "For companies", href: "/companies" },
-  { name: "For engineers", href: "/engineers" },
+const secondaryNav = [
   { name: "How it works", href: "/how-it-works" },
   { name: "Insights", href: "/insight" },
   { name: "Contact", href: "/contact" },
 ];
 
+type Audience = "companies" | "engineers";
+
+function audienceFromPath(pathname: string): Audience | null {
+  if (pathname.startsWith("/engineers")) return "engineers";
+  if (pathname.startsWith("/companies")) return "companies";
+  return null;
+}
+
 export function PublicLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [audienceHint, setAudienceHint] = useState<Audience>("companies");
   const location = useLocation();
+
+  const pathAudience = audienceFromPath(location.pathname);
+  const ctaAudience = pathAudience ?? audienceHint;
+  const isCompaniesCta = ctaAudience === "companies";
+  const companiesActive = pathAudience === "companies";
+  const engineersActive = pathAudience === "engineers";
+
+  useEffect(() => {
+    const fromPath = audienceFromPath(location.pathname);
+    if (fromPath) setAudienceHint(fromPath);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  const cta = isCompaniesCta
+    ? { label: "Book a demo", href: "/contact" }
+    : { label: "Start your journey", href: "/login?role=candidate&signup=1" };
+
+  const isSecondaryActive = (href: string) =>
+    location.pathname === href ||
+    (href === "/insight" && location.pathname.startsWith("/insight"));
+
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="sticky top-0 z-50 bg-white border-b border-border">
-        <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <Link to="/" className="flex items-center gap-3 h-14 overflow-hidden">
-              <img src={logoBlue} alt="Nordic Ascent" className="h-full w-auto object-contain" />
-            </Link>
+      <header className="sticky top-0 z-50 pointer-events-none">
+        <div
+          className={cn(
+            "pointer-events-auto px-3 sm:px-4 lg:px-6 transition-[padding] duration-300 ease-out",
+            scrolled ? "pt-2.5" : "pt-4",
+          )}
+        >
+          <nav
+            className={cn(
+              "fjord-glass mx-auto max-w-6xl transition-all duration-300 ease-out",
+              scrolled
+                ? "rounded-2xl shadow-[0_8px_30px_rgba(28,58,95,0.10)] ring-1 ring-primary/10"
+                : "rounded-[1.35rem] shadow-[0_12px_40px_rgba(28,58,95,0.08)] ring-1 ring-white/60",
+            )}
+          >
+            <div
+              className={cn(
+                "flex items-center justify-between gap-3 px-3 sm:px-4 transition-[height] duration-300",
+                scrolled ? "h-14" : "h-16",
+              )}
+            >
+              <Link
+                to="/"
+                className="group flex items-center gap-2.5 shrink-0 min-w-0"
+                aria-label="Nordic Ascent home"
+              >
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary ring-1 ring-primary/20 shadow-[0_4px_14px_rgba(28,58,95,0.25)]">
+                  <img
+                    src={bridgeIcon}
+                    alt=""
+                    aria-hidden
+                    className="h-[22px] w-[22px] object-contain brightness-0 invert opacity-95 transition-transform duration-300 group-hover:scale-105"
+                  />
+                </span>
+                <span className="flex flex-col justify-center leading-none">
+                  <span className="text-[11px] sm:text-xs font-semibold tracking-[0.22em] uppercase text-primary">
+                    Nordic
+                  </span>
+                  <span className="mt-1 text-[11px] sm:text-xs font-semibold tracking-[0.22em] uppercase text-primary">
+                    Ascent
+                  </span>
+                </span>
+              </Link>
 
-            <div className="hidden md:flex items-center gap-8">
-              {navigation.map((item) => (
+              {/* Desktop: audience + secondary */}
+              <div className="hidden lg:flex items-center gap-1 min-w-0">
                 <Link
-                  key={item.name}
-                  to={item.href}
+                  to="/companies"
+                  onClick={() => setAudienceHint("companies")}
                   className={cn(
-                    "text-sm font-medium transition-colors hover:text-primary",
-                    location.pathname === item.href ||
-                      (item.href === "/insight" && location.pathname.startsWith("/insight"))
+                    "px-3 py-1.5 text-sm font-medium transition-colors",
+                    companiesActive
                       ? "text-primary"
-                      : "text-muted-foreground",
+                      : "text-muted-foreground hover:text-primary",
                   )}
                 >
-                  {item.name}
+                  Companies
                 </Link>
-              ))}
-            </div>
+                <Link
+                  to="/engineers"
+                  onClick={() => setAudienceHint("engineers")}
+                  className={cn(
+                    "px-3 py-1.5 text-sm font-medium transition-colors",
+                    engineersActive
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-primary",
+                  )}
+                >
+                  Engineers
+                </Link>
 
-            <div className="hidden md:flex items-center gap-4">
-              <Button variant="ghost" asChild className="text-muted-foreground hover:text-primary">
-                <Link to="/login">Login</Link>
-              </Button>
-              <Button asChild className="bg-warning text-warning-foreground hover:opacity-90">
-                <Link to="/contact">Book a demo</Link>
-              </Button>
-            </div>
-
-            <button
-              className="md:hidden p-2 text-primary"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
-
-          {mobileMenuOpen && (
-            <div className="md:hidden py-4 border-t border-border">
-              <div className="flex flex-col gap-4">
-                {navigation.map((item) => (
+                {secondaryNav.map((item) => (
                   <Link
                     key={item.name}
                     to={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
                     className={cn(
-                      "text-sm font-medium transition-colors hover:text-primary px-2 py-2",
-                      location.pathname === item.href ? "text-primary" : "text-muted-foreground",
+                      "px-3 py-1.5 text-sm font-medium transition-colors",
+                      isSecondaryActive(item.href)
+                        ? "text-primary"
+                        : "text-muted-foreground hover:text-primary",
                     )}
                   >
                     {item.name}
                   </Link>
                 ))}
-                <div className="flex flex-col gap-2 pt-4 border-t border-border">
+              </div>
+
+              {/* Desktop actions */}
+              <div className="hidden lg:flex items-center gap-2 shrink-0">
+                <Button
+                  variant="ghost"
+                  asChild
+                  className="text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-full px-4"
+                >
+                  <Link to="/login">Login</Link>
+                </Button>
+                <Button
+                  asChild
+                  className="group rounded-full bg-primary text-primary-foreground hover:bg-primary/90 px-5"
+                >
+                  <Link to={cta.href} className="inline-flex items-center gap-1.5">
+                    <span>{cta.label}</span>
+                    <ArrowUpRight className="h-3.5 w-3.5 opacity-70 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  </Link>
+                </Button>
+              </div>
+
+              {/* Mobile */}
+              <div className="flex lg:hidden items-center gap-2">
+                <div className="hidden sm:flex items-center gap-1">
+                  <Link
+                    to="/companies"
+                    onClick={() => setAudienceHint("companies")}
+                    className={cn(
+                      "px-2 py-1 text-xs font-medium transition-colors",
+                      companiesActive
+                        ? "text-primary"
+                        : "text-muted-foreground hover:text-primary",
+                    )}
+                  >
+                    Companies
+                  </Link>
+                  <Link
+                    to="/engineers"
+                    onClick={() => setAudienceHint("engineers")}
+                    className={cn(
+                      "px-2 py-1 text-xs font-medium transition-colors",
+                      engineersActive
+                        ? "text-primary"
+                        : "text-muted-foreground hover:text-primary",
+                    )}
+                  >
+                    Engineers
+                  </Link>
+                </div>
+                <button
+                  className="p-2.5 rounded-full text-primary ring-1 ring-primary/10 bg-white/50 hover:bg-white/80 transition-colors"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  aria-label="Toggle menu"
+                  aria-expanded={mobileMenuOpen}
+                >
+                  {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Mobile panel */}
+            <div
+              className={cn(
+                "lg:hidden overflow-hidden transition-[max-height,opacity] duration-300 ease-out border-t border-primary/5",
+                mobileMenuOpen ? "max-h-[420px] opacity-100" : "max-h-0 opacity-0 border-t-0",
+              )}
+            >
+              <div className="px-4 pb-4 pt-3 space-y-4">
+                <div className="sm:hidden flex flex-col gap-1">
+                  <Link
+                    to="/companies"
+                    onClick={() => setAudienceHint("companies")}
+                    className={cn(
+                      "px-3 py-2.5 text-sm font-medium transition-colors",
+                      companiesActive
+                        ? "text-primary"
+                        : "text-muted-foreground hover:text-primary",
+                    )}
+                  >
+                    Companies
+                  </Link>
+                  <Link
+                    to="/engineers"
+                    onClick={() => setAudienceHint("engineers")}
+                    className={cn(
+                      "px-3 py-2.5 text-sm font-medium transition-colors",
+                      engineersActive
+                        ? "text-primary"
+                        : "text-muted-foreground hover:text-primary",
+                    )}
+                  >
+                    Engineers
+                  </Link>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  {secondaryNav.map((item) => (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      className={cn(
+                        "px-3 py-2.5 text-sm font-medium transition-colors",
+                        isSecondaryActive(item.href)
+                          ? "text-primary"
+                          : "text-muted-foreground hover:text-primary",
+                      )}
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                </div>
+
+                <div className="flex flex-col gap-2 pt-2 border-t border-primary/10">
                   <Button
                     variant="ghost"
                     asChild
-                    className="justify-start text-muted-foreground hover:text-primary"
+                    className="justify-start rounded-xl text-muted-foreground hover:text-primary"
                   >
                     <Link to="/login">Login</Link>
                   </Button>
                   <Button
                     asChild
-                    className="bg-warning text-warning-foreground hover:opacity-90 justify-start"
+                    className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 justify-center"
                   >
-                    <Link to="/contact">Book a demo</Link>
+                    <Link to={cta.href}>{cta.label}</Link>
                   </Button>
                 </div>
               </div>
             </div>
-          )}
-        </nav>
+          </nav>
+        </div>
       </header>
 
       <main className="flex-1">
@@ -171,14 +349,14 @@ export function PublicLayout() {
                   </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-primary-foreground">
+                  <Link to="/terms" className="hover:text-primary-foreground">
                     Terms of Service
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-primary-foreground">
+                  <Link to="/gdpr" className="hover:text-primary-foreground">
                     GDPR
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>

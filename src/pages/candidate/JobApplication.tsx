@@ -168,7 +168,7 @@ export default function CandidateJobApplication() {
           <CardContent className="pt-6 space-y-3">
             <p className="font-medium">Complete your profile first</p>
             <p className="text-sm text-muted-foreground">
-              Finish registration steps 1–3 before applying. Your profile details will be used automatically.
+              Finish registration steps 1-3 before applying. Your profile details will be used automatically.
             </p>
             <Button asChild>
               <Link to="/candidate/profile">Go to profile</Link>

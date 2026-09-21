@@ -9,13 +9,13 @@ export const EXTERNAL_INTEGRATIONS = {
     connected: false,
     label: "Offee assessment",
     clientScope:
-      "External AI assessment tool — API or automated export/import (currently manual CSV + score entry).",
+      "External AI assessment tool: API or automated export/import (currently manual CSV + score entry).",
   },
   transactionalEmail: {
     connected: import.meta.env.VITE_TRANSACTIONAL_EMAIL !== "false",
     label: "Transactional email",
     clientScope:
-      "Resend via send-transactional-email edge function — mentor invites, session invites, selection updates.",
+      "Resend via send-transactional-email edge function: mentor invites, session invites, selection updates.",
   },
 } as const;
 

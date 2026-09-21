@@ -359,7 +359,7 @@ const AdminSettings = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="w-5 h-5" />
-                Module 4 — Activation CMS
+                Module 4: Activation CMS
               </CardTitle>
               <p className="text-sm text-muted-foreground">
                 Editable without a deploy. Use {"{companyName}"}, {"{jobTitle}"}, {"{visitDate}"},{" "}
@@ -372,10 +372,10 @@ const AdminSettings = () => {
                   ["pre_internship_presentation", "Pre-internship presentation"],
                   ["visit_confirmed", "Visit confirmed (candidate)"],
                   ["clearance_screen_note", "Final Clearance screen note"],
-                  ["clearance_cleared", "Candidate — cleared"],
-                  ["clearance_hold", "Candidate — hold"],
-                  ["clearance_company_cleared", "Company — cleared confirmation"],
-                  ["clearance_company_hold", "Company — hold confirmation"],
+                  ["clearance_cleared", "Candidate: cleared"],
+                  ["clearance_hold", "Candidate: hold"],
+                  ["clearance_company_cleared", "Company: cleared confirmation"],
+                  ["clearance_company_hold", "Company: hold confirmation"],
                 ] as const
               ).map(([key, label]) => (
                 <div key={key} className="space-y-2">
@@ -418,7 +418,7 @@ const AdminSettings = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="w-5 h-5" />
-                Module 5 — Relocation CMS
+                Module 5: Relocation CMS
               </CardTitle>
               <p className="text-sm text-muted-foreground">
                 Candidate-facing copy per coordination step. Editable without a deploy.
@@ -427,16 +427,16 @@ const AdminSettings = () => {
             <CardContent className="space-y-4">
               {(
                 [
-                  ["step_1", "Step 1 — Contract signed"],
-                  ["step_2", "Step 2 — Visa / immigration"],
-                  ["step_3", "Step 3 — Norwegian A1"],
-                  ["step_4", "Step 4 — Pre-arrival preparation"],
-                  ["step_5", "Step 5 — Housing"],
-                  ["step_6", "Step 6 — Admin setup"],
-                  ["step_7", "Step 7 — Family support"],
-                  ["step_8", "Step 8 — Buddy (INDONORD)"],
-                  ["step_9", "Step 9 — Final prep + toolkit"],
-                  ["step_10", "Step 10 — Arrival confirmed"],
+                  ["step_1", "Step 1: Contract signed"],
+                  ["step_2", "Step 2: Visa / immigration"],
+                  ["step_3", "Step 3: Norwegian A1"],
+                  ["step_4", "Step 4: Pre-arrival preparation"],
+                  ["step_5", "Step 5: Housing"],
+                  ["step_6", "Step 6: Admin setup"],
+                  ["step_7", "Step 7: Family support"],
+                  ["step_8", "Step 8: Buddy (INDONORD)"],
+                  ["step_9", "Step 9: Final prep + toolkit"],
+                  ["step_10", "Step 10: Arrival confirmed"],
                 ] as const
               ).map(([key, label]) => (
                 <div key={key} className="space-y-2">
@@ -481,7 +481,7 @@ const AdminSettings = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="w-5 h-5" />
-                Module 6 — Onboarding CMS
+                Module 6: Onboarding CMS
               </CardTitle>
               <p className="text-sm text-muted-foreground">
                 Candidate-facing step copy and contact directory. Editable without a deploy.
@@ -490,15 +490,15 @@ const AdminSettings = () => {
             <CardContent className="space-y-4">
               {(
                 [
-                  ["step_1", "Step 1 — Arrival"],
-                  ["step_2", "Step 2 — Airport pickup"],
-                  ["step_3", "Step 3 — Housing move-in"],
-                  ["step_4", "Step 4 — Administrative completion"],
-                  ["step_5", "Step 5 — Practical checklist"],
-                  ["step_6", "Step 6 — Workplace onboarding"],
-                  ["step_7", "Step 7 — Buddy connection"],
-                  ["step_8", "Step 8 — Cultural adjustment"],
-                  ["step_9", "Step 9 — Completion"],
+                  ["step_1", "Step 1: Arrival"],
+                  ["step_2", "Step 2: Airport pickup"],
+                  ["step_3", "Step 3: Housing move-in"],
+                  ["step_4", "Step 4: Administrative completion"],
+                  ["step_5", "Step 5: Practical checklist"],
+                  ["step_6", "Step 6: Workplace onboarding"],
+                  ["step_7", "Step 7: Buddy connection"],
+                  ["step_8", "Step 8: Cultural adjustment"],
+                  ["step_9", "Step 9: Completion"],
                   ["contact_directory", "Contact directory"],
                 ] as const
               ).map(([key, label]) => (
@@ -559,16 +559,16 @@ const AdminSettings = () => {
                 <p className="text-sm font-medium">Standing topics</p>
                 {(
                   [
-                    ["m1_candidate", "1 mo — Candidate"],
-                    ["m1_company", "1 mo — Company"],
-                    ["m2_candidate", "2 mo — Candidate"],
-                    ["m2_company", "2 mo — Company"],
-                    ["m3_candidate", "3 mo — Candidate"],
-                    ["m3_company", "3 mo — Company"],
-                    ["m3_confidential", "3 mo — Confidential prompt"],
-                    ["m6_candidate", "6 mo — Candidate"],
-                    ["m6_company", "6 mo — Company"],
-                    ["m6_confidential", "6 mo — Confidential prompt"],
+                    ["m1_candidate", "1 mo: Candidate"],
+                    ["m1_company", "1 mo: Company"],
+                    ["m2_candidate", "2 mo: Candidate"],
+                    ["m2_company", "2 mo: Company"],
+                    ["m3_candidate", "3 mo: Candidate"],
+                    ["m3_company", "3 mo: Company"],
+                    ["m3_confidential", "3 mo: Confidential prompt"],
+                    ["m6_candidate", "6 mo: Candidate"],
+                    ["m6_company", "6 mo: Company"],
+                    ["m6_confidential", "6 mo: Confidential prompt"],
                   ] as const
                 ).map(([key, label]) => (
                   <div key={key} className="space-y-2">

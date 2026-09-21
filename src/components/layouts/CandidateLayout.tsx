@@ -28,7 +28,7 @@ import { CANDIDATE_PROFILE_PATH } from "@/lib/candidateAccess";
 
 // No sub-items needed; My Journey is a direct link
 
-// Standalone nav items — Job roles only in the left panel (applications stay inside Job roles)
+// Standalone nav items: Job roles only in the left panel (applications stay inside Job roles)
 const standaloneNav = [
   { name: "Job roles", href: "/candidate/jobs", icon: Briefcase, tooltip: "Browse open Nordic engineering roles and apply" },
   { name: "Mentoring", href: "/candidate/mentoring", icon: UsersRound, tooltip: "Your mentor, meeting agendas, and programme progress" },
@@ -98,7 +98,7 @@ const CandidateLayout = () => {
         )}
       >
         <div className="flex h-full flex-col">
-          {/* Nav header – no logo; compact for normal back/forth navigation */}
+          {/* Nav header: no logo; compact for normal back/forth navigation */}
           <div className="flex h-14 items-center justify-between px-4 border-b border-border">
             {!collapsed && (
               <Link to={homePath} className="text-sm font-semibold text-foreground">

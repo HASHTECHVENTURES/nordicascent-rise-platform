@@ -26,6 +26,8 @@ import Insight from "./pages/Insight";
 import JobDetail from "./pages/JobDetail";
 import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Gdpr from "./pages/Gdpr";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 
@@ -146,6 +148,8 @@ const App = () => (
               <Route path="/insight/:id" element={<JobDetail />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/gdpr" element={<Gdpr />} />
             </Route>
 
             {/* Auth Routes */}
@@ -221,7 +225,7 @@ const App = () => (
               </Route>
             </Route>
 
-            {/* University Portal — academic credit only */}
+            {/* University Portal: academic credit only */}
             <Route element={<ProtectedRoute allowedRoles={["university"]} />}>
               <Route element={<UniversityLayout />}>
                 <Route path="/university" element={<Navigate to="/university/dashboard" replace />} />

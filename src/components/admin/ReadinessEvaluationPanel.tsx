@@ -226,7 +226,7 @@ export default function ReadinessEvaluationPanel({ candidateId }: Props) {
             setRedFlag(checked);
             if (checked) setApprovedForActivation(false);
           }} />
-          <Label htmlFor="red-flag">Red flag — serious concern regardless of scores</Label>
+          <Label htmlFor="red-flag">Red flag: serious concern regardless of scores</Label>
         </div>
         {redFlag && (
           <Textarea
@@ -249,7 +249,7 @@ export default function ReadinessEvaluationPanel({ candidateId }: Props) {
             disabled={redFlag}
           />
           <Label htmlFor="approved-activation">
-            Approve for activation — unlocks Activation for the candidate and shows on company Final Clearance
+            Approve for activation: unlocks Activation for the candidate and shows on company Final Clearance
           </Label>
         </div>
 

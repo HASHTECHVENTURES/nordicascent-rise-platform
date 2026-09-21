@@ -10,7 +10,7 @@ type JobWithCompany = {
   companies: { status?: string | null } | null;
 };
 
-/** Open jobs employers have published — includes pending companies until admin verifies. */
+/** Open jobs employers have published: includes pending companies until admin verifies. */
 export function isCandidateVisibleJob(job: JobWithCompany) {
   if (job.status !== "open") return false;
   const status = job.companies?.status;

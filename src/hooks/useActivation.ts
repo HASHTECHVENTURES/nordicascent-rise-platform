@@ -490,7 +490,7 @@ export function useCompleteAcademicWorkflowStep() {
   });
 }
 
-/** Employer activation list — use !inner embeds (do not stack on ADMIN_SELECTION_SELECT). */
+/** Employer activation list: use !inner embeds (do not stack on ADMIN_SELECTION_SELECT). */
 const EMPLOYER_ACTIVATION_SELECT = `
   *,
   jobs!inner(id, title, positions_count, target_track, company_id, core_skills, engineering_discipline, experience_level, requirements, companies(id, name)),

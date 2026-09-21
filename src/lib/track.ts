@@ -8,7 +8,7 @@ export type Track = "entry" | "fast";
 export const TRACK_META: Record<Track, { label: string; short: string; stages: string[] }> = {
   entry: {
     label: "Entry Track",
-    short: "12-month program · 0–12 months experience",
+    short: "12-month program · 0-12 months experience",
     stages: ["preparation", "selection", "readiness", "activation", "relocation", "onboarding", "followup"],
   },
   fast: {
@@ -24,7 +24,7 @@ export const isStageInTrack = (stageId: string, track: Track) =>
 export const getNextStageInTrack = (stageId: string, track: Track): string | null => {
   const stages = TRACK_META[track].stages;
   const idx = stages.indexOf(stageId);
-  if (idx < 0 || idx >= stages.length - 1) return null;
+  if (idx < 0 || idx >= stages.length: 1) return null;
   return stages[idx + 1];
 };
 
@@ -52,9 +52,9 @@ export function getContinueStageForExcluded(stageId: string, track: Track): stri
 }
 
 export const EXPERIENCE_OPTIONS: { value: string; label: string; track: Track }[] = [
-  { value: "0-12 months", label: "0 – 12 months", track: "entry" },
-  { value: "1-3 years", label: "1 – 3 years", track: "fast" },
-  { value: "3-5 years", label: "3 – 5 years", track: "fast" },
+  { value: "0-12 months", label: "0 to 12 months", track: "entry" },
+  { value: "1-3 years", label: "1 to 3 years", track: "fast" },
+  { value: "3-5 years", label: "3 to 5 years", track: "fast" },
   { value: "5+ years", label: "5+ years", track: "fast" },
   { value: "Fresher", label: "Fresher (legacy)", track: "entry" },
   { value: "12 months", label: "12 months (legacy)", track: "entry" },
@@ -66,7 +66,7 @@ export const EXPERIENCE_OPTIONS: { value: string; label: string; track: Track }[
   { value: "6+ years", label: "6+ years (legacy)", track: "fast" },
 ];
 
-/** Map free-text experience to Entry (0–12 mo) or Fast (1+ yr). Returns null if unclear. */
+/** Map free-text experience to Entry (0-12 mo) or Fast (1+ yr). Returns null if unclear. */
 export function deriveTrackFromExperience(experience: string): Track | null {
   const text = experience.trim().toLowerCase();
   if (!text) return null;
@@ -98,7 +98,7 @@ export function deriveTrackFromExperience(experience: string): Track | null {
     return parseInt(monthMatch[1], 10) >= 12 ? "fast" : "entry";
   }
 
-  // Bare number like "1" or "2" — treat as years of experience
+  // Bare number like "1" or "2": treat as years of experience
   if (/^\d+(?:\.\d+)?$/.test(text)) {
     return parseFloat(text) >= 1 ? "fast" : "entry";
   }

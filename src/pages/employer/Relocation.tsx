@@ -61,7 +61,7 @@ export default function EmployerRelocation() {
       <div>
         <h1 className="text-2xl font-medium">Relocation</h1>
         <p className="text-muted-foreground">
-          Module 5 at {companyName} — high-level relocation progress and planned arrival.
+          Module 5 at {companyName}: high-level relocation progress and planned arrival.
         </p>
       </div>
 

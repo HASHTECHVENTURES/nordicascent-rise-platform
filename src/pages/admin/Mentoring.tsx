@@ -23,7 +23,7 @@ export default function AdminMentoring({ embedded = false }: { embedded?: boolea
         <div>
           <h1 className="text-2xl font-medium">Mentoring</h1>
           <p className="text-muted-foreground">
-            Module 3B — parallel with Readiness (Meetings 1–3) and Activation (Meetings 4–6).
+            Module 3B: parallel with Readiness (Meetings 1-3) and Activation (Meetings 4-6).
             Mentors use shared agendas and a reusable observation form. Signal and Activation notes
             feed Final Clearance.
           </p>
@@ -68,17 +68,17 @@ export default function AdminMentoring({ embedded = false }: { embedded?: boolea
           <p className="font-medium text-foreground">Meeting structure</p>
           <ul className="list-disc pl-5 space-y-1">
             <li>
-              <strong>Meetings 1–3 (Readiness):</strong> Meeting 1 → Level 1 → Level 2 →
+              <strong>Meetings 1-3 (Readiness):</strong> Meeting 1 → Level 1 → Level 2 →
               Meeting 2 → Level 3 → Meeting 3. Meeting 1 unlocks Level 1; Level 1 (both areas)
               unlocks Level 2 (no extra meeting); Level 2 unlocks Meeting 2; Meeting 2 unlocks
               Level 3; Level 3 unlocks Meeting 3.
             </li>
             <li>
-              <strong>Meetings 4–6 (Activation, Entry only):</strong> Weeks 1–2, 3–5, end of
+              <strong>Meetings 4-6 (Activation, Entry only):</strong> Weeks 1-2, 3-5, end of
               internship + Activation note
             </li>
             <li>
-              <strong>Fast track:</strong> Programme ends after Meeting 3 — Meetings 4–6 are not
+              <strong>Fast track:</strong> Programme ends after Meeting 3: Meetings 4-6 are not
               applicable
             </li>
           </ul>
