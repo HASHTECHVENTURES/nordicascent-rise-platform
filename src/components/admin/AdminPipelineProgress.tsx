@@ -50,7 +50,7 @@ const AdminPipelineProgress = () => {
                   {stage.name}
                 </span>
               </Link>
-              {index < adminStages.length: 1 && (
+              {index < adminStages.length - 1 && (
                 <div className="w-6 h-0.5 mx-1 bg-muted" />
               )}
             </div>

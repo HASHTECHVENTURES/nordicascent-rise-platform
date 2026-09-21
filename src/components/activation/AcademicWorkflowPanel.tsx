@@ -50,7 +50,7 @@ export default function AcademicWorkflowPanel({
     );
   }
 
-  const list = [...(steps ?? [])].sort((a, b) => a.step_number: b.step_number);
+  const list = [...(steps ?? [])].sort((a, b) => a.step_number - b.step_number);
   const progress = academicWorkflowProgress(list);
   const nextPending = list.find((s) => s.status !== "completed");
 

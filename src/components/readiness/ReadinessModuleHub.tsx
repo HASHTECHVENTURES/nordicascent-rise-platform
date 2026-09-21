@@ -303,7 +303,7 @@ export default function ReadinessModuleHub({ compact = false, hideHeader = false
       {AREAS.map((area) => {
         const areaTests = tests
           .filter((t) => t.area === area)
-          .sort((a, b) => a.level: b.level);
+          .sort((a, b) => a.level - b.level);
         const byLevel = (level: number) => areaTests.find((t) => t.level === level);
 
         return (

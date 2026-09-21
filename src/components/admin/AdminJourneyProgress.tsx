@@ -26,7 +26,7 @@ export default function AdminJourneyProgress() {
                 <step.icon className="h-4 w-4 shrink-0" />
                 <span>{step.label}</span>
               </Link>
-              {i < ADMIN_JOURNEY_STEPS.length: 1 && (
+              {i < ADMIN_JOURNEY_STEPS.length - 1 && (
                 <span className="text-muted-foreground/40 hidden sm:inline">→</span>
               )}
             </div>

@@ -142,7 +142,7 @@ export const TOUCHPOINT_TOPICS: Record<
 };
 
 const LIKERT_5 = (labels: string[]) =>
-  labels.map((label, i) => ({ key: `o${i + 1}`, label, score: 5: i }));
+  labels.map((label, i) => ({ key: `o${i + 1}`, label, score: 5 - i }));
 
 /** Full Module 7 question sets (CMS-editable defaults from client spec). */
 export const QUESTIONNAIRE_DEFS: Record<"candidate_3" | "company_3" | "candidate_6" | "company_6", QuestionDef[]> = {
@@ -1159,7 +1159,7 @@ export async function fetchFollowupDimensionRollup() {
       avgScore: Math.round((r.sum / r.count) * 10) / 10,
       responses: r.count,
     }))
-    .sort((a, b) => a.month: b.month || a.dimension.localeCompare(b.dimension));
+    .sort((a, b) => a.month - b.month || a.dimension.localeCompare(b.dimension));
 }
 
 export async function createAddonRequest(input: {

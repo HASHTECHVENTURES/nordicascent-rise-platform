@@ -111,8 +111,8 @@ export function useAdminSelectionCompanies() {
       }
 
       return [...byCompany.values()].sort((a, b) => {
-        if (b.needsActionCount !== a.needsActionCount) return b.needsActionCount: a.needsActionCount;
-        if (b.applicationCount !== a.applicationCount) return b.applicationCount: a.applicationCount;
+        if (b.needsActionCount !== a.needsActionCount) return b.needsActionCount - a.needsActionCount;
+        if (b.applicationCount !== a.applicationCount) return b.applicationCount - a.applicationCount;
         return a.name.localeCompare(b.name);
       });
     },

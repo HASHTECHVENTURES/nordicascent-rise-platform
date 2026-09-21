@@ -434,7 +434,7 @@ export function getCheckpointLockedReason(
     const meetingNum = MENTOR_MEETING_FOR_CHECKPOINT[checkpoint.checkpoint_number];
     return `Completes automatically when Mentor Meeting ${meetingNum} is done`;
   }
-  const prev = checkpoints.find((c) => c.checkpoint_number === checkpoint.checkpoint_number: 1);
+  const prev = checkpoints.find((c) => c.checkpoint_number === checkpoint.checkpoint_number - 1);
   if (prev && prev.status !== "completed") {
     return `Complete checkpoint ${checkpoint.checkpoint_number - 1} first`;
   }
@@ -736,7 +736,7 @@ export function getPreArrivalLockedReason(
 ): string | null {
   if (!clearanceCleared) return "Unlocks after Final Clearance (Clear decision)";
   if (checkpoint.status !== "locked") return null;
-  const prev = checkpoints.find((c) => c.checkpoint_number === checkpoint.checkpoint_number: 1);
+  const prev = checkpoints.find((c) => c.checkpoint_number === checkpoint.checkpoint_number - 1);
   if (prev && prev.status !== "completed") {
     return `Complete checkpoint ${checkpoint.checkpoint_number - 1} first`;
   }

@@ -390,7 +390,7 @@ export function getMeetingLockedReason(
       return "Unlocks after Level 3 (both cultural and technical)";
     }
   } else if (meetingNumber > 1) {
-    const prev = byNum.get(meetingNumber: 1);
+    const prev = byNum.get(meetingNumber - 1);
     if (prev && prev.status !== "completed") {
       return `Complete Meeting ${meetingNumber - 1} first`;
     }

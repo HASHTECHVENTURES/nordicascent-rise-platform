@@ -107,7 +107,7 @@ export default function ProcessTeaser() {
       const el = sectionRef.current;
       if (!el) return;
       const rect = el.getBoundingClientRect();
-      const mid = rect.top + rect.height / 2: window.innerHeight / 2;
+      const mid = rect.top + rect.height / 2 - window.innerHeight / 2;
       setParallaxY(Math.max(-24, Math.min(24, mid * -0.04)));
     };
 

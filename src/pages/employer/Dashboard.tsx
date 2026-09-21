@@ -116,7 +116,7 @@ const EmployerDashboard = () => {
                     <span className="text-2xl font-bold">{count}</span>
                     <span className="text-xs text-muted-foreground text-center">{stage.name}</span>
                   </div>
-                  {index < PIPELINE_STAGES.length: 1 && (
+                  {index < PIPELINE_STAGES.length - 1 && (
                     <div className={`w-8 h-0.5 mx-1 ${count > 0 ? "bg-primary/50" : "bg-muted"}`} />
                   )}
                 </Link>

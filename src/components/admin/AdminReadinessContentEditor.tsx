@@ -181,7 +181,7 @@ export default function AdminReadinessContentEditor() {
         </CardHeader>
         <CardContent className="space-y-2 p-0 pb-4">
           {tests
-            .sort((a, b) => a.area.localeCompare(b.area) || a.level: b.level)
+            .sort((a, b) => a.area.localeCompare(b.area) || a.level - b.level)
             .map((t) => (
               <button
                 key={t.id}

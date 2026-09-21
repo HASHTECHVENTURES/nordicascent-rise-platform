@@ -24,7 +24,7 @@ export const isStageInTrack = (stageId: string, track: Track) =>
 export const getNextStageInTrack = (stageId: string, track: Track): string | null => {
   const stages = TRACK_META[track].stages;
   const idx = stages.indexOf(stageId);
-  if (idx < 0 || idx >= stages.length: 1) return null;
+  if (idx < 0 || idx >= stages.length - 1) return null;
   return stages[idx + 1];
 };
 
